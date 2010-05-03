@@ -1,6 +1,8 @@
 package com.sampullara.mustache;
 
 import java.io.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -45,91 +47,99 @@ public class Compiler {
     this.root = root;
   }
 
-  public Mustache parse(String path) throws MustacheException {
-    try {
-      StringBuilder sb = new StringBuilder();
-      sb.append(header);
-      String className = "Mustache" + num.getAndIncrement();
-      sb.append(className);
-      sb.append(middle);
-      // Now we grab the mustache template
-      String startMustache = "{{";
-      String endMustache = "}}";
-      BufferedReader br = new BufferedReader(new FileReader(new File(root, path)));
-      String line;
-      int currentline = 0;
-      while ((line = br.readLine()) != null) {
-        currentline++;
-        int last = 0;
-        int foundStart;
-        boolean tagonly = false;
-        line = line.trim();
-        while ((foundStart = line.indexOf(startMustache)) != -1) {
-          int foundEnd = line.indexOf(endMustache);
-          // Look for the 3rd ending mustache
-          if (line.length() > foundEnd + 2 && line.charAt(foundEnd + 2) == '}') {
-            foundEnd++;
+  private Map<File, Mustache> cache = new ConcurrentHashMap<File, Mustache>();
+
+  public synchronized Mustache parse(String path) throws MustacheException {
+    File file = new File(root, path);
+    Mustache result = cache.get(file);
+    if (result == null) {
+      try {
+        StringBuilder sb = new StringBuilder();
+        sb.append(header);
+        String className = "Mustache" + num.getAndIncrement();
+        sb.append(className);
+        sb.append(middle);
+        // Now we grab the mustache template
+        String startMustache = "{{";
+        String endMustache = "}}";
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String line;
+        int currentline = 0;
+        while ((line = br.readLine()) != null) {
+          currentline++;
+          int last = 0;
+          int foundStart;
+          boolean tagonly = false;
+          line = line.trim();
+          while ((foundStart = line.indexOf(startMustache)) != -1) {
+            int foundEnd = line.indexOf(endMustache);
+            // Look for the 3rd ending mustache
+            if (line.length() > foundEnd + 2 && line.charAt(foundEnd + 2) == '}') {
+              foundEnd++;
+            }
+            // Unterminated mustache
+            if (foundEnd < foundStart) {
+              throw new MustacheException("Found unmatched end mustache: " + currentline + ":" + foundEnd);
+            }
+            // If there is only a tag on a line, don't insert a newline
+            if (foundStart == 0 && foundEnd + endMustache.length() == line.length()) {
+              tagonly = true;
+            }
+            String pre = line.substring(last, foundStart);
+            writeText(sb, pre, false);
+            String command = line.substring(foundStart + startMustache.length(), foundEnd);
+            switch (command.charAt(0)) {
+              case '!':
+                // Comment, do nothing with the content
+                break;
+              case '#':
+                // Tag start
+                System.out.println("Tag start: " + command);
+                break;
+              case '^':
+                // Inverted tag
+                System.out.println("Inverted tag start: " + command);
+                break;
+              case '/':
+                // Tag end
+                System.out.println("End tag: " + command);
+                break;
+              case '>':
+                // Partial
+                System.out.println("Partial: " + command);
+                break;
+              case '{':
+                // Not escaped
+                if (command.endsWith("}")) {
+                  sb.append("write(w, c, \"").append(command.substring(1, command.length() - 1).trim()).append("\", false);");
+                } else {
+                  throw new MustacheException("Unescaped section not terminated properly: " + command + " at " + currentline + ":" + foundStart);
+                }
+                break;
+              case '&':
+                // Not escaped
+                sb.append("write(w, c, \"").append(command.substring(1).trim()).append("\", false);");
+                break;
+              default:
+                // Reference
+                sb.append("write(w, c, \"").append(command.trim()).append("\", true);");
+                break;
+            }
+            line = line.substring(foundEnd + endMustache.length());
           }
-          // Unterminated mustache
-          if (foundEnd < foundStart) {
-            throw new MustacheException("Found unmatched end mustache: " + currentline + ":" + foundEnd);
-          }
-          // If there is only a tag on a line, don't insert a newline
-          if (foundStart == 0 && foundEnd + endMustache.length() == line.length()) {
-            tagonly = true;
-          }
-          String pre = line.substring(last, foundStart);
-          writeText(sb, pre, false);
-          String command = line.substring(foundStart + startMustache.length(), foundEnd);
-          switch (command.charAt(0)) {
-            case '!':
-              // Comment, do nothing with the content
-              break;
-            case '#':
-              // Tag start
-              System.out.println("Tag start: " + command);
-              break;
-            case '^':
-              // Inverted tag
-              System.out.println("Inverted tag start: " + command);
-              break;
-            case '/':
-              // Tag end
-              System.out.println("End tag: " + command);
-              break;
-            case '>':
-              // Partial
-              System.out.println("Partial: " + command);
-              break;
-            case '{':
-              // Not escaped
-              if (command.endsWith("}")) {
-                sb.append("write(w, c, \"").append(command.substring(1, command.length() - 1).trim()).append("\", false);");                
-              } else {
-                throw new MustacheException("Unescaped section not terminated properly: " + command + " at " + currentline + ":" + foundStart);
-              }
-              break;
-            case '&':
-              // Not escaped
-              sb.append("write(w, c, \"").append(command.substring(1).trim()).append("\", false);");
-              break;
-            default:
-              // Reference
-              sb.append("write(w, c, \"").append(command.trim()).append("\", true);");
-              break;
-          }
-          line = line.substring(foundEnd + endMustache.length());
+          if (!tagonly) writeText(sb, last == 0 ? line : line.substring(last), true);
         }
-        if (!tagonly) writeText(sb, last == 0 ? line : line.substring(last), true);
+        sb.append(footer);
+        ClassLoader loader;
+        loader = RuntimeJavaCompiler.compile(new PrintWriter(System.out, true), className, sb.toString());
+        Class<?> aClass = loader.loadClass("com.sampullara.mustaches." + className);
+        result = (Mustache) aClass.newInstance();
+        cache.put(file, result);
+      } catch (Exception e) {
+        throw new MustacheException(e);
       }
-      sb.append(footer);
-      ClassLoader loader;
-      loader = RuntimeJavaCompiler.compile(new PrintWriter(System.out, true), className, sb.toString());
-      Class<?> aClass = loader.loadClass("com.sampullara.mustaches." + className);
-      return (Mustache) aClass.newInstance();
-    } catch (Exception e) {
-      throw new MustacheException(e);
     }
+    return result;
   }
 
   private void writeText(StringBuilder sb, String text, boolean endline) {
