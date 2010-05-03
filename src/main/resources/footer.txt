@@ -1,5 +1,8 @@
-} catch (Exception e) {
-throw new com.sampullara.mustache.MustacheException(e);
-}
-}
+    } catch (Exception e) {
+      throw new MustacheException(e);
+    }
+    if (s.size() != 1) {
+      throw new MustacheException("Invalid scope stack: " + s);
+    }
+  }
 }

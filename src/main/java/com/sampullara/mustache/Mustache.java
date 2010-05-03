@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -21,13 +22,12 @@ import java.util.regex.Pattern;
  * Time: 10:12:47 AM
  */
 public abstract class Mustache {
-  protected static Map<Class, Map<String, AccessibleObject>> cache = new ConcurrentHashMap<Class, Map<String, AccessibleObject>>();
   protected Logger logger = Logger.getLogger(getClass().getName());
 
   public abstract void execute(Writer writer, Object ctx) throws MustacheException;
 
-  protected void write(Writer writer, Object ctx, String name, boolean encode) throws MustacheException {
-    Object value = getValue(ctx, name);
+  protected void write(Writer writer, Stack<Scope> s, String name, boolean encode) throws MustacheException {
+    Object value = getValue(s, name);
     if (value != null) {
       String string = String.valueOf(value);
       if (encode) {
@@ -44,8 +44,8 @@ public abstract class Mustache {
   private static Iterable emptyIterable = new ArrayList(0);
   private static Iterable singleIterable = Arrays.asList(true);
 
-  protected Iterable iterable(Object ctx, String name) {
-    Object value = getValue(ctx, name);
+  protected Iterable iterable(Stack<Scope> s, String name) {
+    Object value = s.peek().get(name);
     if (value != null) {
       if (value instanceof Boolean) {
         if (((Boolean)value)) {
@@ -62,46 +62,13 @@ public abstract class Mustache {
     return emptyIterable;
   }
 
-  private Object getValue(Object ctx, String name, Class... classes) {
-    Class aClass = ctx.getClass();
-    Map<String, AccessibleObject> members;
-    synchronized (Mustache.class) {
-      // Don't overload methods in your contexts
-      members = cache.get(aClass);
-      if (members == null) {
-        members = new ConcurrentHashMap<String, AccessibleObject>();
-      }
-    }
-    AccessibleObject member = members.get(name);
-    if (classes == null && member == null) {
-      try {
-        member = aClass.getDeclaredField(name);
-        member.setAccessible(true);
-        members.put(name, member);
-      } catch (NoSuchFieldException e) {
-        // Not set
-      }
-    }
-    if (member == null) {
-      try {
-        member = aClass.getDeclaredMethod(name, classes);
-        member.setAccessible(true);
-        members.put(name, member);
-      } catch (NoSuchMethodException e2) {
-        logger.warning("No field or method found for: " + name);
-      }
-    }
-    Object value = null;
+  private Object getValue(Stack<Scope> s, String name) {
     try {
-      if (member instanceof Field) {
-        value = ((Field) member).get(ctx);
-      } else if (member instanceof Method) {
-        value = ((Method) member).invoke(ctx);
-      }
+      return s.peek().get(name);
     } catch (Exception e) {
-      logger.warning("Failed: " + e + " using " + member);
+      logger.warning("Failed: " + e + " using " + name);
     }
-    return value;
+    return null;
   }
 
   private static Pattern findToEncode = Pattern.compile("&(?!\\w+;)|[\"<>\\\\]");

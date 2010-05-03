@@ -1,3 +1,6 @@
  extends com.sampullara.mustache.Mustache {
 
-public void execute(java.io.Writer w, Object c) throws com.sampullara.mustache.MustacheException {try {
+public void execute(java.io.Writer w, Object o) throws MustacheException {
+  Stack<Scope> s = new Stack<Scope>();
+  s.push(new Scope(o));
+  try {

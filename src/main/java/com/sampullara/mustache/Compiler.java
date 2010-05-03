@@ -2,6 +2,7 @@ package com.sampullara.mustache;
 
 import java.io.*;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -65,6 +66,7 @@ public class Compiler {
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line;
         int currentline = 0;
+        Stack<String> scope = new Stack<String>();
         while ((line = br.readLine()) != null) {
           currentline++;
           int last = 0;
@@ -111,18 +113,18 @@ public class Compiler {
               case '{':
                 // Not escaped
                 if (command.endsWith("}")) {
-                  sb.append("write(w, c, \"").append(command.substring(1, command.length() - 1).trim()).append("\", false);");
+                  sb.append("write(w, s, \"").append(command.substring(1, command.length() - 1).trim()).append("\", false);");
                 } else {
                   throw new MustacheException("Unescaped section not terminated properly: " + command + " at " + currentline + ":" + foundStart);
                 }
                 break;
               case '&':
                 // Not escaped
-                sb.append("write(w, c, \"").append(command.substring(1).trim()).append("\", false);");
+                sb.append("write(w, s, \"").append(command.substring(1).trim()).append("\", false);");
                 break;
               default:
                 // Reference
-                sb.append("write(w, c, \"").append(command.trim()).append("\", true);");
+                sb.append("write(w, s, \"").append(command.trim()).append("\", true);");
                 break;
             }
             line = line.substring(foundEnd + endMustache.length());
