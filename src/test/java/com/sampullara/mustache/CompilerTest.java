@@ -17,11 +17,12 @@ public class CompilerTest extends TestCase {
     Compiler c = new Compiler(new File("src/test/resources"));
     Mustache m = c.parse("simple.html");
     PrintWriter writer = new PrintWriter(System.out);
-    m.execute(writer, new Object() {
+    m.execute(writer, new Scope(new Object() {
       String name = "world";
       String value = "6000";
       String taxed_value = "3600";
-    });
+      boolean in_ca = true;
+    }));
     writer.flush();
   }
 
@@ -29,10 +30,10 @@ public class CompilerTest extends TestCase {
     Compiler c = new Compiler(new File("src/test/resources"));
     Mustache m = c.parse("escaped.html");
     PrintWriter writer = new PrintWriter(System.out);
-    m.execute(writer, new Object() {
+    m.execute(writer, new Scope(new Object() {
       String title = "Bear > Shark";
       String entities = "&quot;";
-    });
+    }));
     writer.flush();
   }
 
@@ -40,9 +41,9 @@ public class CompilerTest extends TestCase {
     Compiler c = new Compiler(new File("src/test/resources"));
     Mustache m = c.parse("unescaped.html");
     PrintWriter writer = new PrintWriter(System.out);
-    m.execute(writer, new Object() {
+    m.execute(writer, new Scope(new Object() {
       String title() { return "Bear > Shark"; }
-    });
+    }));
     writer.flush();
   }
 }

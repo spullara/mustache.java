@@ -1,7 +1,7 @@
     } catch (Exception e) {
       throw new MustacheException(e);
     }
-    if (s.size() != 1) {
+    if (s != startScope) {
       throw new MustacheException("Invalid scope stack: " + s);
     }
   }

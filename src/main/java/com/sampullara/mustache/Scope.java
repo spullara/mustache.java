@@ -32,6 +32,10 @@ public class Scope extends HashMap {
     logger = Logger.getLogger(parent.getClass().getName());
   }
 
+  public Scope getParentScope() {
+    return parentScope;
+  }
+
   @Override
   public Object get(Object o) {
     String name = o.toString();

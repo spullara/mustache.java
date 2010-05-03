@@ -24,9 +24,9 @@ import java.util.regex.Pattern;
 public abstract class Mustache {
   protected Logger logger = Logger.getLogger(getClass().getName());
 
-  public abstract void execute(Writer writer, Object ctx) throws MustacheException;
+  public abstract void execute(Writer writer, Scope ctx) throws MustacheException;
 
-  protected void write(Writer writer, Stack<Scope> s, String name, boolean encode) throws MustacheException {
+  protected void write(Writer writer, Scope s, String name, boolean encode) throws MustacheException {
     Object value = getValue(s, name);
     if (value != null) {
       String string = String.valueOf(value);
@@ -44,8 +44,8 @@ public abstract class Mustache {
   private static Iterable emptyIterable = new ArrayList(0);
   private static Iterable singleIterable = Arrays.asList(true);
 
-  protected Iterable iterable(Stack<Scope> s, String name) {
-    Object value = s.peek().get(name);
+  protected Iterable iterable(Scope s, String name) {
+    Object value = s.get(name);
     if (value != null) {
       if (value instanceof Boolean) {
         if (((Boolean)value)) {
@@ -62,9 +62,9 @@ public abstract class Mustache {
     return emptyIterable;
   }
 
-  private Object getValue(Stack<Scope> s, String name) {
+  private Object getValue(Scope s, String name) {
     try {
-      return s.peek().get(name);
+      return s.get(name);
     } catch (Exception e) {
       logger.warning("Failed: " + e + " using " + name);
     }
