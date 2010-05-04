@@ -2,14 +2,9 @@ package com.sampullara.mustache;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
-import java.util.Stack;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Iterator;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,27 +37,60 @@ public abstract class Mustache {
   }
 
   private static Iterable emptyIterable = new ArrayList(0);
-  private static Iterable singleIterable = Arrays.asList(true);
 
-  protected Iterable iterable(Scope s, String name) {
-    Object value = s.get(name);
-    if (value != null) {
-      if (value instanceof Boolean) {
-        if (((Boolean)value)) {
-          return singleIterable;
-        }
-      } else if (value instanceof Iterable) {
-        return (Iterable) value;
-      } else if (value.getClass().isArray()) {
-        return Arrays.asList((Object[])value);
-      } else {
-        logger.warning(name + " is not a boolean or iterable");
-      }
+  protected Iterable<Scope> iterable(final Scope s, final String name) {
+    final Object value = s.get(name);
+    if (value == null || (value instanceof Boolean && !((Boolean)value))) {
+      return emptyIterable;
     }
-    return emptyIterable;
+    return new Iterable<Scope>() {
+      public Iterator<Scope> iterator() {
+        return new Iterator<Scope>() {
+          Iterator i;
+          {
+            if (value instanceof Iterable) {
+              i = ((Iterable)value).iterator();
+            } else if (value instanceof Boolean) {
+              i = Arrays.asList(true).iterator();
+            }
+          }
+          public boolean hasNext() {
+            return i.hasNext();
+          }
+          public Scope next() {
+            Scope scope = new Scope(getValue(s, name), s);
+            scope.put(name, i.next());
+            return scope;
+          }
+          public void remove() {
+            throw new UnsupportedOperationException();
+          }
+        };
+      }
+    };
   }
 
-  private Object getValue(Scope s, String name) {
+  protected Mustache compile(final Scope s, final String name) throws MustacheException {
+    Compiler c = new Compiler();
+    Object partial = getValue(s, name);
+    if (partial != null) {
+      return c.parse(partial.toString());
+    }
+    return null;
+  }
+
+  protected Iterable<Scope> inverted(final Scope s, final String name) {
+    final Object value = s.get(name);
+    boolean isntEmpty = value instanceof Iterable && ((Iterable) value).iterator().hasNext();
+    if (isntEmpty || (value instanceof Boolean && ((Boolean)value))) {
+      return emptyIterable;
+    }
+    Scope scope = new Scope(s);
+    scope.put(name, true);
+    return Arrays.asList(scope);
+  }
+
+  protected Object getValue(Scope s, String name) {
     try {
       return s.get(name);
     } catch (Exception e) {

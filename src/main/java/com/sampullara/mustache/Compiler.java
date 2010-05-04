@@ -46,16 +46,32 @@ public class Compiler {
     return text.toString();
   }
 
+  public Compiler() {
+    this.root = new File(".");
+  }
+
   public Compiler(File root) {
     this.root = root;
   }
 
-  private Map<File, Mustache> cache = new ConcurrentHashMap<File, Mustache>();
+  private Map<File, Mustache> filecache = new ConcurrentHashMap<File, Mustache>();
+  private Map<String, Mustache> partialcache = new ConcurrentHashMap<String, Mustache>();
 
-  public synchronized Mustache parse(String path) throws MustacheException {
+  public synchronized Mustache parse(String partial) throws MustacheException {
+    AtomicInteger currentLine = new AtomicInteger(0);
+    Mustache result = partialcache.get(partial);
+    if (result == null) {
+      BufferedReader br = new BufferedReader(new StringReader(partial));
+      result = compile(br, new Stack<String>(), currentLine, null);
+      partialcache.put(partial, result);
+    }
+    return result;
+  }
+
+  public synchronized Mustache parseFile(String path) throws MustacheException {
     AtomicInteger currentLine = new AtomicInteger(0);
     File file = new File(root, path);
-    Mustache result = cache.get(file);
+    Mustache result = filecache.get(file);
     if (result == null) {
       BufferedReader br;
       try {
@@ -63,15 +79,14 @@ public class Compiler {
       } catch (FileNotFoundException e) {
         throw new MustacheException("Mustache file not found: " + file);
       }
-      result = compile(br, new Stack<String>(), currentLine);
-      cache.put(file, result);
+      result = compile(br, new Stack<String>(), currentLine, null);
+      filecache.put(file, result);
     }
     return result;
   }
 
-  public Mustache compile(BufferedReader br, Stack<String> scope, AtomicInteger currentline) throws MustacheException {
+  public Mustache compile(BufferedReader br, Stack<String> scope, AtomicInteger currentline, ClassLoader parent) throws MustacheException {
     Mustache result;
-    ClassLoader parent = null;
     StringBuilder sb = new StringBuilder();
     sb.append(header);
     String className = "Mustache" + num.getAndIncrement();
@@ -82,7 +97,8 @@ public class Compiler {
     String endMustache = "}}";
     String line;
     try {
-      WHILE:
+      br.mark(1024);
+      READ:
       while ((line = br.readLine()) != null) {
         currentline.incrementAndGet();
         int last = 0;
@@ -114,16 +130,32 @@ public class Compiler {
               // Tag start
               String startTag = command.substring(1).trim();
               scope.push(startTag);
-              Mustache sub = compile(br, scope, currentline);
+              undo(br, foundEnd + (foundEnd + 2 == line.length() ? 1 : 0));
+              Mustache sub = compile(br, scope, currentline, parent);
               parent = sub.getClass().getClassLoader();
-              sb.append("Scope s").append(num.incrementAndGet()).append("= new Scope(s);new ")
-                      .append(sub.getClass().getName()).append("().execute(w, s").append(num.get()).append(");");
-              break;
+              sb.append("for (Scope s").append(num.incrementAndGet());
+              sb.append(":iterable(s, \"");
+              sb.append(startTag);
+              sb.append("\")) {");
+              sb.append("new ").append(sub.getClass().getName());
+              sb.append("().execute(w, s").append(num.get()).append(");");
+              sb.append("}");
+              continue READ;
             case '^':
               // Inverted tag
               startTag = command.substring(1).trim();
               scope.push(startTag);
-              break;
+              undo(br, foundEnd + (foundEnd + 2 == line.length() ? 1 : 0));
+              sub = compile(br, scope, currentline, parent);
+              parent = sub.getClass().getClassLoader();
+              sb.append("for (Scope s").append(num.incrementAndGet());
+              sb.append(":inverted(s, \"");
+              sb.append(startTag);
+              sb.append("\")) {");
+              sb.append("new ").append(sub.getClass().getName());
+              sb.append("().execute(w, s").append(num.get()).append(");");
+              sb.append("}");
+              continue READ;
             case '/':
               // Tag end
               String endTag = command.substring(1).trim();
@@ -131,10 +163,11 @@ public class Compiler {
               if (!endTag.equals(expected)) {
                 throw new MustacheException("Mismatched start/end tags: " + expected + " != " + endTag + " at " + currentline);
               }
-              break WHILE;
+              break READ;
             case '>':
               // Partial
-              System.out.println("Partial: " + command);
+              String partialName = command.substring(1).trim();
+              sb.append("compile(s, \"").append(partialName).append("\").execute(w,s);");
               break;
             case '{':
               // Not escaped
@@ -148,12 +181,16 @@ public class Compiler {
               // Not escaped
               sb.append("write(w, s, \"").append(command.substring(1).trim()).append("\", false);");
               break;
+            case '%':
+              // Pragmas
+              break;
             default:
               // Reference
               sb.append("write(w, s, \"").append(command.trim()).append("\", true);");
               break;
           }
           line = line.substring(foundEnd + endMustache.length());
+          br.mark(1024);
         }
         if (!tagonly) writeText(sb, last == 0 ? line : line.substring(last), true);
       }
@@ -163,7 +200,6 @@ public class Compiler {
     sb.append(footer);
     try {
       String code = sb.toString();
-      logger.info(className + "\n" + code); 
       ClassLoader loader = RuntimeJavaCompiler.compile(new PrintWriter(System.out, true), className, code, parent);
       Class<?> aClass = loader.loadClass("com.sampullara.mustaches." + className);
       result = (Mustache) aClass.newInstance();
@@ -172,6 +208,19 @@ public class Compiler {
       throw new MustacheException("Failed to compile code: " + e);
     }
     return result;
+  }
+
+  private void undo(BufferedReader br, int foundEnd) throws IOException {
+    br.reset();
+    int total = foundEnd + 2;
+    while (total > 0) {
+      int done = br.read(new char[total]);
+      if (done == -1) {
+        break;
+      }
+      total -= done;
+    }
+    br.mark(1024);
   }
 
   private void writeText(StringBuilder sb, String text, boolean endline) {

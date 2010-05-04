@@ -144,8 +144,20 @@ public class RuntimeJavaCompiler {
       if (location.getName().equals("CLASS_PATH")) {
         final String name = s.replace('.', '/');
         Set<URL> urls = new HashSet<URL>();
+        if (loader instanceof CompilerClassLoader) {
+          jfos.addAll(((CompilerClassLoader) loader).getJavaClasses());
+          ClassLoader parent = loader;
+          while ((parent = parent.getParent()) instanceof CompilerClassLoader) {
+            jfos.addAll(((CompilerClassLoader) parent).getJavaClasses());
+          }
+          if (parent instanceof URLClassLoader) {
+            for (Enumeration<URL> loaderurls = ((URLClassLoader) parent).findResources(name); loaderurls.hasMoreElements();) {
+              urls.add(loaderurls.nextElement());
+            }
+          }
+        }
         if (loader instanceof URLClassLoader) {
-          for (Enumeration<URL> loaderurls = ((URLClassLoader)loader).findResources(name); loaderurls.hasMoreElements();) {
+          for (Enumeration<URL> loaderurls = ((URLClassLoader) loader).findResources(name); loaderurls.hasMoreElements();) {
             urls.add(loaderurls.nextElement());
           }
         }
@@ -155,9 +167,6 @@ public class RuntimeJavaCompiler {
           for (Enumeration<URL> loaderurls = ((URLClassLoader) parent).findResources(name); loaderurls.hasMoreElements();) {
             urls.add(loaderurls.nextElement());
           }
-        }
-        if (loader instanceof CompilerClassLoader) {
-          jfos.addAll(((CompilerClassLoader)loader).getJavaClasses());
         }
         for (URL url : urls) {
           String filename = url.getFile();
