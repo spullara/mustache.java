@@ -22,6 +22,9 @@ public class Scope extends HashMap {
   private Scope parentScope;
   private Logger logger;
 
+  public Scope() {
+  }
+
   public Scope(Object parent) {
     this.parent = parent;
     logger = Logger.getLogger(parent.getClass().getName());
@@ -47,41 +50,43 @@ public class Scope extends HashMap {
     String name = o.toString();
     Object v = super.get(o);
     if (v == null) {
-      Class aClass = parent.getClass();
-      Map<String, AccessibleObject> members;
-      synchronized (Mustache.class) {
-        // Don't overload methods in your contexts
-        members = cache.get(aClass);
-        if (members == null) {
-          members = new ConcurrentHashMap<String, AccessibleObject>();
+      if (parent != null) {
+        Class aClass = parent.getClass();
+        Map<String, AccessibleObject> members;
+        synchronized (Mustache.class) {
+          // Don't overload methods in your contexts
+          members = cache.get(aClass);
+          if (members == null) {
+            members = new ConcurrentHashMap<String, AccessibleObject>();
+          }
         }
-      }
-      AccessibleObject member = members.get(name);
-      if (member == null) {
+        AccessibleObject member = members.get(name);
+        if (member == null) {
+          try {
+            member = aClass.getDeclaredField(name);
+            member.setAccessible(true);
+            members.put(name, member);
+          } catch (NoSuchFieldException e) {
+            // Not set
+          }
+        }
+        if (member == null) {
+          try {
+            member = aClass.getDeclaredMethod(name);
+            member.setAccessible(true);
+            members.put(name, member);
+          } catch (NoSuchMethodException e) {
+          }
+        }
         try {
-          member = aClass.getDeclaredField(name);
-          member.setAccessible(true);
-          members.put(name, member);
-        } catch (NoSuchFieldException e) {
-          // Not set
+          if (member instanceof Field) {
+            v = ((Field) member).get(parent);
+          } else if (member instanceof Method) {
+            v = ((Method) member).invoke(parent);
+          }
+        } catch (Exception e) {
+          logger.warning("Failed to get value for " + name + ": " + e);
         }
-      }
-      if (member == null) {
-        try {
-          member = aClass.getDeclaredMethod(name);
-          member.setAccessible(true);
-          members.put(name, member);
-        } catch (NoSuchMethodException e) {
-        }
-      }
-      try {
-        if (member instanceof Field) {
-          v = ((Field) member).get(parent);
-        } else if (member instanceof Method) {
-          v = ((Method) member).invoke(parent);
-        }
-      } catch (Exception e) {
-        logger.warning("Failed to get value for " + name + ": " + e);
       }
     }
     if (v == null) {

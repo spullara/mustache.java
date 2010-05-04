@@ -46,28 +46,32 @@ public abstract class Mustache {
 
   protected Iterable<Scope> iterable(final Scope s, final String name) {
     final Object value = s.get(name);
-    if (value == null || (value instanceof Boolean && !((Boolean)value))) {
+    if (value == null || (value instanceof Boolean && !((Boolean) value))) {
       return emptyIterable;
     }
     return new Iterable<Scope>() {
       public Iterator<Scope> iterator() {
         return new Iterator<Scope>() {
           Iterator i;
+
           {
             if (value instanceof Iterable) {
-              i = ((Iterable)value).iterator();
+              i = ((Iterable) value).iterator();
             } else if (value instanceof Boolean) {
               i = Arrays.asList(true).iterator();
             }
           }
+
           public boolean hasNext() {
             return i.hasNext();
           }
+
           public Scope next() {
             Scope scope = new Scope(getValue(s, name), s);
             scope.put(name, i.next());
             return scope;
           }
+
           public void remove() {
             throw new UnsupportedOperationException();
           }
@@ -76,27 +80,20 @@ public abstract class Mustache {
     };
   }
 
-  protected Mustache compile(final Scope s, final String name) throws MustacheException {
+  protected void partial(Writer writer, Scope s, final String name) throws MustacheException {
     Compiler c = new Compiler(root);
-    Object partial = getValue(s, name);
-    if (partial != null) {
-      return c.parse(partial.toString());
-    }
-    return null;
-  }
-
-  protected Mustache include(final Scope s, final String name) throws MustacheException {
-    Compiler c = new Compiler();
     if (name != null) {
-      return c.parseFile(name);
+      Object parent = s.get(name);
+      Scope scope = parent == null ? s : new Scope(parent, s);
+      Mustache mustache = c.parseFile(name + ".html");
+      mustache.execute(writer, scope);
     }
-    return null;
   }
 
   protected Iterable<Scope> inverted(final Scope s, final String name) {
     final Object value = s.get(name);
     boolean isntEmpty = value instanceof Iterable && ((Iterable) value).iterator().hasNext();
-    if (isntEmpty || (value instanceof Boolean && ((Boolean)value))) {
+    if (isntEmpty || (value instanceof Boolean && ((Boolean) value))) {
       return emptyIterable;
     }
     Scope scope = new Scope(s);

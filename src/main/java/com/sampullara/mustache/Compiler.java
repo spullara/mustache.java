@@ -180,16 +180,9 @@ public class Compiler {
                 }
                 break READ;
               case '>':
-                tagonly(br, startOfLine);
                 // Partial
                 String partialName = sb.substring(1).trim();
-                code.append("compile(s, \"").append(partialName).append("\").execute(w,s);");
-                break;
-              case '<':
-                tagonly(br, startOfLine);
-                // Partial
-                String includeName = sb.substring(1).trim();
-                code.append("include(s, \"").append(includeName).append("\").execute(w,s);");
+                code.append("partial(w, s, \"").append(partialName).append("\");");
                 break;
               case '{':
                 // Not escaped

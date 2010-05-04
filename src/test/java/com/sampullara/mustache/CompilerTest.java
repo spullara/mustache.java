@@ -22,9 +22,11 @@ public class CompilerTest extends TestCase {
     m.execute(writer, new Scope(new Object() {
       String name = "Chris";
       int value = 10000;
+
       int taxed_value() {
         return (int) (this.value - (this.value * 0.4));
       }
+
       boolean in_ca = true;
     }));
     assertEquals(getContents(root, "simple.txt"), writer.toString());
@@ -32,9 +34,11 @@ public class CompilerTest extends TestCase {
     m.execute(writer, new Scope(new Object() {
       String name = "Chris";
       int value = 10000;
+
       int taxed_value() {
         return (int) (this.value - (this.value * 0.4));
       }
+
       boolean in_ca = false;
     }));
     writer.flush();
@@ -58,7 +62,9 @@ public class CompilerTest extends TestCase {
     Mustache m = c.parseFile("unescaped.html");
     StringWriter writer = new StringWriter();
     m.execute(writer, new Scope(new Object() {
-      String title() { return "Bear > Shark"; }
+      String title() {
+        return "Bear > Shark";
+      }
     }));
     writer.flush();
     assertEquals(getContents(root, "unescaped.txt"), writer.toString());
@@ -69,7 +75,10 @@ public class CompilerTest extends TestCase {
     Mustache m = c.parseFile("inverted_section.html");
     StringWriter writer = new StringWriter();
     m.execute(writer, new Scope(new Object() {
-      String name() { return "Bear > Shark"; }
+      String name() {
+        return "Bear > Shark";
+      }
+
       ArrayList repo = new ArrayList();
     }));
     writer.flush();
@@ -81,10 +90,26 @@ public class CompilerTest extends TestCase {
     Mustache m = c.parseFile("comments.html");
     StringWriter writer = new StringWriter();
     m.execute(writer, new Scope(new Object() {
-      String title() { return "A Comedy of Errors"; }
+      String title() {
+        return "A Comedy of Errors";
+      }
     }));
     writer.flush();
     assertEquals(getContents(root, "comments.txt"), writer.toString());
+  }
+
+  public void testPartial() throws MustacheException, IOException {
+    Compiler c = new Compiler(root);
+    Mustache m = c.parseFile("template_partial.html");
+    StringWriter writer = new StringWriter();
+    Scope scope = new Scope();
+    scope.put("title", "Welcome");
+    scope.put("template_partial.2", new Object() {
+      String again = "Goodbye";
+    });
+    m.execute(writer, scope);
+    writer.flush();
+    assertEquals(getContents(root, "template_partial.txt"), writer.toString());
   }
 
   private String getContents(File root, String file) throws IOException {
