@@ -14,15 +14,17 @@ import java.util.zip.ZipEntry;
  * Compile a class at runtime.
  * User: sam
  * Date: May 3, 2010
- * Time: 9:32:57 AM
+ * Time: 9:32:47 AM
  */
 public class RuntimeJavaCompiler {
   public static ClassLoader compile(PrintWriter printWriter, String className, String code) throws IOException {
-    final URLClassLoader loader = (URLClassLoader) Thread.currentThread().getContextClassLoader();
-    return compile(printWriter, className, code, loader);
+    return compile(printWriter, className, code, null);
   }
 
-  public static ClassLoader compile(PrintWriter printWriter, String className, String code, URLClassLoader loader) throws IOException {
+  public static ClassLoader compile(PrintWriter printWriter, String className, String code, ClassLoader loader) throws IOException {
+    if (loader == null) {
+      loader = Thread.currentThread().getContextClassLoader();
+    }
     final CompilerClassLoader ccl = new CompilerClassLoader(loader);
     JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
     StandardJavaFileManager jfm = compiler.getStandardFileManager(null, null, null);
@@ -61,6 +63,10 @@ public class RuntimeJavaCompiler {
       return bytes;
     }
 
+    public InputStream openInputStream() {
+      return new ByteArrayInputStream(bytes.toByteArray());
+    }
+
     byte[] getBytes() {
       return bytes.toByteArray();
     }
@@ -70,7 +76,11 @@ public class RuntimeJavaCompiler {
   public static class CompilerClassLoader extends ClassLoader {
     private Map<String, JavaClassOutput> classes = new HashMap<String, JavaClassOutput>();
 
-    public CompilerClassLoader(URLClassLoader loader) {
+    public Collection<JavaClassOutput> getJavaClasses() {
+      return classes.values();
+    }
+
+    public CompilerClassLoader(ClassLoader loader) {
       super(loader);
     }
 
@@ -96,9 +106,9 @@ public class RuntimeJavaCompiler {
 
   public static class ClassLoaderFileManager extends ForwardingJavaFileManager<StandardJavaFileManager> {
     private final CompilerClassLoader ccl;
-    private final URLClassLoader loader;
+    private final ClassLoader loader;
 
-    public ClassLoaderFileManager(StandardJavaFileManager jfm, CompilerClassLoader ccl, URLClassLoader loader) {
+    public ClassLoaderFileManager(StandardJavaFileManager jfm, CompilerClassLoader ccl, ClassLoader loader) {
       super(jfm);
       this.ccl = ccl;
       this.loader = loader;
@@ -107,12 +117,13 @@ public class RuntimeJavaCompiler {
     @Override
     public String inferBinaryName(Location location, JavaFileObject file) {
       String result;
-      if (file instanceof JavaClassFromFile || file instanceof JavaClassFromEntry) {
+      if (file instanceof JavaClassFromFile || file instanceof JavaClassFromEntry || file instanceof JavaClassOutput) {
         String name = file.getName();
         name = name.substring(0, name.length() - 6).replace('/', '.');
         result = name;
-      } else
+      } else {
         result = super.inferBinaryName(location, file);
+      }
       return result;
     }
 
@@ -133,8 +144,10 @@ public class RuntimeJavaCompiler {
       if (location.getName().equals("CLASS_PATH")) {
         final String name = s.replace('.', '/');
         Set<URL> urls = new HashSet<URL>();
-        for (Enumeration<URL> loaderurls = loader.findResources(name); loaderurls.hasMoreElements();) {
-          urls.add(loaderurls.nextElement());
+        if (loader instanceof URLClassLoader) {
+          for (Enumeration<URL> loaderurls = ((URLClassLoader)loader).findResources(name); loaderurls.hasMoreElements();) {
+            urls.add(loaderurls.nextElement());
+          }
         }
         // Tomcat will sometimes obfuscate the parent classloader entries
         ClassLoader parent = loader.getParent();
@@ -142,6 +155,9 @@ public class RuntimeJavaCompiler {
           for (Enumeration<URL> loaderurls = ((URLClassLoader) parent).findResources(name); loaderurls.hasMoreElements();) {
             urls.add(loaderurls.nextElement());
           }
+        }
+        if (loader instanceof CompilerClassLoader) {
+          jfos.addAll(((CompilerClassLoader)loader).getJavaClasses());
         }
         for (URL url : urls) {
           String filename = url.getFile();

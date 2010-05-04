@@ -29,7 +29,7 @@ public class Scope extends HashMap {
 
   public Scope(Scope parentScope) {
     this.parentScope = parentScope;
-    logger = Logger.getLogger(parent.getClass().getName());
+    logger = Logger.getLogger(getClass().getName());
   }
 
   public Scope getParentScope() {
