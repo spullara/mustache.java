@@ -1,5 +1,6 @@
 package com.sampullara.mustache;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -18,6 +19,11 @@ import java.util.regex.Pattern;
  */
 public abstract class Mustache {
   protected Logger logger = Logger.getLogger(getClass().getName());
+  private File root;
+
+  public void setRoot(File root) {
+    this.root = root;
+  }
 
   public abstract void execute(Writer writer, Scope ctx) throws MustacheException;
 
@@ -71,10 +77,18 @@ public abstract class Mustache {
   }
 
   protected Mustache compile(final Scope s, final String name) throws MustacheException {
-    Compiler c = new Compiler();
+    Compiler c = new Compiler(root);
     Object partial = getValue(s, name);
     if (partial != null) {
       return c.parse(partial.toString());
+    }
+    return null;
+  }
+
+  protected Mustache include(final Scope s, final String name) throws MustacheException {
+    Compiler c = new Compiler();
+    if (name != null) {
+      return c.parseFile(name);
     }
     return null;
   }
