@@ -20,6 +20,7 @@ public class Compiler {
   private static AtomicInteger num = new AtomicInteger(0);
   private Logger logger = Logger.getLogger(getClass().getName());
   public static final int MARK = 1024;
+  private boolean debug = false;
 
   static {
     header = getText("/header.txt");
@@ -86,7 +87,7 @@ public class Compiler {
     return result;
   }
 
-  public Mustache compile(BufferedReader br, Stack<String> scope, AtomicInteger currentline, ClassLoader parent) throws MustacheException {
+  public Mustache compile(BufferedReader br, Stack<String> scope, AtomicInteger currentLine, ClassLoader parent) throws MustacheException {
     Mustache result;
     StringBuilder code = new StringBuilder();
     code.append(header);
@@ -105,9 +106,9 @@ public class Compiler {
       while ((c = br.read()) != -1) {
         // Increment the line
         if (c == '\n') {
-          writeText(code, template.toString(), true);
+          writeText(currentLine, code, template.toString(), true);
           template = new StringBuilder();
-          currentline.incrementAndGet();
+          currentLine.incrementAndGet();
           startOfLine = true;
           continue;
         }
@@ -118,7 +119,7 @@ public class Compiler {
             // Two mustaches, now capture command
             StringBuilder sb = new StringBuilder();
             while ((c = br.read()) != -1) {
-              if (c == '\n') currentline.incrementAndGet();
+              if (c == '\n') currentLine.incrementAndGet();
               if (c == em.charAt(0)) {
                 br.mark(1);
                 if (br.read() == em.charAt(1)) {
@@ -131,18 +132,21 @@ public class Compiler {
               }
               sb.append((char) c);
             }
-            writeText(code, template.toString(), false);
-            template = new StringBuilder();
             String command = sb.toString().trim();
             switch (command.charAt(0)) {
               case '#':
-                tagonly(br, startOfLine);
+                tagonly(br, startOfLine, currentLine, template);
+                writeText(currentLine, code, template.toString(), false);
+                template = new StringBuilder();
                 // Tag start
                 String startTag = sb.substring(1).trim();
                 scope.push(startTag);
-                Mustache sub = compile(br, scope, currentline, parent);
-                tagonly(br, startOfLine);
+                Mustache sub = compile(br, scope, currentLine, parent);
+                tagonly(br, startOfLine, currentLine, template);
                 parent = sub.getClass().getClassLoader();
+                if (debug) {
+                  code.append("System.err.println(\"#" + startTag + "\");");
+                }
                 code.append("for (Scope s").append(num.incrementAndGet());
                 code.append(":iterable(s, \"");
                 code.append(startTag);
@@ -152,13 +156,18 @@ public class Compiler {
                 code.append("}");
                 break;
               case '^':
-                tagonly(br, startOfLine);
+                tagonly(br, startOfLine, currentLine, template);
+                writeText(currentLine, code, template.toString(), false);
+                template = new StringBuilder();
                 // Inverted tag
                 startTag = sb.substring(1).trim();
                 scope.push(startTag);
-                sub = compile(br, scope, currentline, parent);
-                tagonly(br, startOfLine);
+                sub = compile(br, scope, currentLine, parent);
+                tagonly(br, startOfLine, currentLine, template);
                 parent = sub.getClass().getClassLoader();
+                if (debug) {
+                  code.append("System.err.println(\"^" + startTag + "\");");
+                }
                 code.append("for (Scope s").append(num.incrementAndGet());
                 code.append(":inverted(s, \"");
                 code.append(startTag);
@@ -168,45 +177,62 @@ public class Compiler {
                 code.append("}");
                 break;
               case '/':
+                if (!startOfLine) writeText(currentLine, code, template.toString(), false);
+                template = new StringBuilder();
                 br.mark(1);
-                if (br.read() == '\n') {
-                  writeText(code, "", true);
+                if (br.read() == '\n' && !startOfLine) {
+                  writeText(currentLine, code, "", true);
                 } else br.reset();
                 // Tag end
                 String endTag = sb.substring(1).trim();
                 String expected = scope.pop();
                 if (!endTag.equals(expected)) {
-                  throw new MustacheException("Mismatched start/end tags: " + expected + " != " + endTag + " at " + currentline);
+                  throw new MustacheException("Mismatched start/end tags: " + expected + " != " + endTag + " at " + currentLine);
+                }
+                if (debug) {
+                  code.append("System.err.println(\"/" + endTag + "\");");
                 }
                 break READ;
               case '>':
                 // Partial
+                writeText(currentLine, code, template.toString(), false);
+                template = new StringBuilder();
                 String partialName = sb.substring(1).trim();
                 code.append("partial(w, s, \"").append(partialName).append("\");");
                 break;
               case '{':
                 // Not escaped
+                writeText(currentLine, code, template.toString(), false);
+                template = new StringBuilder();
                 if (em.charAt(1) != '}' || br.read() == '}') {
                   code.append("write(w, s, \"").append(sb.substring(1).trim()).append("\", false);");
                 } else {
-                  throw new MustacheException("Unescaped section not terminated properly: " + sb + " at " + currentline);
+                  throw new MustacheException("Unescaped section not terminated properly: " + sb + " at " + currentLine);
                 }
                 break;
               case '&':
                 // Not escaped
+                writeText(currentLine, code, template.toString(), false);
+                template = new StringBuilder();
                 code.append("write(w, s, \"").append(sb.substring(1).trim()).append("\", false);");
                 break;
               case '%':
-                tagonly(br, startOfLine);
+                tagonly(br, startOfLine, currentLine, template);
+                writeText(currentLine, code, template.toString(), false);
+                template = new StringBuilder();
                 // Pragmas
                 logger.warning("Pragmas are unsupported");
                 break;
               case '!':
-                tagonly(br, startOfLine);
+                tagonly(br, startOfLine, currentLine, template);
+                writeText(currentLine, code, template.toString(), false);
+                template = new StringBuilder();
                 // Comment
                 break;
               default:
                 // Reference
+                writeText(currentLine, code, template.toString(), false);
+                template = new StringBuilder();
                 code.append("write(w, s, \"").append(command).append("\", true);");
                 break;
             }
@@ -216,15 +242,23 @@ public class Compiler {
             br.reset();
           }
         }
-        startOfLine = false;
+        startOfLine = ((c == '\t' || c == ' ') && startOfLine);
         template.append((char) c);
       }
-      writeText(code, template.toString(), false);
+      writeText(currentLine, code, template.toString(), false);
       code.append(footer);
     } catch (IOException e) {
       throw new MustacheException("Failed to read: " + e);
     }
     try {
+      if (debug) {
+        File dir = new File("src/main/java/com/sampullara/mustaches/");
+        dir.mkdirs();
+        File file = new File(dir, className + ".java");
+        FileWriter fw = new FileWriter(file);
+        fw.write(code.toString());
+        fw.close();
+      }
       ClassLoader loader = RuntimeJavaCompiler.compile(new PrintWriter(System.out, true), className, code.toString(), parent);
       Class<?> aClass = loader.loadClass("com.sampullara.mustaches." + className);
       result = (Mustache) aClass.newInstance();
@@ -236,18 +270,24 @@ public class Compiler {
     return result;
   }
 
-  private void tagonly(BufferedReader br, boolean startOfLine) throws IOException {
+  private void tagonly(BufferedReader br, boolean startOfLine, AtomicInteger currentLine, StringBuilder template) throws IOException {
     if (startOfLine) {
       br.mark(1);
       if (br.read() != '\n') {
         br.reset();
+      } else {
+        currentLine.incrementAndGet();
+        template.delete(0, template.length());
       }
     }
   }
 
-  private void writeText(StringBuilder sb, String text, boolean endline) {
+  private void writeText(AtomicInteger currentLine, StringBuilder sb, String text, boolean endline) {
+    if (debug && endline) {
+      sb.append("System.err.println(" + currentLine + ");");
+    }
     if (text.length() != 0) {
-      text = text.replaceAll("\"", "\\\"");
+      text = text.replace("\"", "\\\"");
       sb.append("w.write(\"").append(text).append(endline ? "\\n" : "").append("\");");
     } else if (endline) {
       sb.append("w.write(\"\\n\");\n");

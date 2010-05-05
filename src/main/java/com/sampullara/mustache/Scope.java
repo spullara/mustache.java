@@ -47,6 +47,10 @@ public class Scope extends HashMap {
 
   @Override
   public Object get(Object o) {
+    return get(o, this);
+  }
+
+  public Object get(Object o, Scope scope) {
     String name = o.toString();
     Object v = super.get(o);
     if (v == null) {
@@ -76,13 +80,24 @@ public class Scope extends HashMap {
             member.setAccessible(true);
             members.put(name, member);
           } catch (NoSuchMethodException e) {
+            try {
+              member = aClass.getDeclaredMethod(name, Scope.class);
+              member.setAccessible(true);
+              members.put(name, member);
+            } catch (NoSuchMethodException e1) {
+            }
           }
         }
         try {
           if (member instanceof Field) {
             v = ((Field) member).get(parent);
           } else if (member instanceof Method) {
-            v = ((Method) member).invoke(parent);
+            Method method = (Method) member;
+            if (method.getParameterTypes().length == 0) {
+              v = method.invoke(parent);
+            } else {
+              v = method.invoke(parent, scope);
+            }
           }
         } catch (Exception e) {
           logger.warning("Failed to get value for " + name + ": " + e);
@@ -91,7 +106,7 @@ public class Scope extends HashMap {
     }
     if (v == null) {
       if (parentScope != null) {
-        v = parentScope.get(o);
+        v = parentScope.get(o, scope);
       }
     }
     if (v == null) {

@@ -4,6 +4,8 @@ import junit.framework.TestCase;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Tests for the compiler.
@@ -110,6 +112,47 @@ public class CompilerTest extends TestCase {
     m.execute(writer, scope);
     writer.flush();
     assertEquals(getContents(root, "template_partial.txt"), writer.toString());
+  }
+
+  public void testComplex() throws MustacheException, IOException {
+    Scope scope = new Scope(new Object() {
+      String header = "Colors";
+      List item = Arrays.asList(
+              new Object() {
+                String name = "red";
+                boolean current = true;
+                String url = "#Red";
+              },
+              new Object() {
+                String name = "green";
+                boolean current = false;
+                String url = "#Green";
+              },
+              new Object() {
+                String name = "blue";
+                boolean current = false;
+                String url = "#Blue";
+              }
+      );
+
+      boolean link(Scope s) {
+        return !((Boolean) s.get("current"));
+      }
+
+      boolean list(Scope s) {
+        return ((List) s.get("item")).size() != 0;
+      }
+
+      boolean empty(Scope s) {
+        return ((List) s.get("item")).size() == 0;
+      }
+    });
+    Compiler c = new Compiler(root);
+    Mustache m = c.parseFile("complex.html");
+    StringWriter writer = new StringWriter();
+    m.execute(writer, scope);
+    writer.flush();
+    assertEquals(getContents(root, "complex.txt"), writer.toString());
   }
 
   private String getContents(File root, String file) throws IOException {

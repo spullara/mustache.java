@@ -67,8 +67,14 @@ public abstract class Mustache {
           }
 
           public Scope next() {
-            Scope scope = new Scope(getValue(s, name), s);
-            scope.put(name, i.next());
+            Object value = i.next();
+            Scope scope;
+            if (!(value instanceof Boolean)) {
+              scope = new Scope(value, s);
+            } else {
+              scope = new Scope(s);
+            }
+            scope.put(name, value);
             return scope;
           }
 
