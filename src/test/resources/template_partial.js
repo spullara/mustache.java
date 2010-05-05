@@ -1,8 +1,6 @@
 var partial_context = {
-  title: function() {
-    return "Welcome";
-  },
-  partial: {
-    again: "Goodbye"
+  "title": "Welcome",
+  "template_partial.2": {
+    "again": "Goodbye"
   }
 }

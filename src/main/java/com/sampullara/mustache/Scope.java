@@ -1,5 +1,7 @@
 package com.sampullara.mustache;
 
+import org.codehaus.jackson.JsonNode;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -55,52 +57,64 @@ public class Scope extends HashMap {
     Object v = super.get(o);
     if (v == null) {
       if (parent != null) {
-        Class aClass = parent.getClass();
-        Map<String, AccessibleObject> members;
-        synchronized (Mustache.class) {
-          // Don't overload methods in your contexts
-          members = cache.get(aClass);
-          if (members == null) {
-            members = new ConcurrentHashMap<String, AccessibleObject>();
+        if (parent instanceof Map) {
+          v = ((Map) parent).get(o);
+        } else if (parent instanceof JsonNode) {
+          JsonNode jsonNode = (JsonNode) parent;
+          JsonNode result = jsonNode.get(o.toString());
+          if (result != null && result.isTextual()) {
+            v = result.getTextValue();
+          } else {
+            v = result;
           }
-        }
-        AccessibleObject member = members.get(name);
-        if (member == null) {
-          try {
-            member = aClass.getDeclaredField(name);
-            member.setAccessible(true);
-            members.put(name, member);
-          } catch (NoSuchFieldException e) {
-            // Not set
+        } else {
+          Class aClass = parent.getClass();
+          Map<String, AccessibleObject> members;
+          synchronized (Mustache.class) {
+            // Don't overload methods in your contexts
+            members = cache.get(aClass);
+            if (members == null) {
+              members = new ConcurrentHashMap<String, AccessibleObject>();
+            }
           }
-        }
-        if (member == null) {
-          try {
-            member = aClass.getDeclaredMethod(name);
-            member.setAccessible(true);
-            members.put(name, member);
-          } catch (NoSuchMethodException e) {
+          AccessibleObject member = members.get(name);
+          if (member == null) {
             try {
-              member = aClass.getDeclaredMethod(name, Scope.class);
+              member = aClass.getDeclaredField(name);
               member.setAccessible(true);
               members.put(name, member);
-            } catch (NoSuchMethodException e1) {
+            } catch (NoSuchFieldException e) {
+              // Not set
             }
           }
-        }
-        try {
-          if (member instanceof Field) {
-            v = ((Field) member).get(parent);
-          } else if (member instanceof Method) {
-            Method method = (Method) member;
-            if (method.getParameterTypes().length == 0) {
-              v = method.invoke(parent);
-            } else {
-              v = method.invoke(parent, scope);
+          if (member == null) {
+            try {
+              member = aClass.getDeclaredMethod(name);
+              member.setAccessible(true);
+              members.put(name, member);
+            } catch (NoSuchMethodException e) {
+              try {
+                member = aClass.getDeclaredMethod(name, Scope.class);
+                member.setAccessible(true);
+                members.put(name, member);
+              } catch (NoSuchMethodException e1) {
+              }
             }
           }
-        } catch (Exception e) {
-          logger.warning("Failed to get value for " + name + ": " + e);
+          try {
+            if (member instanceof Field) {
+              v = ((Field) member).get(parent);
+            } else if (member instanceof Method) {
+              Method method = (Method) member;
+              if (method.getParameterTypes().length == 0) {
+                v = method.invoke(parent);
+              } else {
+                v = method.invoke(parent, scope);
+              }
+            }
+          } catch (Exception e) {
+            logger.warning("Failed to get value for " + name + ": " + e);
+          }
         }
       }
     }

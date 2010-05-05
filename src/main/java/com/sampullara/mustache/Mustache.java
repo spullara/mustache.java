@@ -126,14 +126,19 @@ public abstract class Mustache {
       switch (c) {
         case '&':
           matcher.appendReplacement(sb, "&amp;");
+          break;
         case '\\':
           matcher.appendReplacement(sb, "\\\\");
+          break;
         case '"':
           matcher.appendReplacement(sb, "\"");
+          break;
         case '<':
           matcher.appendReplacement(sb, "&lt;");
+          break;
         case '>':
           matcher.appendReplacement(sb, "&gt;");
+          break;
       }
     }
     matcher.appendTail(sb);

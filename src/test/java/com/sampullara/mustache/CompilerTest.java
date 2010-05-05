@@ -1,6 +1,9 @@
 package com.sampullara.mustache;
 
 import junit.framework.TestCase;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.map.MappingJsonFactory;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -153,6 +156,21 @@ public class CompilerTest extends TestCase {
     m.execute(writer, scope);
     writer.flush();
     assertEquals(getContents(root, "complex.txt"), writer.toString());
+  }
+
+  public void testJson() throws IOException, MustacheException {
+    String content = getContents(root, "template_partial.js");
+    content = content.substring(content.indexOf("=") + 1);
+    JsonParser jp = new MappingJsonFactory().createJsonParser(content);
+    JsonNode jsonNode = jp.readValueAsTree();
+    Scope scope = new Scope(jsonNode);
+    Compiler c = new Compiler(root);
+    Mustache m = c.parseFile("template_partial.html");
+    StringWriter writer = new StringWriter();
+    m.execute(writer, scope);
+    writer.flush();
+    assertEquals(getContents(root, "template_partial.txt"), writer.toString());
+
   }
 
   private String getContents(File root, String file) throws IOException {
