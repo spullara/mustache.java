@@ -15,7 +15,8 @@ import java.util.concurrent.*;
 public class MustacheWriter extends Writer {
 
   private Queue<Future<Object>> ordered = new ConcurrentLinkedQueue<Future<Object>>();
-  private static ExecutorService es = Executors.newCachedThreadPool();
+  private static ExecutorService es = new ThreadPoolExecutor(10, 100, 60, TimeUnit.SECONDS,
+          new ArrayBlockingQueue<Runnable>(10), new ThreadPoolExecutor.CallerRunsPolicy());
   private Writer writer;
 
   public MustacheWriter(Writer writer) {
@@ -83,7 +84,6 @@ public class MustacheWriter extends Writer {
     } catch (Exception e) {
       throw new IOException("Failed to flush", e);
     }
-    writer.flush();
   }
 
   @Override

@@ -19,6 +19,10 @@ public class MustacheCompiler {
   private Logger logger = Logger.getLogger(getClass().getName());
   private boolean debug = false;
 
+  public void setDebug() {
+    debug = true;
+  }
+
   static {
     header = getText("/header.txt");
     middle = getText("/middle.txt");
