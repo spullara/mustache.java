@@ -1,5 +1,5 @@
- extends com.sampullara.mustache.Mustache {
+ extends Mustache {
 
-public void execute(java.io.Writer w, Scope s) throws MustacheException {
+public void execute(MustacheWriter w, Scope s) throws MustacheException {
   Scope startScope = s;
   try {

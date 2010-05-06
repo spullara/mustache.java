@@ -137,8 +137,8 @@ public class MustacheCompiler {
                 code.append(":iterable(s, \"");
                 code.append(startTag);
                 code.append("\")) {");
-                code.append("new ").append(sub.getClass().getName());
-                code.append("().execute(w, s").append(num.get()).append(");");
+                code.append("w.enqueue(new ").append(sub.getClass().getName());
+                code.append("(), s").append(num.get()).append(");");
                 code.append("}");
                 break;
               case '^':
@@ -158,8 +158,8 @@ public class MustacheCompiler {
                 code.append(":inverted(s, \"");
                 code.append(startTag);
                 code.append("\")) {");
-                code.append("new ").append(sub.getClass().getName());
-                code.append("().execute(w, s").append(num.get()).append(");");
+                code.append("w.enqueue(new ").append(sub.getClass().getName());
+                code.append("(), s").append(num.get()).append(");");
                 code.append("}");
                 break;
               case '/':

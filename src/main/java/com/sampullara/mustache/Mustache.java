@@ -34,7 +34,7 @@ public abstract class Mustache {
     return path;
   }
 
-  public abstract void execute(Writer writer, Scope ctx) throws MustacheException;
+  public abstract void execute(MustacheWriter writer, Scope ctx) throws MustacheException;
 
   protected void write(Writer writer, Scope s, String name, boolean encode) throws MustacheException {
     Object value = getValue(s, name);
@@ -95,7 +95,7 @@ public abstract class Mustache {
     };
   }
 
-  protected void partial(Writer writer, Scope s, final String name) throws MustacheException {
+  protected void partial(MustacheWriter writer, Scope s, final String name) throws MustacheException {
     MustacheCompiler c = new MustacheCompiler(root);
     if (name != null) {
       Object parent = s.get(name);
