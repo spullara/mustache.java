@@ -18,7 +18,7 @@ public class MustacheWriter extends Writer {
   private static ExecutorService es = Executors.newCachedThreadPool();
   private Writer writer;
 
-  protected MustacheWriter(Writer writer) {
+  public MustacheWriter(Writer writer) {
     this.writer = writer;
   }
 
