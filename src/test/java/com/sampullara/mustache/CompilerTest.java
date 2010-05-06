@@ -21,7 +21,7 @@ public class CompilerTest extends TestCase {
   private File root;
 
   public void testSimple() throws MustacheException, IOException {
-    Compiler c = new Compiler(root);
+    MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("simple.html");
     StringWriter writer = new StringWriter();
     m.execute(writer, new Scope(new Object() {
@@ -51,7 +51,7 @@ public class CompilerTest extends TestCase {
   }
 
   public void testEscaped() throws MustacheException, IOException {
-    Compiler c = new Compiler(root);
+    MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("escaped.html");
     StringWriter writer = new StringWriter();
     m.execute(writer, new Scope(new Object() {
@@ -63,7 +63,7 @@ public class CompilerTest extends TestCase {
   }
 
   public void testUnescaped() throws MustacheException, IOException {
-    Compiler c = new Compiler(root);
+    MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("unescaped.html");
     StringWriter writer = new StringWriter();
     m.execute(writer, new Scope(new Object() {
@@ -76,7 +76,7 @@ public class CompilerTest extends TestCase {
   }
 
   public void testInverted() throws MustacheException, IOException {
-    Compiler c = new Compiler(root);
+    MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("inverted_section.html");
     StringWriter writer = new StringWriter();
     m.execute(writer, new Scope(new Object() {
@@ -91,7 +91,7 @@ public class CompilerTest extends TestCase {
   }
 
   public void testComments() throws MustacheException, IOException {
-    Compiler c = new Compiler(root);
+    MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("comments.html");
     StringWriter writer = new StringWriter();
     m.execute(writer, new Scope(new Object() {
@@ -104,7 +104,7 @@ public class CompilerTest extends TestCase {
   }
 
   public void testPartial() throws MustacheException, IOException {
-    Compiler c = new Compiler(root);
+    MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("template_partial.html");
     StringWriter writer = new StringWriter();
     Scope scope = new Scope();
@@ -150,7 +150,7 @@ public class CompilerTest extends TestCase {
         return ((List) s.get("item")).size() == 0;
       }
     });
-    Compiler c = new Compiler(root);
+    MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("complex.html");
     StringWriter writer = new StringWriter();
     m.execute(writer, scope);
@@ -164,7 +164,7 @@ public class CompilerTest extends TestCase {
     JsonParser jp = new MappingJsonFactory().createJsonParser(content);
     JsonNode jsonNode = jp.readValueAsTree();
     Scope scope = new Scope(jsonNode);
-    Compiler c = new Compiler(root);
+    MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("template_partial.html");
     StringWriter writer = new StringWriter();
     m.execute(writer, scope);

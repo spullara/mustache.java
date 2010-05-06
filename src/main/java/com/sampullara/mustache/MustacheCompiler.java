@@ -1,9 +1,7 @@
 package com.sampullara.mustache;
 
 import java.io.*;
-import java.util.Map;
 import java.util.Stack;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
@@ -14,12 +12,11 @@ import java.util.logging.Logger;
  * Date: May 4, 2010
  * Time: 9:59:58 AM
  */
-public class Compiler {
+public class MustacheCompiler {
   private File root;
   private static String header, middle, footer;
   private static AtomicInteger num = new AtomicInteger(0);
   private Logger logger = Logger.getLogger(getClass().getName());
-  public static final int MARK = 1024;
   private boolean debug = false;
 
   static {
@@ -29,7 +26,7 @@ public class Compiler {
   }
 
   private static String getText(String template) {
-    InputStream stream = Compiler.class.getResourceAsStream(template);
+    InputStream stream = MustacheCompiler.class.getResourceAsStream(template);
     BufferedReader br = new BufferedReader(new InputStreamReader(stream));
     return getText(template, br);
   }
@@ -48,42 +45,31 @@ public class Compiler {
     return text.toString();
   }
 
-  public Compiler() {
+  public MustacheCompiler() {
     this.root = new File(".");
   }
 
-  public Compiler(File root) {
+  public MustacheCompiler(File root) {
     this.root = root;
   }
 
-  private Map<File, Mustache> filecache = new ConcurrentHashMap<File, Mustache>();
-  private Map<String, Mustache> partialcache = new ConcurrentHashMap<String, Mustache>();
-
   public synchronized Mustache parse(String partial) throws MustacheException {
     AtomicInteger currentLine = new AtomicInteger(0);
-    Mustache result = partialcache.get(partial);
-    if (result == null) {
-      BufferedReader br = new BufferedReader(new StringReader(partial));
-      result = compile(br, new Stack<String>(), currentLine, null);
-      partialcache.put(partial, result);
-    }
-    return result;
+    BufferedReader br = new BufferedReader(new StringReader(partial));
+    return compile(br, new Stack<String>(), currentLine, null);
   }
 
   public synchronized Mustache parseFile(String path) throws MustacheException {
     AtomicInteger currentLine = new AtomicInteger(0);
     File file = new File(root, path);
-    Mustache result = filecache.get(file);
-    if (result == null) {
-      BufferedReader br;
-      try {
-        br = new BufferedReader(new FileReader(file));
-      } catch (FileNotFoundException e) {
-        throw new MustacheException("Mustache file not found: " + file);
-      }
-      result = compile(br, new Stack<String>(), currentLine, null);
-      filecache.put(file, result);
+    BufferedReader br;
+    try {
+      br = new BufferedReader(new FileReader(file));
+    } catch (FileNotFoundException e) {
+      throw new MustacheException("Mustache file not found: " + file);
     }
+    Mustache result = compile(br, new Stack<String>(), currentLine, null);
+    result.setPath(path);
     return result;
   }
 

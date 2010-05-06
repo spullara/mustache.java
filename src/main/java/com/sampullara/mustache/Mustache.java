@@ -20,9 +20,18 @@ import java.util.regex.Pattern;
 public abstract class Mustache {
   protected Logger logger = Logger.getLogger(getClass().getName());
   private File root;
+  private String path;
 
   public void setRoot(File root) {
     this.root = root;
+  }
+
+  public void setPath(String path) {
+    this.path = path;
+  }
+
+  public String getPath() {
+    return path;
   }
 
   public abstract void execute(Writer writer, Scope ctx) throws MustacheException;
@@ -87,7 +96,7 @@ public abstract class Mustache {
   }
 
   protected void partial(Writer writer, Scope s, final String name) throws MustacheException {
-    Compiler c = new Compiler(root);
+    MustacheCompiler c = new MustacheCompiler(root);
     if (name != null) {
       Object parent = s.get(name);
       Scope scope = parent == null ? s : new Scope(parent, s);
