@@ -25,11 +25,17 @@ public class Scope extends HashMap {
   private Logger logger;
 
   public Scope() {
+    logger = Logger.getLogger(getClass().getName());
   }
 
   public Scope(Object parent) {
-    this.parent = parent;
-    logger = Logger.getLogger(parent.getClass().getName());
+    if (parent instanceof Scope) {
+      this.parentScope = (Scope) parent;
+      logger = Logger.getLogger(getClass().getName());
+    } else {
+      this.parent = parent;
+      logger = Logger.getLogger(parent.getClass().getName());
+    }
   }
 
   public Scope(Scope parentScope) {
@@ -54,14 +60,30 @@ public class Scope extends HashMap {
 
   public Object get(Object o, Scope scope) {
     String name = o.toString();
-    Object v = super.get(o);
+    Object value = null;
+    String[] components = name.split("\\.");
+    Scope current = this;
+    Scope currentScope = scope;
+    for (String component : components) {
+      value = current.localGet(currentScope, component);
+      if (value == null) {
+        return null;
+      }
+      currentScope = current;
+      current = new Scope(value);
+    }
+    return value;
+  }
+
+  private Object localGet(Scope scope, String name) {
+    Object v = super.get(name);
     if (v == null) {
       if (parent != null) {
         if (parent instanceof Map) {
-          v = ((Map) parent).get(o);
+          v = ((Map) parent).get(name);
         } else if (parent instanceof JsonNode) {
           JsonNode jsonNode = (JsonNode) parent;
-          JsonNode result = jsonNode.get(o.toString());
+          JsonNode result = jsonNode.get(name);
           if (result != null && result.isTextual()) {
             v = result.getTextValue();
           } else {
@@ -120,7 +142,7 @@ public class Scope extends HashMap {
     }
     if (v == null) {
       if (parentScope != null) {
-        v = parentScope.get(o, scope);
+        v = parentScope.get(name, scope);
       }
     }
     if (v == null) {

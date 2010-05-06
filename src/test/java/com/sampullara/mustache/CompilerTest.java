@@ -109,7 +109,7 @@ public class CompilerTest extends TestCase {
     StringWriter writer = new StringWriter();
     Scope scope = new Scope();
     scope.put("title", "Welcome");
-    scope.put("template_partial.2", new Object() {
+    scope.put("template_partial_2", new Object() {
       String again = "Goodbye";
     });
     m.execute(writer, scope);
