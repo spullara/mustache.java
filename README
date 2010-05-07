@@ -70,4 +70,4 @@ semantics in your code.  For example, if you were to change the Feature class:
     }
 
 And the HTML to reference desc instead, you would find that the whole page still only takes
-approximately 1 second to execute, not 2 seconds.
+approximately 1 second to execute, not 4(!) seconds.
