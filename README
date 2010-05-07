@@ -70,4 +70,19 @@ semantics in your code.  For example, if you were to change the Feature class:
     }
 
 And the HTML to reference desc instead, you would find that the whole page still only takes
-approximately 1 second to execute, not 4(!) seconds.
+approximately 1 second to execute, not 4(!) seconds.  Here is another example using the new CallbackFuture
+in order to not use a up a thread for each of the sleeps:
+
+      CallbackFuture<String> desc() throws InterruptedException {
+        final CallbackFuture<String> result = new CallbackFuture<String>();
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+          @Override
+          public void run() {
+            result.set(description);
+          }
+        }, 1000);
+        return result;
+      }
+
+This should enable scheduled tasks, streaming behavior and asynchronous i/o.

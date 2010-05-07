@@ -6,9 +6,7 @@ import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -241,9 +239,16 @@ public class CompilerTest extends TestCase {
 
       String description;
 
-      String desc() throws InterruptedException {
-        Thread.sleep(1000);
-        return description;
+      CallbackFuture<String> desc() throws InterruptedException {
+        final CallbackFuture<String> result = new CallbackFuture<String>();
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+          @Override
+          public void run() {
+            result.set(description);
+          }
+        }, 1000);
+        return result;
       }
     }
   }

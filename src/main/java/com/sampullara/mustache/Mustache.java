@@ -6,6 +6,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,6 +41,13 @@ public abstract class Mustache {
   protected void write(Writer writer, Scope s, String name, boolean encode) throws MustacheException {
     Object value = getValue(s, name);
     if (value != null) {
+      if (value instanceof Future) {
+        try {
+          value = ((Future)value).get();
+        } catch (Exception e) {
+          throw new MustacheException("Failed to evaluate future value: " + name, e);
+        }
+      }
       String string = String.valueOf(value);
       if (encode) {
         string = encode(string);

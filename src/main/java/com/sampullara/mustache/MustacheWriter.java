@@ -26,8 +26,7 @@ public class MustacheWriter extends Writer {
   int total = 0;
 
   public void enqueue(final Mustache m, final Scope s) {
-    total++;
-    ordered.add(es.submit(new Callable<Object>() {
+    enqueue(es.submit(new Callable<Object>() {
       @Override
       public Object call() throws Exception {
         MustacheWriter w = new MustacheWriter(writer);
@@ -38,8 +37,12 @@ public class MustacheWriter extends Writer {
   }
 
   public void enqueue(Callable<Object> callable) {
+    enqueue(es.submit(callable));
+  }
+
+  public void enqueue(Future<Object> future) {
     total++;
-    ordered.add(es.submit(callable));
+    ordered.add(future);
   }
 
   public void done() throws ExecutionException, InterruptedException, IOException {
@@ -48,6 +51,11 @@ public class MustacheWriter extends Writer {
       if (o instanceof MustacheWriter) {
         MustacheWriter mw = (MustacheWriter) o;
         mw.done();
+      } else if (o instanceof Future) {
+        Object result = ((Future) o).get();
+        if (result != null) {
+          writer.write(result.toString());
+        }
       } else {
         writer.write(o.toString());
       }

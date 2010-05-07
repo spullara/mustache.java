@@ -15,4 +15,8 @@ public class MustacheException extends Exception {
   public MustacheException(String msg) {
     super(msg);
   }
+
+  public MustacheException(String s, Exception e) {
+    super(s, e);
+  }
 }
