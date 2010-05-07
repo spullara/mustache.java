@@ -6,10 +6,10 @@ Documentation:
 
 Example:
 {{#items}}
-  {{name}}
-  {{price}}
+Name: {{name}}
+Price: {{price}}
   {{#features}}
-    {{description}}
+  Feature:  {{description}}
   {{/features}}
 {{/items}}
 
