@@ -23,7 +23,10 @@ public class MustacheWriter extends Writer {
     this.writer = writer;
   }
 
+  int total = 0;
+
   public void enqueue(final Mustache m, final Scope s) {
+    total++;
     ordered.add(es.submit(new Callable<Object>() {
       @Override
       public Object call() throws Exception {
@@ -35,6 +38,7 @@ public class MustacheWriter extends Writer {
   }
 
   public void enqueue(Callable<Object> callable) {
+    total++;
     ordered.add(es.submit(callable));
   }
 
@@ -47,6 +51,10 @@ public class MustacheWriter extends Writer {
       } else {
         writer.write(o.toString());
       }
+      total--;
+    }
+    if (total != 0) {
+      throw new AssertionError("Enqueued work != executed work: " + total);
     }
   }
 

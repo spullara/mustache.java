@@ -189,6 +189,65 @@ public class CompilerTest extends TestCase {
 
   }
 
+  public void testReadme() throws MustacheException, IOException {
+    MustacheCompiler c = new MustacheCompiler(root);
+    Mustache m = c.parseFile("items.html");
+    StringWriter sw = new StringWriter();
+    MustacheWriter writer = new MustacheWriter(sw);
+    long start = System.currentTimeMillis();
+    m.execute(writer, new Scope(new Context()));
+    writer.flush();
+    long diff = System.currentTimeMillis() - start;
+    assertEquals(getContents(root, "items.txt"), sw.toString());
+  }
+
+  public void testReadme2() throws MustacheException, IOException {
+    MustacheCompiler c = new MustacheCompiler(root);
+    Mustache m = c.parseFile("items2.html");
+    StringWriter sw = new StringWriter();
+    MustacheWriter writer = new MustacheWriter(sw);
+    long start = System.currentTimeMillis();
+    m.execute(writer, new Scope(new Context()));
+    writer.flush();
+    long diff = System.currentTimeMillis() - start;
+    assertTrue("Should be a little bit more than 1 second", diff < 1100);
+    assertEquals(getContents(root, "items.txt"), sw.toString());
+  }
+
+
+  static class Context {
+    List<Item> items() {
+      return Arrays.asList(
+              new Item("Item 1", "$19.99", Arrays.asList(new Feature("New!"), new Feature("Awesome!"))),
+              new Item("Item 2", "$29.99", Arrays.asList(new Feature("Old."), new Feature("Ugly.")))
+      );
+    }
+
+    static class Item {
+      Item(String name, String price, List<Feature> features) {
+        this.name = name;
+        this.price = price;
+        this.features = features;
+      }
+
+      String name, price;
+      List<Feature> features;
+    }
+
+    static class Feature {
+      Feature(String description) {
+        this.description = description;
+      }
+
+      String description;
+
+      String desc() throws InterruptedException {
+        Thread.sleep(1000);
+        return description;
+      }
+    }
+  }
+
   private String getContents(File root, String file) throws IOException {
     BufferedReader br = new BufferedReader(new FileReader(new File(root, file)));
     StringWriter capture = new StringWriter();
