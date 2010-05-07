@@ -118,6 +118,7 @@ public class MustacheFilter implements Filter {
       Matcher matcher = mapping.regex.matcher(uri);
       if (matcher.matches()) {
         try {
+          rs.setContentType("text/html");
           Scope scope = new Scope(mapping.context.newInstance());
           for (int i = 0; i < matcher.groupCount() + 1; i++) {
             scope.put("route_" + i, matcher.group(i));
