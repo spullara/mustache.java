@@ -1,11 +1,13 @@
 package com.sampullara.mustache;
 
+import com.sampullara.mustache.http.JSONHttpRequest;
 import junit.framework.TestCase;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -212,7 +214,6 @@ public class CompilerTest extends TestCase {
     assertEquals(getContents(root, "items.txt"), sw.toString());
   }
 
-
   static class Context {
     List<Item> items() {
       return Arrays.asList(
@@ -251,6 +252,21 @@ public class CompilerTest extends TestCase {
         return result;
       }
     }
+  }
+
+  public void testJSONHttpRequest() throws MustacheException, IOException {
+    MustacheCompiler c = new MustacheCompiler(root);
+    Mustache m = c.parseFile("simple2.html");
+    StringWriter sw = new StringWriter();
+    MustacheWriter writer = new MustacheWriter(sw);
+    m.execute(writer, new Scope(new Object() {
+      CallbackFuture<JsonNode> data() throws IOException {
+        JSONHttpRequest jhr = new JSONHttpRequest("http://www.javarants.com/simple.json");
+        return jhr.execute();
+      }
+    }));
+    writer.flush();
+    assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
   private String getContents(File root, String file) throws IOException {

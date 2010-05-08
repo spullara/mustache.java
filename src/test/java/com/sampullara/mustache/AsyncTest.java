@@ -29,7 +29,7 @@ public class AsyncTest extends TestCase {
     }
 
     List<CallbackFuture<String>> futures = new ArrayList<CallbackFuture<String>>();
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10; i++) {
       final CallbackFuture<String> future = new CallbackFuture<String>();
 
       // create the exchange object, which lets you define where you want to go
@@ -39,10 +39,6 @@ public class AsyncTest extends TestCase {
         protected void onResponseComplete() throws IOException {
           super.onResponseComplete();
           String responseContent = this.getResponseContent();
-          try {
-            Thread.sleep(1000);
-          } catch (InterruptedException e) {
-          }
           future.set(responseContent);
         }
       };
@@ -54,8 +50,11 @@ public class AsyncTest extends TestCase {
       client.send(exchange);
       futures.add(future);
     }
+    int total = 0;
     for (CallbackFuture<String> future : futures) {
-      System.out.println(future.get());
+      future.get();
+      total++;
     }
+    assertEquals(10, total);
   }
 }

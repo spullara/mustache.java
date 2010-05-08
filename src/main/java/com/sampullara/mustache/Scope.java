@@ -8,6 +8,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 /**
@@ -79,6 +81,13 @@ public class Scope extends HashMap {
     Object v = super.get(name);
     if (v == null) {
       if (parent != null) {
+        if (parent instanceof Future) {
+          try {
+            parent = ((Future)parent).get();
+          } catch (Exception e) {
+            throw new RuntimeException("Failed to get value from future");
+          }
+        }
         if (parent instanceof Map) {
           v = ((Map) parent).get(name);
         } else if (parent instanceof JsonNode) {
@@ -86,6 +95,8 @@ public class Scope extends HashMap {
           JsonNode result = jsonNode.get(name);
           if (result != null && result.isTextual()) {
             v = result.getTextValue();
+          } else if (result != null && result.isBoolean()) {
+            v = result.getBooleanValue();
           } else {
             v = result;
           }

@@ -63,7 +63,7 @@ public abstract class Mustache {
   private static Iterable emptyIterable = new ArrayList(0);
 
   protected Iterable<Scope> iterable(final Scope s, final String name) {
-    final Object value = s.get(name);
+    final Object value = getValue(s, name);
     if (value == null || (value instanceof Boolean && !((Boolean) value))) {
       return emptyIterable;
     }
@@ -77,6 +77,8 @@ public abstract class Mustache {
               i = ((Iterable) value).iterator();
             } else if (value instanceof Boolean) {
               i = Arrays.asList(true).iterator();
+            } else {
+              i = Arrays.asList(value).iterator();
             }
           }
 

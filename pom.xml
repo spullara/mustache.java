@@ -29,6 +29,13 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- Jetty Client -->
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-client</artifactId>
+      <version>7.0.1.v20091125</version>
+    </dependency>
+
     <!-- Testing -->
     <dependency>
       <groupId>junit</groupId>
@@ -36,14 +43,6 @@
       <version>4.7</version>
       <scope>test</scope>
     </dependency>
-    <!-- Jetty -->
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-client</artifactId>
-      <version>7.0.1.v20091125</version>
-      <scope>test</scope>
-    </dependency>
-    
   </dependencies>
 
   <build>
