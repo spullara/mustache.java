@@ -91,63 +91,9 @@ public class Scope extends HashMap {
         if (parent instanceof Map) {
           v = ((Map) parent).get(name);
         } else if (parent instanceof JsonNode) {
-          JsonNode jsonNode = (JsonNode) parent;
-          JsonNode result = jsonNode.get(name);
-          if (result != null && result.isTextual()) {
-            v = result.getTextValue();
-          } else if (result != null && result.isBoolean()) {
-            v = result.getBooleanValue();
-          } else {
-            v = result;
-          }
+          v = handleJsonNode(name);
         } else {
-          Class aClass = parent.getClass();
-          Map<String, AccessibleObject> members;
-          synchronized (Mustache.class) {
-            // Don't overload methods in your contexts
-            members = cache.get(aClass);
-            if (members == null) {
-              members = new ConcurrentHashMap<String, AccessibleObject>();
-            }
-          }
-          AccessibleObject member = members.get(name);
-          if (member == null) {
-            try {
-              member = aClass.getDeclaredField(name);
-              member.setAccessible(true);
-              members.put(name, member);
-            } catch (NoSuchFieldException e) {
-              // Not set
-            }
-          }
-          if (member == null) {
-            try {
-              member = aClass.getDeclaredMethod(name);
-              member.setAccessible(true);
-              members.put(name, member);
-            } catch (NoSuchMethodException e) {
-              try {
-                member = aClass.getDeclaredMethod(name, Scope.class);
-                member.setAccessible(true);
-                members.put(name, member);
-              } catch (NoSuchMethodException e1) {
-              }
-            }
-          }
-          try {
-            if (member instanceof Field) {
-              v = ((Field) member).get(parent);
-            } else if (member instanceof Method) {
-              Method method = (Method) member;
-              if (method.getParameterTypes().length == 0) {
-                v = method.invoke(parent);
-              } else {
-                v = method.invoke(parent, scope);
-              }
-            }
-          } catch (Exception e) {
-            logger.warning("Failed to get value for " + name + ": " + e);
-          }
+          v = handleObject(scope, name, v);
         }
       }
     }
@@ -158,6 +104,71 @@ public class Scope extends HashMap {
     }
     if (v == null) {
       logger.warning("No field, method or key found for: " + name);
+    }
+    return v;
+  }
+
+  private Object handleObject(Scope scope, String name, Object v) {
+    Class aClass = parent.getClass();
+    Map<String, AccessibleObject> members;
+    synchronized (Mustache.class) {
+      // Don't overload methods in your contexts
+      members = cache.get(aClass);
+      if (members == null) {
+        members = new ConcurrentHashMap<String, AccessibleObject>();
+      }
+    }
+    AccessibleObject member = members.get(name);
+    if (member == null) {
+      try {
+        member = aClass.getDeclaredField(name);
+        member.setAccessible(true);
+        members.put(name, member);
+      } catch (NoSuchFieldException e) {
+        // Not set
+      }
+    }
+    if (member == null) {
+      try {
+        member = aClass.getDeclaredMethod(name);
+        member.setAccessible(true);
+        members.put(name, member);
+      } catch (NoSuchMethodException e) {
+        try {
+          member = aClass.getDeclaredMethod(name, Scope.class);
+          member.setAccessible(true);
+          members.put(name, member);
+        } catch (NoSuchMethodException e1) {
+        }
+      }
+    }
+    try {
+      if (member instanceof Field) {
+        v = ((Field) member).get(parent);
+      } else if (member instanceof Method) {
+        Method method = (Method) member;
+        if (method.getParameterTypes().length == 0) {
+          v = method.invoke(parent);
+        } else {
+          v = method.invoke(parent, scope);
+        }
+      }
+    } catch (Exception e) {
+      logger.warning("Failed to get value for " + name + ": " + e);
+    }
+    return v;
+  }
+
+  private Object handleJsonNode(String name) {
+    Object v;
+    JsonNode jsonNode = (JsonNode) parent;
+    JsonNode result = jsonNode.get(name);
+    if (result != null && result.isTextual()) {
+      v = result.getTextValue();
+    } else if (result != null && result.isBoolean()) {
+      v = result.getBooleanValue();
+    } else {
+      v = result;
     }
     return v;
   }
