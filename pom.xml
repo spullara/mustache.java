@@ -45,6 +45,13 @@
     </dependency>
   </dependencies>
 
+  <distributionManagement>
+    <site>
+      <id>www.javarants.com</id>
+      <url>scp://www.javarants.com/opt/sites/javarants/mustache/</url>
+    </site>
+  </distributionManagement>
+  
   <build>
     <plugins>
       <plugin>
