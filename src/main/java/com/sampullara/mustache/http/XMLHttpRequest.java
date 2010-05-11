@@ -13,6 +13,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.Future;
 
 /**
  * TODO: Edit this
@@ -38,7 +39,7 @@ public class XMLHttpRequest extends HttpRequest<Document> {
   }
 
   @Override
-  public CallbackFuture<Document> execute() throws IOException {
+  public Future<Document> execute() throws IOException {
     final CallbackFuture<Document> future = new CallbackFuture<Document>();
     ContentExchange exchange = new ContentExchange() {
       protected void onResponseComplete() throws IOException {

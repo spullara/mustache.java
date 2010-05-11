@@ -7,6 +7,7 @@ import org.w3c.dom.Document;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.Future;
 
 /**
  * TODO: Edit this
@@ -32,5 +33,5 @@ public abstract class HttpRequest<T> {
     this.url = new URL(url);
   }
 
-  public abstract CallbackFuture<T> execute() throws IOException;
+  public abstract Future<T> execute() throws IOException;
 }

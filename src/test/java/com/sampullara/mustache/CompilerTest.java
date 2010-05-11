@@ -10,6 +10,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * Tests for the compiler.
@@ -240,7 +241,7 @@ public class CompilerTest extends TestCase {
 
       String description;
 
-      CallbackFuture<String> desc() throws InterruptedException {
+      Future<String> desc() throws InterruptedException {
         final CallbackFuture<String> result = new CallbackFuture<String>();
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -260,7 +261,7 @@ public class CompilerTest extends TestCase {
     StringWriter sw = new StringWriter();
     MustacheWriter writer = new MustacheWriter(sw);
     m.execute(writer, new Scope(new Object() {
-      CallbackFuture<JsonNode> data() throws IOException {
+      Future<JsonNode> data() throws IOException {
         JSONHttpRequest jhr = new JSONHttpRequest("http://www.javarants.com/simple.json");
         return jhr.execute();
       }

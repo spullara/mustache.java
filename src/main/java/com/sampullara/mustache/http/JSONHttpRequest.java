@@ -8,6 +8,7 @@ import org.eclipse.jetty.client.ContentExchange;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.concurrent.Future;
 
 /**
  * Retrieve JSON data from a data source without blocking a thread.
@@ -24,7 +25,7 @@ public class JSONHttpRequest extends HttpRequest<JsonNode> {
   }
 
   @Override
-  public CallbackFuture<JsonNode> execute() throws IOException {
+  public Future<JsonNode> execute() throws IOException {
     final CallbackFuture<JsonNode> future = new CallbackFuture<JsonNode>();
     ContentExchange exchange = new ContentExchange() {
       protected void onResponseComplete() throws IOException {
