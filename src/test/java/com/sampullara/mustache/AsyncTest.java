@@ -1,5 +1,6 @@
 package com.sampullara.mustache;
 
+import com.sampullara.util.CallbackFuture;
 import junit.framework.TestCase;
 import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;

@@ -1,5 +1,7 @@
 package com.sampullara.mustache;
 
+import com.sampullara.util.RuntimeJavaCompiler;
+
 import java.io.*;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;

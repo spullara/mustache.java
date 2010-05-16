@@ -1,8 +1,7 @@
-package com.sampullara.mustache.http;
+package com.sampullara.util.http;
 
-import com.sampullara.mustache.CallbackFuture;
+import com.sampullara.util.CallbackFuture;
 import org.eclipse.jetty.client.ContentExchange;
-import org.eclipse.jetty.client.HttpClient;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -12,7 +11,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.concurrent.Future;
 
 /**

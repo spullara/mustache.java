@@ -1,6 +1,7 @@
 package com.sampullara.mustache;
 
-import com.sampullara.mustache.http.JSONHttpRequest;
+import com.sampullara.util.http.JSONHttpRequest;
+import com.sampullara.util.CallbackFuture;
 import com.sampullara.util.FutureWriter;
 import junit.framework.TestCase;
 import org.codehaus.jackson.JsonNode;

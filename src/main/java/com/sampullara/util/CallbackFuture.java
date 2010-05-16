@@ -1,4 +1,4 @@
-package com.sampullara.mustache;
+package com.sampullara.util;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;

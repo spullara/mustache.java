@@ -1,8 +1,6 @@
-package com.sampullara.mustache.http;
+package com.sampullara.util.http;
 
-import com.sampullara.mustache.CallbackFuture;
 import org.eclipse.jetty.client.HttpClient;
-import org.w3c.dom.Document;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

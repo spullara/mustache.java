@@ -1,4 +1,4 @@
-package com.sampullara.mustache;
+package com.sampullara.util;
 
 import javax.tools.*;
 import java.io.*;

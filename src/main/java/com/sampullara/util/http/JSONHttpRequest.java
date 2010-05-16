@@ -1,6 +1,6 @@
-package com.sampullara.mustache.http;
+package com.sampullara.util.http;
 
-import com.sampullara.mustache.CallbackFuture;
+import com.sampullara.util.CallbackFuture;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;

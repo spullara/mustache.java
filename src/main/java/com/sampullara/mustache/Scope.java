@@ -8,12 +8,12 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 /**
- * TODO: Edit this
+ * The scope of the executing Mustache can include an object and a map of strings.  Each scope can also have a
+ * parent scope that is checked after nothing is found in the current scope.
  * <p/>
  * User: sam
  * Date: May 3, 2010
@@ -83,7 +83,7 @@ public class Scope extends HashMap {
       if (parent != null) {
         if (parent instanceof Future) {
           try {
-            parent = ((Future)parent).get();
+            parent = ((Future) parent).get();
           } catch (Exception e) {
             throw new RuntimeException("Failed to get value from future");
           }
