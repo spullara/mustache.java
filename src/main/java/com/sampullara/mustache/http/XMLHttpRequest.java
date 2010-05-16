@@ -16,7 +16,7 @@ import java.net.URL;
 import java.util.concurrent.Future;
 
 /**
- * TODO: Edit this
+ * Retrieve and parse XML document from an HTTP source.
  * <p/>
  * User: sam
  * Date: May 7, 2010
@@ -53,6 +53,7 @@ public class XMLHttpRequest extends HttpRequest<Document> {
       }
     };
 
+    exchange.setRequestHeader("Accept", "text/xml, application/xml");
     exchange.setMethod("GET");
     exchange.setURL(url.toExternalForm());
 

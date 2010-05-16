@@ -1,5 +1,6 @@
 package com.sampullara.mustache;
 
+import com.sampullara.util.FutureWriter;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;
@@ -136,7 +137,7 @@ public class MustacheFilter implements Filter {
               return;
             }
           }
-          MustacheWriter mw = new MustacheWriter(rs.getWriter());
+          FutureWriter mw = new FutureWriter(rs.getWriter());
           mapping.template.execute(mw, scope);
           mw.flush();
         } catch (Exception e) {

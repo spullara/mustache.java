@@ -141,7 +141,7 @@ public class MustacheCompiler {
                 code.append(":iterable(s, \"");
                 code.append(startTag);
                 code.append("\")) {");
-                code.append("w.enqueue(new ").append(sub.getClass().getName());
+                code.append("enqueue(w, new ").append(sub.getClass().getName());
                 code.append("(), s").append(num.get()).append(");");
                 code.append("}");
                 break;
@@ -162,7 +162,7 @@ public class MustacheCompiler {
                 code.append(":inverted(s, \"");
                 code.append(startTag);
                 code.append("\")) {");
-                code.append("w.enqueue(new ").append(sub.getClass().getName());
+                code.append("enqueue(w, new ").append(sub.getClass().getName());
                 code.append("(), s").append(num.get()).append(");");
                 code.append("}");
                 break;

@@ -10,7 +10,7 @@ import java.net.URL;
 import java.util.concurrent.Future;
 
 /**
- * TODO: Edit this
+ * Base class for doing an HTTP request
  * <p/>
  * User: sam
  * Date: May 7, 2010

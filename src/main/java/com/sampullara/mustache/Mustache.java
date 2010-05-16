@@ -1,12 +1,14 @@
 package com.sampullara.mustache;
 
+import com.sampullara.util.FutureWriter;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -36,7 +38,18 @@ public abstract class Mustache {
     return path;
   }
 
-  public abstract void execute(MustacheWriter writer, Scope ctx) throws MustacheException;
+  public abstract void execute(FutureWriter writer, Scope ctx) throws MustacheException;
+
+  protected void enqueue(final FutureWriter writer, final Mustache m, final Scope s) {
+    writer.enqueue(new Callable<Object>() {
+      @Override
+      public Object call() throws Exception {
+        FutureWriter fw = new FutureWriter(writer.getWriter());
+        m.execute(fw, s);
+        return fw;
+      }
+    });
+  }
 
   protected void write(Writer writer, Scope s, String name, boolean encode) throws MustacheException {
     Object value = getValue(s, name);
@@ -106,7 +119,7 @@ public abstract class Mustache {
     };
   }
 
-  protected void partial(MustacheWriter writer, Scope s, final String name) throws MustacheException {
+  protected void partial(FutureWriter writer, Scope s, final String name) throws MustacheException {
     MustacheCompiler c = new MustacheCompiler(root);
     if (name != null) {
       Object parent = s.get(name);

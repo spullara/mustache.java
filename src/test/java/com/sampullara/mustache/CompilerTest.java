@@ -1,13 +1,13 @@
 package com.sampullara.mustache;
 
 import com.sampullara.mustache.http.JSONHttpRequest;
+import com.sampullara.util.FutureWriter;
 import junit.framework.TestCase;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -26,7 +26,7 @@ public class CompilerTest extends TestCase {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("simple.html");
     StringWriter sw = new StringWriter();
-    MustacheWriter writer = new MustacheWriter(sw);
+    FutureWriter writer = new FutureWriter(sw);
     m.execute(writer, new Scope(new Object() {
       String name = "Chris";
       int value = 10000;
@@ -45,7 +45,7 @@ public class CompilerTest extends TestCase {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("simple.html");
     StringWriter sw = new StringWriter();
-    MustacheWriter writer = new MustacheWriter(sw);
+    FutureWriter writer = new FutureWriter(sw);
     m.execute(writer, new Scope(new Object() {
       String name = "Chris";
       int value = 10000;
@@ -64,7 +64,7 @@ public class CompilerTest extends TestCase {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("escaped.html");
     StringWriter sw = new StringWriter();
-    MustacheWriter writer = new MustacheWriter(sw);
+    FutureWriter writer = new FutureWriter(sw);
     m.execute(writer, new Scope(new Object() {
       String title = "Bear > Shark";
       String entities = "&quot;";
@@ -77,7 +77,7 @@ public class CompilerTest extends TestCase {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("unescaped.html");
     StringWriter sw = new StringWriter();
-    MustacheWriter writer = new MustacheWriter(sw);
+    FutureWriter writer = new FutureWriter(sw);
     m.execute(writer, new Scope(new Object() {
       String title() {
         return "Bear > Shark";
@@ -91,7 +91,7 @@ public class CompilerTest extends TestCase {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("inverted_section.html");
     StringWriter sw = new StringWriter();
-    MustacheWriter writer = new MustacheWriter(sw);
+    FutureWriter writer = new FutureWriter(sw);
     m.execute(writer, new Scope(new Object() {
       String name() {
         return "Bear > Shark";
@@ -107,7 +107,7 @@ public class CompilerTest extends TestCase {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("comments.html");
     StringWriter sw = new StringWriter();
-    MustacheWriter writer = new MustacheWriter(sw);
+    FutureWriter writer = new FutureWriter(sw);
     m.execute(writer, new Scope(new Object() {
       String title() {
         return "A Comedy of Errors";
@@ -121,7 +121,7 @@ public class CompilerTest extends TestCase {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("template_partial.html");
     StringWriter sw = new StringWriter();
-    MustacheWriter writer = new MustacheWriter(sw);
+    FutureWriter writer = new FutureWriter(sw);
     Scope scope = new Scope();
     scope.put("title", "Welcome");
     scope.put("template_partial_2", new Object() {
@@ -168,7 +168,7 @@ public class CompilerTest extends TestCase {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("complex.html");
     StringWriter sw = new StringWriter();
-    MustacheWriter writer = new MustacheWriter(sw);
+    FutureWriter writer = new FutureWriter(sw);
     m.execute(writer, scope);
     writer.flush();
     assertEquals(getContents(root, "complex.txt"), sw.toString());
@@ -183,7 +183,7 @@ public class CompilerTest extends TestCase {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("template_partial.html");
     StringWriter sw = new StringWriter();
-    MustacheWriter writer = new MustacheWriter(sw);
+    FutureWriter writer = new FutureWriter(sw);
     m.execute(writer, scope);
     writer.flush();
     assertEquals(getContents(root, "template_partial.txt"), sw.toString());
@@ -194,7 +194,7 @@ public class CompilerTest extends TestCase {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("items.html");
     StringWriter sw = new StringWriter();
-    MustacheWriter writer = new MustacheWriter(sw);
+    FutureWriter writer = new FutureWriter(sw);
     long start = System.currentTimeMillis();
     m.execute(writer, new Scope(new Context()));
     writer.flush();
@@ -206,7 +206,7 @@ public class CompilerTest extends TestCase {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("items2.html");
     StringWriter sw = new StringWriter();
-    MustacheWriter writer = new MustacheWriter(sw);
+    FutureWriter writer = new FutureWriter(sw);
     long start = System.currentTimeMillis();
     m.execute(writer, new Scope(new Context()));
     writer.flush();
@@ -259,7 +259,7 @@ public class CompilerTest extends TestCase {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("simple2.html");
     StringWriter sw = new StringWriter();
-    MustacheWriter writer = new MustacheWriter(sw);
+    FutureWriter writer = new FutureWriter(sw);
     m.execute(writer, new Scope(new Object() {
       Future<JsonNode> data() throws IOException {
         JSONHttpRequest jhr = new JSONHttpRequest("http://www.javarants.com/simple.json");
@@ -270,7 +270,7 @@ public class CompilerTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
-  private String getContents(File root, String file) throws IOException {
+  protected String getContents(File root, String file) throws IOException {
     BufferedReader br = new BufferedReader(new FileReader(new File(root, file)));
     StringWriter capture = new StringWriter();
     char[] buffer = new char[8192];
