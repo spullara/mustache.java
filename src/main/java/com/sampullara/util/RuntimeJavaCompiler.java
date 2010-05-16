@@ -11,7 +11,8 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
 /**
- * Compile a class at runtime.
+ * Compile a class at runtime.  Various fallbacks and assumptions are baked into this class such that if you
+ * use a non-standard classloader it may not be able to see the bytes of your classes.
  * User: sam
  * Date: May 3, 2010
  * Time: 9:32:47 AM
@@ -36,6 +37,9 @@ public class RuntimeJavaCompiler {
     return ccl;
   }
 
+  /**
+   * Given a file, create an input stream from that file.
+   */
   public static class JavaClassFromFile extends SimpleJavaFileObject {
     private File file;
 
@@ -50,6 +54,33 @@ public class RuntimeJavaCompiler {
     }
   }
 
+  /**
+   * Given a Jar Entry, create an input stream from that entry.
+   */
+  public static class JavaClassFromEntry extends SimpleJavaFileObject {
+    private JarFile jarfile;
+    private ZipEntry entry;
+
+    protected JavaClassFromEntry(JarFile jarfile, ZipEntry entry) {
+      super(URI.create("jar://" + jarfile.getName() + "!" + entry.getName()), Kind.CLASS);
+      this.jarfile = jarfile;
+      this.entry = entry;
+    }
+
+    @Override
+    public String getName() {
+      return entry.getName();
+    }
+
+    @Override
+    public InputStream openInputStream() throws IOException {
+      return jarfile.getInputStream(entry);
+    }
+  }
+
+  /**
+   * Given a URI and a Kind collect the output of the compiler.
+   */
   public static class JavaClassOutput extends SimpleJavaFileObject {
     private ByteArrayOutputStream bytes;
 
@@ -73,6 +104,9 @@ public class RuntimeJavaCompiler {
 
   }
 
+  /**
+   * Our class loader can store a set of classes but is otherwise unremarkable.
+   */
   public static class CompilerClassLoader extends ClassLoader {
     private Map<String, JavaClassOutput> classes = new HashMap<String, JavaClassOutput>();
 
@@ -104,6 +138,10 @@ public class RuntimeJavaCompiler {
     }
   }
 
+  /**
+   * Use the standard file manager along with a little bit of code that is specific to our in-memory
+   * classes that we are creating.
+   */
   public static class ClassLoaderFileManager extends ForwardingJavaFileManager<StandardJavaFileManager> {
     private final CompilerClassLoader ccl;
     private final ClassLoader loader;
@@ -138,12 +176,24 @@ public class RuntimeJavaCompiler {
       return super.getJavaFileForOutput(location, classname, kind, fileObject);
     }
 
+    /**
+     * This is the core of the problems with the compiler API.  Here we have to track down classes from whereever they
+     * might be in the classloader hierarchy so the compiler can see them.
+     *
+     * @param location
+     * @param s
+     * @param kinds
+     * @param b
+     * @return
+     * @throws IOException
+     */
     @Override
     public Iterable<JavaFileObject> list(Location location, String s, Set<JavaFileObject.Kind> kinds, boolean b) throws IOException {
       List<JavaFileObject> jfos = new ArrayList<JavaFileObject>();
       if (location.getName().equals("CLASS_PATH")) {
         final String name = s.replace('.', '/');
         Set<URL> urls = new HashSet<URL>();
+        // Special handling for our own class loaders
         if (loader instanceof CompilerClassLoader) {
           jfos.addAll(((CompilerClassLoader) loader).getJavaClasses());
           ClassLoader parent = loader;
@@ -156,6 +206,7 @@ public class RuntimeJavaCompiler {
             }
           }
         }
+        // Add everything from the current loader
         if (loader instanceof URLClassLoader) {
           for (Enumeration<URL> loaderurls = ((URLClassLoader) loader).findResources(name); loaderurls.hasMoreElements();) {
             urls.add(loaderurls.nextElement());
@@ -168,6 +219,7 @@ public class RuntimeJavaCompiler {
             urls.add(loaderurls.nextElement());
           }
         }
+        // This takes all the discovered URLs in the class loaders and compares them with the request
         for (URL url : urls) {
           String filename = url.getFile();
           String protocol = url.getProtocol();
@@ -198,6 +250,7 @@ public class RuntimeJavaCompiler {
           }
         }
       }
+      // Finally add everything from the super class
       for (JavaFileObject jfo : super.list(location, s, kinds, b)) {
         jfos.add(jfo);
       }
@@ -206,7 +259,7 @@ public class RuntimeJavaCompiler {
   }
 
   /**
-   * A file object used to represent source coming from a string.
+   * This takes the passed in source and provides it to the compiler.
    */
   public static class JavaSourceFromString extends SimpleJavaFileObject {
     private String code;
@@ -223,24 +276,4 @@ public class RuntimeJavaCompiler {
     }
   }
 
-  public static class JavaClassFromEntry extends SimpleJavaFileObject {
-    private JarFile jarfile;
-    private ZipEntry entry;
-
-    protected JavaClassFromEntry(JarFile jarfile, ZipEntry entry) {
-      super(URI.create("jar://" + jarfile.getName() + "!" + entry.getName()), Kind.CLASS);
-      this.jarfile = jarfile;
-      this.entry = entry;
-    }
-
-    @Override
-    public String getName() {
-      return entry.getName();
-    }
-
-    @Override
-    public InputStream openInputStream() throws IOException {
-      return jarfile.getInputStream(entry);
-    }
-  }
 }
