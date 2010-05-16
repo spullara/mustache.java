@@ -8,6 +8,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
@@ -40,7 +41,15 @@ public abstract class Mustache {
 
   public abstract void execute(FutureWriter writer, Scope ctx) throws MustacheException;
 
-  protected void enqueue(final FutureWriter writer, final Mustache m, final Scope s) {
+  /**
+   * Enqueue's a Mustache into the FutureWriter and starts evaluating it.
+   *
+   * @param writer
+   * @param m
+   * @param s
+   * @throws IOException
+   */
+  protected void enqueue(final FutureWriter writer, final Mustache m, final Scope s) throws IOException {
     writer.enqueue(new Callable<Object>() {
       @Override
       public Object call() throws Exception {
@@ -51,6 +60,15 @@ public abstract class Mustache {
     });
   }
 
+  /**
+   * Writes a named value from the scope with optional encoding.
+   *
+   * @param writer
+   * @param s
+   * @param name
+   * @param encode
+   * @throws MustacheException
+   */
   protected void write(Writer writer, Scope s, String name, boolean encode) throws MustacheException {
     Object value = getValue(s, name);
     if (value != null) {
@@ -75,6 +93,41 @@ public abstract class Mustache {
 
   private static Iterable emptyIterable = new ArrayList(0);
 
+  private class SingleValueIterator implements Iterator {
+    private boolean done;
+    private Object value;
+
+    SingleValueIterator(Object value) {
+      this.value = value;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return !done;
+    }
+
+    @Override
+    public Object next() {
+      if (!done) {
+        done = true;
+        return value;
+      }
+      throw new NoSuchElementException();
+    }
+
+    @Override
+    public void remove() {
+      done = true;
+    }
+  }
+
+  /**
+   * Iterate over a named value. If there is only one value return a single value iterator.
+   * 
+   * @param s
+   * @param name
+   * @return
+   */
   protected Iterable<Scope> iterable(final Scope s, final String name) {
     final Object value = getValue(s, name);
     if (value == null || (value instanceof Boolean && !((Boolean) value))) {
@@ -88,10 +141,8 @@ public abstract class Mustache {
           {
             if (value instanceof Iterable) {
               i = ((Iterable) value).iterator();
-            } else if (value instanceof Boolean) {
-              i = Arrays.asList(true).iterator();
             } else {
-              i = Arrays.asList(value).iterator();
+              i = new SingleValueIterator(value);
             }
           }
 

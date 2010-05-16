@@ -57,26 +57,43 @@ public class FutureWriter extends Writer {
     }
   }
 
-  public void enqueue(Callable<Object> callable) {
+  public void enqueue(Callable<Object> callable) throws IOException {
     Future<Object> future = es.submit(callable);
     enqueue(future);
   }
 
-  public void enqueue(Future<Object> future) {
+  public void enqueue(Future<Object> future) throws IOException {
+    if (closed) {
+      throw new IOException("closed");
+    }
     last = null;
     total++;
     ordered.add(future);
   }
 
-  private static class AppendableCallable implements Callable<Object> {
+  private static class AppendableCallable implements Appendable, Callable<Object> {
     StringBuffer sb;
 
     AppendableCallable(CharSequence cs) {
       sb = new StringBuffer(cs);
     }
 
-    void append(CharSequence cs) {
+    @Override
+    public Appendable append(CharSequence cs) {
       sb.append(cs);
+      return this;
+    }
+
+    @Override
+    public Appendable append(CharSequence charSequence, int i, int i1) throws IOException {
+      sb.append(charSequence, i, i1);
+      return this;
+    }
+
+    @Override
+    public Appendable append(char c) throws IOException {
+      sb.append(String.valueOf(c));
+      return this;
     }
 
     @Override
