@@ -52,11 +52,10 @@ public class CompilerTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
-  public void testSimpleIterator() throws MustacheException, IOException, ExecutionException, InterruptedException {
+  public void testSetWriter() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("simple.html");
-    StringWriter sw = new StringWriter();
-    FutureWriter writer = new FutureWriter(sw);
+    FutureWriter writer = new FutureWriter();
     m.execute(writer, new Scope(new Object() {
       String name = "Chris";
       int value = 10000;
@@ -67,11 +66,10 @@ public class CompilerTest extends TestCase {
 
       boolean in_ca = true;
     }));
-    StringBuilder sb = new StringBuilder();
-    for (byte[] bytes : writer) {
-      sb.append(new String(bytes, UTF8));
-    }
-    assertEquals(getContents(root, "simple.txt"), sb.toString());
+    StringWriter sw = new StringWriter();
+    writer.setWriter(sw);
+    writer.flush();
+    assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
   public void testSimple2() throws MustacheException, IOException, ExecutionException, InterruptedException {
@@ -288,7 +286,7 @@ public class CompilerTest extends TestCase {
     }
   }
 
-  public void diabledTestJSONHttpRequest() throws MustacheException, IOException {
+  public void testJSONHttpRequest() throws MustacheException, IOException {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("simple2.html");
     StringWriter sw = new StringWriter();

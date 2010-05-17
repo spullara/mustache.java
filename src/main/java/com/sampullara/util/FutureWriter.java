@@ -3,8 +3,6 @@ package com.sampullara.util;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.Iterator;
-import java.util.Stack;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -21,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * Date: May 6, 2010
  * Time: 2:44:42 PM
  */
-public class FutureWriter extends Writer implements Iterable<byte[]> {
+public class FutureWriter extends Writer {
 
   private AppendableCallable last;
   private ConcurrentLinkedQueue<Future<Object>> ordered = new ConcurrentLinkedQueue<Future<Object>>();
@@ -32,13 +30,19 @@ public class FutureWriter extends Writer implements Iterable<byte[]> {
   public static final Charset UTF8 = Charset.forName("UTF-8");
   public static final byte[] EMPTY_BYTEARRAY = new byte[0];
 
+  public FutureWriter() {    
+  }
+
   public FutureWriter(Writer writer) {
     this.writer = writer;
   }
 
-
   public Writer getWriter() {
     return writer;
+  }
+
+  public void setWriter(Writer writer) {
+    this.writer = writer;
   }
 
   int total = 0;
@@ -74,58 +78,6 @@ public class FutureWriter extends Writer implements Iterable<byte[]> {
     last = null;
     total++;
     ordered.add(future);
-  }
-
-  @Override
-  public Iterator<byte[]> iterator() {
-    return new Iterator<byte[]>() {
-      Stack<Iterator> stack = new Stack<Iterator>();
-      Iterator i = ordered.iterator();
-
-      @Override
-      public boolean hasNext() {
-        boolean b = i.hasNext();
-        if (!b) {
-          if (stack.size() != 0) {
-            i = stack.pop();
-            return i.hasNext();
-          }
-        }
-        return b;
-      }
-
-      @Override
-      public byte[] next() {
-        try {
-          Object value = i.next();
-          if (value instanceof Future) {
-            Object o = ((Future) value).get();
-            if (o instanceof FutureWriter) {
-              stack.push(i);
-              FutureWriter fw = (FutureWriter) o;
-              i = fw.iterator();
-              return (byte[]) i.next();
-            } else if (o instanceof Future) {
-              Object result = ((Future) o).get();
-              if (result != null) {
-                return result.toString().getBytes(UTF8);
-              }
-              return EMPTY_BYTEARRAY;
-            } else {
-              return (o.toString()).getBytes(UTF8);
-            }
-          }
-          return (byte[]) value;
-        } catch (Exception e) {
-          throw new AssertionError("Failed to iterate over FutureWriter: " + e);
-        }
-      }
-
-      @Override
-      public void remove() {
-        i.remove();
-      }
-    };
   }
 
   private static class AppendableCallable implements Appendable, Callable<Object> {
