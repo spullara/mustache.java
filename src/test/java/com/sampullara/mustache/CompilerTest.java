@@ -51,7 +51,7 @@ public class CompilerTest extends TestCase {
     writer.flush();
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
-
+  
   public void testSetWriter() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("simple.html");

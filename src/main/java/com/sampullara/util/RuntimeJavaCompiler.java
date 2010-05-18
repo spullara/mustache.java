@@ -1,11 +1,32 @@
 package com.sampullara.util;
 
-import javax.tools.*;
-import java.io.*;
+import javax.tools.FileObject;
+import javax.tools.ForwardingJavaFileManager;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.SimpleJavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
@@ -18,6 +39,11 @@ import java.util.zip.ZipEntry;
  * Time: 9:32:47 AM
  */
 public class RuntimeJavaCompiler {
+
+  static {
+
+  }
+
   public static ClassLoader compile(PrintWriter printWriter, String className, String code) throws IOException {
     return compile(printWriter, className, code, null);
   }
@@ -120,6 +146,23 @@ public class RuntimeJavaCompiler {
 
     public void add(String name, JavaClassOutput clazz) {
       classes.put(name, clazz);
+    }
+
+    @Override
+    protected URL findResource(String s) {
+      if (s.startsWith("/")) s = s.substring(1);
+      if (s.endsWith(".class")) s = s.substring(0, s.length() - 6);
+      s = s.replace('/', '.');
+      JavaClassOutput jco = classes.get(s);
+      try {
+        File tempFile = File.createTempFile("class", "bytes");
+        FileOutputStream fos = new FileOutputStream(tempFile);
+        fos.write(jco.getBytes());
+        fos.close();
+        return tempFile.toURI().toURL();
+      } catch (IOException e) {
+        return null;
+      }
     }
 
     @Override
