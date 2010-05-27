@@ -40,10 +40,6 @@ import java.util.zip.ZipEntry;
  */
 public class RuntimeJavaCompiler {
 
-  static {
-
-  }
-
   public static ClassLoader compile(PrintWriter printWriter, String className, String code) throws IOException {
     return compile(printWriter, className, code, null);
   }

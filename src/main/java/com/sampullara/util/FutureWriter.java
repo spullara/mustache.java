@@ -125,7 +125,9 @@ public class FutureWriter extends Writer {
             writer.write(result.toString());
           }
         } else {
-          writer.write(o.toString());
+          if (o != null) {
+            writer.write(o.toString());
+          }
         }
         total--;
       }

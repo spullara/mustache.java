@@ -125,8 +125,10 @@ public class MustacheCompiler {
               sb.append((char) c);
             }
             String command = sb.toString().trim();
-            switch (command.charAt(0)) {
+            char ch = command.charAt(0);
+            switch (ch) {
               case '#':
+              case '^':
                 tagonly(br, startOfLine, currentLine, template);
                 writeText(currentLine, code, template.toString(), false);
                 template = new StringBuilder();
@@ -140,28 +142,11 @@ public class MustacheCompiler {
                   code.append("System.err.println(\"#" + startTag + "\");");
                 }
                 code.append("for (Scope s").append(num.incrementAndGet());
-                code.append(":iterable(s, \"");
-                code.append(startTag);
-                code.append("\")) {");
-                code.append("enqueue(w, new ").append(sub.getClass().getName());
-                code.append("(), s").append(num.get()).append(");");
-                code.append("}");
-                break;
-              case '^':
-                tagonly(br, startOfLine, currentLine, template);
-                writeText(currentLine, code, template.toString(), false);
-                template = new StringBuilder();
-                // Inverted tag
-                startTag = sb.substring(1).trim();
-                scope.push(startTag);
-                sub = compile(br, scope, currentLine, parent);
-                tagonly(br, startOfLine, currentLine, template);
-                parent = sub.getClass().getClassLoader();
-                if (debug) {
-                  code.append("System.err.println(\"^" + startTag + "\");");
+                if (ch == '#') {
+                  code.append(":iterable(s, \"");
+                } else {
+                  code.append(":inverted(s, \"");
                 }
-                code.append("for (Scope s").append(num.incrementAndGet());
-                code.append(":inverted(s, \"");
                 code.append(startTag);
                 code.append("\")) {");
                 code.append("enqueue(w, new ").append(sub.getClass().getName());
