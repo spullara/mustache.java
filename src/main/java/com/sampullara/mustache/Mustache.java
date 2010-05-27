@@ -53,7 +53,7 @@ public abstract class Mustache {
     writer.enqueue(new Callable<Object>() {
       @Override
       public Object call() throws Exception {
-        FutureWriter fw = new FutureWriter(writer.getWriter());
+        FutureWriter fw = new FutureWriter();
         m.execute(fw, s);
         return fw;
       }

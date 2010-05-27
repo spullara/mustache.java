@@ -118,6 +118,7 @@ public class FutureWriter extends Writer {
         Object o = work.get();
         if (o instanceof FutureWriter) {
           FutureWriter fw = (FutureWriter) o;
+          fw.setWriter(writer);
           fw.flush();
         } else if (o instanceof Future) {
           Object result = ((Future) o).get();
