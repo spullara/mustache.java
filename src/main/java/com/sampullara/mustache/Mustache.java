@@ -31,6 +31,10 @@ public abstract class Mustache {
     this.root = root;
   }
 
+  public File getRoot() {
+    return root;
+  }
+
   public void setPath(String path) {
     this.path = path;
   }

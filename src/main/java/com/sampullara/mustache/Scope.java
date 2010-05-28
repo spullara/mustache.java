@@ -154,7 +154,8 @@ public class Scope extends HashMap {
         }
       }
     } catch (Exception e) {
-      logger.warning("Failed to get value for " + name + ": " + e);
+      // Might be nice for debugging but annoying in practice
+      // logger.warning("Failed to get value for " + name + ": " + e);
     }
     return v;
   }
