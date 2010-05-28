@@ -20,6 +20,8 @@ public class MustacheCompiler {
   private static AtomicInteger num = new AtomicInteger(0);
   private Logger logger = Logger.getLogger(getClass().getName());
   private boolean debug = false;
+  private String pkg;
+  private String superclass;
 
   public void setDebug() {
     debug = true;
@@ -59,6 +61,10 @@ public class MustacheCompiler {
     this.root = root;
   }
 
+  public void setSuperclass(String superclass) {
+    this.superclass = superclass;
+  }
+
   public synchronized Mustache parse(String partial) throws MustacheException {
     AtomicInteger currentLine = new AtomicInteger(0);
     BufferedReader br = new BufferedReader(new StringReader(partial));
@@ -85,6 +91,13 @@ public class MustacheCompiler {
     code.append(header);
     String className = "Mustache" + num.getAndIncrement();
     code.append(className);
+    code.append(" extends ");
+    if (superclass == null) {
+      code.append("Mustache");
+    } else {
+      code.append(superclass);
+    }
+    code.append(" {");
     code.append(middle);
     // Now we grab the mustache template
     String sm = "{{";

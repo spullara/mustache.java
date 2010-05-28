@@ -1,4 +1,3 @@
- extends Mustache {
 
 public void execute(FutureWriter w, Scope s) throws MustacheException {
   Scope startScope = s;
