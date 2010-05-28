@@ -103,7 +103,8 @@ public class Scope extends HashMap {
       }
     }
     if (v == null) {
-      logger.warning("No field, method or key found for: " + name);
+      // Might be nice for debugging but annoying in practice
+      // logger.warning("No field, method or key found for: " + name);
     }
     return v;
   }
