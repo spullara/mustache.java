@@ -78,19 +78,36 @@ public abstract class Mustache {
     if (value != null) {
       if (value instanceof Future) {
         try {
-          value = ((Future)value).get();
+          value = ((Future) value).get();
         } catch (Exception e) {
           throw new MustacheException("Failed to evaluate future value: " + name, e);
         }
       }
-      String string = String.valueOf(value);
-      if (encode) {
-        string = encode(string);
-      }
-      try {
-        writer.write(string);
-      } catch (IOException e) {
-        throw new MustacheException("Failed to write: " + e);
+      if (value instanceof FutureWriter) {
+        if (writer instanceof FutureWriter) {
+          FutureWriter fw = (FutureWriter) writer;
+          final Object finalValue = value;
+          try {
+            fw.enqueue(new Callable<Object>() {
+              @Override
+              public Object call() throws Exception {
+                return finalValue;
+              }
+            });
+          } catch (IOException e) {
+            throw new MustacheException("Failed to enqueue future writer", e);
+          }
+        }
+      } else {
+        String string = String.valueOf(value);
+        if (encode) {
+          string = encode(string);
+        }
+        try {
+          writer.write(string);
+        } catch (IOException e) {
+          throw new MustacheException("Failed to write: " + e);
+        }
       }
     }
   }
@@ -127,7 +144,7 @@ public abstract class Mustache {
 
   /**
    * Iterate over a named value. If there is only one value return a single value iterator.
-   * 
+   *
    * @param s
    * @param name
    * @return
