@@ -277,6 +277,7 @@ public class MustacheCompiler {
       sb.append("System.err.println(" + currentLine + ");");
     }
     if (text.length() != 0) {
+      text = text.replace("\\", "\\\\");
       text = text.replace("\"", "\\\"");
       sb.append("w.write(\"").append(text).append(endline ? "\\n" : "").append("\");");
     } else if (endline) {
