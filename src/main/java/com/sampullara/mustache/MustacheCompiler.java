@@ -85,6 +85,10 @@ public class MustacheCompiler {
     return result;
   }
 
+  public Mustache compile(BufferedReader br) throws MustacheException {
+    return compile(br, new Stack<String>(), new AtomicInteger(0), getClass().getClassLoader());
+  }
+
   public Mustache compile(BufferedReader br, Stack<String> scope, AtomicInteger currentLine, ClassLoader parent) throws MustacheException {
     Mustache result;
     StringBuilder code = new StringBuilder();

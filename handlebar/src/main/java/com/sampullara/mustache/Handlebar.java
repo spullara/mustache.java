@@ -24,8 +24,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Run a local server and merge .js and .html files using mustache.
@@ -73,7 +71,7 @@ public class Handlebar {
           // Handle like a template
           String filename = pathInfo.endsWith("/") ? pathInfo + "index.html" : pathInfo.substring(1);
           try {
-            Mustache mustache = mc.compile(new BufferedReader(new FileReader(filename)), new Stack<String>(), new AtomicInteger(0), Handlebar.class.getClassLoader());
+            Mustache mustache = mc.compile(new BufferedReader(new FileReader(filename)));
             FutureWriter fw = new FutureWriter(res.getWriter());
             File file = new File(mocks, base + ".json");
             res.setStatus(HttpServletResponse.SC_OK);
