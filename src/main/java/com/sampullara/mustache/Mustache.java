@@ -1,6 +1,7 @@
 package com.sampullara.mustache;
 
 import com.sampullara.util.FutureWriter;
+import org.codehaus.jackson.JsonNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -160,7 +161,7 @@ public abstract class Mustache {
           Iterator i;
 
           {
-            if (value instanceof Iterable) {
+            if (value instanceof Iterable && !(value instanceof JsonNode)) {
               i = ((Iterable) value).iterator();
             } else {
               i = new SingleValueIterator(value);
