@@ -5,10 +5,7 @@
   <groupId>com.sampullara.mustache.java</groupId>
   <artifactId>compiler</artifactId>
   <version>0.1-SNAPSHOT</version>
-  <modules>
-    <module>handlebar</module>
-  </modules>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
 
   <name>mustache.java</name>
   <url>http://maven.apache.org</url>
