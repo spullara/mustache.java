@@ -75,13 +75,27 @@ public class Handlebar {
             FutureWriter fw = new FutureWriter(res.getWriter());
             File file = new File(mocks, base + ".json");
             res.setStatus(HttpServletResponse.SC_OK);
+            Map parameters = new HashMap<Object, Object>(req.getParameterMap()) {
+              @Override
+              public Object get(Object o) {
+                Object result = super.get(o);    //To change body of overridden methods use File | Settings | File Templates.
+                if (result instanceof String[]) {
+                  String[] strings = (String[]) result;
+                  if (strings.length == 1) {
+                    return strings[0];
+                  }
+                }
+                return result;
+              }
+            };
+
             if (file.exists()) {
               BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
               JsonParser parser = jf.createJsonParser(bis);
               JsonNode json = parser.readValueAsTree();
-              mustache.execute(fw, new Scope(json));
+              mustache.execute(fw, new Scope(json, new Scope(parameters)));
             } else {
-              mustache.execute(fw, new Scope());
+              mustache.execute(fw, new Scope(parameters));
             }
             fw.flush();
             r.setHandled(true);

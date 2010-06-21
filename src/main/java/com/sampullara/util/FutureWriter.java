@@ -2,7 +2,6 @@ package com.sampullara.util;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -27,8 +26,6 @@ public class FutureWriter extends Writer {
           new ArrayBlockingQueue<Runnable>(10), new ThreadPoolExecutor.CallerRunsPolicy());
   private Writer writer;
   private boolean closed = false;
-  public static final Charset UTF8 = Charset.forName("UTF-8");
-  public static final byte[] EMPTY_BYTEARRAY = new byte[0];
 
   public FutureWriter() {    
   }
