@@ -19,8 +19,8 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,7 +71,7 @@ public class Handlebar {
           // Handle like a template
           String filename = pathInfo.endsWith("/") ? pathInfo + "index.html" : pathInfo.substring(1);
           try {
-            Mustache mustache = mc.compile(new BufferedReader(new FileReader(filename)));
+            Mustache mustache = mc.compile(new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8")));
             FutureWriter fw = new FutureWriter(res.getWriter());
             File file = new File(mocks, base + ".json");
             res.setStatus(HttpServletResponse.SC_OK);
@@ -90,8 +90,8 @@ public class Handlebar {
             };
 
             if (file.exists()) {
-              BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
-              JsonParser parser = jf.createJsonParser(bis);
+              BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+              JsonParser parser = jf.createJsonParser(br);
               JsonNode json = parser.readValueAsTree();
               mustache.execute(fw, new Scope(json, new Scope(parameters)));
             } else {
