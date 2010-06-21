@@ -161,7 +161,7 @@ public abstract class Mustache {
           Iterator i;
 
           {
-            if (value instanceof Iterable && !(value instanceof JsonNode)) {
+            if (value instanceof Iterable && !(value instanceof JsonNode && !(((JsonNode) value).isArray()))) {
               i = ((Iterable) value).iterator();
             } else {
               i = new SingleValueIterator(value);
