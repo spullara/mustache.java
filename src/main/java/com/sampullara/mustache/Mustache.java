@@ -79,7 +79,13 @@ public abstract class Mustache {
     if (value != null) {
       if (value instanceof Future) {
         try {
-          value = ((Future) value).get();
+          if (writer instanceof FutureWriter) {
+            FutureWriter fw = (FutureWriter) writer;
+            fw.enqueue((Future<Object>) value);
+            return;
+          }
+          value = ((Future)value).get();
+          return;
         } catch (Exception e) {
           throw new MustacheException("Failed to evaluate future value: " + name, e);
         }
