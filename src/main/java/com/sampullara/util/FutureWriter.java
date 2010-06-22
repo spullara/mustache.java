@@ -112,13 +112,17 @@ public class FutureWriter extends Writer {
   public void flush() throws IOException {
     try {
       for (Future<Object> work : ordered) {
+        if (!work.isDone()) {
+          writer.flush();
+        }
         Object o = work.get();
         if (o instanceof FutureWriter) {
           FutureWriter fw = (FutureWriter) o;
           fw.setWriter(writer);
           fw.flush();
         } else if (o instanceof Future) {
-          Object result = ((Future) o).get();
+          Future future = (Future) o;
+          Object result = future.get();
           if (result != null) {
             writer.write(result.toString());
           }
@@ -128,6 +132,9 @@ public class FutureWriter extends Writer {
           }
         }
         total--;
+      }
+      if (!(writer instanceof FutureWriter)) {
+        writer.flush();
       }
       if (total != 0) {
         throw new AssertionError("Enqueued work != executed work: " + total);
