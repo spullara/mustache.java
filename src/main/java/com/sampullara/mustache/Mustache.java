@@ -1,6 +1,7 @@
 package com.sampullara.mustache;
 
 import com.sampullara.util.FutureWriter;
+import org.codehaus.jackson.JsonNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,7 +79,13 @@ public abstract class Mustache {
     if (value != null) {
       if (value instanceof Future) {
         try {
-          value = ((Future) value).get();
+          if (writer instanceof FutureWriter) {
+            FutureWriter fw = (FutureWriter) writer;
+            fw.enqueue((Future<Object>) value);
+            return;
+          }
+          value = ((Future)value).get();
+          return;
         } catch (Exception e) {
           throw new MustacheException("Failed to evaluate future value: " + name, e);
         }
@@ -160,7 +167,7 @@ public abstract class Mustache {
           Iterator i;
 
           {
-            if (value instanceof Iterable) {
+            if (value instanceof Iterable && !(value instanceof JsonNode && !(((JsonNode) value).isArray()))) {
               i = ((Iterable) value).iterator();
             } else {
               i = new SingleValueIterator(value);

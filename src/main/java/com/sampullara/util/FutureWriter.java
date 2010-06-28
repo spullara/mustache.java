@@ -2,7 +2,6 @@ package com.sampullara.util;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -27,8 +26,6 @@ public class FutureWriter extends Writer {
           new ArrayBlockingQueue<Runnable>(10), new ThreadPoolExecutor.CallerRunsPolicy());
   private Writer writer;
   private boolean closed = false;
-  public static final Charset UTF8 = Charset.forName("UTF-8");
-  public static final byte[] EMPTY_BYTEARRAY = new byte[0];
 
   public FutureWriter() {    
   }
@@ -115,13 +112,17 @@ public class FutureWriter extends Writer {
   public void flush() throws IOException {
     try {
       for (Future<Object> work : ordered) {
+        if (!work.isDone()) {
+          writer.flush();
+        }
         Object o = work.get();
         if (o instanceof FutureWriter) {
           FutureWriter fw = (FutureWriter) o;
           fw.setWriter(writer);
           fw.flush();
         } else if (o instanceof Future) {
-          Object result = ((Future) o).get();
+          Future future = (Future) o;
+          Object result = future.get();
           if (result != null) {
             writer.write(result.toString());
           }
@@ -131,6 +132,9 @@ public class FutureWriter extends Writer {
           }
         }
         total--;
+      }
+      if (!(writer instanceof FutureWriter)) {
+        writer.flush();
       }
       if (total != 0) {
         throw new AssertionError("Enqueued work != executed work: " + total);

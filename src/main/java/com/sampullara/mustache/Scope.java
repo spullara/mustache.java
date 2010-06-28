@@ -131,7 +131,7 @@ public class Scope extends HashMap {
     }
     if (member == null) {
       try {
-        member = aClass.getDeclaredMethod(name);
+        member = getMethod(name, aClass);
         member.setAccessible(true);
         members.put(name, member);
       } catch (NoSuchMethodException e) {
@@ -159,6 +159,20 @@ public class Scope extends HashMap {
       // logger.warning("Failed to get value for " + name + ": " + e);
     }
     return v;
+  }
+
+  private AccessibleObject getMethod(String name, Class aClass, Class... params) throws NoSuchMethodException {
+    AccessibleObject member;
+    try {
+      member = aClass.getDeclaredMethod(name, params);
+    } catch (NoSuchMethodException nsme) {
+      Class superclass = aClass.getSuperclass();
+      if (superclass != Object.class) {
+        return getMethod(name, superclass);
+      }
+      throw nsme;
+    }
+    return member;
   }
 
   private Object handleJsonNode(String name) {
