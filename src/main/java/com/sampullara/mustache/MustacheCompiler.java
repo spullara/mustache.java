@@ -20,7 +20,6 @@ public class MustacheCompiler {
   private static AtomicInteger num = new AtomicInteger(0);
   private Logger logger = Logger.getLogger(getClass().getName());
   private boolean debug = false;
-  private String pkg;
   private String superclass;
 
   public void setDebug() {
