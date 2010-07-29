@@ -59,6 +59,8 @@ public abstract class Mustache {
       @Override
       public Object call() throws Exception {
         FutureWriter fw = new FutureWriter();
+        m.setRoot(getRoot());
+        m.setPath(getPath());
         m.execute(fw, s);
         return fw;
       }
