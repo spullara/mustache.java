@@ -21,6 +21,7 @@ import java.util.logging.Logger;
  */
 public class Scope extends HashMap {
   protected static Map<Class, Map<String, AccessibleObject>> cache = new ConcurrentHashMap<Class, Map<String, AccessibleObject>>();
+  public static final Object NULL = new Object();
 
   private Object parent;
   private Scope parentScope;
@@ -60,6 +61,8 @@ public class Scope extends HashMap {
     return get(o, this);
   }
 
+  private Map<String, Boolean> missing = parentScope == null ? new ConcurrentHashMap<String, Boolean>() : null;
+
   public Object get(Object o, Scope scope) {
     String name = o.toString();
     Object value = null;
@@ -68,7 +71,14 @@ public class Scope extends HashMap {
     Scope currentScope = scope;
     for (String component : components) {
       value = current.localGet(currentScope, component);
-      if (value == null) {
+      if (value == null || value == NULL) {
+        Scope topscope = this;
+        while (topscope.parentScope != null) {
+          topscope = topscope.parentScope;
+        }
+        if (topscope.missing.put(name, true) == null) {
+          logger.warning("No field, method or key found for: " + name);
+        }
         return null;
       }
       currentScope = current;
@@ -156,7 +166,7 @@ public class Scope extends HashMap {
       }
     } catch (Exception e) {
       // Might be nice for debugging but annoying in practice
-      // logger.warning("Failed to get value for " + name + ": " + e);
+      logger.warning("Failed to get value for " + name + ": " + e);
     }
     return v;
   }
