@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -166,7 +167,7 @@ public class Scope extends HashMap {
       }
     } catch (Exception e) {
       // Might be nice for debugging but annoying in practice
-      logger.warning("Failed to get value for " + name + ": " + e);
+      logger.log(Level.WARNING, "Failed to get value for " + name, e);
     }
     return v;
   }
