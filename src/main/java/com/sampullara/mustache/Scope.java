@@ -133,7 +133,7 @@ public class Scope extends HashMap {
     AccessibleObject member = members.get(name);
     if (member == null) {
       try {
-        member = aClass.getDeclaredField(name);
+        member = getField(name, aClass);
         member.setAccessible(true);
         members.put(name, member);
       } catch (NoSuchFieldException e) {
@@ -182,6 +182,20 @@ public class Scope extends HashMap {
         return getMethod(name, superclass);
       }
       throw nsme;
+    }
+    return member;
+  }
+
+  private AccessibleObject getField(String name, Class aClass) throws NoSuchFieldException {
+    AccessibleObject member;
+    try {
+      member = aClass.getDeclaredField(name);
+    } catch (NoSuchFieldException nsfe) {
+      Class superclass = aClass.getSuperclass();
+      if (superclass != Object.class) {
+        return getField(name, superclass);
+      }
+      throw nsfe;
     }
     return member;
   }
