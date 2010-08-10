@@ -76,7 +76,7 @@ public class Scope extends HashMap {
         while (topscope.parentScope != null) {
           topscope = topscope.parentScope;
         }
-        if (topscope.missing.put(name, true) == null) {
+        if (!name.startsWith("_") && topscope.missing.put(name, true) == null) {
           logger.warning("No field, method or key found for: " + name);
         }
         return null;
