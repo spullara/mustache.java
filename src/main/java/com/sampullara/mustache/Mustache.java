@@ -158,14 +158,22 @@ public abstract class Mustache {
    * @param name
    * @return
    */
-  protected Iterable<Scope> iterable(final Scope s, final String name) {
+  protected Iterable<Scope> iterable(final Scope s, String name) {
+    int times = 0;
+    while(name.endsWith("?")) {
+      name = name.substring(0, name.length() - 1);
+      times++;
+    }
+    final String finalName = name;
     final Object value = getValue(s, name);
     if (value == null || (value instanceof Boolean && !((Boolean) value))) {
       return emptyIterable;
     }
+    final int finalTimes = times;
     return new Iterable<Scope>() {
       public Iterator<Scope> iterator() {
         return new Iterator<Scope>() {
+          int count = finalTimes == 0 ? Integer.MAX_VALUE : finalTimes;
           Iterator i;
 
           {
@@ -177,7 +185,7 @@ public abstract class Mustache {
           }
 
           public boolean hasNext() {
-            return i.hasNext();
+            return count-- != 0 && i.hasNext();
           }
 
           public Scope next() {
@@ -188,7 +196,7 @@ public abstract class Mustache {
             } else {
               scope = new Scope(s);
             }
-            scope.put(name, value);
+            scope.put(finalName, value);
             return scope;
           }
 
