@@ -157,7 +157,8 @@ public class MustacheCompiler {
                 if (debug) {
                   code.append("System.err.println(\"#" + startTag + "\");");
                 }
-                code.append("for (Scope s").append(num.incrementAndGet());
+                int variableNum = num.incrementAndGet();
+                code.append("for (Scope s").append(variableNum);
                 if (ch == '#') {
                   code.append(":iterable(s, \"");
                 } else {
@@ -166,7 +167,7 @@ public class MustacheCompiler {
                 code.append(startTag);
                 code.append("\")) {");
                 code.append("enqueue(w, new ").append(sub.getClass().getName());
-                code.append("(), s").append(num.get()).append(");");
+                code.append("(), s").append(variableNum).append(");");
                 code.append("}");
                 break;
               case '/':
