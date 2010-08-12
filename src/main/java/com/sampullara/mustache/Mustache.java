@@ -240,7 +240,7 @@ public abstract class Mustache {
 
   private static Pattern findToEncode = Pattern.compile("&(?!\\w+;)|[\"<>\\\\]");
 
-  protected static String encode(String value) {
+  public static String encode(String value) {
     StringBuffer sb = new StringBuffer();
     Matcher matcher = findToEncode.matcher(value);
     while (matcher.find()) {
