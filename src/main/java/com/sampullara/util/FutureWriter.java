@@ -27,6 +27,14 @@ public class FutureWriter extends Writer {
   private Writer writer;
   private boolean closed = false;
 
+  public static void setExecutorService(ExecutorService es) {
+    ExecutorService old = FutureWriter.es;
+    // Switch to the new one
+    FutureWriter.es = es;
+    // Gracefully shutdown the old one
+    old.shutdown();
+  }
+
   public FutureWriter() {    
   }
 
