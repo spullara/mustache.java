@@ -221,7 +221,8 @@ public abstract class Mustache {
   protected Iterable<Scope> inverted(final Scope s, final String name) {
     final Object value = s.get(name);
     boolean isntEmpty = value instanceof Iterable && ((Iterable) value).iterator().hasNext();
-    if (isntEmpty || (value instanceof Boolean && ((Boolean) value))) {
+    if (isntEmpty || (value instanceof Boolean && ((Boolean) value)) ||
+            (value != null && !(value instanceof Iterable) && !(value instanceof Boolean))) {
       return emptyIterable;
     }
     Scope scope = new Scope(s);
