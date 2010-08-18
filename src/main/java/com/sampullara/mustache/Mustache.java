@@ -121,7 +121,7 @@ public abstract class Mustache {
     }
   }
 
-  private static Iterable emptyIterable = new ArrayList(0);
+  public static final Iterable EMPTY = new ArrayList(0);
 
   private class SingleValueIterator implements Iterator {
     private boolean done;
@@ -160,20 +160,14 @@ public abstract class Mustache {
    */
   protected Iterable<Scope> iterable(final Scope s, String name) {
     int times = 0;
-    while(name.endsWith("?")) {
-      name = name.substring(0, name.length() - 1);
-      times++;
-    }
     final String finalName = name;
     final Object value = getValue(s, name);
     if (value == null || (value instanceof Boolean && !((Boolean) value))) {
-      return emptyIterable;
+      return EMPTY;
     }
-    final int finalTimes = times;
     return new Iterable<Scope>() {
       public Iterator<Scope> iterator() {
         return new Iterator<Scope>() {
-          int count = finalTimes == 0 ? Integer.MAX_VALUE : finalTimes;
           Iterator i;
 
           {
@@ -185,7 +179,7 @@ public abstract class Mustache {
           }
 
           public boolean hasNext() {
-            return count-- != 0 && i.hasNext();
+            return i.hasNext();
           }
 
           public Scope next() {
@@ -219,11 +213,11 @@ public abstract class Mustache {
   }
 
   protected Iterable<Scope> inverted(final Scope s, final String name) {
-    final Object value = s.get(name);
+    final Object value = getValue(s, name);
     boolean isntEmpty = value instanceof Iterable && ((Iterable) value).iterator().hasNext();
     if (isntEmpty || (value instanceof Boolean && ((Boolean) value)) ||
             (value != null && !(value instanceof Iterable) && !(value instanceof Boolean))) {
-      return emptyIterable;
+      return EMPTY;
     }
     Scope scope = new Scope(s);
     scope.put(name, true);
@@ -232,7 +226,13 @@ public abstract class Mustache {
 
   protected Object getValue(Scope s, String name) {
     try {
-      return s.get(name);
+      Object o = s.get(name);
+      if (o == null) {
+        if (!name.startsWith("_") && s.missing.put(name, true) == null) {
+          logger.warning("No field, method or key found for: " + name);
+        }
+      }
+      return o;
     } catch (Exception e) {
       logger.warning("Failed: " + e + " using " + name);
     }

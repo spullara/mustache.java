@@ -242,7 +242,7 @@ public class CompilerTest extends TestCase {
     m.execute(writer, new Scope(new Context()));
     writer.flush();
     long diff = System.currentTimeMillis() - start;
-    assertTrue("Should be a little bit more than 1 second", diff < 1100);
+    assertTrue("Should be a little bit more than 1 second", diff > 1000 && diff < 2000);
     assertEquals(getContents(root, "items.txt"), sw.toString());
   }
 

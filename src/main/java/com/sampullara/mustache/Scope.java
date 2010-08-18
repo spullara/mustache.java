@@ -62,7 +62,7 @@ public class Scope extends HashMap {
     return get(o, this);
   }
 
-  private Map<String, Boolean> missing = parentScope == null ? new ConcurrentHashMap<String, Boolean>() : null;
+  Map<String, Boolean> missing = parentScope == null ? new ConcurrentHashMap<String, Boolean>() : null;
 
   public Object get(Object o, Scope scope) {
     String name = o.toString();
@@ -73,13 +73,6 @@ public class Scope extends HashMap {
     for (String component : components) {
       value = current.localGet(currentScope, component);
       if (value == null || value == NULL) {
-        Scope topscope = this;
-        while (topscope.parentScope != null) {
-          topscope = topscope.parentScope;
-        }
-        if (!name.startsWith("_") && topscope.missing.put(name, true) == null) {
-          logger.warning("No field, method or key found for: " + name);
-        }
         return null;
       }
       currentScope = current;
