@@ -9,8 +9,10 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -86,7 +88,7 @@ public abstract class Mustache {
             fw.enqueue((Future<Object>) value);
             return;
           }
-          value = ((Future)value).get();
+          value = ((Future) value).get();
           return;
         } catch (Exception e) {
           throw new MustacheException("Failed to evaluate future value: " + name, e);
@@ -216,7 +218,7 @@ public abstract class Mustache {
     final Object value = getValue(s, name);
     boolean isntEmpty = value instanceof Iterable && ((Iterable) value).iterator().hasNext();
     if (isntEmpty || (value instanceof Boolean && ((Boolean) value)) ||
-            (value != null && !(value instanceof Iterable) && !(value instanceof Boolean))) {
+        (value != null && !(value instanceof Iterable) && !(value instanceof Boolean))) {
       return EMPTY;
     }
     Scope scope = new Scope(s);
@@ -224,11 +226,13 @@ public abstract class Mustache {
     return Arrays.asList(scope);
   }
 
+  private Map<String, Boolean> missing = new ConcurrentHashMap<String, Boolean>();
+
   protected Object getValue(Scope s, String name) {
     try {
       Object o = s.get(name);
       if (o == null) {
-        if (!name.startsWith("_") && s.missing.put(name, true) == null) {
+        if (!name.startsWith("_") && missing.put(name, true) == null) {
           logger.warning("No field, method or key found for: " + name);
         }
       }

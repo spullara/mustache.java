@@ -62,8 +62,6 @@ public class Scope extends HashMap {
     return get(o, this);
   }
 
-  Map<String, Boolean> missing = parentScope == null ? new ConcurrentHashMap<String, Boolean>() : null;
-
   public Object get(Object o, Scope scope) {
     String name = o.toString();
     Object value = null;
