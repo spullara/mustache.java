@@ -23,12 +23,12 @@ import java.util.logging.Logger;
  */
 public class Scope extends HashMap {
   protected static Map<Class, Map<String, AccessibleObject>> cache = new ConcurrentHashMap<Class, Map<String, AccessibleObject>>();
-  public static final Object NULL = new Object();
+  public static final Iterable EMPTY = new ArrayList(0);
+  public static final Object NULL = new Object() { public String toString() { return ""; }};
 
   private Object parent;
   private Scope parentScope;
   private Logger logger;
-  public static final Iterable EMPTY = new ArrayList(0);
 
   public Scope() {
     logger = Logger.getLogger(getClass().getName());
@@ -73,7 +73,7 @@ public class Scope extends HashMap {
     for (String component : components) {
       value = current.localGet(currentScope, component);
       if (value == null || value == NULL) {
-        return null;
+        return value;
       }
       currentScope = current;
       current = new Scope(value);
