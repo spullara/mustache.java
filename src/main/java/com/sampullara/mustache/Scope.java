@@ -5,6 +5,7 @@ import org.codehaus.jackson.JsonNode;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,6 +28,7 @@ public class Scope extends HashMap {
   private Object parent;
   private Scope parentScope;
   private Logger logger;
+  public static final Iterable EMPTY = new ArrayList(0);
 
   public Scope() {
     logger = Logger.getLogger(getClass().getName());
@@ -147,13 +149,28 @@ public class Scope extends HashMap {
     }
     try {
       if (member instanceof Field) {
-        v = ((Field) member).get(parent);
+        Field field = (Field) member;
+        v = field.get(parent);
+        if (v == null) {
+          if (field.getType().isAssignableFrom(Iterable.class)) {
+            v = EMPTY;
+          } else {
+            v = NULL;
+          }
+        }
       } else if (member instanceof Method) {
         Method method = (Method) member;
         if (method.getParameterTypes().length == 0) {
           v = method.invoke(parent);
         } else {
           v = method.invoke(parent, scope);
+        }
+        if (v == null) {
+          if (method.getReturnType().isAssignableFrom(Iterable.class)) {
+            v = EMPTY;
+          } else {
+            v = NULL;
+          }
         }
       }
     } catch (Exception e) {

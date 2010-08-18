@@ -6,7 +6,6 @@ import org.codehaus.jackson.JsonNode;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
@@ -17,6 +16,9 @@ import java.util.concurrent.Future;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.sampullara.mustache.Scope.EMPTY;
+import static com.sampullara.mustache.Scope.NULL;
 
 /**
  * Base class for Mustaches.
@@ -122,8 +124,6 @@ public abstract class Mustache {
       }
     }
   }
-
-  public static final Iterable EMPTY = new ArrayList(0);
 
   private class SingleValueIterator implements Iterator {
     private boolean done;
@@ -233,8 +233,19 @@ public abstract class Mustache {
       Object o = s.get(name);
       if (o == null) {
         if (!name.startsWith("_") && missing.put(name, true) == null) {
-          logger.warning("No field, method or key found for: " + name);
+          StringBuilder sb = new StringBuilder();
+          for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+            String className = ste.getClassName();
+            if (className.startsWith("com.sampullara.mustaches.Mustache")) {
+              sb.append(path).append(":").append(ste.getLineNumber());
+              break;
+            }
+          }
+          logger.warning("No field, method or key found for: " + name + " @ " + sb);
         }
+      }
+      if (o == NULL) {
+        return null;
       }
       return o;
     } catch (Exception e) {
