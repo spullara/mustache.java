@@ -31,6 +31,7 @@ public abstract class Mustache {
   protected Logger logger = Logger.getLogger(getClass().getName());
   private File root;
   private String path;
+  private static final boolean debug = Boolean.getBoolean("mustache.debug");
 
   public void setRoot(File root) {
     this.root = root;
@@ -231,7 +232,7 @@ public abstract class Mustache {
   protected Object getValue(Scope s, String name) {
     try {
       Object o = s.get(name);
-      if (o == null) {
+      if (o == null && debug) {
         StringBuilder sb = new StringBuilder();
         for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
           String className = ste.getClassName();

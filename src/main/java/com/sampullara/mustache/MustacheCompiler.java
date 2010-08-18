@@ -117,7 +117,7 @@ public class MustacheCompiler {
       while ((c = br.read()) != -1) {
         // Increment the line
         if (c == '\n') {
-          writeText(currentLine, code, template.toString(), true);
+          writeText(currentLine, code, template.toString(), !startOfLine);
           template = new StringBuilder();
           currentLine.incrementAndGet();
           startOfLine = true;
@@ -145,10 +145,10 @@ public class MustacheCompiler {
             }
             String command = sb.toString().trim();
             char ch = command.charAt(0);
+            startOfLine = tagonly(br, startOfLine, currentLine, template);
             switch (ch) {
               case '#':
               case '^':
-                tagonly(br, startOfLine, currentLine, template);
                 writeText(currentLine, code, template.toString(), false);
                 template = new StringBuilder();
                 // Tag start
@@ -221,14 +221,12 @@ public class MustacheCompiler {
                 code.append("write(w, s, \"").append(sb.substring(1).trim()).append("\", false);");
                 break;
               case '%':
-                tagonly(br, startOfLine, currentLine, template);
                 writeText(currentLine, code, template.toString(), false);
                 template = new StringBuilder();
                 // Pragmas
                 logger.warning("Pragmas are unsupported");
                 break;
               case '!':
-                tagonly(br, startOfLine, currentLine, template);
                 writeText(currentLine, code, template.toString(), false);
                 template = new StringBuilder();
                 // Comment
@@ -274,7 +272,7 @@ public class MustacheCompiler {
     return result;
   }
 
-  private void tagonly(BufferedReader br, boolean startOfLine, AtomicInteger currentLine, StringBuilder template) throws IOException {
+  private boolean tagonly(BufferedReader br, boolean startOfLine, AtomicInteger currentLine, StringBuilder template) throws IOException {
     if (startOfLine) {
       br.mark(1);
       if (br.read() != '\n') {
@@ -282,8 +280,10 @@ public class MustacheCompiler {
       } else {
         br.reset();
         template.delete(0, template.length());
+        return true;
       }
     }
+    return false;
   }
 
   private void writeText(AtomicInteger currentLine, StringBuilder sb, String text, boolean endline) {
@@ -294,6 +294,8 @@ public class MustacheCompiler {
       text = text.replace("\\", "\\\\");
       text = text.replace("\"", "\\\"");
       sb.append("w.write(\"").append(text).append(endline ? "\\n" : "").append("\");");
+    } else if (endline) {
+      sb.append("w.write(\"\\n\");");
     }
   }
 }
