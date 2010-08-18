@@ -19,7 +19,7 @@ public class MustacheCompiler {
   private static String header, middle, footer;
   private static AtomicInteger num = new AtomicInteger(0);
   private Logger logger = Logger.getLogger(getClass().getName());
-  private boolean debug = true;
+  private boolean debug = false;
   private String superclass;
 
   public void setDebug() {
