@@ -19,7 +19,7 @@ public class MustacheCompiler {
   private static String header, middle, footer;
   private static AtomicInteger num = new AtomicInteger(0);
   private Logger logger = Logger.getLogger(getClass().getName());
-  private boolean debug = false;
+  private boolean debug = true;
   private String superclass;
 
   public void setDebug() {
@@ -91,6 +91,9 @@ public class MustacheCompiler {
   public Mustache compile(BufferedReader br, Stack<String> scope, AtomicInteger currentLine, ClassLoader parent) throws MustacheException {
     Mustache result;
     StringBuilder code = new StringBuilder();
+    for (int i = 0; i < currentLine.get(); i++) {
+      code.append("\n");
+    }
     code.append(header);
     String className = "Mustache" + num.getAndIncrement();
     code.append(className);
@@ -118,6 +121,7 @@ public class MustacheCompiler {
           template = new StringBuilder();
           currentLine.incrementAndGet();
           startOfLine = true;
+          code.append("\n");
           continue;
         }
         // Check for a mustache start
@@ -127,7 +131,6 @@ public class MustacheCompiler {
             // Two mustaches, now capture command
             StringBuilder sb = new StringBuilder();
             while ((c = br.read()) != -1) {
-              if (c == '\n') currentLine.incrementAndGet();
               if (c == em.charAt(0)) {
                 br.mark(1);
                 if (br.read() == em.charAt(1)) {
@@ -151,11 +154,12 @@ public class MustacheCompiler {
                 // Tag start
                 String startTag = sb.substring(1).trim();
                 scope.push(startTag);
+                int start = currentLine.get();
                 Mustache sub = compile(br, scope, currentLine, parent);
-                tagonly(br, startOfLine, currentLine, template);
+                int lines = currentLine.get() - start;
                 parent = sub.getClass().getClassLoader();
                 if (debug) {
-                  code.append("System.err.println(\"#" + startTag + "\");");
+                  code.append("System.err.println(\"#").append(startTag).append("\");");
                 }
                 int variableNum = num.incrementAndGet();
                 code.append("for (Scope s").append(variableNum);
@@ -169,14 +173,20 @@ public class MustacheCompiler {
                 code.append("enqueue(w, new ").append(sub.getClass().getName());
                 code.append("(), s").append(variableNum).append(");");
                 code.append("}");
+                for (int i = 0; i < lines; i++) {
+                  code.append("/* sub */\n");
+                }
                 break;
               case '/':
                 if (!startOfLine) writeText(currentLine, code, template.toString(), false);
                 template = new StringBuilder();
                 br.mark(1);
                 if (br.read() == '\n' && !startOfLine) {
+                  currentLine.incrementAndGet();
                   writeText(currentLine, code, "", true);
-                } else br.reset();
+                } else {
+                  br.reset();
+                }
                 // Tag end
                 String endTag = sb.substring(1).trim();
                 String expected = scope.pop();
@@ -184,7 +194,7 @@ public class MustacheCompiler {
                   throw new MustacheException("Mismatched start/end tags: " + expected + " != " + endTag + " at " + currentLine);
                 }
                 if (debug) {
-                  code.append("System.err.println(\"/" + endTag + "\");");
+                  code.append("System.err.println(\"/").append(endTag).append("\");");
                 }
                 break READ;
               case '>':
@@ -270,7 +280,7 @@ public class MustacheCompiler {
       if (br.read() != '\n') {
         br.reset();
       } else {
-        currentLine.incrementAndGet();
+        br.reset();
         template.delete(0, template.length());
       }
     }
@@ -284,8 +294,6 @@ public class MustacheCompiler {
       text = text.replace("\\", "\\\\");
       text = text.replace("\"", "\\\"");
       sb.append("w.write(\"").append(text).append(endline ? "\\n" : "").append("\");");
-    } else if (endline) {
-      sb.append("w.write(\"\\n\");\n");
     }
   }
 }
