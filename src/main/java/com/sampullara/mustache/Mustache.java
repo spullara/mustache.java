@@ -226,22 +226,23 @@ public abstract class Mustache {
     return Arrays.asList(scope);
   }
 
-  private Map<String, Boolean> missing = new ConcurrentHashMap<String, Boolean>();
+  private static Map<String, Boolean> missing = new ConcurrentHashMap<String, Boolean>();
 
   protected Object getValue(Scope s, String name) {
     try {
       Object o = s.get(name);
       if (o == null) {
-        if (!name.startsWith("_") && missing.put(name, true) == null) {
-          StringBuilder sb = new StringBuilder();
-          for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
-            String className = ste.getClassName();
-            if (className.startsWith("com.sampullara.mustaches.Mustache")) {
-              sb.append(path).append(":").append(ste.getLineNumber());
-              break;
-            }
+        StringBuilder sb = new StringBuilder();
+        for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+          String className = ste.getClassName();
+          if (className.startsWith("com.sampullara.mustaches.Mustache")) {
+            sb.append(path).append(":").append(ste.getLineNumber());
+            break;
           }
-          logger.warning("No field, method or key found for: " + name + " @ " + sb);
+        }
+        String location = name + " @ " + sb;
+        if (!name.startsWith("_") && missing.put(location, true) == null) {
+          logger.warning("No field, method or key found for: " + location);
         }
       }
       if (o == NULL) {
