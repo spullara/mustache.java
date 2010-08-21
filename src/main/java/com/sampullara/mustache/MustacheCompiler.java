@@ -2,7 +2,16 @@ package com.sampullara.mustache;
 
 import com.sampullara.util.RuntimeJavaCompiler;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringReader;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -113,6 +122,7 @@ public class MustacheCompiler {
     try {
       StringBuilder template = new StringBuilder();
       boolean startOfLine = true;
+      boolean nontagstartofline = false;
       READ:
       while ((c = br.read()) != -1) {
         // Increment the line
@@ -120,7 +130,11 @@ public class MustacheCompiler {
           writeText(currentLine, code, template.toString(), !startOfLine);
           template = new StringBuilder();
           currentLine.incrementAndGet();
+          if (startOfLine && nontagstartofline) {
+            code.append("w.write(\"\\n\");");
+          }
           startOfLine = true;
+          nontagstartofline = true;
           code.append("\n");
           continue;
         }
@@ -128,6 +142,7 @@ public class MustacheCompiler {
         if (c == sm.charAt(0)) {
           br.mark(1);
           if (br.read() == sm.charAt(1)) {
+            nontagstartofline = false;
             // Two mustaches, now capture command
             StringBuilder sb = new StringBuilder();
             while ((c = br.read()) != -1) {
@@ -245,6 +260,7 @@ public class MustacheCompiler {
           }
         }
         startOfLine = ((c == '\t' || c == ' ') && startOfLine);
+        nontagstartofline = nontagstartofline && startOfLine;
         template.append((char) c);
       }
       writeText(currentLine, code, template.toString(), false);
