@@ -121,28 +121,28 @@ public class MustacheCompiler {
     int c;
     try {
       StringBuilder template = new StringBuilder();
-      boolean startOfLine = true;
-      boolean nontagstartofline = false;
+      boolean iterable = currentLine.get() != 0;
+      currentLine.compareAndSet(0, 1);
+      boolean onlywhitespace = true;
       READ:
       while ((c = br.read()) != -1) {
         // Increment the line
         if (c == '\n') {
-          writeText(currentLine, code, template.toString(), !startOfLine);
+          writeText(code, template.toString());
           template = new StringBuilder();
           currentLine.incrementAndGet();
-          if (startOfLine && nontagstartofline) {
-            code.append("w.write(\"\\n\");");
-          }
-          startOfLine = true;
-          nontagstartofline = true;
-          code.append("\n");
+          if (!iterable || (iterable && !onlywhitespace)) {
+            code.append("w.write(\"\\n\");\n");
+          } else code.append("\n");
+
+          iterable = false;
+          onlywhitespace = true;
           continue;
         }
         // Check for a mustache start
         if (c == sm.charAt(0)) {
           br.mark(1);
           if (br.read() == sm.charAt(1)) {
-            nontagstartofline = false;
             // Two mustaches, now capture command
             StringBuilder sb = new StringBuilder();
             while ((c = br.read()) != -1) {
@@ -160,18 +160,21 @@ public class MustacheCompiler {
             }
             String command = sb.toString().trim();
             char ch = command.charAt(0);
-            startOfLine = tagonly(br, startOfLine, currentLine, template);
             switch (ch) {
               case '#':
               case '^':
-                writeText(currentLine, code, template.toString(), false);
-                template = new StringBuilder();
                 // Tag start
                 String startTag = sb.substring(1).trim();
                 scope.push(startTag);
                 int start = currentLine.get();
                 Mustache sub = compile(br, scope, currentLine, parent);
                 int lines = currentLine.get() - start;
+
+                if (!onlywhitespace || lines == 0) {
+                  writeText(code, template.toString());
+                }
+                template = new StringBuilder();
+
                 parent = sub.getClass().getClassLoader();
                 if (debug) {
                   code.append("System.err.println(\"#").append(startTag).append("\");");
@@ -191,17 +194,13 @@ public class MustacheCompiler {
                 for (int i = 0; i < lines; i++) {
                   code.append("/* sub */\n");
                 }
+                iterable = lines != 0;
                 break;
               case '/':
-                if (!startOfLine) writeText(currentLine, code, template.toString(), false);
-                template = new StringBuilder();
-                br.mark(1);
-                if (br.read() == '\n' && !startOfLine) {
-                  currentLine.incrementAndGet();
-                  writeText(currentLine, code, "", true);
-                } else {
-                  br.reset();
+                if (!onlywhitespace) {
+                  writeText(code, template.toString());
                 }
+                template = new StringBuilder();
                 // Tag end
                 String endTag = sb.substring(1).trim();
                 String expected = scope.pop();
@@ -214,14 +213,14 @@ public class MustacheCompiler {
                 break READ;
               case '>':
                 // Partial
-                writeText(currentLine, code, template.toString(), false);
+                writeText(code, template.toString());
                 template = new StringBuilder();
                 String partialName = sb.substring(1).trim();
                 code.append("partial(w, s, \"").append(partialName).append("\");");
                 break;
               case '{':
                 // Not escaped
-                writeText(currentLine, code, template.toString(), false);
+                writeText(code, template.toString());
                 template = new StringBuilder();
                 if (em.charAt(1) != '}' || br.read() == '}') {
                   code.append("write(w, s, \"").append(sb.substring(1).trim()).append("\", false);");
@@ -231,24 +230,24 @@ public class MustacheCompiler {
                 break;
               case '&':
                 // Not escaped
-                writeText(currentLine, code, template.toString(), false);
+                writeText(code, template.toString());
                 template = new StringBuilder();
                 code.append("write(w, s, \"").append(sb.substring(1).trim()).append("\", false);");
                 break;
               case '%':
-                writeText(currentLine, code, template.toString(), false);
+                writeText(code, template.toString());
                 template = new StringBuilder();
                 // Pragmas
                 logger.warning("Pragmas are unsupported");
                 break;
               case '!':
-                writeText(currentLine, code, template.toString(), false);
+                writeText(code, template.toString());
                 template = new StringBuilder();
                 // Comment
                 break;
               default:
                 // Reference
-                writeText(currentLine, code, template.toString(), false);
+                writeText(code, template.toString());
                 template = new StringBuilder();
                 code.append("write(w, s, \"").append(command).append("\", true);");
                 break;
@@ -259,11 +258,10 @@ public class MustacheCompiler {
             br.reset();
           }
         }
-        startOfLine = ((c == '\t' || c == ' ') && startOfLine);
-        nontagstartofline = nontagstartofline && startOfLine;
+        onlywhitespace = (c == ' ' || c == '\t') && onlywhitespace;
         template.append((char) c);
       }
-      writeText(currentLine, code, template.toString(), false);
+      writeText(code, template.toString());
       code.append(footer);
     } catch (IOException e) {
       throw new MustacheException("Failed to read: " + e);
@@ -288,30 +286,11 @@ public class MustacheCompiler {
     return result;
   }
 
-  private boolean tagonly(BufferedReader br, boolean startOfLine, AtomicInteger currentLine, StringBuilder template) throws IOException {
-    if (startOfLine) {
-      br.mark(1);
-      if (br.read() != '\n') {
-        br.reset();
-      } else {
-        br.reset();
-        template.delete(0, template.length());
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private void writeText(AtomicInteger currentLine, StringBuilder sb, String text, boolean endline) {
-    if (debug && endline) {
-      sb.append("System.err.println(" + currentLine + ");");
-    }
+  private void writeText(StringBuilder sb, String text) {
     if (text.length() != 0) {
       text = text.replace("\\", "\\\\");
       text = text.replace("\"", "\\\"");
-      sb.append("w.write(\"").append(text).append(endline ? "\\n" : "").append("\");");
-    } else if (endline) {
-      sb.append("w.write(\"\\n\");");
+      sb.append("w.write(\"").append(text).append("\");");
     }
   }
 }
