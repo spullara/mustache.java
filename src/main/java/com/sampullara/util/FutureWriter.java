@@ -1,6 +1,7 @@
 package com.sampullara.util;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
@@ -9,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * This class sit in front of a writer and doesn't flush until Done is called on it.  Until then it queues up
@@ -116,18 +118,27 @@ public class FutureWriter extends Writer {
     }
   }
 
+
   @Override
   public void flush() throws IOException {
+    flush(true);
+  }
+
+  public void flush(boolean top) throws IOException {
     try {
       for (Future<Object> work : ordered) {
-        if (!work.isDone()) {
+        Object o;
+        try {
+          o = work.get(50, TimeUnit.MILLISECONDS);
+        } catch(TimeoutException te) {
+          System.out.println("1 Flushed: " + System.currentTimeMillis());
           writer.flush();
+          o = work.get();
         }
-        Object o = work.get();
         if (o instanceof FutureWriter) {
           FutureWriter fw = (FutureWriter) o;
           fw.setWriter(writer);
-          fw.flush();
+          fw.flush(false);
         } else if (o instanceof Future) {
           Future future = (Future) o;
           Object result = future.get();
@@ -141,7 +152,10 @@ public class FutureWriter extends Writer {
         }
         total--;
       }
-      if (!(writer instanceof FutureWriter)) {
+      if (top) {
+        if (!(writer instanceof StringWriter)) {
+          System.out.println("2 Flushed: " + System.currentTimeMillis());
+        }
         writer.flush();
       }
       if (total != 0) {

@@ -92,7 +92,6 @@ public abstract class Mustache {
             return;
           }
           value = ((Future) value).get();
-          return;
         } catch (Exception e) {
           throw new MustacheException("Failed to evaluate future value: " + name, e);
         }
