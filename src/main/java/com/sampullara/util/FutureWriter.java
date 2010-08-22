@@ -131,7 +131,6 @@ public class FutureWriter extends Writer {
         try {
           o = work.get(50, TimeUnit.MILLISECONDS);
         } catch(TimeoutException te) {
-          System.out.println("1 Flushed: " + System.currentTimeMillis());
           writer.flush();
           o = work.get();
         }
@@ -153,9 +152,6 @@ public class FutureWriter extends Writer {
         total--;
       }
       if (top) {
-        if (!(writer instanceof StringWriter)) {
-          System.out.println("2 Flushed: " + System.currentTimeMillis());
-        }
         writer.flush();
       }
       if (total != 0) {
