@@ -221,4 +221,8 @@ public class Scope extends HashMap {
     }
     return v;
   }
+
+  public Object getParent() {
+    return parent;
+  }
 }

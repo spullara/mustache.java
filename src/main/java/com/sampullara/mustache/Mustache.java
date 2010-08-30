@@ -242,7 +242,8 @@ public abstract class Mustache {
         }
         String location = name + " @ " + sb;
         if (!name.startsWith("_") && missing.put(location, true) == null) {
-          logger.warning("No field, method or key found for: " + location);
+          final Object parent = s.getParent();
+          logger.warning("No field, method or key found for: " + location + (parent == null ? "" : " with base scope parent: " + parent.getClass().getName()));
         }
       }
       if (o == NULL) {
