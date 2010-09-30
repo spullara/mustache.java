@@ -140,7 +140,7 @@ public class Scope extends HashMap {
         members.put(name, member);
       } catch (NoSuchMethodException e) {
         try {
-          member = aClass.getMethod(name, Scope.class);
+          member = getMethod(name, aClass, Scope.class);
           member.setAccessible(true);
           members.put(name, member);
         } catch (NoSuchMethodException e1) {
@@ -187,7 +187,7 @@ public class Scope extends HashMap {
     } catch (NoSuchMethodException nsme) {
       Class superclass = aClass.getSuperclass();
       if (superclass != Object.class) {
-        return getMethod(name, superclass);
+        return getMethod(name, superclass, params);
       }
       throw nsme;
     }
