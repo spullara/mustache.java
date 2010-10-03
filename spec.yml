@@ -1,0 +1,316 @@
+---
+version: '0.0.1a'
+tests:
+  - name: Literal String
+    data:
+    template: |
+      Hello from Mustache!
+    expected: |
+      Hello from Mustache!
+
+  ###############
+  # Interpolation
+
+  - name: Basic Interpolation
+    data: { subject: "world" }
+    template: |
+      Hello, {{subject}}!
+    expected: |
+      Hello, world!
+
+  - name: Escaped Interpolation
+    data: { forbidden: '& " < >' }
+    template: |
+      These characters should be HTML escaped: {{forbidden}}
+    expected: |
+      These characters should be HTML escaped: &amp; &quot; &lt; &gt;
+
+  - name: Unescaped Interpolation via Triple Mustache
+    data: { forbidden: '& " < >' }
+    template: |
+      These characters should not be HTML escaped: {{{forbidden}}}
+    expected: |
+      These characters should not be HTML escaped: & " < >
+
+  - name: Unescaped Interpolation via the Ampersand
+    data: { forbidden: '& " < >' }
+    template: |
+      These characters should not be HTML escaped: {{&forbidden}}
+    expected: |
+      These characters should not be HTML escaped: & " < >
+
+  ##########
+  # Sections
+
+  - name: Basic Behavior for Section With True Value
+    data: { boolean: true }
+    template: '{{#boolean}}This should be rendered.{{/boolean}}'
+    expected: 'This should be rendered.'
+
+  - name: Basic Behavior for Section With False Value
+    data: { boolean: false }
+    template: '{{#boolean}}This should not be rendered.{{/boolean}}'
+    expected: ''
+
+  - name: Basic Behavior for Section With Context
+    data: { context: { name: 'Joe' } }
+    template: '{{#context}}Hi {{name}}.{{/context}}'
+    expected: 'Hi Joe.'
+
+  - name: Basic Behavior for Section With List
+    data: { list: [ { n: 'one' }, { n: 'two' }, { n: 'three' } ] }
+    template: '{{#list}}{{n}} - {{/list}}'
+    expected: 'one - two - three - '
+
+  - name: Basic Behavior for Section With Empty List
+    data: { list: [ ] }
+    template: '{{#list}}Yay lists!{{/list}}'
+    expected: ''
+
+  - name: Whitespace for Inline Sections
+    data: { boolean: true }
+    template: |
+      Something {{#boolean}}completely normal{{/boolean}} is happening...
+    expected: |
+      Something completely normal is happening...
+
+  - name: Whitespace for Multiline Sections
+    data: { boolean: true }
+    template: |
+      Only
+      {{#boolean}}
+      Three
+      {{/boolean}}
+      Lines
+    expected: |
+      Only
+      Three
+      Lines
+
+  - name: Whitesapce for Indented Sections
+    data: { boolean: true }
+    template: |
+      Trim
+        {{#boolean}}
+      Extra
+        {{/boolean}}
+      Spaces
+    expected: |
+      Trim
+      Extra
+      Spaces
+
+  ###################
+  # Inverted Sections
+
+  - name: Basic Behavior for Inverted Section With True Value
+    data: { boolean: true }
+    template: '{{^boolean}}This should not be rendered.{{/boolean}}'
+    expected: ''
+
+  - name: Basic Behavior for Inverted Section With False Value
+    data: { boolean: false }
+    template: '{{^boolean}}This should be rendered.{{/boolean}}'
+    expected: 'This should be rendered.'
+
+  - name: Basic Behavior for Inverted Section With Context
+    data: { context: { name: 'Joe' } }
+    template: '{{^context}}Hi {{name}}.{{/context}}'
+    expected: ''
+
+  - name: Basic Behavior for Inverted Section With List
+    data: { list: [ { n: 'one' }, { n: 'two' }, { n: 'three' } ] }
+    template: '{{^list}}{{n}} - {{/list}}'
+    expected: ''
+
+  - name: Basic Behavior for Inverted Section With Empty List
+    data: { list: [ ] }
+    template: '{{^list}}Empty list!{{/list}}'
+    expected: 'Empty list!'
+
+  - name: Whitespace for Inlined Inverted Sections
+    data: { boolean: false }
+    template: |
+      Something {{^boolean}}completely normal{{/boolean}} is happening...
+    expected: |
+      Something completely normal is happening...
+
+  - name: Whitespace for Inverted Sections
+    data: { boolean: false }
+    template: |
+      Only
+      {{^boolean}}
+      Three
+      {{/boolean}}
+      Lines
+    expected: |
+      Only
+      Three
+      Lines
+
+  - name: Whitesapce for Indented Inverted Sections
+    data: { boolean: false }
+    template: |
+      Trim
+        {{^boolean}}
+      Extra
+        {{/boolean}}
+      Spaces
+    expected: |
+      Trim
+      Extra
+      Spaces
+
+  ##########
+  # Comments
+
+  - name: Basic Behavior for Comments
+    data: { boolean: true }
+    template: '12345{{! Comment Block! }}67890'
+    expected: '1234567890'
+
+  - name: Basic Behavior for Comments With Newlines
+    data: { boolean: true }
+    template: |
+      12345{{!
+        This is a
+        multi-line comment...
+      }}67890
+    expected: |
+      1234567890
+
+  #########
+  # Partals
+
+  - name: Basic Partial Injection
+    data: { }
+    template: '<< {{>text}}'
+    partials: { text: 'from partial' }
+    expected: '<< from partial'
+
+  - name: Basic Partial with Tags
+    data: { text: 'content' }
+    template: '<< {{>partial}}'
+    partials: { partial: '*{{text}}*' }
+    expected: '<< *content*'
+
+  - name: Basic Partial Injection Using '<'
+    data: { }
+    template: '<< {{<text}}'
+    partials: { text: 'from partial' }
+    expected: '<< from partial'
+
+  - name: Basic Partial with Tags Using '<'
+    data: { text: 'content' }
+    template: '<< {{<partial}}'
+    partials: { partial: '*{{text}}*' }
+    expected: '<< *content*'
+
+  - name: Partial Indentation
+    data: { text: 'content' }
+    template: |
+      ---
+        {{>multiline}}
+      ---
+    partials:
+      multiline: |
+        A: {{text}}
+        B: {{text}}
+        C: {{text}}
+    expected: |
+      ---
+        A: content
+        B: content
+        C: content
+      ---
+
+  - name: Recursive Partials
+    data:
+      nodes:
+        - content: 'First Parent'
+          nodes:
+            - content: "First Parent's First Child"
+              nodes: []
+        - content: 'Second Parent'
+          nodes: []
+        - content: 'Third Parent'
+          nodes:
+            - content: "Third Parent's First Child"
+              nodes: []
+            - content: "Third Parent's Second Child"
+              nodes: []
+    template: |
+      <ul>
+        {{#nodes}}
+          {{>node}}
+        {{/nodes}}
+      </ul>
+    partials:
+      node: |
+        <li>
+          {{content}}
+          {{#nodes}}
+            <ul>
+              {{>node}}
+            </ul>
+          {{/nodes}}
+        </li>
+    expected: |
+      <ul>
+        <li>
+          First Parent
+          <ul>
+            <li>
+              First Parent's First Child
+            </li>
+          </ul>
+        </li>
+        <li>
+          Second Parent
+        </li>
+        <li>
+          Third Parent
+          <ul>
+            <li>
+              Third Parent's First Child
+            </li>
+            <li>
+              Third Parent's Second Child
+            </li>
+          </ul>
+        </li>
+      </ul>
+
+  ###############
+  # Set Delimiter
+
+  - name: Basic Set Delimiter Behavior
+    data: { text: 'Hey!' }
+    template: |
+      * {{text}}
+      {{=<% %>}}
+      * <%text%>
+      <%={{ }}%>
+      * {{text}}
+    expected: |
+      * Hey!
+
+      * Hey!
+
+      * Hey!
+
+  - name: Basic Set Delimiter Behavior With Mirrored Sigil
+    data: { text: 'Hey!' }
+    template: |
+      * {{text}}
+      {{=<% %>=}}
+      * <%text%>
+      <%={{ }}=%>
+      * {{text}}
+    expected: |
+      * Hey!
+
+      * Hey!
+
+      * Hey!
+
