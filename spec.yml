@@ -314,3 +314,68 @@ tests:
 
       * Hey!
 
+  ###################
+  # In-Tag Whitespace
+
+  - name: Interpolation With Leading Whitespace
+    data: { subject: "world" }
+    template: |
+      Hello, {{  subject}}!
+    expected: |
+      Hello, world!
+
+  - name: Interpolation With Trailing Whitespace
+    data: { subject: "world" }
+    template: |
+      Hello, {{subject  }}!
+    expected: |
+      Hello, world!
+
+  - name: Interpolation With Whitespace Padding
+    data: { subject: "world" }
+    template: |
+      Hello, {{  subject  }}!
+    expected: |
+      Hello, world!
+
+  - name: Triple Mustache Interpolation With Leading Whitespace
+    data: { subject: "world" }
+    template: |
+      Hello, {{{  subject}}}!
+    expected: |
+      Hello, world!
+
+  - name: Triple Mustache Interpolation With Trailing Whitespace
+    data: { subject: "world" }
+    template: |
+      Hello, {{{subject  }}}!
+    expected: |
+      Hello, world!
+
+  - name: Triple Mustache Interpolation With Whitespace Padding
+    data: { subject: "world" }
+    template: |
+      Hello, {{{  subject  }}}!
+    expected: |
+      Hello, world!
+
+  - name: Unescaped Interpolation With Leading Whitespace
+    data: { subject: "world" }
+    template: |
+      Hello, {{&  subject}}!
+    expected: |
+      Hello, world!
+
+  - name: Unescaped Interpolation With Trailing Whitespace
+    data: { subject: "world" }
+    template: |
+      Hello, {{&subject  }}!
+    expected: |
+      Hello, world!
+
+  - name: Unescaped Interpolation With Whitespace Padding
+    data: { subject: "world" }
+    template: |
+      Hello, {{&  subject  }}!
+    expected: |
+      Hello, world!
