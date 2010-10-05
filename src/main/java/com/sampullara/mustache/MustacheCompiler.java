@@ -297,7 +297,6 @@ public class MustacheCompiler {
         declaration.append(header);
         declaration.append(className);
         code.insert(0, declaration);
-        System.out.println(code);
         if (debug) {
           File dir = new File("src/main/java/com/sampullara/mustaches/");
           dir.mkdirs();
