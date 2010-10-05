@@ -30,7 +30,6 @@ import java.util.logging.Logger;
 public class MustacheCompiler {
   private File root;
   private static String header, middle, footer;
-  private static AtomicInteger num = new AtomicInteger(0);
   private Logger logger = Logger.getLogger(getClass().getName());
   private boolean debug = false;
   private String superclass;
@@ -113,6 +112,7 @@ public class MustacheCompiler {
   }
 
   public Mustache compile(BufferedReader br, Stack<String> scope, AtomicInteger currentLine, ClassLoader parent) throws MustacheException {
+    AtomicInteger num = new AtomicInteger(0);
     Mustache result;
     StringBuilder code = new StringBuilder();
     int startingLines = currentLine.get();
@@ -297,6 +297,7 @@ public class MustacheCompiler {
         declaration.append(header);
         declaration.append(className);
         code.insert(0, declaration);
+        System.out.println(code);
         if (debug) {
           File dir = new File("src/main/java/com/sampullara/mustaches/");
           dir.mkdirs();
