@@ -5,6 +5,7 @@ import com.sampullara.util.RuntimeJavaCompiler;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,6 +13,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -30,6 +34,7 @@ public class MustacheCompiler {
   private Logger logger = Logger.getLogger(getClass().getName());
   private boolean debug = false;
   private String superclass;
+  private String outputDirectory;
 
   public void setDebug() {
     debug = true;
@@ -73,6 +78,10 @@ public class MustacheCompiler {
     this.superclass = superclass;
   }
 
+  public void setOutputDirectory(String outputDirectory) {
+    this.outputDirectory = outputDirectory;
+  }
+
   public synchronized Mustache parse(String partial) throws MustacheException {
     AtomicInteger currentLine = new AtomicInteger(0);
     BufferedReader br = new BufferedReader(new StringReader(partial));
@@ -100,12 +109,7 @@ public class MustacheCompiler {
   public Mustache compile(BufferedReader br, Stack<String> scope, AtomicInteger currentLine, ClassLoader parent) throws MustacheException {
     Mustache result;
     StringBuilder code = new StringBuilder();
-    for (int i = 0; i < currentLine.get(); i++) {
-      code.append("\n");
-    }
-    code.append(header);
-    String className = "Mustache" + num.getAndIncrement();
-    code.append(className);
+    int startingLines = currentLine.get();
     code.append(" extends ");
     if (superclass == null) {
       code.append("Mustache");
@@ -267,18 +271,51 @@ public class MustacheCompiler {
       throw new MustacheException("Failed to read: " + e);
     }
     try {
-      if (debug) {
-        File dir = new File("src/main/java/com/sampullara/mustaches/");
-        dir.mkdirs();
-        File file = new File(dir, className + ".java");
-        FileWriter fw = new FileWriter(file);
-        fw.write(code.toString());
-        fw.close();
+      MessageDigest md = MessageDigest.getInstance("SHA1");
+      byte[] digest = md.digest(code.toString().getBytes(Charset.forName("UTF-8")));
+      StringBuilder hash = new StringBuilder();
+      for (byte aDigest : digest) {
+        hash.append(Integer.toHexString(0xFF & aDigest));
       }
-      ClassLoader loader = RuntimeJavaCompiler.compile(new PrintWriter(System.out, true), className, code.toString(), parent);
-      Class<?> aClass = loader.loadClass("com.sampullara.mustaches." + className);
-      result = (Mustache) aClass.newInstance();
-      result.setRoot(root);
+      String className = "Mustache" + hash;
+      try {
+        Mustache mustache = (Mustache) parent.loadClass("com.sampullara.mustaches." + className).newInstance();
+        mustache.setRoot(root);
+        return mustache;
+      } catch (Exception e) {
+        StringBuilder declaration = new StringBuilder();
+        for (int i = 0; i < startingLines; i++) {
+          declaration.append("\n");
+        }
+        declaration.append(header);
+        declaration.append(className);
+        code.insert(0, declaration);
+        if (debug) {
+          File dir = new File("src/main/java/com/sampullara/mustaches/");
+          dir.mkdirs();
+          File file = new File(dir, className + ".java");
+          FileWriter fw = new FileWriter(file);
+          fw.write(code.toString());
+          fw.close();
+        }
+        RuntimeJavaCompiler.CompilerClassLoader loader = (RuntimeJavaCompiler.CompilerClassLoader) RuntimeJavaCompiler.compile(new PrintWriter(System.out, true), className, code.toString(), parent);
+        Class<?> aClass = loader.loadClass("com.sampullara.mustaches." + className);
+        result = (Mustache) aClass.newInstance();
+        result.setRoot(root);
+        if (outputDirectory != null) {
+          for (Map.Entry<String, RuntimeJavaCompiler.JavaClassOutput> entry : loader.getJavaClassMap().entrySet()) {
+            String outputName = entry.getKey();
+            int dot = outputName.lastIndexOf(".");
+            String outputPackage = outputName.substring(0, dot);
+            File outputDir = new File(outputDirectory, outputPackage.replace(".", "/"));
+            outputDir.mkdirs();
+            File outputFile = new File(outputDir, outputName.substring(dot + 1) + ".class");
+            FileOutputStream fos = new FileOutputStream(outputFile);
+            fos.write(entry.getValue().getBytes());
+            fos.close();
+          }
+        }
+      }
     } catch (Exception e) {
       e.printStackTrace();
       throw new MustacheException("Failed to compile code: " + e);

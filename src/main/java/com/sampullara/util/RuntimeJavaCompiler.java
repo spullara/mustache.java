@@ -120,7 +120,7 @@ public class RuntimeJavaCompiler {
       return new ByteArrayInputStream(bytes.toByteArray());
     }
 
-    byte[] getBytes() {
+    public byte[] getBytes() {
       return bytes.toByteArray();
     }
 
@@ -131,6 +131,10 @@ public class RuntimeJavaCompiler {
    */
   public static class CompilerClassLoader extends ClassLoader {
     private Map<String, JavaClassOutput> classes = new HashMap<String, JavaClassOutput>();
+
+    public Map<String, JavaClassOutput> getJavaClassMap() {
+      return classes;
+    }
 
     public Collection<JavaClassOutput> getJavaClasses() {
       return classes.values();

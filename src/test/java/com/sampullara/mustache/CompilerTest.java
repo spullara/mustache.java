@@ -36,6 +36,7 @@ public class CompilerTest extends TestCase {
   public void testSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("simple.html");
+    c.setOutputDirectory("target/classes");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
     m.execute(writer, new Scope(new Object() {
@@ -52,8 +53,27 @@ public class CompilerTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
   
+  public void testSimpleWithSave() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheCompiler c = init();
+    Mustache m = c.parseFile("simple.html");
+    StringWriter sw = new StringWriter();
+    FutureWriter writer = new FutureWriter(sw);
+    m.execute(writer, new Scope(new Object() {
+      String name = "Chris";
+      int value = 10000;
+
+      int taxed_value() {
+        return (int) (this.value - (this.value * 0.4));
+      }
+
+      boolean in_ca = true;
+    }));
+    writer.flush();
+    assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
   public void testMissing() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheCompiler c = new MustacheCompiler(root);
+    MustacheCompiler c = init();
     Mustache m = c.parseFile("simple.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
@@ -64,7 +84,7 @@ public class CompilerTest extends TestCase {
   }
 
   public void testSetWriter() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheCompiler c = new MustacheCompiler(root);
+    MustacheCompiler c = init();
     Mustache m = c.parseFile("simple.html");
     FutureWriter writer = new FutureWriter();
     m.execute(writer, new Scope(new Object() {
@@ -84,7 +104,7 @@ public class CompilerTest extends TestCase {
   }
 
   public void testSimple2() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheCompiler c = new MustacheCompiler(root);
+    MustacheCompiler c = init();
     Mustache m = c.parseFile("simple.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
@@ -103,7 +123,7 @@ public class CompilerTest extends TestCase {
   }
 
   public void testEscaped() throws MustacheException, IOException {
-    MustacheCompiler c = new MustacheCompiler(root);
+    MustacheCompiler c = init();
     Mustache m = c.parseFile("escaped.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
@@ -130,7 +150,7 @@ public class CompilerTest extends TestCase {
   }
 
   public void testInverted() throws MustacheException, IOException {
-    MustacheCompiler c = new MustacheCompiler(root);
+    MustacheCompiler c = init();
     Mustache m = c.parseFile("inverted_section.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
@@ -146,7 +166,7 @@ public class CompilerTest extends TestCase {
   }
 
   public void testComments() throws MustacheException, IOException {
-    MustacheCompiler c = new MustacheCompiler(root);
+    MustacheCompiler c = init();
     Mustache m = c.parseFile("comments.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
@@ -160,7 +180,7 @@ public class CompilerTest extends TestCase {
   }
 
   public void testPartial() throws MustacheException, IOException {
-    MustacheCompiler c = new MustacheCompiler(root);
+    MustacheCompiler c = init();
     Mustache m = c.parseFile("template_partial.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
@@ -222,7 +242,7 @@ public class CompilerTest extends TestCase {
     JsonParser jp = new MappingJsonFactory().createJsonParser(content);
     JsonNode jsonNode = jp.readValueAsTree();
     Scope scope = new Scope(jsonNode);
-    MustacheCompiler c = new MustacheCompiler(root);
+    MustacheCompiler c = init();
     Mustache m = c.parseFile("template_partial.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
@@ -233,7 +253,7 @@ public class CompilerTest extends TestCase {
   }
 
   public void testReadme() throws MustacheException, IOException {
-    MustacheCompiler c = new MustacheCompiler(root);
+    MustacheCompiler c = init();
     Mustache m = c.parseFile("items.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
@@ -247,6 +267,7 @@ public class CompilerTest extends TestCase {
   public void testReadme2() throws MustacheException, IOException {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("items2.html");
+    c.setOutputDirectory("target/classes");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
     long start = System.currentTimeMillis();
@@ -298,7 +319,7 @@ public class CompilerTest extends TestCase {
   }
 
   public void testJSONHttpRequest() throws MustacheException, IOException {
-    MustacheCompiler c = new MustacheCompiler(root);
+    MustacheCompiler c = init();
     Mustache m = c.parseFile("simple2.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
@@ -310,6 +331,12 @@ public class CompilerTest extends TestCase {
     }));
     writer.flush();
     assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
+  private MustacheCompiler init() {
+    MustacheCompiler c = new MustacheCompiler(root);
+    c.setOutputDirectory("target/test-classes");
+    return c;
   }
 
   protected String getContents(File root, String file) throws IOException {
