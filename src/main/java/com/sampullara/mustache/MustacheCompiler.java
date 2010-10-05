@@ -285,7 +285,8 @@ public class MustacheCompiler {
       }
       String className = "Mustache" + hash;
       try {
-        Mustache mustache = (Mustache) parent.loadClass("com.sampullara.mustaches." + className).newInstance();
+        ClassLoader classLoader = parent == null ? MustacheCompiler.class.getClassLoader() : parent;
+        Mustache mustache = (Mustache) classLoader.loadClass("com.sampullara.mustaches." + className).newInstance();
         mustache.setRoot(root);
         return mustache;
       } catch (Exception e) {
