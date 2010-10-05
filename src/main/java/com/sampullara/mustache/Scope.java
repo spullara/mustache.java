@@ -212,9 +212,10 @@ public class Scope extends HashMap {
     Object v;
     JsonNode jsonNode = (JsonNode) parent;
     JsonNode result = jsonNode.get(name);
-    if (result != null && result.isTextual()) {
+    if (result == null || result.isNull()) return null;
+    if (result.isTextual()) {
       v = result.getTextValue();
-    } else if (result != null && result.isBoolean()) {
+    } else if (result.isBoolean()) {
       v = result.getBooleanValue();
     } else {
       v = result;
