@@ -34,7 +34,7 @@ public class MustacheCompiler {
   private Logger logger = Logger.getLogger(getClass().getName());
   private boolean debug = false;
   private String superclass;
-  private String outputDirectory;
+  private String outputDirectory = System.getProperty("mustcache");
 
   public void setDebug() {
     debug = true;
