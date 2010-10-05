@@ -74,6 +74,12 @@ public class MustacheCompiler {
     this.root = root;
   }
 
+  public MustacheCompiler(File root, String outputDirectory) {
+    this(root);
+    this.outputDirectory = outputDirectory;
+  }
+
+
   public void setSuperclass(String superclass) {
     this.superclass = superclass;
   }

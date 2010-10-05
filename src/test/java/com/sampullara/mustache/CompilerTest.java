@@ -334,9 +334,7 @@ public class CompilerTest extends TestCase {
   }
 
   private MustacheCompiler init() {
-    MustacheCompiler c = new MustacheCompiler(root);
-    c.setOutputDirectory("target/test-classes");
-    return c;
+    return new MustacheCompiler(root, "target/test-classes");
   }
 
   protected String getContents(File root, String file) throws IOException {
