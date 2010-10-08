@@ -1,26 +1,54 @@
 tests:
-  - name: Basic Set Delimiter Behavior
+  - name: Single Sigil
     data: { text: 'Hey!' }
-    template: |
-      * {{text}}
-      {{=<% %>}}
-      * <%text%>
-      <%={{ }}%>
-      * {{text}}
-    expected: |
-      * Hey!
-      * Hey!
-      * Hey!
+    template: '{{=<% %>}}(<%text%>)'
+    expected: '(Hey!)'
 
-  - name: Basic Set Delimiter Behavior With Mirrored Sigil
+  - name: Mirrored Sigil
     data: { text: 'Hey!' }
+    template: '{{=<% %>=}}(<%text%>)'
+    expected: '(Hey!)'
+
+  # Whitespace Sensitivity
+
+  - name: Single Sigil Respects Surrounding Whitespace
+    data: { }
+    template: '| {{=@ @}} |'
+    expected: '|  |'
+
+  - name: Mirrored Sigil Respects Surrounding Whitespace
+    data: { }
+    template: '| {{=@ @=}} |'
+    expected: '|  |'
+
+  - name: Disregard Single Sigil Line
+    data: { }
     template: |
-      * {{text}}
-      {{=<% %>=}}
-      * <%text%>
-      <%={{ }}=%>
-      * {{text}}
+      Begin.
+      {{=@ @}}
+      End.
     expected: |
-      * Hey!
-      * Hey!
-      * Hey!
+      Begin.
+      End.
+
+  - name: Disregard Mirrored Sigil Line
+    data: { }
+    template: |
+      Begin.
+      {{=@ @=}}
+      End.
+    expected: |
+      Begin.
+      End.
+
+  # Whitespace Insensitivity
+
+  - name: Single Sigil Ignores Padding Whitespace
+    data: { }
+    template: '|{{= @ @ }}|'
+    expected: '||'
+
+  - name: Mirrored Sigil Ignores Padding Whitespace
+    data: { }
+    template: '|{{= @ @ =}}|'
+    expected: '||'
