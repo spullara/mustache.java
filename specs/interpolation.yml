@@ -34,3 +34,37 @@ tests:
       These characters should not be HTML escaped: {{&forbidden}}
     expected: |
       These characters should not be HTML escaped: & " < >
+
+  # Whitespace Sensitivity
+
+  - name: Interpolation Respects Surrounding Whitespace
+    data: { string: '---' }
+    template: '| {{string}} |'
+    expected: '| --- |'
+
+  - name: Triple Mustache Respects Surrounding Whitespace
+    data: { string: '---' }
+    template: '| {{{string}}} |'
+    expected: '| --- |'
+
+  - name: Ampersand Respects Surrounding Whitespace
+    data: { string: '---' }
+    template: '| {{&string}} |'
+    expected: '| --- |'
+
+  # Whitespace Insensitivity
+
+  - name: Interpolation Ignores Padding Whitespace
+    data: { string: "---" }
+    template: '|{{ string }}|'
+    expected: '|---|'
+
+  - name: Triple Mustache Ignores Padding Whitespace
+    data: { string: "---" }
+    template: '|{{{ string }}}|'
+    expected: '|---|'
+
+  - name: Ampersand Ignores Padding Whitespace
+    data: { string: "---" }
+    template: '|{{& string }}|'
+    expected: '|---|'
