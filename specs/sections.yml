@@ -16,44 +16,51 @@ tests:
     expected: 'Hi Joe.'
 
   - name: Basic Behavior With List
-    data: { list: [ { n: 'one' }, { n: 'two' }, { n: 'three' } ] }
-    template: '{{#list}}{{n}} - {{/list}}'
-    expected: 'one - two - three - '
+    data: { list: [ { n: 1 }, { n: 2 }, { n: 3 } ] }
+    template: '{{#list}}{{n}}{{/list}}'
+    expected: '123'
 
   - name: Basic Behavior With Empty List
     data: { list: [ ] }
     template: '{{#list}}Yay lists!{{/list}}'
     expected: ''
 
-  - name: Whitespace When Inline
-    data: { boolean: true }
-    template: |
-      Something {{#boolean}}completely normal{{/boolean}} is happening...
-    expected: |
-      Something completely normal is happening...
+  # Whitespace Sensitivity
 
-  - name: Whitespace When Multiline
+  - name: Respects Surrounding Whitespace
+    data: { boolean: true }
+    template: "| {{#boolean}}\t|\t{{/boolean}} |"
+    expected: "| \t|\t |"
+
+  - name: Disregard Standalone Lines
     data: { boolean: true }
     template: |
-      Only
+      | This
       {{#boolean}}
-      Three
+      | Is A
       {{/boolean}}
-      Lines
+      | Line
     expected: |
-      Only
-      Three
-      Lines
+      | This
+      | Is A
+      | Line
 
-  - name: Whitesapce When Indented
+  - name: Disregard Standalone Indented Lines
     data: { boolean: true }
     template: |
-      Trim
+      | This
         {{#boolean}}
-      Extra
+      | Is A
         {{/boolean}}
-      Spaces
+      | Line
     expected: |
-      Trim
-      Extra
-      Spaces
+      | This
+      | Is A
+      | Line
+
+  # Whitespace Insensitivity
+
+  - name: Ignores Padding Whitespace
+    data: { boolean: true }
+    template: '|{{# boolean }}={{/ boolean }}|'
+    expected: '|=|'
