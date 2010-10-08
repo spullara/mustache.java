@@ -29,3 +29,12 @@ tests:
       12345
       67890
 
+  - name: Disregard Indented Line Comments
+    data: { }
+    template: |
+      12345
+        {{! Comment Block! }}
+      67890
+    expected: |
+      12345
+      67890

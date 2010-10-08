@@ -41,6 +41,26 @@ tests:
       Begin.
       End.
 
+  - name: Disregard Indented Single Sigil Line
+    data: { }
+    template: |
+      Begin.
+        {{=@ @}}
+      End.
+    expected: |
+      Begin.
+      End.
+
+  - name: Disregard Indented Mirrored Sigil Line
+    data: { }
+    template: |
+      Begin.
+        {{=@ @=}}
+      End.
+    expected: |
+      Begin.
+      End.
+
   # Whitespace Insensitivity
 
   - name: Single Sigil Ignores Padding Whitespace
