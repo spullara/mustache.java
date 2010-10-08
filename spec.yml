@@ -104,39 +104,6 @@ tests:
         </li>
       </ul>
 
-  ###############
-  # Set Delimiter
-
-  - name: Basic Set Delimiter Behavior
-    data: { text: 'Hey!' }
-    template: |
-      * {{text}}
-      {{=<% %>}}
-      * <%text%>
-      <%={{ }}%>
-      * {{text}}
-    expected: |
-      * Hey!
-
-      * Hey!
-
-      * Hey!
-
-  - name: Basic Set Delimiter Behavior With Mirrored Sigil
-    data: { text: 'Hey!' }
-    template: |
-      * {{text}}
-      {{=<% %>=}}
-      * <%text%>
-      <%={{ }}=%>
-      * {{text}}
-    expected: |
-      * Hey!
-
-      * Hey!
-
-      * Hey!
-
   ###################
   # In-Tag Whitespace
 
