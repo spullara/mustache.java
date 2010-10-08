@@ -1,0 +1,32 @@
+tests:
+  - name: Basic Behavior
+    data: { boolean: true }
+    template: '12345{{! Comment Block! }}67890'
+    expected: '1234567890'
+
+  - name: Containing Newlines
+    data: { boolean: true }
+    template: |
+      12345{{!
+        This is a
+        multi-line comment...
+      }}67890
+    expected: |
+      1234567890
+
+  - name: Adjoining Whitespace
+    data: { boolean: true }
+    template: '12345 {{! Comment Block! }} 67890'
+    expected: '12345  67890'
+
+  - name: On Newlines
+    data: { boolean: true }
+    template: |
+      12345
+      {{! Comment Block! }}
+      67890
+    expected: |
+      12345
+
+      67890
+
