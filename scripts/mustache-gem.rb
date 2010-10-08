@@ -21,47 +21,57 @@ end
 alias :partial :partials
 
 Mustache.template_path = partials
+failures = []
 
-spec = YAML.load_file(File.join(File.dirname(__FILE__), '..', 'spec.yml'))
-puts "Testing compliance with v#{ spec['version'] }\n"
+Dir[File.join(File.dirname(__FILE__), '..', 'specs', '*.yml')].each do |file|
+  spec = YAML.load_file(file)
+  puts
+  puts "Running tests in #{ File.basename(file) }\n"
 
-failures = spec['tests'].reject do |test|
-  begin
-    print "Testing #{ test['name'].downcase }... "
+  failed = spec['tests'].reject do |test|
+    test[:file] = file
 
-    if test.has_key?('partials')
-      Dir.mkdir(partials)
-      test['partials'].each do |file, content|
-        File.open(partial("#{file}.mustache"), 'w') { |f| f.print(content) }
-      end
-    end
+    begin
+      print "Testing #{ test['name'].downcase }... "
 
-    test['output'] = Mustache.render(test['template'], test['data'])
-    if test['output'] == test['expected']
-      print colorize("PASSED\n", 32)
-      true
-    else
-      puts colorize("FAILED!", 31)
-
-      puts "Given the template:", '', colorize(test['template'], '4;33')
       if test.has_key?('partials')
-        puts "Partials:", ''
+        Dir.mkdir(partials)
         test['partials'].each do |file, content|
-          puts colorize("#{file}.mustache", 43)
-          puts colorize(content, '4;33')
+          File.open(partial("#{file}.mustache"), 'w') { |f| f.print(content) }
         end
       end
-      puts "And data:", '',           test['data'].inspect, ''
-      puts "Mustache rendered:", '',  colorize(test['output'], '4;31')
-      puts "Instead of:", '',         colorize(test['expected'], '4;32')
-      false
+
+      test['output'] = Mustache.render(test['template'], test['data'])
+      if test['output'] == test['expected']
+        print colorize("PASSED\n", 32)
+        true
+      else
+        puts colorize("FAILED!", 31)
+
+        puts "Given the template:", '', colorize(test['template'], '4;33')
+        if test.has_key?('partials')
+          puts "Partials:", ''
+          test['partials'].each do |file, content|
+            puts colorize("#{file}.mustache", 43)
+            puts colorize(content, '4;33')
+          end
+        end
+        puts "And data:", '',           test['data'].inspect, ''
+        puts "Mustache rendered:", '',  colorize(test['output'], '4;31')
+        puts "Instead of:", '',         colorize(test['expected'], '4;32')
+        false
+      end
+    ensure
+      Dir[File.join(partials, '*')].each { |file| File.delete(file) }
+      Dir.rmdir(partials) if File.exists?(partials)
     end
-  ensure
-    Dir[File.join(partials, '*')].each { |file| File.delete(file) }
-    Dir.rmdir(partials) if File.exists?(partials)
   end
+
+  failures << failed
 end
 
 puts
-puts colorize("Final Results: #{failures.length} failures", 0)
-failures.each { |e| puts "Failed #{e['name']}" }
+puts colorize("Final Results: #{failures.inject(0) { |a,e| a + e.length }} failures", 0)
+failures.each do |e|
+  e.each { |e| puts "#{ File.basename(e[:file]) }: Failed #{ e['name'] }" }
+end
