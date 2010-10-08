@@ -7,94 +7,90 @@ tests:
 
   - name: Basic Behavior Using '<'
     data: { }
-    template: '<< {{<text}}'
+    template: '"{{<text}}"'
     partials: { text: 'from partial' }
-    expected: '<< from partial'
+    expected: '"from partial"'
 
-  - name: Basic Behavior With Tags Using '>'
+  - name: Grabbing Context Using '>'
     data: { text: 'content' }
     template: '"{{>partial}}"'
     partials: { partial: '*{{text}}*' }
     expected: '"*content*"'
 
-  - name: Basic Behavior With Tags Using '<'
+  - name: Grabbing Context Using '<'
     data: { text: 'content' }
     template: '"{{<partial}}"'
     partials: { partial: '*{{text}}*' }
     expected: '"*content*"'
 
-  - name: Indentation
-    data: { text: 'content' }
-    template: |
-      ---
-        {{>multiline}}
-      ---
-    partials:
-      multiline: |
-        A: {{text}}
-        B: {{text}}
-        C: {{text}}
-    expected: |
-      ---
-        A: content
-        B: content
-        C: content
-      ---
+  - name: Recursion Using '>'
+    data: { content: X, nodes: [ { content: Y, nodes: [] } ] }
+    template: '{{>node}}'
+    partials: { node: '{{content}}<{{#nodes}}{{>node}}{{/nodes}}>' }
+    expected: 'X<Y<>>'
 
-  - name: Recursive
-    data:
-      nodes:
-        - content: 'First Parent'
-          nodes:
-            - content: "First Parent's First Child"
-              nodes: []
-        - content: 'Second Parent'
-          nodes: []
-        - content: 'Third Parent'
-          nodes:
-            - content: "Third Parent's First Child"
-              nodes: []
-            - content: "Third Parent's Second Child"
-              nodes: []
+  - name: Recursion Using '<'
+    data: { content: X, nodes: [ { content: Y, nodes: [] } ] }
+    template: '{{<node}}'
+    partials: { node: '{{content}}<{{#nodes}}{{<node}}{{/nodes}}>' }
+    expected: 'X<Y<>>'
+
+  # Whitespace Sensitivity
+
+  - name: Respects Surrounding Whitespace Using '>'
+    data: { }
+    template: '| {{>partial}} |'
+    partials: { partial: "\t|\t" }
+    expected: "| \t|\t |"
+
+  - name: Respects Surrounding Whitespace Using '<'
+    data: { }
+    template: '| {{<partial}} |'
+    partials: { partial: "\t|\t" }
+    expected: "| \t|\t |"
+
+  - name: Respects Indentation Using '>'
+    data: { }
     template: |
-      <ul>
-        {{#nodes}}
-          {{>node}}
-        {{/nodes}}
-      </ul>
+      \
+       {{>partial}}
+      /
     partials:
-      node: |
-        <li>
-          {{content}}
-          {{#nodes}}
-            <ul>
-              {{>node}}
-            </ul>
-          {{/nodes}}
-        </li>
+      partial: |
+        |
+        |
     expected: |
-      <ul>
-        <li>
-          First Parent
-          <ul>
-            <li>
-              First Parent's First Child
-            </li>
-          </ul>
-        </li>
-        <li>
-          Second Parent
-        </li>
-        <li>
-          Third Parent
-          <ul>
-            <li>
-              Third Parent's First Child
-            </li>
-            <li>
-              Third Parent's Second Child
-            </li>
-          </ul>
-        </li>
-      </ul>
-  
+      \
+       |
+       |
+      /
+
+  - name: Respects Indentation Using '<'
+    data: { }
+    template: |
+      \
+       {{<partial}}
+      /
+    partials:
+      partial: |
+        |
+        |
+    expected: |
+      \
+       |
+       |
+      /
+
+  # Whitespace Insensitivity
+
+  - name: Ignores Padding Whitespace Using '>'
+    data: { boolean: true }
+    template: "|{{> partial }}|"
+    partials: { partial: "=" }
+    expected: '|=|'
+
+  - name: Ignores Padding Whitespace Using '<'
+    data: { boolean: true }
+    template: "|{{< partial }}|"
+    partials: { partial: "=" }
+    expected: '|=|'
