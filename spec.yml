@@ -1,44 +1,6 @@
 ---
 version: '0.0.1a'
 tests:
-  - name: Literal String
-    data:
-    template: |
-      Hello from Mustache!
-    expected: |
-      Hello from Mustache!
-
-  ###############
-  # Interpolation
-
-  - name: Basic Interpolation
-    data: { subject: "world" }
-    template: |
-      Hello, {{subject}}!
-    expected: |
-      Hello, world!
-
-  - name: Escaped Interpolation
-    data: { forbidden: '& " < >' }
-    template: |
-      These characters should be HTML escaped: {{forbidden}}
-    expected: |
-      These characters should be HTML escaped: &amp; &quot; &lt; &gt;
-
-  - name: Unescaped Interpolation via Triple Mustache
-    data: { forbidden: '& " < >' }
-    template: |
-      These characters should not be HTML escaped: {{{forbidden}}}
-    expected: |
-      These characters should not be HTML escaped: & " < >
-
-  - name: Unescaped Interpolation via the Ampersand
-    data: { forbidden: '& " < >' }
-    template: |
-      These characters should not be HTML escaped: {{&forbidden}}
-    expected: |
-      These characters should not be HTML escaped: & " < >
-
   ##########
   # Sections
 
