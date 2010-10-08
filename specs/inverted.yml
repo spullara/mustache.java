@@ -1,14 +1,14 @@
 ---
 tests:
-  - name: Basic Behavior With True Value
-    data: { boolean: true }
-    template: '{{^boolean}}This should not be rendered.{{/boolean}}'
-    expected: ''
-
   - name: Basic Behavior With False Value
     data: { boolean: false }
     template: '{{^boolean}}This should be rendered.{{/boolean}}'
     expected: 'This should be rendered.'
+
+  - name: Basic Behavior With True Value
+    data: { boolean: true }
+    template: '{{^boolean}}This should not be rendered.{{/boolean}}'
+    expected: ''
 
   - name: Basic Behavior With Context
     data: { context: { name: 'Joe' } }
@@ -16,45 +16,51 @@ tests:
     expected: ''
 
   - name: Basic Behavior With List
-    data: { list: [ { n: 'one' }, { n: 'two' }, { n: 'three' } ] }
-    template: '{{^list}}{{n}} - {{/list}}'
+    data: { list: [ { n: 1 }, { n: 2 }, { n: 3 } ] }
+    template: '{{^list}}{{n}}{{/list}}'
     expected: ''
 
   - name: Basic Behavior With Empty List
     data: { list: [ ] }
-    template: '{{^list}}Empty list!{{/list}}'
-    expected: 'Empty list!'
+    template: '{{^list}}Yay lists!{{/list}}'
+    expected: 'Yay lists!'
 
-  - name: Whitespace When Inlined
+  # Whitespace Sensitivity
+
+  - name: Respects Surrounding Whitespace
+    data: { boolean: false }
+    template: "| {{^boolean}}\t|\t{{/boolean}} |"
+    expected: "| \t|\t |"
+
+  - name: Disregard Standalone Lines
     data: { boolean: false }
     template: |
-      Something {{^boolean}}completely normal{{/boolean}} is happening...
-    expected: |
-      Something completely normal is happening...
-
-  - name: Whitespace When Multiline
-    data: { boolean: false }
-    template: |
-      Only
+      | This
       {{^boolean}}
-      Three
+      | Is A
       {{/boolean}}
-      Lines
+      | Line
     expected: |
-      Only
-      Three
-      Lines
+      | This
+      | Is A
+      | Line
 
-  - name: Whitesapce When Indented
+  - name: Disregard Standalone Indented Lines
     data: { boolean: false }
     template: |
-      Trim
+      | This
         {{^boolean}}
-      Extra
+      | Is A
         {{/boolean}}
-      Spaces
+      | Line
     expected: |
-      Trim
-      Extra
-      Spaces
-  
+      | This
+      | Is A
+      | Line
+
+  # Whitespace Insensitivity
+
+  - name: Ignores Padding Whitespace
+    data: { boolean: false }
+    template: '|{{^ boolean }}={{/ boolean }}|'
+    expected: '|=|'
