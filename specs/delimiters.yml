@@ -9,9 +9,7 @@ tests:
       * {{text}}
     expected: |
       * Hey!
-
       * Hey!
-
       * Hey!
 
   - name: Basic Set Delimiter Behavior With Mirrored Sigil
@@ -24,7 +22,5 @@ tests:
       * {{text}}
     expected: |
       * Hey!
-
       * Hey!
-
       * Hey!
