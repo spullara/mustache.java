@@ -7,7 +7,7 @@ tests:
     expected: |
       Hello from Mustache!
 
-  - name: Basic Behavior
+  - name: Basic Interpolation
     data: { subject: "world" }
     template: |
       Hello, {{subject}}!
