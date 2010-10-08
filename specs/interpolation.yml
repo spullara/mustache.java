@@ -7,7 +7,7 @@ tests:
     expected: |
       Hello from Mustache!
 
-  - name: Basic Interpolation
+  - name: Basic Behavior
     data: { subject: "world" }
     template: |
       Hello, {{subject}}!
@@ -21,14 +21,14 @@ tests:
     expected: |
       These characters should be HTML escaped: &amp; &quot; &lt; &gt;
 
-  - name: Unescaped Interpolation via Triple Mustache
+  - name: Unescaped via Triple Mustache
     data: { forbidden: '& " < >' }
     template: |
       These characters should not be HTML escaped: {{{forbidden}}}
     expected: |
       These characters should not be HTML escaped: & " < >
 
-  - name: Unescaped Interpolation via the Ampersand
+  - name: Unescaped via the Ampersand
     data: { forbidden: '& " < >' }
     template: |
       These characters should not be HTML escaped: {{&forbidden}}

@@ -25,14 +25,14 @@ tests:
     template: '{{#list}}Yay lists!{{/list}}'
     expected: ''
 
-  - name: Whitespace for Inline Sections
+  - name: Whitespace When Inline
     data: { boolean: true }
     template: |
       Something {{#boolean}}completely normal{{/boolean}} is happening...
     expected: |
       Something completely normal is happening...
 
-  - name: Whitespace for Multiline Sections
+  - name: Whitespace When Multiline
     data: { boolean: true }
     template: |
       Only
@@ -45,7 +45,7 @@ tests:
       Three
       Lines
 
-  - name: Whitesapce for Indented Sections
+  - name: Whitesapce When Indented
     data: { boolean: true }
     template: |
       Trim

@@ -1,38 +1,38 @@
 ---
 tests:
-  - name: Basic Behavior for Inverted Section With True Value
+  - name: Basic Behavior With True Value
     data: { boolean: true }
     template: '{{^boolean}}This should not be rendered.{{/boolean}}'
     expected: ''
 
-  - name: Basic Behavior for Inverted Section With False Value
+  - name: Basic Behavior With False Value
     data: { boolean: false }
     template: '{{^boolean}}This should be rendered.{{/boolean}}'
     expected: 'This should be rendered.'
 
-  - name: Basic Behavior for Inverted Section With Context
+  - name: Basic Behavior With Context
     data: { context: { name: 'Joe' } }
     template: '{{^context}}Hi {{name}}.{{/context}}'
     expected: ''
 
-  - name: Basic Behavior for Inverted Section With List
+  - name: Basic Behavior With List
     data: { list: [ { n: 'one' }, { n: 'two' }, { n: 'three' } ] }
     template: '{{^list}}{{n}} - {{/list}}'
     expected: ''
 
-  - name: Basic Behavior for Inverted Section With Empty List
+  - name: Basic Behavior With Empty List
     data: { list: [ ] }
     template: '{{^list}}Empty list!{{/list}}'
     expected: 'Empty list!'
 
-  - name: Whitespace for Inlined Inverted Sections
+  - name: Whitespace When Inlined
     data: { boolean: false }
     template: |
       Something {{^boolean}}completely normal{{/boolean}} is happening...
     expected: |
       Something completely normal is happening...
 
-  - name: Whitespace for Inverted Sections
+  - name: Whitespace When Multiline
     data: { boolean: false }
     template: |
       Only
@@ -45,7 +45,7 @@ tests:
       Three
       Lines
 
-  - name: Whitesapce for Indented Inverted Sections
+  - name: Whitesapce When Indented
     data: { boolean: false }
     template: |
       Trim
