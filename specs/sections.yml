@@ -25,6 +25,21 @@ tests:
     template: '{{#list}}Yay lists!{{/list}}'
     expected: ''
 
+  - name: Doubled
+    data: { t: true, two: 'second' }
+    template: |
+      {{#t}}
+      * first
+      {{/t}}
+      * {{two}}
+      {{#t}}
+      * third
+      {{/t}}
+    expected: |
+      * first
+      * second
+      * third
+
   # Whitespace Sensitivity
 
   - name: Respects Surrounding Whitespace
