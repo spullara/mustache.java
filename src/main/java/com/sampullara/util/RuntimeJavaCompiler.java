@@ -66,7 +66,7 @@ public class RuntimeJavaCompiler {
     private File file;
 
     protected JavaClassFromFile(File file) {
-      super(URI.create("file://" + file.toString()), Kind.CLASS);
+      super(file.toURI(), Kind.CLASS);
       this.file = file;
     }
 
