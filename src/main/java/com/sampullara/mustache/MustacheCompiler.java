@@ -136,6 +136,9 @@ public class MustacheCompiler {
       boolean onlywhitespace = true;
       READ:
       while ((c = br.read()) != -1) {
+        if (c == '\r') {
+          continue;
+        }
         // Increment the line
         if (c == '\n') {
           writeText(code, template.toString());
