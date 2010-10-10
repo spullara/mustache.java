@@ -1,4 +1,3 @@
----
 tests:
   - name: Basic Behavior With True Value
     data: { boolean: true }

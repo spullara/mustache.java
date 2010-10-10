@@ -1,4 +1,3 @@
----
 tests:
   - name: No Interpolation
     data: { }
