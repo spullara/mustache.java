@@ -17,7 +17,7 @@ $Data::Dumper::Deparse = 1;
 use File::Basename        qw/ basename dirname /;
 use File::Spec::Functions qw/ catdir catfile /;
 use Template::Mustache;
-use YAML ();
+use YAML::XS ();
 
 {
     package MustacheSpec;
@@ -67,7 +67,7 @@ sub assert_mustache_spec {
 }
 
 for my $file (glob catfile(dirname(__FILE__), '..', 'specs', '*.yml')) {
-    my $spec = YAML::LoadFile($file);
+    my $spec = YAML::XS::LoadFile($file);
     my $pkg = ucfirst(basename($file));
 
     no strict 'refs';
