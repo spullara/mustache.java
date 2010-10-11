@@ -2,17 +2,7 @@ package com.sampullara.mustache;
 
 import com.sampullara.util.RuntimeJavaCompiler;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.util.Map;
@@ -34,6 +24,7 @@ public class MustacheCompiler {
   private boolean debug = false;
   private String superclass;
   private String outputDirectory = System.getProperty("mustcache");
+  private static final String ENCODING = "UTF-8";
 
   public void setDebug() {
     debug = true;
@@ -47,8 +38,13 @@ public class MustacheCompiler {
 
   private static String getText(String template) {
     InputStream stream = MustacheCompiler.class.getResourceAsStream(template);
-    BufferedReader br = new BufferedReader(new InputStreamReader(stream));
-    return getText(template, br);
+      BufferedReader br = null;
+      try {
+          br = new BufferedReader(new InputStreamReader(stream,ENCODING));
+          return getText(template, br);
+      } catch (UnsupportedEncodingException e) {
+          return null;
+      }      
   }
 
   private static String getText(String template, BufferedReader br) {
@@ -98,7 +94,9 @@ public class MustacheCompiler {
     File file = new File(root, path);
     BufferedReader br;
     try {
-      br = new BufferedReader(new FileReader(file));
+      br = new BufferedReader(new InputStreamReader(new FileInputStream(file),ENCODING));
+    } catch (UnsupportedEncodingException e) {
+      throw new MustacheException("UnsupportedEncoding: " + ENCODING);  
     } catch (FileNotFoundException e) {
       throw new MustacheException("Mustache file not found: " + file);
     }
@@ -311,7 +309,7 @@ public class MustacheCompiler {
           File dir = new File("src/main/java/com/sampullara/mustaches/");
           dir.mkdirs();
           File file = new File(dir, className + ".java");
-          FileWriter fw = new FileWriter(file);
+          Writer fw = new OutputStreamWriter(new FileOutputStream(file),ENCODING);
           fw.write(code.toString());
           fw.close();
         }

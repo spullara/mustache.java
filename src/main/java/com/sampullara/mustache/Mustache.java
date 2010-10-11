@@ -27,11 +27,11 @@ import static com.sampullara.mustache.Scope.NULL;
  * User: sam
  * Date: May 3, 2010
  * Time: 10:12:47 AM
- */
+ */                                             
 public abstract class Mustache {
   protected Logger logger = Logger.getLogger(getClass().getName());
   private File root;
-  private String path;
+  private String path;                                        
   private static final boolean debug = Boolean.getBoolean("mustache.debug");
 
   public void setRoot(File root) {

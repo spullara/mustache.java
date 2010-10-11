@@ -8,11 +8,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -338,7 +334,7 @@ public class CompilerTest extends TestCase {
   }
 
   protected String getContents(File root, String file) throws IOException {
-    BufferedReader br = new BufferedReader(new FileReader(new File(root, file)));
+    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(root, file)),"UTF-8"));
     StringWriter capture = new StringWriter();
     char[] buffer = new char[8192];
     int read;
