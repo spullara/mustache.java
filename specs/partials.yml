@@ -49,6 +49,18 @@ tests:
     partials: { partial: "\t|\t" }
     expected: "| \t|\t |"
 
+  - name: Respects Indentation of Other Content Using '>'
+    data: { data: '|' }
+    template: "  {{data}}  {{> partial}}\n"
+    partials: { partial: ">\n>" }
+    expected: "  |  >\n>\n"
+
+  - name: Respects Indentation of Other Content Using '<'
+    data: { data: '|' }
+    template: "  {{data}}  {{< partial}}\n"
+    partials: { partial: "<\n<" }
+    expected: "  |  <\n<\n"
+
   - name: Respects Indentation Using '>'
     data: { }
     template: |

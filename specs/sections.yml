@@ -43,8 +43,8 @@ tests:
 
   - name: Respects Surrounding Whitespace
     data: { boolean: true }
-    template: "| {{#boolean}}\t|\t{{/boolean}} |"
-    expected: "| \t|\t |"
+    template: " | {{#boolean}}\t|\t{{/boolean}} | \n"
+    expected: " | \t|\t | \n"
 
   - name: Disregard Standalone Lines
     data: { boolean: true }

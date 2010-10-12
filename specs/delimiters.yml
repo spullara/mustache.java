@@ -21,6 +21,16 @@ tests:
     template: '| {{=@ @=}} |'
     expected: '|  |'
 
+  - name: Inlined Single Sigil Respects Indentation
+    data: { }
+    template: ' | {{=@ @}}'
+    expected: ' | '
+
+  - name: Inlined Mirrored Sigil Respects Indentation
+    data: { }
+    template: ' | {{=@ @=}}'
+    expected: ' | '
+
   - name: Disregard Single Sigil Line
     data: { }
     template: |

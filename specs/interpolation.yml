@@ -51,6 +51,21 @@ tests:
     template: '| {{&string}} |'
     expected: '| --- |'
 
+  - name: Interpolation Respects Indentation When Standalone
+    data: { string: '---' }
+    template: "  {{string}}\n"
+    expected: "  ---"
+
+  - name: Triple Mustache Respects Indentation When Standalone
+    data: { string: '---' }
+    template: "  {{{string}}}\n"
+    expected: "  ---"
+
+  - name: Ampersand Respects Indentation When Standalone
+    data: { string: '---' }
+    template: "  {{&string}}\n"
+    expected: "  ---"
+
   # Whitespace Insensitivity
 
   - name: Interpolation Ignores Padding Whitespace

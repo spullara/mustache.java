@@ -39,13 +39,12 @@ tests:
       * second
       * third
 
-
   # Whitespace Sensitivity
 
   - name: Respects Surrounding Whitespace
     data: { boolean: false }
-    template: "| {{^boolean}}\t|\t{{/boolean}} |"
-    expected: "| \t|\t |"
+    template: " | {{^boolean}}\t|\t{{/boolean}} | \n"
+    expected: " | \t|\t | \n"
 
   - name: Disregard Standalone Lines
     data: { boolean: false }

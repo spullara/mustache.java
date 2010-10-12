@@ -4,6 +4,11 @@ tests:
     template: '12345{{! Comment Block! }}67890'
     expected: '1234567890'
 
+  - name: Indented Inline
+    data: { }
+    template: '  12 {{! 34 }}'
+    expected: '  12 '
+
   - name: Multiline
     data: { }
     template: |
