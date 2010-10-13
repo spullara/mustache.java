@@ -19,6 +19,18 @@ tests:
     expected: |
       1234567890
 
+  - name: Multiline Standalone
+    data: { }
+    template: |
+      Hello
+        {{!
+          Something's going on here...
+        }}
+      Goodbye
+    expected: |
+      Hello
+      Goodbye
+
   - name: Respects Surrounding Whitespace
     data: { }
     template: '12345 {{! Comment Block! }} 67890'
