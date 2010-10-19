@@ -1,0 +1,51 @@
+tests:
+  - name: Basic Interpolation
+    data:
+      lambda: !code
+        ruby: 'proc { "world" }'
+        perl: 'sub { "world" }'
+    template: "Hello, {{lambda}}!"
+    expected: "Hello, world!"
+
+  - name: Arity/1
+    data:
+      static: 'static'
+      lambda: !code
+        ruby: 'proc { |hash| hash["static"].upcase }'
+        perl: 'sub { uc(shift->get("static")) }'
+    template: "{{lambda}} CLING"
+    expected: "STATIC CLING"
+
+  - name: Escaped
+    data:
+      lambda: !code
+        ruby: 'proc { ">" }'
+        perl: 'sub { ">" }'
+    template: "&{{lambda}};"
+    expected: "&&gt;;"
+
+  - name: Unescaped
+    data:
+      lambda: !code
+        ruby: 'proc { ">" }'
+        perl: 'sub { ">" }'
+    template: "<{{{lambda}}}"
+    expected: "<>"
+
+  - name: Section
+    data:
+      static: 'static'
+      lambda: !code
+        ruby: 'proc { |text| text }'
+        perl: 'sub { shift }'
+    template: "<{{#lambda}}{{static}}{{/lambda}}>"
+    expected: "<{{static}}>"
+
+  - name: Inverted Section
+    data:
+      static: 'static'
+      lambda: !code
+        ruby: 'proc { |text| text }'
+        perl: 'sub { shift }'
+    template: "<{{^lambda}}{{static}}{{/lambda}}>"
+    expected: "<>"

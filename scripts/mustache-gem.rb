@@ -6,6 +6,8 @@ require 'tmpdir'
 require 'yaml'
 require 'test/unit'
 
+YAML::add_builtin_type('code') { |_, val| eval(val['ruby']) }
+
 class MustacheSpec < Test::Unit::TestCase
   def setup
     @partials = File.join(File.dirname(__FILE__), '..', 'partials')

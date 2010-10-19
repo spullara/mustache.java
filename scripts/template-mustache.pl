@@ -20,6 +20,12 @@ use Template::Mustache;
 use YAML::XS ();
 
 {
+    # YAML::XS will automatically bless lambdas as a new instance of this.
+    package code;
+    use overload '&{}' => sub { eval shift->{perl} }
+}
+
+{
     package MustacheSpec;
     use base 'Test::Mini::TestCase';
 
@@ -41,6 +47,21 @@ use YAML::XS ();
             open *FH, '>', $filename;
             print FH $test->{partials}->{$name};
             close FH;
+        }
+    }
+
+    sub setup_data {
+        my ($self, $test) = @_;
+        return unless $test->{data};
+        for my $key (keys %{$test->{data}}) {
+            my $value = $test->{data}->{$key};
+            next unless ref $value;
+
+            if (ref $value eq 'code') {
+                $test->{data}->{$key} = sub { goto &$value };
+            } elsif (ref $value eq 'HASH') {
+                $self->setup_data({ data => $value });
+            }
         }
     }
 
@@ -79,6 +100,7 @@ for my $file (glob catfile(dirname(__FILE__), '..', 'specs', '*.yml')) {
         *{"$pkg\::test - @{[$name]}"} = sub {
             my ($self) = @_;
             $self->setup_partials($test);
+            $self->setup_data($test);
             assert_mustache_spec($test);
         };
     }
