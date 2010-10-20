@@ -34,12 +34,14 @@ tests:
 
   - name: Section
     data:
-      static: 'static'
       lambda: !code
-        ruby: 'proc { |text| text }'
-        perl: 'sub { shift }'
-    template: "<{{#lambda}}{{static}}{{/lambda}}>"
-    expected: "<{{static}}>"
+        ruby: 'proc { |text| text == "{{x}}" ? "{{true}}" : "{{false}}" }'
+        perl: 'sub { shift eq "{{x}}" ? "{{true}}" : "{{false}}" }'
+      true:  'True!'
+      false: 'False!'
+      x:     'Error!'
+    template: "<{{#lambda}}{{x}}{{/lambda}}>"
+    expected: "<True!>"
 
   - name: Inverted Section
     data:
