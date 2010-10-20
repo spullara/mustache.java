@@ -58,7 +58,7 @@ use YAML::XS ();
             next unless ref $value;
 
             if (ref $value eq 'code') {
-                $test->{data}->{$key} = sub { goto &$value };
+                $test->{data}->{$key} = \&$value;
             } elsif (ref $value eq 'HASH') {
                 $self->setup_data({ data => $value });
             }
