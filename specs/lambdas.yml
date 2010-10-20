@@ -1,5 +1,6 @@
 tests:
   - name: Basic Interpolation
+    desc: A lambda's return value should be interpolated.
     data:
       lambda: !code
         ruby: 'proc { "world" }'
@@ -7,43 +8,57 @@ tests:
     template: "Hello, {{lambda}}!"
     expected: "Hello, world!"
 
+  - name: Basic Interpolation
+    desc: A lambda's return value should be parsed.
+    data:
+      planet: "world"
+      lambda: !code
+        ruby: 'proc { "{{planet}}" }'
+        perl: 'sub { "{{planet}}" }'
+    template: "Hello, {{lambda}}!"
+    expected: "Hello, world!"
+
   - name: Arity/1
+    desc: Interpolated lambdas receive the context stack as the first argument.
     data:
       static: 'static'
       lambda: !code
-        ruby: 'proc { |ctx| ctx["static"].upcase }'
-        perl: 'sub { my ($ctx) = @_; uc($ctx->get("static")) }'
-    template: "{{lambda}} CLING"
-    expected: "STATIC CLING"
+        ruby: 'proc { |ctx| ctx["static"] }'
+        perl: 'sub { my ($ctx) = @_; $ctx->get("static") }'
+    template: "{{lambda}} cling"
+    expected: "static cling"
 
-  - name: Escaped
+  - name: Escaping
+    desc: Lambda results should be appropriately escaped.
     data:
       lambda: !code
         ruby: 'proc { ">" }'
         perl: 'sub { ">" }'
-    template: "&{{lambda}};"
-    expected: "&&gt;;"
-
-  - name: Unescaped
-    data:
-      lambda: !code
-        ruby: 'proc { ">" }'
-        perl: 'sub { ">" }'
-    template: "<{{{lambda}}}"
-    expected: "<>"
+    template: "<{{lambda}}{{{lambda}}}"
+    expected: "<&gt;>"
 
   - name: Section
+    desc: Lambdas used for sections should receive the raw section string.
     data:
+      x: 'Error!'
       lambda: !code
-        ruby: 'proc { |text| text == "{{x}}" ? "{{true}}" : "{{false}}" }'
-        perl: 'sub { shift eq "{{x}}" ? "{{true}}" : "{{false}}" }'
-      true:  'True!'
-      false: 'False!'
-      x:     'Error!'
+        ruby: 'proc { |text| text == "{{x}}" ? "yes" : "no" }'
+        perl: 'sub { $_[0] eq "{{x}}" ? "yes" : "no" }'
     template: "<{{#lambda}}{{x}}{{/lambda}}>"
-    expected: "<True!>"
+    expected: "<yes>"
+
+  - name: Section Expansion
+    desc: Lambdas used for sections should have their results parsed.
+    data:
+      planet: "Earth"
+      lambda: !code
+        ruby: 'proc { |text| "#{text}{{planet}}#{text}" }'
+        perl: 'sub { $_[0] . "{{planet}}" . $_[0] }'
+    template: "<{{#lambda}}-{{/lambda}}>"
+    expected: "<-Earth->"
 
   - name: Inverted Section
+    desc: Lambdas used for inverted sections should be considered truthy.
     data:
       static: 'static'
       lambda: !code
