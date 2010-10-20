@@ -11,8 +11,8 @@ tests:
     data:
       static: 'static'
       lambda: !code
-        ruby: 'proc { |hash| hash["static"].upcase }'
-        perl: 'sub { uc(shift->get("static")) }'
+        ruby: 'proc { |ctx| ctx["static"].upcase }'
+        perl: 'sub { my ($ctx) = @_; uc($ctx->get("static")) }'
     template: "{{lambda}} CLING"
     expected: "STATIC CLING"
 
