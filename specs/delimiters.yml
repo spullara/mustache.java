@@ -1,84 +1,80 @@
 tests:
-  - name: Single Sigil
+  - name: Single Equals
+    desc: A single equals sign should be sufficient to change delimiters.
     data: { text: 'Hey!' }
     template: '{{=<% %>}}(<%text%>)'
     expected: '(Hey!)'
 
-  - name: Mirrored Sigil
+  - name: Mirrored Equals
+    desc: Surrounding equals signs should be permitted.
     data: { text: 'Hey!' }
     template: '{{=<% %>=}}(<%text%>)'
     expected: '(Hey!)'
 
   # Whitespace Sensitivity
 
-  - name: Single Sigil Respects Surrounding Whitespace
+  - name: Single Equals - Surrounding Whitespace
+    desc: Surrounding whitespace should be left untouched.
     data: { }
     template: '| {{=@ @}} |'
     expected: '|  |'
 
-  - name: Mirrored Sigil Respects Surrounding Whitespace
+  - name: Mirrored Equals - Surrounding Whitespace
+    desc: Surrounding whitespace should be left untouched.
     data: { }
     template: '| {{=@ @=}} |'
     expected: '|  |'
 
-  - name: Inlined Single Sigil Respects Indentation
+  - name: Single Equals (Inline) - Outlying Whitespace
+    desc: Whitespace should be left untouched.
     data: { }
-    template: ' | {{=@ @}}'
-    expected: ' | '
+    template: " | {{=@ @}}\n"
+    expected: " | \n"
 
-  - name: Inlined Mirrored Sigil Respects Indentation
+  - name: Mirrored Equals (Inline) - Outlying Whitespace
+    desc: Whitespace should be left untouched.
     data: { }
-    template: ' | {{=@ @=}}'
-    expected: ' | '
+    template: " | {{=@ @=}}\n"
+    expected: " | \n"
 
-  - name: Disregard Single Sigil Line
+  - name: Single Equals (Standalone)
+    desc: Standalone lines should be removed from the template.
     data: { }
     template: |
       Begin.
       {{=@ @}}
+      Middle.
+        @={{ }}@
       End.
     expected: |
       Begin.
+      Middle.
       End.
 
-  - name: Disregard Mirrored Sigil Line
+  - name: Mirrored Equals (Standalone)
+    desc: Standalone lines should be removed from the template.
     data: { }
     template: |
       Begin.
       {{=@ @=}}
+      Middle.
+        @={{ }}=@
       End.
     expected: |
       Begin.
-      End.
-
-  - name: Disregard Indented Single Sigil Line
-    data: { }
-    template: |
-      Begin.
-        {{=@ @}}
-      End.
-    expected: |
-      Begin.
-      End.
-
-  - name: Disregard Indented Mirrored Sigil Line
-    data: { }
-    template: |
-      Begin.
-        {{=@ @=}}
-      End.
-    expected: |
-      Begin.
+      Middle.
       End.
 
   # Whitespace Insensitivity
 
-  - name: Single Sigil Ignores Padding Whitespace
+  - name: Single Equals With Padding
+    desc: Superfluous in-tag whitespace should be ignored.
     data: { }
-    template: '|{{= @ @ }}|'
+    template: '|{{= @   @ }}|'
     expected: '||'
 
-  - name: Mirrored Sigil Ignores Padding Whitespace
+  - name: Mirrored Equals With Padding
+    desc: Superfluous in-tag whitespace should be ignored.
     data: { }
-    template: '|{{= @ @ =}}|'
+    template: '|{{= @   @ =}}|'
     expected: '||'
