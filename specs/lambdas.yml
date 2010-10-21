@@ -1,5 +1,5 @@
 tests:
-  - name: Basic Interpolation
+  - name: Interpolation
     desc: A lambda's return value should be interpolated.
     data:
       lambda: !code
@@ -8,7 +8,7 @@ tests:
     template: "Hello, {{lambda}}!"
     expected: "Hello, world!"
 
-  - name: Basic Interpolation
+  - name: Interpolation - Expansion
     desc: A lambda's return value should be parsed.
     data:
       planet: "world"
@@ -47,7 +47,7 @@ tests:
     template: "<{{#lambda}}{{x}}{{/lambda}}>"
     expected: "<yes>"
 
-  - name: Section Expansion
+  - name: Section - Expansion
     desc: Lambdas used for sections should have their results parsed.
     data:
       planet: "Earth"
