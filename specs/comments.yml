@@ -1,15 +1,12 @@
 tests:
   - name: Inline
+    desc: Comment blocks should be removed from the template.
     data: { }
     template: '12345{{! Comment Block! }}67890'
     expected: '1234567890'
 
-  - name: Indented Inline
-    data: { }
-    template: '  12 {{! 34 }}'
-    expected: '  12 '
-
   - name: Multiline
+    desc: Multiline comments should be permitted.
     data: { }
     template: |
       12345{{!
@@ -19,7 +16,22 @@ tests:
     expected: |
       1234567890
 
+  - name: Standalone
+    desc: Standalone comment lines should be entirely removed.
+    data: { }
+    template: |
+      123
+      {{! Comment Block! }}
+      4567
+        {{! Indented Comment Block! }}
+      890
+    expected: |
+      123
+      4567
+      890
+
   - name: Multiline Standalone
+    desc: All lines of a standalone multiline comment should be removed.
     data: { }
     template: |
       Hello
@@ -31,27 +43,14 @@ tests:
       Hello
       Goodbye
 
-  - name: Respects Surrounding Whitespace
+  - name: Indented Inline
+    desc: Inline comments should not strip whitespace
+    data: { }
+    template: "  12 {{! 34 }}\n"
+    expected: "  12 \n"
+
+  - name: Surrounding Whitespace
+    desc: Comment removal should preserve surrounding whitespace.
     data: { }
     template: '12345 {{! Comment Block! }} 67890'
     expected: '12345  67890'
-
-  - name: Disregard Line Comments
-    data: { }
-    template: |
-      12345
-      {{! Comment Block! }}
-      67890
-    expected: |
-      12345
-      67890
-
-  - name: Disregard Indented Line Comments
-    data: { }
-    template: |
-      12345
-        {{! Comment Block! }}
-      67890
-    expected: |
-      12345
-      67890
