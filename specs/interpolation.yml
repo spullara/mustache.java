@@ -1,33 +1,38 @@
 tests:
   - name: No Interpolation
+    desc: Mustache-free templates should render as-is.
     data: { }
     template: |
-      Hello from Mustache!
+      Hello from {Mustache}!
     expected: |
-      Hello from Mustache!
+      Hello from {Mustache}!
 
   - name: Basic Interpolation
+    desc: Unadorned tags should interpolate content into the template.
     data: { subject: "world" }
     template: |
       Hello, {{subject}}!
     expected: |
       Hello, world!
 
-  - name: Escaped Interpolation
+  - name: HTML Escaping
+    desc: Basic interpolation should be HTML escaped.
     data: { forbidden: '& " < >' }
     template: |
       These characters should be HTML escaped: {{forbidden}}
     expected: |
       These characters should be HTML escaped: &amp; &quot; &lt; &gt;
 
-  - name: Unescaped via Triple Mustache
+  - name: Triple Mustache
+    desc: Triple mustaches should interpolate without HTML escaping.
     data: { forbidden: '& " < >' }
     template: |
       These characters should not be HTML escaped: {{{forbidden}}}
     expected: |
       These characters should not be HTML escaped: & " < >
 
-  - name: Unescaped via the Ampersand
+  - name: Ampersand
+    desc: Ampersand should interpolate without HTML escaping.
     data: { forbidden: '& " < >' }
     template: |
       These characters should not be HTML escaped: {{&forbidden}}
@@ -36,49 +41,58 @@ tests:
 
   # Whitespace Sensitivity
 
-  - name: Interpolation Respects Surrounding Whitespace
+  - name: Interpolation - Surrounding Whitespace
+    desc: Interpolation should not alter surrounding whitespace.
     data: { string: '---' }
     template: '| {{string}} |'
     expected: '| --- |'
 
-  - name: Triple Mustache Respects Surrounding Whitespace
+  - name: Triple Mustache - Surrounding Whitespace
+    desc: Interpolation should not alter surrounding whitespace.
     data: { string: '---' }
     template: '| {{{string}}} |'
     expected: '| --- |'
 
-  - name: Ampersand Respects Surrounding Whitespace
+  - name: Ampersand - Surrounding Whitespace
+    desc: Interpolation should not alter surrounding whitespace.
     data: { string: '---' }
     template: '| {{&string}} |'
     expected: '| --- |'
 
-  - name: Interpolation Respects Indentation When Standalone
+  - name: Interpolation - Standalone
+    desc: Standalone interpolation should not alter surrounding whitespace.
     data: { string: '---' }
     template: "  {{string}}\n"
     expected: "  ---\n"
 
-  - name: Triple Mustache Respects Indentation When Standalone
+  - name: Triple Mustache - Standalone
+    desc: Standalone interpolation should not alter surrounding whitespace.
     data: { string: '---' }
     template: "  {{{string}}}\n"
     expected: "  ---\n"
 
-  - name: Ampersand Respects Indentation When Standalone
+  - name: Ampersand - Standalone
+    desc: Standalone interpolation should not alter surrounding whitespace.
     data: { string: '---' }
     template: "  {{&string}}\n"
     expected: "  ---\n"
 
   # Whitespace Insensitivity
 
-  - name: Interpolation Ignores Padding Whitespace
+  - name: Interpolation With Padding
+    desc: Superfluous in-tag whitespace should be ignored.
     data: { string: "---" }
     template: '|{{ string }}|'
     expected: '|---|'
 
-  - name: Triple Mustache Ignores Padding Whitespace
+  - name: Triple Mustache With Padding
+    desc: Superfluous in-tag whitespace should be ignored.
     data: { string: "---" }
     template: '|{{{ string }}}|'
     expected: '|---|'
 
-  - name: Ampersand Ignores Padding Whitespace
+  - name: Ampersand With Padding
+    desc: Superfluous in-tag whitespace should be ignored.
     data: { string: "---" }
     template: '|{{& string }}|'
     expected: '|---|'
