@@ -32,7 +32,7 @@ class MustacheSpec < Test::Unit::TestCase
     actual = Mustache.render(test['template'], test['data'])
 
     assert_equal test['expected'], actual, "" <<
-      "Test: #{ test['name'] }\n" <<
+      "#{ test['desc'] }\n" <<
       "Data: #{ test['data'].inspect }\n" <<
       "Template: #{ test['template'].inspect }\n" <<
       "Partials: #{ (test['partials'] || {}).inspect }\n"

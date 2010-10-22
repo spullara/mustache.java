@@ -81,6 +81,7 @@ sub assert_mustache_spec {
     my $actual = Template::Mustache->render($tmpl, $data);
 
     assert_equal($actual, $expected,
+        "$test->{desc}\n".
         "Data:     @{[ Dumper $test->{data} ]}\n".
         "Template: @{[ Dumper $test->{template} ]}\n".
         "Partials: @{[ Dumper ($test->{partials} || {}) ]}\n"
