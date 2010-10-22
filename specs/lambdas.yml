@@ -18,7 +18,7 @@ tests:
     template: "Hello, {{lambda}}!"
     expected: "Hello, world!"
 
-  - name: Arity/1
+  - name: Interpolation - Arity
     desc: Interpolated lambdas receive the context stack as the first argument.
     data:
       static: 'static'
@@ -27,6 +27,21 @@ tests:
         perl: 'sub { my ($ctx) = @_; $ctx->get("static") }'
     template: "{{lambda}} cling"
     expected: "static cling"
+
+  - name: Interpolation - Multiple Calls
+    desc: Interpolated lambdas should only be called once.
+    data:
+      calls: 0
+      lambda: !code
+        ruby: 'proc { |ctx| ctx["calls"] += 1 }'
+        perl: |
+          sub {
+            my ($ctx) = @_;
+            $ctx->set("calls" => $ctx->get("calls") + 1);
+            $ctx->get("calls");
+          }
+    template: '{{lambda}} == {{{lambda}}} == {{lambda}}'
+    expected: '1 == 1 == 1'
 
   - name: Escaping
     desc: Lambda results should be appropriately escaped.
