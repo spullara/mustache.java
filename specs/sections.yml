@@ -1,30 +1,36 @@
 tests:
-  - name: Basic Behavior With True Value
+  - name: Truthy
+    desc: Truthy sections should have their contents rendered.
     data: { boolean: true }
     template: '{{#boolean}}This should be rendered.{{/boolean}}'
     expected: 'This should be rendered.'
 
-  - name: Basic Behavior With False Value
+  - name: Falsey
+    desc: Falsey sections should have their contents omitted.
     data: { boolean: false }
     template: '{{#boolean}}This should not be rendered.{{/boolean}}'
     expected: ''
 
-  - name: Basic Behavior With Context
+  - name: Context
+    desc: Objects and hashes should be pushed onto the context stack.
     data: { context: { name: 'Joe' } }
     template: '{{#context}}Hi {{name}}.{{/context}}'
     expected: 'Hi Joe.'
 
-  - name: Basic Behavior With List
+  - name: List
+    desc: Lists should be iterated; list items should visit the context stack.
     data: { list: [ { n: 1 }, { n: 2 }, { n: 3 } ] }
     template: '{{#list}}{{n}}{{/list}}'
     expected: '123'
 
-  - name: Basic Behavior With Empty List
+  - name: Empty List
+    desc: Empty lists should behave like falsey values.
     data: { list: [ ] }
     template: '{{#list}}Yay lists!{{/list}}'
     expected: ''
 
   - name: Doubled
+    desc: Multiple sections per template should be permitted.
     data: { t: true, two: 'second' }
     template: |
       {{#t}}
@@ -41,40 +47,36 @@ tests:
 
   # Whitespace Sensitivity
 
-  - name: Respects Surrounding Whitespace
+  - name: Surrounding Whitespace
+    desc: Sections should not alter surrounding whitespace.
     data: { boolean: true }
     template: " | {{#boolean}}\t|\t{{/boolean}} | \n"
     expected: " | \t|\t | \n"
 
-  - name: Disregard Standalone Lines
+  - name: Standalone Lines
+    desc: Standalone lines should be removed from the template.
     data: { boolean: true }
     template: |
       | This
       {{#boolean}}
-      | Is A
+      | Is
       {{/boolean}}
-      | Line
-    expected: |
-      | This
-      | Is A
-      | Line
-
-  - name: Disregard Standalone Indented Lines
-    data: { boolean: true }
-    template: |
-      | This
+      |
         {{#boolean}}
-      | Is A
+      | A
         {{/boolean}}
       | Line
     expected: |
       | This
-      | Is A
+      | Is
+      |
+      | A
       | Line
 
   # Whitespace Insensitivity
 
-  - name: Ignores Padding Whitespace
+  - name: Padding
+    desc: Superfluous in-tag whitespace should be ignored.
     data: { boolean: true }
     template: '|{{# boolean }}={{/ boolean }}|'
     expected: '|=|'
