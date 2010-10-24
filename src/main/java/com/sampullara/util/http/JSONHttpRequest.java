@@ -31,11 +31,15 @@ public class JSONHttpRequest extends HttpRequest<JsonNode> {
       protected void onResponseComplete() throws IOException {
         super.onResponseComplete();
         String responseContent = this.getResponseContent();
-        try {
-          JsonParser jp = jf.createJsonParser(responseContent);
-          future.set(jp.readValueAsTree());
-        } catch (Exception e) {
-          future.error(e);
+        if (responseContent == null) {
+          future.set(null);
+        } else {
+          try {
+            JsonParser jp = jf.createJsonParser(responseContent);
+            future.set(jp.readValueAsTree());
+          } catch (Exception e) {
+            future.error(e);
+          }
         }
       }
     };
