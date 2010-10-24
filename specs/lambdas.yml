@@ -21,15 +21,9 @@ tests:
   - name: Interpolation - Multiple Calls
     desc: Interpolated lambdas should only be called once.
     data:
-      calls: 0
       lambda: !code
-        ruby: 'proc { |ctx| ctx["calls"] += 1 }'
-        perl: |
-          sub {
-            my ($ctx) = @_;
-            $ctx->set("calls" => $ctx->get("calls") + 1);
-            $ctx->get("calls");
-          }
+        ruby: 'proc { ($calls ||= 0) += 1 }'
+        perl: 'sub { no strict; $calls += 1 }'
     template: '{{lambda}} == {{{lambda}}} == {{lambda}}'
     expected: '1 == 1 == 1'
 
