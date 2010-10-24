@@ -18,16 +18,6 @@ tests:
     template: "Hello, {{lambda}}!"
     expected: "Hello, world!"
 
-  - name: Interpolation - Arity
-    desc: Interpolated lambdas receive the context stack as the first argument.
-    data:
-      static: 'static'
-      lambda: !code
-        ruby: 'proc { |ctx| ctx["static"] }'
-        perl: 'sub { my ($ctx) = @_; $ctx->get("static") }'
-    template: "{{lambda}} cling"
-    expected: "static cling"
-
   - name: Interpolation - Multiple Calls
     desc: Interpolated lambdas should only be called once.
     data:
