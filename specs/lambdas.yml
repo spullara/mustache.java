@@ -22,7 +22,7 @@ tests:
     desc: Interpolated lambdas should only be called once.
     data:
       lambda: !code
-        ruby: 'proc { ($calls ||= 0) += 1 }'
+        ruby: 'proc { $calls ||= 0; $calls += 1 }'
         perl: 'sub { no strict; $calls += 1 }'
     template: '{{lambda}} == {{{lambda}}} == {{lambda}}'
     expected: '1 == 1 == 1'
