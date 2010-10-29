@@ -27,6 +27,18 @@ tests:
     template: '{{lambda}} == {{{lambda}}} == {{lambda}}'
     expected: '1 == 1 == 1'
 
+  - name: Interpolation - Caches
+    desc: Lambda caches should not disrupt normal context operations.
+    data:
+      key: Top
+      context:
+        key: Under
+        lambda: !code
+          ruby: 'proc { "Big" }'
+          perl: 'sub { "Big" }'
+    template: "{{#context}}{{key}} the {{lambda}}{{/context}} {{key}}"
+    expected: "Under the Big Top"
+
   - name: Escaping
     desc: Lambda results should be appropriately escaped.
     data:
