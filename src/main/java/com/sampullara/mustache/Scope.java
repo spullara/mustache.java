@@ -121,6 +121,7 @@ public class Scope extends HashMap {
       members = cache.get(aClass);
       if (members == null) {
         members = new ConcurrentHashMap<String, AccessibleObject>();
+        cache.put(aClass, members);
       }
     }
     AccessibleObject member = members.get(name);
