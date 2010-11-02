@@ -113,6 +113,9 @@ public class Scope extends HashMap {
     return v;
   }
 
+  private static class Nothing extends AccessibleObject {}
+  private static Nothing nothing = new Nothing();
+
   private Object handleObject(Scope scope, String name, Object v) {
     Class aClass = parent.getClass();
     Map<String, AccessibleObject> members;
@@ -121,10 +124,12 @@ public class Scope extends HashMap {
       members = cache.get(aClass);
       if (members == null) {
         members = new ConcurrentHashMap<String, AccessibleObject>();
+
         cache.put(aClass, members);
       }
     }
     AccessibleObject member = members.get(name);
+    if (member == nothing) return null;
     if (member == null) {
       try {
         member = getField(name, aClass);
@@ -177,6 +182,9 @@ public class Scope extends HashMap {
     } catch (Exception e) {
       // Might be nice for debugging but annoying in practice
       logger.log(Level.WARNING, "Failed to get value for " + name, e);
+    }
+    if (member == null) {
+      members.put(name, nothing);
     }
     return v;
   }
