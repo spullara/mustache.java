@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -163,20 +164,28 @@ public abstract class Mustache {
   protected Iterable<Scope> iterable(final Scope s, String name) {
     int times = 0;
     final String finalName = name;
-    final Object value = getValue(s, name);
+    Object value = getValue(s, name);
+    if (value instanceof Future) {
+      try {
+        value = ((Future) value).get();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
     if (value == null || (value instanceof Boolean && !((Boolean) value))) {
       return EMPTY;
     }
+    final Object finalValue = value;
     return new Iterable<Scope>() {
       public Iterator<Scope> iterator() {
         return new Iterator<Scope>() {
           Iterator i;
 
           {
-            if (value instanceof Iterable && !(value instanceof JsonNode && !(((JsonNode) value).isArray()))) {
-              i = ((Iterable) value).iterator();
+            if (finalValue instanceof Iterable && !(finalValue instanceof JsonNode && !(((JsonNode) finalValue).isArray()))) {
+              i = ((Iterable) finalValue).iterator();
             } else {
-              i = new SingleValueIterator(value);
+              i = new SingleValueIterator(finalValue);
             }
           }
 
