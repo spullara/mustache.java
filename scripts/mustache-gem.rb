@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'rubygems'
 require 'mustache'
 require 'tmpdir'
 require 'yaml'
