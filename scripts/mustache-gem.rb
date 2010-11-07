@@ -11,7 +11,9 @@ class MustacheSpec < Test::Unit::TestCase
   def setup
     @partials = File.join(File.dirname(__FILE__), '..', 'partials')
     Dir.mkdir(@partials)
-    Mustache.template_path = @partials
+
+    @Mustache = Class.new(Mustache)
+    @Mustache.template_path = @partials
   end
 
   def teardown
@@ -28,7 +30,7 @@ class MustacheSpec < Test::Unit::TestCase
   end
 
   def assert_mustache_spec(test)
-    actual = Mustache.render(test['template'], test['data'])
+    actual = @Mustache.render(test['template'], test['data'])
 
     assert_equal test['expected'], actual, "" <<
       "#{ test['desc'] }\n" <<
