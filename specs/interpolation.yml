@@ -39,6 +39,30 @@ tests:
     expected: |
       These characters should not be HTML escaped: & " < >
 
+  - name: Basic Numeric Interpolation
+    desc: Numbers should interpolate seamlessly.
+    data: { power: 1.21, mph: 85 }
+    template: |
+      We must discharge {{power}} jiggawatts at {{mph}} miles an hour!
+    expected: |
+      We must discharge 1.21 jiggawatts at 85 miles an hour!
+
+  - name: Triple Mustache Numeric Interpolation
+    desc: Numbers should interpolate seamlessly.
+    data: { power: 1.21, mph: 85 }
+    template: |
+      We must discharge {{{power}}} jiggawatts at {{{mph}}} miles an hour!
+    expected: |
+      We must discharge 1.21 jiggawatts at 85 miles an hour!
+
+  - name: Ampersand Numeric Interpolation
+    desc: Numbers should interpolate seamlessly.
+    data: { power: 1.21, mph: 85 }
+    template: |
+      We must discharge {{&power}} jiggawatts at {{&mph}} miles an hour!
+    expected: |
+      We must discharge 1.21 jiggawatts at 85 miles an hour!
+
   # Whitespace Sensitivity
 
   - name: Interpolation - Surrounding Whitespace
