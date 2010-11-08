@@ -1,57 +1,25 @@
 tests:
-  - name: Single Equals
-    desc: A single equals sign should be sufficient to change delimiters.
-    data: { text: 'Hey!' }
-    template: '{{=<% %>}}(<%text%>)'
-    expected: '(Hey!)'
-
-  - name: Mirrored Equals
-    desc: Surrounding equals signs should be permitted.
+  - name: Pair Behavior
+    desc: The equals sign (used on both sides) should permit delimiter changes.
     data: { text: 'Hey!' }
     template: '{{=<% %>=}}(<%text%>)'
     expected: '(Hey!)'
 
   # Whitespace Sensitivity
 
-  - name: Single Equals - Surrounding Whitespace
-    desc: Surrounding whitespace should be left untouched.
-    data: { }
-    template: '| {{=@ @}} |'
-    expected: '|  |'
-
-  - name: Mirrored Equals - Surrounding Whitespace
+  - name: Surrounding Whitespace
     desc: Surrounding whitespace should be left untouched.
     data: { }
     template: '| {{=@ @=}} |'
     expected: '|  |'
 
-  - name: Single Equals (Inline) - Outlying Whitespace
-    desc: Whitespace should be left untouched.
-    data: { }
-    template: " | {{=@ @}}\n"
-    expected: " | \n"
-
-  - name: Mirrored Equals (Inline) - Outlying Whitespace
+  - name: Outlying Whitespace (Inline)
     desc: Whitespace should be left untouched.
     data: { }
     template: " | {{=@ @=}}\n"
     expected: " | \n"
 
-  - name: Single Equals (Standalone)
-    desc: Standalone lines should be removed from the template.
-    data: { }
-    template: |
-      Begin.
-      {{=@ @}}
-      Middle.
-        @={{ }}@
-      End.
-    expected: |
-      Begin.
-      Middle.
-      End.
-
-  - name: Mirrored Equals (Standalone)
+  - name: Standalone Tag
     desc: Standalone lines should be removed from the template.
     data: { }
     template: |
@@ -67,13 +35,7 @@ tests:
 
   # Whitespace Insensitivity
 
-  - name: Single Equals With Padding
-    desc: Superfluous in-tag whitespace should be ignored.
-    data: { }
-    template: '|{{= @   @ }}|'
-    expected: '||'
-
-  - name: Mirrored Equals With Padding
+  - name: Pair with Padding
     desc: Superfluous in-tag whitespace should be ignored.
     data: { }
     template: '|{{= @   @ =}}|'
