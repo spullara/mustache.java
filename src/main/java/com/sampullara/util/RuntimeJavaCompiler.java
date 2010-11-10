@@ -84,7 +84,7 @@ public class RuntimeJavaCompiler {
     private ZipEntry entry;
 
     protected JavaClassFromEntry(JarFile jarfile, ZipEntry entry) {
-      super(URI.create("jar://" + jarfile.getName() + "!" + entry.getName()), Kind.CLASS);
+      super(URI.create("jar://" + jarfile.getName().toString().replace('\\', '/') + "!" + entry.getName()), Kind.CLASS);
       this.jarfile = jarfile;
       this.entry = entry;
     }
