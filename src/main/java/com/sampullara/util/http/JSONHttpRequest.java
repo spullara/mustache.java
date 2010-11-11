@@ -29,24 +29,41 @@ public class JSONHttpRequest extends HttpRequest<JsonNode> {
     final CallbackFuture<JsonNode> future = new CallbackFuture<JsonNode>();
     ContentExchange exchange = new ContentExchange() {
       protected void onResponseComplete() throws IOException {
-        super.onResponseComplete();
-        String responseContent = this.getResponseContent();
-        if (responseContent == null) {
-          future.set(null);
-        } else {
-          try {
-            JsonParser jp = jf.createJsonParser(responseContent);
-            future.set(jp.readValueAsTree());
-          } catch (Exception e) {
-            future.error(e);
+        try {
+          super.onResponseComplete();
+          String responseContent = this.getResponseContent();
+          if (responseContent == null) {
+            future.set(null);
+          } else {
+            try {
+              JsonParser jp = jf.createJsonParser(responseContent);
+              future.set(jp.readValueAsTree());
+            } catch (Exception e) {
+              future.error(e);
+            }
+          }
+        } catch (Throwable th) {
+          th.printStackTrace();
+          if (!future.isDone()) {
+            future.error(th);
+          }
+          if (th instanceof IOException) {
+            throw (IOException) th;
+          }
+          if (th instanceof RuntimeException) {
+            throw (RuntimeException) th;
+          }
+          if (th instanceof Error) {
+            throw (Error) th;
           }
         }
       }
     };
-    
+
     exchange.setRequestHeader("Accept", "application/json, text/javascript");
     exchange.setMethod("GET");
     exchange.setURL(url.toString());
+    System.out.println(url);
 
     // start the exchange
     client.send(exchange);

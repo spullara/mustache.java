@@ -27,8 +27,8 @@ public class CallbackFuture<T> implements Future<T> {
     if (!isDone) {
       isDone = true;
       this.o = o;
-      notify();
     }
+    notifyAll();
   }
 
   /**
@@ -39,8 +39,8 @@ public class CallbackFuture<T> implements Future<T> {
     if (!isDone) {
       isDone = true;
       this.error = error;
-      notify();
     }
+    notifyAll();
   }
 
   @Override
