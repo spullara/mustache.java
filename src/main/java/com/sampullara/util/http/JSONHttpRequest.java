@@ -63,7 +63,6 @@ public class JSONHttpRequest extends HttpRequest<JsonNode> {
     exchange.setRequestHeader("Accept", "application/json, text/javascript");
     exchange.setMethod("GET");
     exchange.setURL(url.toString());
-    System.out.println(url);
 
     // start the exchange
     client.send(exchange);
