@@ -17,31 +17,52 @@ tests:
       1234567890
 
   - name: Standalone
-    desc: Standalone comment lines should be entirely removed.
+    desc: All standalone comment lines should be removed.
     data: { }
     template: |
-      123
+      Begin.
       {{! Comment Block! }}
-      4567
-        {{! Indented Comment Block! }}
-      890
+      End.
     expected: |
-      123
-      4567
-      890
+      Begin.
+      End.
+
+  - name: Indented Standalone
+    desc: All standalone comment lines should be removed.
+    data: { }
+    template: |
+      Begin.
+        {{! Indented Comment Block! }}
+      End.
+    expected: |
+      Begin.
+      End.
 
   - name: Multiline Standalone
-    desc: All lines of a standalone multiline comment should be removed.
+    desc: All standalone comment lines should be removed.
     data: { }
     template: |
-      Hello
+      Begin.
+      {{!
+      Something's going on here...
+      }}
+      End.
+    expected: |
+      Begin.
+      End.
+
+  - name: Indented Multiline Standalone
+    desc: All standalone comment lines should be removed.
+    data: { }
+    template: |
+      Begin.
         {{!
           Something's going on here...
         }}
-      Goodbye
+      End.
     expected: |
-      Hello
-      Goodbye
+      Begin.
+      End.
 
   - name: Indented Inline
     desc: Inline comments should not strip whitespace
