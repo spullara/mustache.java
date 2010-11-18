@@ -2,32 +2,32 @@ tests:
   - name: Falsey
     desc: Falsey sections should have their contents rendered.
     data: { boolean: false }
-    template: '{{^boolean}}This should be rendered.{{/boolean}}'
-    expected: 'This should be rendered.'
+    template: '"{{^boolean}}This should be rendered.{{/boolean}}"'
+    expected: '"This should be rendered."'
 
   - name: Truthy
     desc: Truthy sections should have their contents omitted.
     data: { boolean: true }
-    template: '{{^boolean}}This should not be rendered.{{/boolean}}'
-    expected: ''
+    template: '"{{^boolean}}This should not be rendered.{{/boolean}}"'
+    expected: '""'
 
   - name: Context
     desc: Objects and hashes should behave like truthy values.
     data: { context: { name: 'Joe' } }
-    template: '{{^context}}Hi {{name}}.{{/context}}'
-    expected: ''
+    template: '"{{^context}}Hi {{name}}.{{/context}}"'
+    expected: '""'
 
   - name: List
     desc: Lists should behave like truthy values.
     data: { list: [ { n: 1 }, { n: 2 }, { n: 3 } ] }
-    template: '{{^list}}{{n}}{{/list}}'
-    expected: ''
+    template: '"{{^list}}{{n}}{{/list}}"'
+    expected: '""'
 
   - name: Empty List
     desc: Empty lists should behave like falsey values.
     data: { list: [ ] }
-    template: '{{^list}}Yay lists!{{/list}}'
-    expected: 'Yay lists!'
+    template: '"{{^list}}Yay lists!{{/list}}"'
+    expected: '"Yay lists!"'
 
   - name: Doubled
     desc: Multiple inverted sections per template should be permitted.
@@ -57,21 +57,29 @@ tests:
     desc: Standalone lines should be removed from the template.
     data: { boolean: false }
     template: |
-      | This
+      | This Is
       {{^boolean}}
-      | Is
+      |
       {{/boolean}}
-      |
-        {{^boolean}}
-      | A
-        {{/boolean}}
-      | Line
+      | A Line
     expected: |
-      | This
-      | Is
+      | This Is
       |
-      | A
-      | Line
+      | A Line
+
+  - name: Standalone Indented Lines
+    desc: Standalone indented lines should be removed from the template.
+    data: { boolean: false }
+    template: |
+      | This Is
+        {{^boolean}}
+      |
+        {{/boolean}}
+      | A Line
+    expected: |
+      | This Is
+      |
+      | A Line
 
   # Whitespace Insensitivity
 
