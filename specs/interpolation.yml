@@ -39,29 +39,41 @@ tests:
     expected: |
       These characters should not be HTML escaped: & " < >
 
-  - name: Basic Numeric Interpolation
-    desc: Numbers should interpolate seamlessly.
-    data: { power: 1.21, mph: 85 }
-    template: |
-      We must discharge {{power}} jiggawatts at {{mph}} miles an hour!
-    expected: |
-      We must discharge 1.21 jiggawatts at 85 miles an hour!
+  - name: Basic Integer Interpolation
+    desc: Integers should interpolate seamlessly.
+    data: { mph: 85 }
+    template: '"{{mph}} miles an hour!"'
+    expected: '"85 miles an hour!"'
 
-  - name: Triple Mustache Numeric Interpolation
-    desc: Numbers should interpolate seamlessly.
-    data: { power: 1.21, mph: 85 }
-    template: |
-      We must discharge {{{power}}} jiggawatts at {{{mph}}} miles an hour!
-    expected: |
-      We must discharge 1.21 jiggawatts at 85 miles an hour!
+  - name: Triple Mustache Integer Interpolation
+    desc: Integers should interpolate seamlessly.
+    data: { mph: 85 }
+    template: '"{{{mph}}} miles an hour!"'
+    expected: '"85 miles an hour!"'
 
-  - name: Ampersand Numeric Interpolation
-    desc: Numbers should interpolate seamlessly.
-    data: { power: 1.21, mph: 85 }
-    template: |
-      We must discharge {{&power}} jiggawatts at {{&mph}} miles an hour!
-    expected: |
-      We must discharge 1.21 jiggawatts at 85 miles an hour!
+  - name: Ampersand Integer Interpolation
+    desc: Integers should interpolate seamlessly.
+    data: { mph: 85 }
+    template: '"{{&mph}} miles an hour!"'
+    expected: '"85 miles an hour!"'
+
+  - name: Basic Decimal Interpolation
+    desc: Decimals should interpolate seamlessly with proper significance.
+    data: { power: 1.210 }
+    template: '"{{power}} jiggawatts!"'
+    expected: '"1.21 jiggawatts!"'
+
+  - name: Triple Mustache Decimal Interpolation
+    desc: Decimals should interpolate seamlessly with proper significance.
+    data: { power: 1.210 }
+    template: '"{{{power}}} jiggawatts!"'
+    expected: '"1.21 jiggawatts!"'
+
+  - name: Ampersand Decimal Interpolation
+    desc: Decimals should interpolate seamlessly with proper significance.
+    data: { power: 1.210 }
+    template: '"{{&power}} jiggawatts!"'
+    expected: '"1.21 jiggawatts!"'
 
   # Whitespace Sensitivity
 
