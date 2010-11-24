@@ -188,7 +188,14 @@ public class MustacheCompiler {
                 }
                 template = new StringBuilder();
 
-                parent = sub.getClass().getClassLoader();
+                ClassLoader classLoader = sub.getClass().getClassLoader();
+                if (parent == null || !(parent instanceof RuntimeJavaCompiler.CompilerClassLoader) ||
+                        !(classLoader instanceof RuntimeJavaCompiler.CompilerClassLoader)) {
+                  parent = classLoader;
+                } else {
+                  RuntimeJavaCompiler.CompilerClassLoader rcc = (RuntimeJavaCompiler.CompilerClassLoader) parent;
+                  rcc.merge((RuntimeJavaCompiler.CompilerClassLoader) classLoader);
+                }
                 if (debug) {
                   code.append("System.err.println(\"#").append(startTag).append("\");");
                 }
@@ -308,22 +315,28 @@ public class MustacheCompiler {
           fw.write(code.toString());
           fw.close();
         }
-        RuntimeJavaCompiler.CompilerClassLoader loader = (RuntimeJavaCompiler.CompilerClassLoader) RuntimeJavaCompiler.compile(new PrintWriter(System.out, true), className, code.toString(), parent);
-        Class<?> aClass = loader.loadClass("com.sampullara.mustaches." + className);
-        result = (Mustache) aClass.newInstance();
-        result.setRoot(root);
-        if (outputDirectory != null) {
-          for (Map.Entry<String, RuntimeJavaCompiler.JavaClassOutput> entry : loader.getJavaClassMap().entrySet()) {
-            String outputName = entry.getKey();
-            int dot = outputName.lastIndexOf(".");
-            String outputPackage = outputName.substring(0, dot);
-            File outputDir = new File(outputDirectory, outputPackage.replace(".", "/"));
-            outputDir.mkdirs();
-            File outputFile = new File(outputDir, outputName.substring(dot + 1) + ".class");
-            FileOutputStream fos = new FileOutputStream(outputFile);
-            fos.write(entry.getValue().getBytes());
-            fos.close();
+        try {
+          RuntimeJavaCompiler.CompilerClassLoader loader = (RuntimeJavaCompiler.CompilerClassLoader) RuntimeJavaCompiler.compile(new PrintWriter(System.out, true), className, code.toString(), parent);
+          Class<?> aClass = loader.loadClass("com.sampullara.mustaches." + className);
+          if (outputDirectory != null) {
+            for (Map.Entry<String, RuntimeJavaCompiler.JavaClassOutput> entry : loader.getJavaClassMap().entrySet()) {
+              String outputName = entry.getKey();
+              int dot = outputName.lastIndexOf(".");
+              String outputPackage = outputName.substring(0, dot);
+              File outputDir = new File(outputDirectory, outputPackage.replace(".", "/"));
+              outputDir.mkdirs();
+              File outputFile = new File(outputDir, outputName.substring(dot + 1) + ".class");
+              FileOutputStream fos = new FileOutputStream(outputFile);
+              fos.write(entry.getValue().getBytes());
+              fos.close();
+            }
           }
+          result = (Mustache) aClass.newInstance();
+          result.setRoot(root);
+        } catch (ClassNotFoundException cnfe) {
+          System.out.println("Compiling: " + className);
+          System.out.println(parent);
+          throw cnfe;
         }
       }
     } catch (Exception e) {

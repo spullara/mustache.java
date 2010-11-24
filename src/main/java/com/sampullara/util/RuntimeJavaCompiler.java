@@ -131,6 +131,7 @@ public class RuntimeJavaCompiler {
    */
   public static class CompilerClassLoader extends ClassLoader {
     private Map<String, JavaClassOutput> classes = new HashMap<String, JavaClassOutput>();
+    private final ClassLoader parent;
 
     public Map<String, JavaClassOutput> getJavaClassMap() {
       return classes;
@@ -142,6 +143,15 @@ public class RuntimeJavaCompiler {
 
     public CompilerClassLoader(ClassLoader loader) {
       super(loader);
+      parent = loader;
+    }
+
+    public void merge(CompilerClassLoader merger) {
+      classes.putAll(merger.classes);
+    }
+
+    public String toString() {
+      return parent.toString() + " ->\n  " + classes.toString();
     }
 
     public void add(String name, JavaClassOutput clazz) {
