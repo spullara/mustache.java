@@ -73,7 +73,7 @@ public class Scope extends HashMap {
     for (String component : components) {
       value = current.localGet(currentScope, component);
       if (value == null || value == NULL) {
-        return value;
+        return null;
       }
       currentScope = current;
       current = new Scope(value);

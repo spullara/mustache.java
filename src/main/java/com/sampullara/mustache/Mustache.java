@@ -29,10 +29,10 @@ import static com.sampullara.mustache.Scope.NULL;
  * Time: 10:12:47 AM
  */                                             
 public abstract class Mustache {
-  protected Logger logger = Logger.getLogger(getClass().getName());
-  private File root;
-  private String path;                                        
+  protected static Logger logger = Logger.getLogger(Mustache.class.getName());
   private static final boolean debug = Boolean.getBoolean("mustache.debug");
+  private File root;
+  private String path;
 
   public void setRoot(File root) {
     this.root = root;

@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
@@ -177,7 +178,7 @@ public class RuntimeJavaCompiler {
 
     @Override
     protected Class<?> findClass(final String classname)
-            throws ClassNotFoundException {
+        throws ClassNotFoundException {
       JavaClassOutput file = classes.get(classname);
       if (file != null) {
         byte[] bytes = file.getBytes();
@@ -222,12 +223,18 @@ public class RuntimeJavaCompiler {
     public JavaFileObject getJavaFileForOutput(Location location, String classname, JavaFileObject.Kind kind, FileObject fileObject) throws IOException {
       if (kind == JavaFileObject.Kind.CLASS) {
         JavaClassOutput jco =
-                new JavaClassOutput(URI.create("memory://" + classname.replace('.', '/') + ".class"), JavaFileObject.Kind.CLASS);
+            new JavaClassOutput(URI.create("memory://" + classname.replace('.', '/') + ".class"), JavaFileObject.Kind.CLASS);
         ccl.add(classname, jco);
         return jco;
       }
       return super.getJavaFileForOutput(location, classname, kind, fileObject);
     }
+
+    // Individual class loaders can change at runtime, mostly due to this class
+    private Map<String, List<JavaFileObject>> jfosCache = new ConcurrentHashMap<String, List<JavaFileObject>>();
+
+    // We only need to do this for every package since we don't allow the jars to vary at runtime
+    private static Map<String, List<JavaFileObject>> jfosGlobalCache = new ConcurrentHashMap<String, List<JavaFileObject>>();
 
     /**
      * This is the core of the problems with the compiler API.  Here we have to track down classes from whereever they
@@ -241,8 +248,11 @@ public class RuntimeJavaCompiler {
      * @throws IOException
      */
     @Override
-    public Iterable<JavaFileObject> list(Location location, String s, Set<JavaFileObject.Kind> kinds, boolean b) throws IOException {
-      List<JavaFileObject> jfos = new ArrayList<JavaFileObject>();
+    public synchronized Iterable<JavaFileObject> list(Location location, String s, Set<JavaFileObject.Kind> kinds, boolean b) throws IOException {
+      String key = location + " " + s + " " + kinds + " " + b;
+      List<JavaFileObject> jfos = jfosCache.get(key);
+      if (jfos != null) return jfos;
+      jfos = new ArrayList<JavaFileObject>();
       if (location.getName().equals("CLASS_PATH")) {
         final String name = s.replace('.', '/');
         Set<URL> urls = new HashSet<URL>();
@@ -279,16 +289,22 @@ public class RuntimeJavaCompiler {
           if ("jar".equals(protocol)) {
             String jarFilename = filename.substring(5);
             jarFilename = jarFilename.substring(0, jarFilename.indexOf("!"));
-            if (new File(jarFilename).exists()) {
-              JarFile jar = new JarFile(jarFilename);
-              for (Enumeration<JarEntry> entries = jar.entries(); entries.hasMoreElements();) {
-                JarEntry entry = entries.nextElement();
-                String entryName = entry.getName();
-                if (entryName.startsWith(name) && !entry.isDirectory()) {
-                  jfos.add(new JavaClassFromEntry(jar, entry));
+            List<JavaFileObject> list = jfosGlobalCache.get(jarFilename);
+            if (list == null) {
+              list = new ArrayList<JavaFileObject>();
+              if (new File(jarFilename).exists()) {
+                JarFile jar = new JarFile(jarFilename);
+                for (Enumeration<JarEntry> entries = jar.entries(); entries.hasMoreElements();) {
+                  JarEntry entry = entries.nextElement();
+                  String entryName = entry.getName();
+                  if (entryName.startsWith(name) && !entry.isDirectory()) {
+                    list.add(new JavaClassFromEntry(jar, entry));
+                  }
                 }
+                jfosGlobalCache.put(jarFilename, list);
               }
             }
+            jfos.addAll(list);
           } else if ("file".equals(protocol)) {
             File file = new File(filename);
             if (file.exists()) {
@@ -307,6 +323,7 @@ public class RuntimeJavaCompiler {
       for (JavaFileObject jfo : super.list(location, s, kinds, b)) {
         jfos.add(jfo);
       }
+      jfosCache.put(key, jfos);
       return jfos;
     }
   }
@@ -319,7 +336,7 @@ public class RuntimeJavaCompiler {
 
     public JavaSourceFromString(String name, String code) {
       super(URI.create("string:///" + name.replace('.', '/') + Kind.SOURCE.extension),
-              Kind.SOURCE);
+          Kind.SOURCE);
       this.code = code;
     }
 
