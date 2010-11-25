@@ -301,7 +301,7 @@ public class RuntimeJavaCompiler {
                     list.add(new JavaClassFromEntry(jar, entry));
                   }
                 }
-                jfosGlobalCache.put(jarFilename, list);
+                // jfosGlobalCache.put(jarFilename, list);
               }
             }
             jfos.addAll(list);
