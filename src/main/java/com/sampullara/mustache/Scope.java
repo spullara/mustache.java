@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * The scope of the executing Mustache can include an object and a map of strings.  Each scope can also have a
@@ -25,6 +26,7 @@ public class Scope extends HashMap {
   protected static Map<Class, Map<String, AccessibleObject>> cache = new ConcurrentHashMap<Class, Map<String, AccessibleObject>>();
   public static final Iterable EMPTY = new ArrayList(0);
   public static final Object NULL = new Object() { public String toString() { return ""; }};
+  private static final Pattern DOT_PATTERN = Pattern.compile("\\.");
 
   private Object parent;
   private Scope parentScope;
@@ -67,7 +69,7 @@ public class Scope extends HashMap {
   public Object get(Object o, Scope scope) {
     String name = o.toString();
     Object value = null;
-    String[] components = name.split("\\.");
+    String[] components = DOT_PATTERN.split(name);
     Scope current = this;
     Scope currentScope = scope;
     for (String component : components) {
