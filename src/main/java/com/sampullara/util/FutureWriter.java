@@ -52,6 +52,10 @@ public class FutureWriter extends Writer {
     this.writer = writer;
   }
 
+  public static void shutdown() {
+    es.shutdownNow();
+  }
+
   int total = 0;
 
   /**
