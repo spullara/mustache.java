@@ -105,11 +105,11 @@ public class MustacheCompiler {
     return result;
   }
 
-  public Mustache compile(BufferedReader br) throws MustacheException {
+  public Mustache compile(Reader br) throws MustacheException {
     return compile(br, new Stack<String>(), new AtomicInteger(0), getClass().getClassLoader());
   }
 
-  public Mustache compile(BufferedReader br, Stack<String> scope, AtomicInteger currentLine, ClassLoader parent) throws MustacheException {
+  public Mustache compile(Reader br, Stack<String> scope, AtomicInteger currentLine, ClassLoader parent) throws MustacheException {
     AtomicInteger num = new AtomicInteger(0);
     Mustache result;
     StringBuilder code = new StringBuilder();
