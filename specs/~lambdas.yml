@@ -5,7 +5,7 @@ tests:
       lambda: !code
         ruby: 'proc { "world" }'
         perl: 'sub { "world" }'
-        js:   'function() { return "World" }'
+        js:   'function() { return "world" }'
     template: "Hello, {{lambda}}!"
     expected: "Hello, world!"
 
@@ -26,7 +26,7 @@ tests:
       lambda: !code
         ruby: 'proc { $calls ||= 0; $calls += 1 }'
         perl: 'sub { no strict; $calls += 1 }'
-        js:   'function() { calls ||= 0; return calls++; }'
+        js:   'function() { calls = calls || 0; return calls++; }'
     template: '{{lambda}} == {{{lambda}}} == {{lambda}}'
     expected: '1 == 1 == 1'
 
