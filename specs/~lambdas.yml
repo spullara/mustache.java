@@ -26,7 +26,7 @@ tests:
       lambda: !code
         ruby: 'proc { $calls ||= 0; $calls += 1 }'
         perl: 'sub { no strict; $calls += 1 }'
-        js:   'function() { calls = calls || 0; return calls++; }'
+        js:   'function() { f = arguments.callee; return f.calls = (f.calls || 0) + 1 }'
     template: '{{lambda}} == {{{lambda}}} == {{lambda}}'
     expected: '1 == 1 == 1'
 
