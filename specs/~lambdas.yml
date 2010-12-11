@@ -5,6 +5,7 @@ tests:
       lambda: !code
         ruby: 'proc { "world" }'
         perl: 'sub { "world" }'
+        js:   'function() { return "World" }'
     template: "Hello, {{lambda}}!"
     expected: "Hello, world!"
 
@@ -15,6 +16,7 @@ tests:
       lambda: !code
         ruby: 'proc { "{{planet}}" }'
         perl: 'sub { "{{planet}}" }'
+        js:   'function() { return "{{planet}}" }'
     template: "Hello, {{lambda}}!"
     expected: "Hello, world!"
 
@@ -24,6 +26,7 @@ tests:
       lambda: !code
         ruby: 'proc { $calls ||= 0; $calls += 1 }'
         perl: 'sub { no strict; $calls += 1 }'
+        js:   'function() { calls ||= 0; return calls++; }'
     template: '{{lambda}} == {{{lambda}}} == {{lambda}}'
     expected: '1 == 1 == 1'
 
@@ -36,6 +39,7 @@ tests:
         lambda: !code
           ruby: 'proc { "Big" }'
           perl: 'sub { "Big" }'
+          js:   'function() { return "Big" }'
     template: "{{#context}}{{key}} the {{lambda}}{{/context}} {{key}}"
     expected: "Under the Big Top"
 
@@ -45,6 +49,7 @@ tests:
       lambda: !code
         ruby: 'proc { ">" }'
         perl: 'sub { ">" }'
+        js:   'function() { return ">" }'
     template: "<{{lambda}}{{{lambda}}}"
     expected: "<&gt;>"
 
@@ -55,6 +60,7 @@ tests:
       lambda: !code
         ruby: 'proc { |text| text == "{{x}}" ? "yes" : "no" }'
         perl: 'sub { $_[0] eq "{{x}}" ? "yes" : "no" }'
+        js:   'function(txt) { return (txt == "{{x}}" ? "yes" : "no") }'
     template: "<{{#lambda}}{{x}}{{/lambda}}>"
     expected: "<yes>"
 
@@ -65,6 +71,7 @@ tests:
       lambda: !code
         ruby: 'proc { |text| "#{text}{{planet}}#{text}" }'
         perl: 'sub { $_[0] . "{{planet}}" . $_[0] }'
+        js:   'function(txt) { return txt + "{{planet}}" + txt }'
     template: "<{{#lambda}}-{{/lambda}}>"
     expected: "<-Earth->"
 
@@ -75,5 +82,6 @@ tests:
       lambda: !code
         ruby: 'proc { |text| text }'
         perl: 'sub { shift }'
+        js:   'function(txt) { return txt }'
     template: "<{{^lambda}}{{static}}{{/lambda}}>"
     expected: "<>"
