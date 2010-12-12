@@ -45,6 +45,18 @@ tests:
       * second
       * third
 
+  - name: Nested (Falsey)
+    desc: Nested falsey sections should have their contents rendered.
+    data: { t: false }
+    template: "| A {{^t}}B {{^t}}C{{/t}} D{{/t}} E |"
+    expected: "| A B C D E |"
+
+  - name: Nested (Truthy)
+    desc: Nested truthy sections should be omitted.
+    data: { t: true }
+    template: "| A {{^t}}B {{^t}}C{{/t}} D{{/t}} E |"
+    expected: "| A  E |"
+
   # Whitespace Sensitivity
 
   - name: Surrounding Whitespace
