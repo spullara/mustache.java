@@ -1,10 +1,12 @@
 package com.sampullara.mustache;
 
+import com.google.common.base.Function;
 import com.sampullara.util.FutureWriter;
 import org.codehaus.jackson.JsonNode;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -12,7 +14,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -52,6 +53,9 @@ public abstract class Mustache {
 
   public abstract void execute(FutureWriter writer, Scope ctx) throws MustacheException;
 
+  private FutureWriter capturedWriter;
+  private FutureWriter actual;
+
   /**
    * Enqueue's a Mustache into the FutureWriter and starts evaluating it.
    *
@@ -60,7 +64,11 @@ public abstract class Mustache {
    * @param s
    * @throws IOException
    */
-  protected void enqueue(final FutureWriter writer, final Mustache m, final Scope s) throws IOException {
+  protected void enqueue(FutureWriter writer, final Mustache m, final Scope s) throws IOException {
+    if (capturedWriter != null) {
+      actual = writer;
+      writer = capturedWriter;
+    }
     writer.enqueue(new Callable<Object>() {
       @Override
       public Object call() throws Exception {
@@ -162,7 +170,6 @@ public abstract class Mustache {
    * @return
    */
   protected Iterable<Scope> iterable(final Scope s, String name) {
-    int times = 0;
     final String finalName = name;
     Object value = getValue(s, name);
     if (value instanceof Future) {
@@ -171,6 +178,47 @@ public abstract class Mustache {
       } catch (Exception e) {
         e.printStackTrace();
       }
+    } else if (value instanceof Function) {
+      final Function f = (Function) value;
+      return new Iterable<Scope>() {
+        @Override
+        public Iterator<Scope> iterator() {
+          return new Iterator<Scope>() {
+            boolean first = true;
+            StringWriter writer = new StringWriter();
+
+            @Override
+            public boolean hasNext() {
+              if (first) {
+                capturedWriter = new FutureWriter(writer);
+              } else {
+                try {
+                  capturedWriter.flush();
+                  capturedWriter = null;
+                  Object apply = f.apply(writer.toString());
+                  actual.write(apply == null ? null : String.valueOf(apply));
+                  actual = null;
+                } catch (IOException e) {
+                  e.printStackTrace();
+                }
+              }
+              return first;
+            }
+
+            @Override
+            public Scope next() {
+              if (first) {
+                first = false;
+                return s;
+              }
+              throw new NoSuchElementException();
+            }
+
+            @Override
+            public void remove() {}
+          };
+        }
+      };
     }
     if (value == null || (value instanceof Boolean && !((Boolean) value))) {
       return EMPTY;

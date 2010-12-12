@@ -51,6 +51,13 @@
       <version>7.0.1.v20091125</version>
     </dependency>
 
+    <!-- Google Guava -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>r07</version>
+    </dependency>
+
     <!-- Servlets -->
     <dependency>
       <groupId>javax.servlet</groupId>

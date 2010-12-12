@@ -1,5 +1,6 @@
 package com.sampullara.mustache;
 
+import com.google.common.base.Function;
 import com.sampullara.util.CallbackFuture;
 import com.sampullara.util.FutureWriter;
 import com.sampullara.util.http.JSONHttpRequest;
@@ -48,7 +49,30 @@ public class CompilerTest extends TestCase {
     writer.flush();
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
-  
+
+  public void testSimpleLamda() throws MustacheException, IOException {
+    MustacheCompiler c = new MustacheCompiler(root);
+    Mustache m = c.parseFile("lambda.html");
+    c.setOutputDirectory("target/classes");
+    StringWriter sw = new StringWriter();
+    FutureWriter writer = new FutureWriter(sw);
+    m.execute(writer, new Scope(new Object() {
+      Function<String, String> translate = new Function<String, String>() {
+        @Override
+        public String apply(String input) {
+          if (input.equals("Hello")) {
+            return "Hola";
+          } if (input.equals("Hola")) {
+            return "Hello";
+          }
+          return null;
+        }
+      };
+    }));
+    writer.flush();
+    assertEquals(getContents(root, "lambda.txt"), sw.toString());
+  }
+
   public void testSimpleWithSave() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheCompiler c = init();
     Mustache m = c.parseFile("simple.html");
