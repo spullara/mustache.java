@@ -5,6 +5,12 @@ tests:
     template: '{{=<% %>=}}(<%text%>)'
     expected: '(Hey!)'
 
+  - name: Special Characters
+    desc: Characters with special meaning regexen should be valid delimiters.
+    data: { text: 'It worked!' }
+    template: '({{=[ ]=}}[text])'
+    expected: '(It worked!)'
+
   # Whitespace Sensitivity
 
   - name: Surrounding Whitespace
