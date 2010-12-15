@@ -104,6 +104,12 @@ tests:
     template: " | {{#boolean}}\t|\t{{/boolean}} | \n"
     expected: " | \t|\t | \n"
 
+  - name: Internal Whitespace
+    desc: Sections should not alter internal whitespace.
+    data: { boolean: true }
+    template: " | {{#boolean}} {{! Important Whitespace }}\n {{/boolean}} | \n"
+    expected: " |  \n  | \n"
+
   - name: Standalone Lines
     desc: Standalone lines should be removed from the template.
     data: { boolean: true }
