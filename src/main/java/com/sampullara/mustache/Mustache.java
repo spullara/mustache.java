@@ -53,8 +53,8 @@ public abstract class Mustache {
 
   public abstract void execute(FutureWriter writer, Scope ctx) throws MustacheException;
 
-  private FutureWriter capturedWriter;
-  private FutureWriter actual;
+  private ThreadLocal<FutureWriter> capturedWriter = new ThreadLocal<FutureWriter>();
+  private ThreadLocal<FutureWriter> actual = new ThreadLocal<FutureWriter>();
 
   /**
    * Enqueue's a Mustache into the FutureWriter and starts evaluating it.
@@ -65,9 +65,9 @@ public abstract class Mustache {
    * @throws IOException
    */
   protected void enqueue(FutureWriter writer, final Mustache m, final Scope s) throws IOException {
-    if (capturedWriter != null) {
-      actual = writer;
-      writer = capturedWriter;
+    if (capturedWriter.get() != null) {
+      actual.set(writer);
+      writer = capturedWriter.get();
     }
     writer.enqueue(new Callable<Object>() {
       @Override
@@ -188,17 +188,17 @@ public abstract class Mustache {
             StringWriter writer = new StringWriter();
 
             @Override
-            public boolean hasNext() {
+            public synchronized boolean hasNext() {
               if (first) {
-                capturedWriter = new FutureWriter(writer);
+                capturedWriter.set(new FutureWriter(writer));
               } else {
                 try {
-                  capturedWriter.flush();
-                  capturedWriter = null;
+                  capturedWriter.get().flush();
+                  capturedWriter.set(null);
                   Object apply = f.apply(writer.toString());
-                  actual.write(apply == null ? null : String.valueOf(apply));
-                  actual = null;
-                } catch (IOException e) {
+                  actual.get().write(apply == null ? null : String.valueOf(apply));
+                  actual.set(null);
+                } catch (Exception e) {
                   e.printStackTrace();
                 }
               }
@@ -206,7 +206,7 @@ public abstract class Mustache {
             }
 
             @Override
-            public Scope next() {
+            public synchronized Scope next() {
               if (first) {
                 first = false;
                 return s;
