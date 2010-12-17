@@ -75,6 +75,16 @@ tests:
     template: "<{{#lambda}}-{{/lambda}}>"
     expected: "<-Earth->"
 
+  - name: Section - Multiple Calls
+    desc: Lambdas used for sections should not simply cache the first response.
+    data:
+      lambda: !code
+        ruby: 'proc { |text| "__#{text}__" }'
+        perl: 'sub { "__" . $_[0] . "__" }'
+        js:   'function(txt) { return "__" + txt + "__" }'
+    template: '{{#lambda}}FILE{{/lambda}} != {{#lambda}}LINE{{/ambda}}'
+    expected: '__FILE__ != __LINE__'
+
   - name: Inverted Section
     desc: Lambdas used for inverted sections should be considered truthy.
     data:
