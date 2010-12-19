@@ -82,7 +82,7 @@ tests:
         ruby: 'proc { |text| "__#{text}__" }'
         perl: 'sub { "__" . $_[0] . "__" }'
         js:   'function(txt) { return "__" + txt + "__" }'
-    template: '{{#lambda}}FILE{{/lambda}} != {{#lambda}}LINE{{/ambda}}'
+    template: '{{#lambda}}FILE{{/lambda}} != {{#lambda}}LINE{{/lambda}}'
     expected: '__FILE__ != __LINE__'
 
   - name: Inverted Section
