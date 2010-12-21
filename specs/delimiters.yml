@@ -11,6 +11,81 @@ tests:
     template: '({{=[ ]=}}[text])'
     expected: '(It worked!)'
 
+  - name: Sections
+    desc: Delimiters set outside sections should persist.
+    data: { section: true, data: 'I got interpolated.' }
+    template: |
+      [
+      {{#section}}
+        {{data}}
+        |data|
+      {{/section}}
+
+      {{= | | =}}
+      |#section|
+        {{data}}
+        |data|
+      |/section|
+      ]
+    expected: |
+      [
+        I got interpolated.
+        |data|
+
+        {{data}}
+        I got interpolated.
+      ]
+
+  - name: Inverted Sections
+    desc: Delimiters set outside inverted sections should persist.
+    data: { section: false, data: 'I got interpolated.' }
+    template: |
+      [
+      {{^section}}
+        {{data}}
+        |data|
+      {{/section}}
+
+      {{= | | =}}
+      |^section|
+        {{data}}
+        |data|
+      |/section|
+      ]
+    expected: |
+      [
+        I got interpolated.
+        |data|
+
+        {{data}}
+        I got interpolated.
+      ]
+
+  - name: Partial Inheritence
+    desc: Delimiters set in a parent template should not affect a partial.
+    data: { value: 'yes' }
+    partials:
+      include: '.{{value}}.'
+    template: |
+      [ {{>include}} ]
+      {{= | | =}}
+      [ |>include| ]
+    expected: |
+      [ .yes. ]
+      [ .yes. ]
+
+  - name: Post-Partial Behavior
+    desc: Delimiters set in a partial should not affect the parent template.
+    data: { value: 'yes' }
+    partials:
+      include: '.{{value}}. {{= | | =}} .|value|.'
+    template: |
+      [ {{>include}} ]
+      [ .{{value}}.  .|value|. ]
+    expected: |
+      [ .yes.  .yes. ]
+      [ .yes.  .|value|. ]
+
   # Whitespace Sensitivity
 
   - name: Surrounding Whitespace
