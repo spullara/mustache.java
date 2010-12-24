@@ -298,6 +298,20 @@ public class CompilerTest extends TestCase {
     assertEquals(getContents(root, "items.txt"), sw.toString());
   }
 
+  public void testReadme3() throws MustacheException, IOException {
+    MustacheCompiler c = new MustacheCompiler(root);
+    Mustache m = c.parseFile("items3.html");
+    c.setOutputDirectory("target/classes");
+    StringWriter sw = new StringWriter();
+    FutureWriter writer = new FutureWriter(sw);
+    long start = System.currentTimeMillis();
+    m.execute(writer, new Scope(new Context()));
+    writer.flush();
+    long diff = System.currentTimeMillis() - start;
+    assertTrue("Should be a little bit more than 1 second", diff > 1000 && diff < 2000);
+    assertEquals(getContents(root, "items3.txt"), sw.toString());
+  }
+
   static class Context {
     List<Item> items() {
       return Arrays.asList(

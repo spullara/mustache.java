@@ -174,6 +174,7 @@ public class MustacheCompiler {
             switch (ch) {
               case '#':
               case '^':
+              case '?':
                 // Tag start
                 String startTag = sb.substring(1).trim();
                 scope.push(startTag);
@@ -199,10 +200,16 @@ public class MustacheCompiler {
                 }
                 int variableNum = num.incrementAndGet();
                 code.append("for (Scope s").append(variableNum);
-                if (ch == '#') {
-                  code.append(":iterable(s, \"");
-                } else {
-                  code.append(":inverted(s, \"");
+                switch(ch) {
+                  case '#':
+                    code.append(":iterable(s, \"");
+                    break;
+                  case '^':
+                    code.append(":inverted(s, \"");
+                    break;
+                  case '?':
+                    code.append(":ifiterable(s, \"");
+                    break;
                 }
                 code.append(startTag);
                 code.append("\")) {");
