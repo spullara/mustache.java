@@ -6,6 +6,7 @@ tests:
         ruby: 'proc { "world" }'
         perl: 'sub { "world" }'
         js:   'function() { return "world" }'
+        php:  'return "world";'
     template: "Hello, {{lambda}}!"
     expected: "Hello, world!"
 
@@ -17,6 +18,7 @@ tests:
         ruby: 'proc { "{{planet}}" }'
         perl: 'sub { "{{planet}}" }'
         js:   'function() { return "{{planet}}" }'
+        php:  'return "{{planet}}";'
     template: "Hello, {{lambda}}!"
     expected: "Hello, world!"
 
@@ -27,6 +29,7 @@ tests:
         ruby: 'proc { $calls ||= 0; $calls += 1 }'
         perl: 'sub { no strict; $calls += 1 }'
         js:   'function() { f = arguments.callee; return f.calls = (f.calls || 0) + 1 }'
+        php:  'global $calls; return ++$calls;'
     template: '{{lambda}} == {{{lambda}}} == {{lambda}}'
     expected: '1 == 1 == 1'
 
@@ -40,6 +43,7 @@ tests:
           ruby: 'proc { "Big" }'
           perl: 'sub { "Big" }'
           js:   'function() { return "Big" }'
+          php:  'return "Big";'
     template: "{{#context}}{{key}} the {{lambda}}{{/context}} {{key}}"
     expected: "Under the Big Top"
 
@@ -50,6 +54,7 @@ tests:
         ruby: 'proc { ">" }'
         perl: 'sub { ">" }'
         js:   'function() { return ">" }'
+        php:  'return ">";'
     template: "<{{lambda}}{{{lambda}}}"
     expected: "<&gt;>"
 
@@ -61,6 +66,7 @@ tests:
         ruby: 'proc { |text| text == "{{x}}" ? "yes" : "no" }'
         perl: 'sub { $_[0] eq "{{x}}" ? "yes" : "no" }'
         js:   'function(txt) { return (txt == "{{x}}" ? "yes" : "no") }'
+        php:  'return ($text == "{{x}}") ? "yes" : "no";'
     template: "<{{#lambda}}{{x}}{{/lambda}}>"
     expected: "<yes>"
 
@@ -72,6 +78,7 @@ tests:
         ruby: 'proc { |text| "#{text}{{planet}}#{text}" }'
         perl: 'sub { $_[0] . "{{planet}}" . $_[0] }'
         js:   'function(txt) { return txt + "{{planet}}" + txt }'
+        php:  'return $text . "{{planet}}" . $text;'
     template: "<{{#lambda}}-{{/lambda}}>"
     expected: "<-Earth->"
 
@@ -82,6 +89,7 @@ tests:
         ruby: 'proc { |text| "__#{text}__" }'
         perl: 'sub { "__" . $_[0] . "__" }'
         js:   'function(txt) { return "__" + txt + "__" }'
+        php:  'return "__" . $text . "__";'
     template: '{{#lambda}}FILE{{/lambda}} != {{#lambda}}LINE{{/lambda}}'
     expected: '__FILE__ != __LINE__'
 
@@ -93,5 +101,6 @@ tests:
         ruby: 'proc { |text| text }'
         perl: 'sub { shift }'
         js:   'function(txt) { return txt }'
+        php:  'return $text;'
     template: "<{{^lambda}}{{static}}{{/lambda}}>"
     expected: "<>"
