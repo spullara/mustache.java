@@ -49,6 +49,7 @@
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-client</artifactId>
       <version>7.0.1.v20091125</version>
+      <scope>test</scope>
     </dependency>
 
     <!-- Google Guava -->
