@@ -1,6 +1,6 @@
 package com.sampullara.util.http;
 
-import com.sampullara.util.CallbackFuture;
+import com.google.common.util.concurrent.ValueFuture;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;
@@ -26,7 +26,7 @@ public class JSONHttpRequest extends HttpRequest<JsonNode> {
 
   @Override
   public Future<JsonNode> execute() throws IOException {
-    final CallbackFuture<JsonNode> future = new CallbackFuture<JsonNode>();
+    final ValueFuture<JsonNode> future = ValueFuture.create();
     ContentExchange exchange = new ContentExchange() {
       protected void onResponseComplete() throws IOException {
         try {
@@ -39,13 +39,13 @@ public class JSONHttpRequest extends HttpRequest<JsonNode> {
               JsonParser jp = jf.createJsonParser(responseContent);
               future.set(jp.readValueAsTree());
             } catch (Exception e) {
-              future.error(e);
+              future.setException(e);
             }
           }
         } catch (Throwable th) {
           th.printStackTrace();
           if (!future.isDone()) {
-            future.error(th);
+            future.setException(th);
           }
           if (th instanceof IOException) {
             throw (IOException) th;
