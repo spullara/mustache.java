@@ -58,8 +58,8 @@ tests:
 
   - name: List
     desc: Lists should be iterated; list items should visit the context stack.
-    data: { list: [ { n: 1 }, { n: 2 }, { n: 3 } ] }
-    template: '"{{#list}}{{n}}{{/list}}"'
+    data: { list: [ { item: 1 }, { item: 2 }, { item: 3 } ] }
+    template: '"{{#list}}{{item}}{{/list}}"'
     expected: '"123"'
 
   - name: Empty List
