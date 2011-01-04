@@ -15,7 +15,7 @@ tests:
 
   - name: Recursion
     desc: The greater-than operator should properly recurse.
-    data: { content: X, nodes: [ { content: Y, nodes: [] } ] }
+    data: { content: "X", nodes: [ { content: "Y", nodes: [] } ] }
     template: '{{>node}}'
     partials: { node: '{{content}}<{{#nodes}}{{>node}}{{/nodes}}>' }
     expected: 'X<Y<>>'
