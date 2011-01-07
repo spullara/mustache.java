@@ -39,7 +39,7 @@ public class JSONHttpRequest extends HttpRequest<JsonNode> {
               JsonParser jp = jf.createJsonParser(responseContent);
               future.set(jp.readValueAsTree());
             } catch (Exception e) {
-              future.error(e);
+              future.error(new IOException("Could not access: " + getURI() + ": " + responseContent.substring(0, 1000), e));
             }
           }
         } catch (Throwable th) {
