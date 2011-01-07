@@ -19,6 +19,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.google.common.collect.Iterables.limit;
+import static com.google.common.collect.Iterables.transform;
 import static com.sampullara.mustache.Scope.EMPTY;
 import static com.sampullara.mustache.Scope.NULL;
 
@@ -162,6 +164,14 @@ public abstract class Mustache {
     }
   }
 
+  protected Iterable<Scope> ifiterable(final Scope s, final String name) {
+    return limit(transform(iterable(s, name), new Function<Scope, Scope>() {
+      public Scope apply(Scope scope) {
+        scope.remove(name);
+        return scope;
+      }
+    }), 1);
+  }
   /**
    * Iterate over a named value. If there is only one value return a single value iterator.
    *

@@ -1,0 +1,10 @@
+Name: Item 1
+Price: $19.99
+Features:
+  Feature: New!
+  Feature: Awesome!
+Name: Item 2
+Price: $29.99
+Features:
+  Feature: Old.
+  Feature: Ugly.

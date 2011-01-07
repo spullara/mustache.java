@@ -1,9 +1,22 @@
 package com.sampullara.mustache;
 
+import com.google.common.base.Charsets;
 import com.sampullara.util.RuntimeJavaCompiler;
 
-import java.io.*;
-import java.nio.charset.Charset;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.security.MessageDigest;
 import java.util.Map;
 import java.util.Stack;
@@ -174,6 +187,7 @@ public class MustacheCompiler {
             switch (ch) {
               case '#':
               case '^':
+              case '?':
                 // Tag start
                 String startTag = sb.substring(1).trim();
                 scope.push(startTag);
@@ -199,10 +213,16 @@ public class MustacheCompiler {
                 }
                 int variableNum = num.incrementAndGet();
                 code.append("for (Scope s").append(variableNum);
-                if (ch == '#') {
-                  code.append(":iterable(s, \"");
-                } else {
-                  code.append(":inverted(s, \"");
+                switch(ch) {
+                  case '#':
+                    code.append(":iterable(s, \"");
+                    break;
+                  case '^':
+                    code.append(":inverted(s, \"");
+                    break;
+                  case '?':
+                    code.append(":ifiterable(s, \"");
+                    break;
                 }
                 code.append(startTag);
                 code.append("\")) {");
@@ -286,7 +306,7 @@ public class MustacheCompiler {
     }
     try {
       MessageDigest md = MessageDigest.getInstance("SHA1");
-      byte[] digest = md.digest(code.toString().getBytes(Charset.forName("UTF-8")));
+      byte[] digest = md.digest(code.toString().getBytes(Charsets.UTF_8));
       StringBuilder hash = new StringBuilder();
       for (byte aDigest : digest) {
         hash.append(Integer.toHexString(0xFF & aDigest));
