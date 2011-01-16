@@ -1,7 +1,7 @@
 package com.sampullara.mustache;
 
 import com.google.common.base.Function;
-import com.sampullara.util.CallbackFuture;
+import com.google.common.util.concurrent.ValueFuture;
 import com.sampullara.util.FutureWriter;
 import com.sampullara.util.http.JSONHttpRequest;
 import junit.framework.TestCase;
@@ -9,8 +9,12 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;
 
-import java.io.*;
-import java.nio.charset.Charset;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +32,6 @@ import java.util.concurrent.Future;
  */
 public class CompilerTest extends TestCase {
   private File root;
-  private Charset UTF8 = Charset.forName("UTF-8");
 
   public void testSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheCompiler c = new MustacheCompiler(root);
@@ -339,7 +342,7 @@ public class CompilerTest extends TestCase {
       String description;
 
       Future<String> desc() throws InterruptedException {
-        final CallbackFuture<String> result = new CallbackFuture<String>();
+        final ValueFuture<String> result = ValueFuture.create();
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
           @Override
