@@ -1,4 +1,5 @@
-Mustache.java is a derivative of mustache.js (http://github.com/janl/mustache.js/).
+Mustache.java is a derivative of mustache.js (http://mustache.github.com/mustache.5.html).
+There is a Google Group for support and questions: http://groups.google.com/group/mustachejava
 
 Documentation:
 - For the trivial use case see the Tests and mustache.js documentation
