@@ -37,8 +37,8 @@ tests:
     expected: "  |  >\n>\n"
 
   - name: Standalone Indentation
-    desc: Indentation should be prepended to each line of the partial.
-    data: { }
+    desc: Each line of the partial should be indented before rendering.
+    data: { content: "<\n->" }
     template: |
       \
        {{>partial}}
@@ -46,10 +46,13 @@ tests:
     partials:
       partial: |
         |
+        {{{content}}}
         |
     expected: |
       \
        |
+       <
+      ->
        |
       /
 
