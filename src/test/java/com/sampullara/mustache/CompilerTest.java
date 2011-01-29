@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.ValueFuture;
 import com.sampullara.util.FutureWriter;
 import com.sampullara.util.http.JSONHttpRequest;
 import junit.framework.TestCase;
+import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;
@@ -17,6 +18,7 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -49,6 +51,35 @@ public class CompilerTest extends TestCase {
 
       boolean in_ca = true;
     }));
+    writer.flush();
+    assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
+  public void testSimpleWithMap() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheCompiler c = new MustacheCompiler(root);
+    Mustache m = c.parseFile("simple.html");
+    c.setOutputDirectory("target/classes");
+    StringWriter sw = new StringWriter();
+    FutureWriter writer = new FutureWriter(sw);
+    m.execute(writer, new HashMap() {{
+      put("name", "Chris");
+      put("value", 10000);
+      put("taxed_value", 6000);
+      put("in_ca", true);
+    }});
+    writer.flush();
+    assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
+  public void testSimpleWithJson() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheCompiler c = new MustacheCompiler(root);
+    Mustache m = c.parseFile("simple.html");
+    c.setOutputDirectory("target/classes");
+    StringWriter sw = new StringWriter();
+    FutureWriter writer = new FutureWriter(sw);
+    JsonFactory jf = new MappingJsonFactory();
+    JsonNode jsonNode = jf.createJsonParser("{\"name\":\"Chris\", \"value\":10000, \"taxed_value\":6000,\"in_ca\":true}").readValueAsTree();
+    m.execute(writer, jsonNode);
     writer.flush();
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }

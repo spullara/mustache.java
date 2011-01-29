@@ -53,6 +53,14 @@ public abstract class Mustache {
     return path;
   }
 
+  public final void execute(FutureWriter writer, Map map) throws MustacheException {
+    execute(writer, new Scope(map));
+  }
+
+  public final void execute(FutureWriter writer, JsonNode jsonNode) throws MustacheException {
+    execute(writer, new Scope(jsonNode));
+  }
+
   public abstract void execute(FutureWriter writer, Scope ctx) throws MustacheException;
 
   private ThreadLocal<FutureWriter> capturedWriter = new ThreadLocal<FutureWriter>();
