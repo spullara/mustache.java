@@ -33,5 +33,11 @@ YAML and JSON
 -------------
 
 JSON versions of the YML specs were created using a simple ruby script:
-
+	
+	require 'json' # Make sure you're using SYCK
+	require 'yaml'
     Dir.glob("Mustache-Spec/specs/*").collect{|f| ff=f.gsub("yml","json"); File.open(ff,'w'){|x| x << YAML.parse(File.open(f)).transform.to_json}}
+
+Which has been included as a Rake task:
+
+    rake build:json
