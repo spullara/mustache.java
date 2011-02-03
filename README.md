@@ -29,15 +29,17 @@ outside this core specification, as adjunct specifications.
 Implementors are strongly encouraged to support any and all modules they are
 reasonably capable of supporting.
 
-YAML and JSON
--------------
+Alternate Formats
+-----------------
 
-JSON versions of the YML specs were created using a simple ruby script:
-	
-	require 'json' # Make sure you're using SYCK
-	require 'yaml'
-    Dir.glob("Mustache-Spec/specs/*").collect{|f| ff=f.gsub("yml","json"); File.open(ff,'w'){|x| x << YAML.parse(File.open(f)).transform.to_json}}
+Since YAML is a reasonably complex format that not every language has good
+tools for working with, we are also providing JSON versions of the specs.
+These should be kept identical to the YAML specifications, but if you find the
+need to regenerate them, they can be trivially rebuilt by invoking `rake
+build`.
 
-Which has been included as a Rake task:
-
-    rake build:json
+It is also worth noting that some specifications (notably, the lambda module)
+rely on YAML "tags" to denote special types of data (e.g. source code).  Since
+JSON offers no way to denote this, a special key ("__tag__") is injected with
+the name of the tag as its value.  See `TESTING.md` for more information about
+handling tagged data.

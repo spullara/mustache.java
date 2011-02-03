@@ -31,6 +31,9 @@ In general, the process for each `.yml` file is as follows:
           examples in the spec, feel free to implement them and send a pull
           request.
 
+      *   The JSON version of the spec represents these tagged values as a hash
+          with a '__tag__' key of 'code'.
+
   3. Render the template (stored in the 'template' key) with the given 'data'
      hash.
 
