@@ -28,3 +28,10 @@ outside this core specification, as adjunct specifications.
 
 Implementors are strongly encouraged to support any and all modules they are
 reasonably capable of supporting.
+
+YAML and JSON
+-------------
+
+JSON versions of the YML specs were created using a simple ruby script:
+
+    Dir.glob("Mustache-Spec/specs/*").collect{|f| ff=f.gsub("yml","json"); File.open(ff,'w'){|x| x << YAML.parse(File.open(f)).transform.to_json}}
