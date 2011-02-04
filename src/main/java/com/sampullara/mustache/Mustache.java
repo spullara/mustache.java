@@ -8,12 +8,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -34,6 +37,7 @@ import static com.sampullara.mustache.Scope.NULL;
 public abstract class Mustache {
   protected static Logger logger = Logger.getLogger(Mustache.class.getName());
   private static final boolean debug = Boolean.getBoolean("mustache.debug");
+  private static final boolean trace = Boolean.getBoolean("mustache.trace");
   private File root;
   private String path;
 
@@ -65,6 +69,38 @@ public abstract class Mustache {
 
   private ThreadLocal<FutureWriter> capturedWriter = new ThreadLocal<FutureWriter>();
   private ThreadLocal<FutureWriter> actual = new ThreadLocal<FutureWriter>();
+
+
+  public static class Trace {
+    private static Map<String, Trace> traces = new ConcurrentHashMap<String, Trace>();
+
+    public static class Event {
+      public long time = System.currentTimeMillis();
+      public String name;
+      public String parameter;
+      public Event(String name, String parameter) {
+        this.name = name;
+        this.parameter = parameter;
+      }
+      public String toString() {
+        return time + ",\"" + name.replace("\"", "\\\"") + "\",\"" + parameter.replace("\"", "\\\"") + "\"";
+      }
+    }
+    private List<Event> events = new ArrayList<Event>();
+
+    public static void addEvent(String name, String parameter) {
+      Trace trace = traces.get(Thread.currentThread().getName());
+      trace.events.add(new Event(name, parameter));
+    }
+
+    public String toString() {
+      StringBuilder sb = new StringBuilder();
+      for (Map.Entry<String, Trace> trace : traces.entrySet()){
+        sb.append(trace.getKey()).append(",").append(trace).append("\n");
+      }
+      return sb.toString();
+    }
+  }
 
   /**
    * Enqueue's a Mustache into the FutureWriter and starts evaluating it.
@@ -101,7 +137,13 @@ public abstract class Mustache {
    * @throws MustacheException
    */
   protected void write(Writer writer, Scope s, String name, boolean encode) throws MustacheException {
+    if (trace) {
+      // start value
+    }
     Object value = getValue(s, name);
+    if (trace) {
+      // end value
+    }
     if (value != null) {
       if (value instanceof Future) {
         try {
