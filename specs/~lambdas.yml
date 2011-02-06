@@ -3,10 +3,11 @@ tests:
     desc: A lambda's return value should be interpolated.
     data:
       lambda: !code
-        ruby: 'proc { "world" }'
-        perl: 'sub { "world" }'
-        js:   'function() { return "world" }'
-        php:  'return "world";'
+        ruby:   'proc { "world" }'
+        perl:   'sub { "world" }'
+        js:     'function() { return "world" }'
+        php:    'return "world";'
+        python: 'lambda: "world"'
     template: "Hello, {{lambda}}!"
     expected: "Hello, world!"
 
@@ -15,10 +16,11 @@ tests:
     data:
       planet: "world"
       lambda: !code
-        ruby: 'proc { "{{planet}}" }'
-        perl: 'sub { "{{planet}}" }'
-        js:   'function() { return "{{planet}}" }'
-        php:  'return "{{planet}}";'
+        ruby:   'proc { "{{planet}}" }'
+        perl:   'sub { "{{planet}}" }'
+        js:     'function() { return "{{planet}}" }'
+        php:    'return "{{planet}}";'
+        python: 'lambda: "{{planet}}"'
     template: "Hello, {{lambda}}!"
     expected: "Hello, world!"
 
@@ -26,10 +28,11 @@ tests:
     desc: Interpolated lambdas should only be called once.
     data:
       lambda: !code
-        ruby: 'proc { $calls ||= 0; $calls += 1 }'
-        perl: 'sub { no strict; $calls += 1 }'
-        js:   'function() { f = arguments.callee; return f.calls = (f.calls || 0) + 1 }'
-        php:  'global $calls; return ++$calls;'
+        ruby:   'proc { $calls ||= 0; $calls += 1 }'
+        perl:   'sub { no strict; $calls += 1 }'
+        js:     'function() { f = arguments.callee; return f.calls = (f.calls || 0) + 1 }'
+        php:    'global $calls; return ++$calls;'
+        python: 'lambda: globals().update(calls=globals().get("calls",0)+1) or calls'
     template: '{{lambda}} == {{{lambda}}} == {{lambda}}'
     expected: '1 == 1 == 1'
 
@@ -40,10 +43,11 @@ tests:
       context:
         key: Under
         lambda: !code
-          ruby: 'proc { "Big" }'
-          perl: 'sub { "Big" }'
-          js:   'function() { return "Big" }'
-          php:  'return "Big";'
+          ruby:   'proc { "Big" }'
+          perl:   'sub { "Big" }'
+          js:     'function() { return "Big" }'
+          php:    'return "Big";'
+          python: 'lambda: "Big"'
     template: "{{#context}}{{key}} the {{lambda}}{{/context}} {{key}}"
     expected: "Under the Big Top"
 
@@ -51,10 +55,11 @@ tests:
     desc: Lambda results should be appropriately escaped.
     data:
       lambda: !code
-        ruby: 'proc { ">" }'
-        perl: 'sub { ">" }'
-        js:   'function() { return ">" }'
-        php:  'return ">";'
+        ruby:   'proc { ">" }'
+        perl:   'sub { ">" }'
+        js:     'function() { return ">" }'
+        php:    'return ">";'
+        python: 'lambda: ">"'
     template: "<{{lambda}}{{{lambda}}}"
     expected: "<&gt;>"
 
@@ -63,10 +68,11 @@ tests:
     data:
       x: 'Error!'
       lambda: !code
-        ruby: 'proc { |text| text == "{{x}}" ? "yes" : "no" }'
-        perl: 'sub { $_[0] eq "{{x}}" ? "yes" : "no" }'
-        js:   'function(txt) { return (txt == "{{x}}" ? "yes" : "no") }'
-        php:  'return ($text == "{{x}}") ? "yes" : "no";'
+        ruby:   'proc { |text| text == "{{x}}" ? "yes" : "no" }'
+        perl:   'sub { $_[0] eq "{{x}}" ? "yes" : "no" }'
+        js:     'function(txt) { return (txt == "{{x}}" ? "yes" : "no") }'
+        php:    'return ($text == "{{x}}") ? "yes" : "no";'
+        python: 'lambda text: text == "{{x}}" and "Yes" or "No"'
     template: "<{{#lambda}}{{x}}{{/lambda}}>"
     expected: "<yes>"
 
@@ -75,10 +81,11 @@ tests:
     data:
       planet: "Earth"
       lambda: !code
-        ruby: 'proc { |text| "#{text}{{planet}}#{text}" }'
-        perl: 'sub { $_[0] . "{{planet}}" . $_[0] }'
-        js:   'function(txt) { return txt + "{{planet}}" + txt }'
-        php:  'return $text . "{{planet}}" . $text;'
+        ruby:   'proc { |text| "#{text}{{planet}}#{text}" }'
+        perl:   'sub { $_[0] . "{{planet}}" . $_[0] }'
+        js:     'function(txt) { return txt + "{{planet}}" + txt }'
+        php:    'return $text . "{{planet}}" . $text;'
+        python: 'lambda text: "%s{{planet}}%s" % (text, text)'
     template: "<{{#lambda}}-{{/lambda}}>"
     expected: "<-Earth->"
 
@@ -86,10 +93,11 @@ tests:
     desc: Lambdas used for sections should not simply cache the first response.
     data:
       lambda: !code
-        ruby: 'proc { |text| "__#{text}__" }'
-        perl: 'sub { "__" . $_[0] . "__" }'
-        js:   'function(txt) { return "__" + txt + "__" }'
-        php:  'return "__" . $text . "__";'
+        ruby:   'proc { |text| "__#{text}__" }'
+        perl:   'sub { "__" . $_[0] . "__" }'
+        js:     'function(txt) { return "__" + txt + "__" }'
+        php:    'return "__" . $text . "__";'
+        python: 'lambda text: "__%s__" % (text)'
     template: '{{#lambda}}FILE{{/lambda}} != {{#lambda}}LINE{{/lambda}}'
     expected: '__FILE__ != __LINE__'
 
@@ -98,9 +106,10 @@ tests:
     data:
       static: 'static'
       lambda: !code
-        ruby: 'proc { |text| text }'
-        perl: 'sub { shift }'
-        js:   'function(txt) { return txt }'
-        php:  'return $text;'
+        ruby:   'proc { |text| text }'
+        perl:   'sub { shift }'
+        js:     'function(txt) { return txt }'
+        php:    'return $text;'
+        python: 'lambda text: text'
     template: "<{{^lambda}}{{static}}{{/lambda}}>"
     expected: "<>"
