@@ -70,15 +70,15 @@ tests:
 
   - name: Doubled
     desc: Multiple sections per template should be permitted.
-    data: { t: true, two: 'second' }
+    data: { bool: true, two: 'second' }
     template: |
-      {{#t}}
+      {{#bool}}
       * first
-      {{/t}}
+      {{/bool}}
       * {{two}}
-      {{#t}}
+      {{#bool}}
       * third
-      {{/t}}
+      {{/bool}}
     expected: |
       * first
       * second
@@ -86,14 +86,14 @@ tests:
 
   - name: Nested (Truthy)
     desc: Nested truthy sections should have their contents rendered.
-    data: { t: true }
-    template: "| A {{#t}}B {{#t}}C{{/t}} D{{/t}} E |"
+    data: { bool: true }
+    template: "| A {{#bool}}B {{#bool}}C{{/bool}} D{{/bool}} E |"
     expected: "| A B C D E |"
 
   - name: Nested (Falsey)
     desc: Nested falsey sections should be omitted.
-    data: { t: false }
-    template: "| A {{#t}}B {{#t}}C{{/t}} D{{/t}} E |"
+    data: { bool: false }
+    template: "| A {{#bool}}B {{#bool}}C{{/bool}} D{{/bool}} E |"
     expected: "| A  E |"
 
   # Whitespace Sensitivity
