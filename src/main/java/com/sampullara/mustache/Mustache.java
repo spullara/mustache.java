@@ -10,13 +10,14 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -33,11 +34,11 @@ import static com.sampullara.mustache.Scope.NULL;
  * User: sam
  * Date: May 3, 2010
  * Time: 10:12:47 AM
- */                                             
+ */
 public abstract class Mustache {
   protected static Logger logger = Logger.getLogger(Mustache.class.getName());
   private static final boolean debug = Boolean.getBoolean("mustache.debug");
-  private static final boolean trace = Boolean.getBoolean("mustache.trace");
+  protected static final boolean trace = Boolean.getBoolean("mustache.trace");
   private File root;
   private String path;
 
@@ -70,35 +71,105 @@ public abstract class Mustache {
   private ThreadLocal<FutureWriter> capturedWriter = new ThreadLocal<FutureWriter>();
   private ThreadLocal<FutureWriter> actual = new ThreadLocal<FutureWriter>();
 
-
   public static class Trace {
-    private static Map<String, Trace> traces = new ConcurrentHashMap<String, Trace>();
+    private static ThreadLocal<Trace> traceThreadLocal = new ThreadLocal<Trace>();
+    private static Map<Long, Trace> traces = new ConcurrentHashMap<Long, Trace>();
 
     public static class Event {
-      public long time = System.currentTimeMillis();
+      public long start = System.currentTimeMillis();
+      public long end;
+      public String thread;
       public String name;
       public String parameter;
-      public Event(String name, String parameter) {
+
+      public Event(String name, String parameter, String unique) {
         this.name = name;
         this.parameter = parameter;
+        this.thread = unique;
       }
+
       public String toString() {
-        return time + ",\"" + name.replace("\"", "\\\"") + "\",\"" + parameter.replace("\"", "\\\"") + "\"";
+        return start + ",\"" + end + ",\"" + name.replace("\"", "\\\"") + "\",\"" + parameter.replace("\"", "\\\"") + "\"";
+      }
+
+      public void end() {
+        end = System.currentTimeMillis();
       }
     }
+
     private List<Event> events = new ArrayList<Event>();
 
-    public static void addEvent(String name, String parameter) {
-      Trace trace = traces.get(Thread.currentThread().getName());
-      trace.events.add(new Event(name, parameter));
+    public synchronized static Event addEvent(String name, String parameter) {
+      Trace trace = traceThreadLocal.get();
+      Event event = new Event(name, parameter, Thread.currentThread().getName());
+      if (trace == null) {
+        System.out.println("Current trace not set");
+      } else {
+        trace.events.add(event);
+      }
+      return event;
     }
 
-    public String toString() {
-      StringBuilder sb = new StringBuilder();
-      for (Map.Entry<String, Trace> trace : traces.entrySet()){
-        sb.append(trace.getKey()).append(",").append(trace).append("\n");
+    public static void toASCII(Writer w, long uniqueid, int range) throws IOException {
+      Trace trace = traces.get(uniqueid);
+      // Find min and max time
+      long min = Long.MAX_VALUE;
+      long max = 0;
+      for (Event event : trace.events) {
+        if (event.end > max) max = event.end;
+        if (event.start < min) min = event.start;
       }
-      return sb.toString();
+      double scale = range /((double)max - min);
+      Collections.sort(trace.events, new Comparator<Event>() {
+        @Override
+        public int compare(Event event, Event event1) {
+          return (int) (event.start - event1.start);
+        }
+      });
+      for (Event event : trace.events) {
+        int during = (int) Math.round((event.end - event.start) * scale);
+        int before = (int) Math.round((event.start - min) * scale);
+        int after = (int) Math.round((max - event.end) * scale);
+        int extra = 0;
+        if (event.end == 0) {
+          during = 0;
+          after = 0;
+          extra = range - before;
+        }
+        int total = before + during + after;
+        if (total < 80) {
+          during += 80 - total;
+        }
+        if (total > 80) {
+          during -= total - 80;
+        }
+        if (during == 0) continue;
+        for (int i = 0; i < before; i++) {
+          w.write("-");
+        }
+        for (int i = 0; i < during; i++) {
+          w.write("*");
+        }
+        for (int i = 0; i < after; i++) {
+          w.write("-");
+        }
+        for (int i = 0; i < extra; i++) {
+          w.write("x");
+        }
+        w.write(" ");
+        w.write(event.name);
+        w.write("\n");
+      }
+      w.write("Total: " + (max - min) + "ms\n");
+    }
+
+    public synchronized static void setUniqueId(long unique) {
+      Trace trace = traces.get(unique);
+      if (trace == null) {
+        trace = new Trace();
+        traces.put(unique, trace);
+      }
+      traceThreadLocal.set(trace);
     }
   }
 
@@ -137,12 +208,15 @@ public abstract class Mustache {
    * @throws MustacheException
    */
   protected void write(Writer writer, Scope s, String name, boolean encode) throws MustacheException {
+    Trace.Event event = null;
     if (trace) {
-      // start value
+      Object parent = s.getParent();
+      String traceName = parent == null ? s.getClass().getName() : parent.getClass().getName();
+      event = Trace.addEvent("get: " + name, traceName);
     }
     Object value = getValue(s, name);
     if (trace) {
-      // end value
+      event.end();
     }
     if (value != null) {
       if (value instanceof Future) {
@@ -222,6 +296,7 @@ public abstract class Mustache {
       }
     }), 1);
   }
+
   /**
    * Iterate over a named value. If there is only one value return a single value iterator.
    *
@@ -229,7 +304,13 @@ public abstract class Mustache {
    * @param name
    * @return
    */
-  protected Iterable<Scope> iterable(final Scope s, String name) {
+  protected Iterable<Scope> iterable(final Scope s, final String name) {
+    Trace.Event event = null;
+    if (trace) {
+      Object parent = s.getParent();
+      String traceName = parent == null ? s.getClass().getName() : parent.getClass().getName();
+      event = Trace.addEvent("iterable: " + name, traceName);
+    }
     final String finalName = name;
     Object value = getValue(s, name);
     if (value instanceof Future) {
@@ -239,6 +320,9 @@ public abstract class Mustache {
         e.printStackTrace();
       }
     } else if (value instanceof Function) {
+      if (trace) {
+        event.end();
+      }
       final Function f = (Function) value;
       return new Iterable<Scope>() {
         @Override
@@ -275,10 +359,14 @@ public abstract class Mustache {
             }
 
             @Override
-            public void remove() {}
+            public void remove() {
+            }
           };
         }
       };
+    }
+    if (trace) {
+      event.end();
     }
     if (value == null || (value instanceof Boolean && !((Boolean) value))) {
       return EMPTY;
@@ -302,7 +390,16 @@ public abstract class Mustache {
           }
 
           public Scope next() {
+            Trace.Event event = null;
+            if (trace) {
+              Object parent = s.getParent();
+              String traceName = parent == null ? s.getClass().getName() : parent.getClass().getName();
+              event = Trace.addEvent("iterable next: " + name, traceName);
+            }
             Object value = i.next();
+            if (trace) {
+              event.end();
+            }
             Scope scope;
             if (!(value instanceof Boolean)) {
               scope = new Scope(value, s);
@@ -322,17 +419,35 @@ public abstract class Mustache {
   }
 
   protected void partial(FutureWriter writer, Scope s, final String name) throws MustacheException {
-    MustacheCompiler c = new MustacheCompiler(root);
     if (name != null) {
+      Trace.Event event = null;
+      if (trace) {
+        Object parent = s.getParent();
+        String traceName = parent == null ? s.getClass().getName() : parent.getClass().getName();
+        event = Trace.addEvent("partial: " + name, traceName);
+      }
       Object parent = s.get(name);
       Scope scope = parent == null ? s : new Scope(parent, s);
+      MustacheCompiler c = new MustacheCompiler(root);
       Mustache mustache = c.parseFile(name + ".html");
       mustache.execute(writer, scope);
+      if (trace) {
+        event.end();
+      }
     }
   }
 
   protected Iterable<Scope> inverted(final Scope s, final String name) {
+    Trace.Event event = null;
+    if (trace) {
+      Object parent = s.getParent();
+      String traceName = parent == null ? s.getClass().getName() : parent.getClass().getName();
+      event = Trace.addEvent("inverted: " + name, traceName);
+    }
     final Object value = getValue(s, name);
+    if (trace) {
+      event.end();
+    }
     boolean isntEmpty = value instanceof Iterable && ((Iterable) value).iterator().hasNext();
     if (isntEmpty || (value instanceof Boolean && ((Boolean) value)) ||
         (value != null && !(value instanceof Iterable) && !(value instanceof Boolean))) {
