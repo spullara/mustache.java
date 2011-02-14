@@ -38,7 +38,7 @@ import static com.sampullara.mustache.Scope.NULL;
 public abstract class Mustache {
   protected static Logger logger = Logger.getLogger(Mustache.class.getName());
   private static final boolean debug = Boolean.getBoolean("mustache.debug");
-  protected static final boolean trace = Boolean.getBoolean("mustache.trace");
+  public static final boolean trace = Boolean.getBoolean("mustache.trace");
   private File root;
   private String path;
 
@@ -112,6 +112,7 @@ public abstract class Mustache {
 
     public static void toASCII(Writer w, long uniqueid, int range) throws IOException {
       Trace trace = traces.get(uniqueid);
+      if (trace == null) return;
       // Find min and max time
       long min = Long.MAX_VALUE;
       long max = 0;
