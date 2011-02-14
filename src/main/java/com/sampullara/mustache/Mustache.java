@@ -120,7 +120,7 @@ public abstract class Mustache {
         if (event.end > max) max = event.end;
         if (event.start < min) min = event.start;
       }
-      double scale = range /((double)max - min);
+      double scale = range / ((double) max - min);
       Collections.sort(trace.events, new Comparator<Event>() {
         @Override
         public int compare(Event event, Event event1) {
@@ -330,14 +330,8 @@ public abstract class Mustache {
       event = Trace.addEvent("iterable: " + name, traceName);
     }
     final String finalName = name;
-    Object value = getValue(s, name);
-    if (value instanceof Future) {
-      try {
-        value = ((Future) value).get();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    } else if (value instanceof Function) {
+    final Object value = getValue(s, name);
+    if (value instanceof Function) {
       if (trace) {
         event.end();
       }
@@ -394,16 +388,26 @@ public abstract class Mustache {
       public Iterator<Scope> iterator() {
         return new Iterator<Scope>() {
           Iterator i;
-
-          {
-            if (finalValue instanceof Iterable && !(finalValue instanceof JsonNode && !(((JsonNode) finalValue).isArray()))) {
-              i = ((Iterable) finalValue).iterator();
-            } else {
-              i = new SingleValueIterator(finalValue);
-            }
-          }
-
+          Object iterable = value;
           public boolean hasNext() {
+            if (i == null) {
+              if (iterable instanceof Future) {
+                try {
+                  iterable = ((Future) value).get();
+                  if (iterable == null || (iterable instanceof Boolean && !((Boolean) iterable))) {
+                    return false;
+                  }
+                } catch (Exception e) {
+                  e.printStackTrace();
+                  return false;
+                }
+              }
+              if (iterable instanceof Iterable && !(iterable instanceof JsonNode && !(((JsonNode) iterable).isArray()))) {
+                i = ((Iterable) iterable).iterator();
+              } else {
+                i = new SingleValueIterator(iterable);
+              }
+            }
             return i.hasNext();
           }
 
@@ -468,7 +472,7 @@ public abstract class Mustache {
     }
     boolean isntEmpty = value instanceof Iterable && ((Iterable) value).iterator().hasNext();
     if (isntEmpty || (value instanceof Boolean && ((Boolean) value)) ||
-        (value != null && !(value instanceof Iterable) && !(value instanceof Boolean))) {
+            (value != null && !(value instanceof Iterable) && !(value instanceof Boolean))) {
       return EMPTY;
     }
     Scope scope = new Scope(s);
