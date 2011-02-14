@@ -161,7 +161,7 @@ public abstract class Mustache {
         w.write(event.name);
         w.write("\n");
       }
-      w.write("Total: " + (max - min) + "ms\n");
+      w.write("Time: " + (max - min) + "ms Operations: " + trace.events.size() + "\n");
     }
 
     public synchronized static void setUniqueId(long unique) {
