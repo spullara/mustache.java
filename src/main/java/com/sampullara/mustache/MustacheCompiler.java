@@ -212,23 +212,31 @@ public class MustacheCompiler {
                   code.append("System.err.println(\"#").append(startTag).append("\");");
                 }
                 int variableNum = num.incrementAndGet();
-                code.append("for (Scope s").append(variableNum);
                 switch(ch) {
                   case '#':
-                    code.append(":iterable(s, \"");
+                    code.append("iterable(w, s, \"");
+                    code.append(startTag);
+                    code.append("\", ").append(sub.getClass().getName()).append(".class);");
                     break;
                   case '^':
+                    code.append("for (Scope s").append(variableNum);
                     code.append(":inverted(s, \"");
+                    code.append(startTag);
+                    code.append("\")) {");
+                    code.append("enqueue(w, new ").append(sub.getClass().getName());
+                    code.append("(), s").append(variableNum).append(");");
+                    code.append("}");
                     break;
                   case '?':
+                    code.append("for (Scope s").append(variableNum);
                     code.append(":ifiterable(s, \"");
+                    code.append(startTag);
+                    code.append("\")) {");
+                    code.append("enqueue(w, new ").append(sub.getClass().getName());
+                    code.append("(), s").append(variableNum).append(");");
+                    code.append("}");
                     break;
                 }
-                code.append(startTag);
-                code.append("\")) {");
-                code.append("enqueue(w, new ").append(sub.getClass().getName());
-                code.append("(), s").append(variableNum).append(");");
-                code.append("}");
                 for (int i = 0; i < lines; i++) {
                   code.append("/* sub */\n");
                 }

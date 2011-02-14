@@ -298,6 +298,23 @@ public abstract class Mustache {
     }), 1);
   }
 
+  protected void iterable(FutureWriter writer, final Scope s, final String name, final Class<? extends Mustache> sub) throws IOException {
+    if (capturedWriter.get() != null) {
+      actual.set(writer);
+      writer = capturedWriter.get();
+    }
+    writer.enqueue(new Callable<Object>() {
+      @Override
+      public Object call() throws Exception {
+        FutureWriter fw = new FutureWriter();
+        for (Scope s1 : iterable(s, name)) {
+          enqueue(fw, sub.newInstance(), s1);
+        }
+        return fw;
+      }
+    });
+  }
+
   /**
    * Iterate over a named value. If there is only one value return a single value iterator.
    *
@@ -305,7 +322,7 @@ public abstract class Mustache {
    * @param name
    * @return
    */
-  protected Iterable<Scope> iterable(final Scope s, final String name) {
+  private Iterable<Scope> iterable(final Scope s, final String name) {
     Trace.Event event = null;
     if (trace) {
       Object parent = s.getParent();
