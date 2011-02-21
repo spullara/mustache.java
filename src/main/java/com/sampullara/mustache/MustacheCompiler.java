@@ -360,13 +360,12 @@ public class MustacheCompiler {
           result = (Mustache) aClass.newInstance();
           result.setRoot(root);
         } catch (ClassNotFoundException cnfe) {
-          System.out.println("Compiling: " + className);
-          System.out.println(parent);
+          logger.info("Compiling: " + className);
+          logger.info(String.valueOf(parent));
           throw cnfe;
         }
       }
     } catch (Exception e) {
-      e.printStackTrace();
       throw new MustacheException("Failed to compile code: " + e);
     }
     return result;

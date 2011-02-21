@@ -19,6 +19,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -103,7 +104,7 @@ public abstract class Mustache {
       Trace trace = traceThreadLocal.get();
       Event event = new Event(name, parameter, Thread.currentThread().getName());
       if (trace == null) {
-        System.out.println("Current trace not set");
+        logger.info("Current trace not set");
       } else {
         trace.events.add(event);
       }
@@ -355,7 +356,7 @@ public abstract class Mustache {
                   actual.get().write(apply == null ? null : String.valueOf(apply));
                   actual.set(null);
                 } catch (Exception e) {
-                  e.printStackTrace();
+                  logger.log(Level.SEVERE, "Could not apply function: " + f, e);
                 }
               }
               return first;
@@ -398,7 +399,7 @@ public abstract class Mustache {
                     return false;
                   }
                 } catch (Exception e) {
-                  e.printStackTrace();
+                  logger.log(Level.SEVERE, "Could not get iterable: " + name, e);
                   return false;
                 }
               }
