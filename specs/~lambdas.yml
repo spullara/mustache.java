@@ -72,7 +72,7 @@ tests:
         perl:   'sub { $_[0] eq "{{x}}" ? "yes" : "no" }'
         js:     'function(txt) { return (txt == "{{x}}" ? "yes" : "no") }'
         php:    'return ($text == "{{x}}") ? "yes" : "no";'
-        python: 'lambda text: text == "{{x}}" and "Yes" or "No"'
+        python: 'lambda text: text == "{{x}}" and "yes" or "no"'
     template: "<{{#lambda}}{{x}}{{/lambda}}>"
     expected: "<yes>"
 
