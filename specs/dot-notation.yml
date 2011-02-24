@@ -29,4 +29,4 @@ tests:
       a: { b: { c: { d: { e: { name: 'Phil' } } } } }
       b: { c: { d: { e: { name: 'Wrong' } } } }
     template: '"{{#a}}{{b.c.d.e.name}}{{/a}}" == "Phil"'
-    template: '"Phil" == "Phil"'
+    expected: '"Phil" == "Phil"'
