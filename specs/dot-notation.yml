@@ -34,3 +34,35 @@ tests:
       b: { c: { d: { e: { name: 'Wrong' } } } }
     template: '"{{#a}}{{b.c.d.e.name}}{{/a}}" == "Phil"'
     expected: '"Phil" == "Phil"'
+
+  # Tag Compatibility
+
+  - name: Unescaped Interpolation
+    desc: Dot notation should be functional with all basic tag types.
+    data: { person: { name: 'Joe' } }
+    template: '"{{{person.name}}}" == "{{#person}}{{{name}}}{{/person}}"'
+    expected: '"Joe" == "Joe"'
+
+  - name: Sections (Truthy)
+    desc: Dot notation should be functional with all basic tag types.
+    data: { person: { present: true } }
+    template: '"{{#person.present}}Here{{/person.present}}" == "Here"'
+    expected: '"Here" == "Here"'
+
+  - name: Sections (Falsey)
+    desc: Dot notation should be functional with all basic tag types.
+    data: { person: { present: false } }
+    template: '"{{#person.present}}Here{{/person.present}}" == ""'
+    expected: '"" == ""'
+
+  - name: Inverted Sections (Truthy)
+    desc: Dot notation should be functional with all basic tag types.
+    data: { person: { present: true } }
+    template: '"{{^person.present}}Not Here{{/person.present}}" == ""'
+    expected: '"" == ""'
+
+  - name: Inverted Sections (Falsey)
+    desc: Dot notation should be functional with all basic tag types.
+    data: { person: { present: false } }
+    template: '"{{^person.present}}Not Here{{/person.present}}" == "Not Here"'
+    expected: '"Not Here" == "Not Here"'
