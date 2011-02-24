@@ -1,0 +1,32 @@
+tests:
+  - name: Basic Example
+    desc: Dot notation should be a form of shorthand for sections.
+    data: { person: { name: 'Joe' } }
+    template: '"{{person.name}}" == "{{#person}}{{name}}{{/person}}"'
+    expected: '"Joe" == "Joe"'
+  - name: Arbitrary Depth
+    desc: Dot notation should be functional to any level of nesting.
+    data:
+      a: { b: { c: { d: { e: { name: 'Phil' } } } } }
+    template: '"{{a.b.c.d.e.name}}" == "Phil"'
+    expected: '"Phil" == "Phil"'
+  - name: Broken Chain
+    desc: Any falsey value prior to the last part of the name should yield ''.
+    data:
+      a: { }
+    template: '"{{a.b.c}}" == ""'
+    expected: '"" == ""'
+  - name: Broken Chain Resolution
+    desc: Each part of a dotted name should be resolved only against its elder.
+    data:
+      a: { b: { } }
+      c: { name: 'Jim' }
+    template: '"{{a.b.c.name}}" == ""'
+    expected: '"" == ""'
+  - name: Initial Key Resolution
+    desc: The first part of a dotted name should resolve as any other name.
+    data:
+      a: { b: { c: { d: { e: { name: 'Phil' } } } } }
+      b: { c: { d: { e: { name: 'Wrong' } } } }
+    template: '"{{#a}}{{b.c.d.e.name}}{{/a}}" == "Phil"'
+    template: '"Phil" == "Phil"'
