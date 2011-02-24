@@ -1,0 +1,19 @@
+tests:
+  - name: Strings
+    desc: Strings should be directly interpolated.
+    data:
+      list: [ 'a', 'b', 'c', 'd', 'e' ]
+    template: '"{{#list}}({{.}}){{/list}}"'
+    expected: '"(a)(b)(c)(d)(e)"'
+  - name: Integers
+    desc: Integers should be coerced into strings and interpolated.
+    data:
+      list: [ 1, 2, 3, 4, 5 ]
+    template: '"{{#list}}({{.}}){{/list}}"'
+    expected: '"(1)(2)(3)(4)(5)"'
+  - name: Non-Integers
+    desc: Non-integers should be coerced into strings and interpolated.
+    data:
+      list: [ 1.1, 2.2, 3.3, 4.4, 5.5 ]
+    template: '"{{#list}}({{.}}){{/list}}"'
+    expected: '"(1.1)(2.2)(3.3)(4.4)(5.5)"'
