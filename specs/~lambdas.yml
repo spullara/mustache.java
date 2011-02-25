@@ -25,7 +25,7 @@ tests:
     expected: "Hello, world!"
 
   - name: Interpolation - Multiple Calls
-    desc: Interpolated lambdas should only be called once.
+    desc: Interpolated lambdas should not be cached.
     data:
       lambda: !code
         ruby:   'proc { $calls ||= 0; $calls += 1 }'
@@ -34,22 +34,7 @@ tests:
         php:    'global $calls; return ++$calls;'
         python: 'lambda: globals().update(calls=globals().get("calls",0)+1) or calls'
     template: '{{lambda}} == {{{lambda}}} == {{lambda}}'
-    expected: '1 == 1 == 1'
-
-  - name: Interpolation - Caches
-    desc: Lambda caches should not disrupt normal context operations.
-    data:
-      key: Top
-      context:
-        key: Under
-        lambda: !code
-          ruby:   'proc { "Big" }'
-          perl:   'sub { "Big" }'
-          js:     'function() { return "Big" }'
-          php:    'return "Big";'
-          python: 'lambda: "Big"'
-    template: "{{#context}}{{key}} the {{lambda}}{{/context}} {{key}}"
-    expected: "Under the Big Top"
+    expected: '1 == 2 == 3'
 
   - name: Escaping
     desc: Lambda results should be appropriately escaped.
@@ -90,7 +75,7 @@ tests:
     expected: "<-Earth->"
 
   - name: Section - Multiple Calls
-    desc: Lambdas used for sections should not simply cache the first response.
+    desc: Lambdas used for sections should not be cached.
     data:
       lambda: !code
         ruby:   'proc { |text| "__#{text}__" }'
@@ -106,10 +91,10 @@ tests:
     data:
       static: 'static'
       lambda: !code
-        ruby:   'proc { |text| text }'
-        perl:   'sub { shift }'
-        js:     'function(txt) { return txt }'
-        php:    'return $text;'
-        python: 'lambda text: text'
+        ruby:   'proc { |text| false }'
+        perl:   'sub { 0 }'
+        js:     'function(txt) { return false }'
+        php:    'return false;'
+        python: 'lambda text: 0'
     template: "<{{^lambda}}{{static}}{{/lambda}}>"
     expected: "<>"
