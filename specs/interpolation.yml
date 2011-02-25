@@ -75,6 +75,26 @@ tests:
     template: '"{{&power}} jiggawatts!"'
     expected: '"1.21 jiggawatts!"'
 
+  # Context Misses
+
+  - name: Basic Context Miss Interpolation
+    desc: Failed context lookups should default to empty strings.
+    data: { }
+    template: "I ({{cannot}}) be seen!"
+    expected: "I () be seen!"
+
+  - name: Triple Mustache Context Miss Interpolation
+    desc: Failed context lookups should default to empty strings.
+    data: { }
+    template: "I ({{{cannot}}}) be seen!"
+    expected: "I () be seen!"
+
+  - name: Ampersand Context Miss Interpolation
+    desc: Failed context lookups should default to empty strings.
+    data: { }
+    template: "I ({{&cannot}}) be seen!"
+    expected: "I () be seen!"
+
   # Whitespace Sensitivity
 
   - name: Interpolation - Surrounding Whitespace

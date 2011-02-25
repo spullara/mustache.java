@@ -57,6 +57,12 @@ tests:
     template: "| A {{^bool}}B {{^bool}}C{{/bool}} D{{/bool}} E |"
     expected: "| A  E |"
 
+  - name: Context Misses
+    desc: Failed context lookups should be considered falsey.
+    data: { }
+    template: "[{{^missing}}Cannot find key 'missing'!{{/missing}}]"
+    expected: "[Cannot find key 'missing'!]"
+
   # Whitespace Sensitivity
 
   - name: Surrounding Whitespace
