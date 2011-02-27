@@ -30,7 +30,7 @@ tests:
       lambda: !code
         ruby:   'proc { $calls ||= 0; $calls += 1 }'
         perl:   'sub { no strict; $calls += 1 }'
-        js:     'function() { f = arguments.callee; return f.calls = (f.calls || 0) + 1 }'
+        js:     'function() { return (g=(function(){return this})()).calls=(g.calls||0)+1 }'
         php:    'global $calls; return ++$calls;'
         python: 'lambda: globals().update(calls=globals().get("calls",0)+1) or calls'
     template: '{{lambda}} == {{{lambda}}} == {{lambda}}'
