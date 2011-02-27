@@ -9,9 +9,9 @@ features and will be backwards compatible, and patch ('tiny') version changes
 will always be bug fixes.
 
 Mustache implementations SHOULD report the most recent version of the spec
-they have support for.  It is RECOMMENDED that implementations supporting at
-least v1.0.0 of this spec refer to themselves as "Mustache-like", or
-"Mustache-inspired".
+(major and minor version numbers) they have support for.  It is RECOMMENDED
+that implementations supporting at least v1.0.0 of this spec refer to
+themselves as "Mustache-like", or "Mustache-inspired".
 
 The specification is developed as a series of YAML files, under the `specs`
 directory.
