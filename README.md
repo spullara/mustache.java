@@ -16,9 +16,11 @@ API is the contents of the `specs` directory and the algorithm for testing
 against it.
 
 Mustache implementations SHOULD report the most recent version of the spec
-(major and minor version numbers) they have support for.  It is RECOMMENDED
-that implementations supporting at least v1.0.0 of this spec refer to
-themselves as "Mustache-like", or "Mustache-inspired".
+(major and minor version numbers).  If an implementation has support for any
+optional modules, they SHOULD indicate so with a remark attached to the
+version number (e.g. "vX.Y, including lambdas" or "v.X.Y+λ").  It is
+RECOMMENDED that implementations not supporting at least v1.0.0 of this spec
+refer to themselves as "Mustache-like", or "Mustache-inspired".
 
 Alternate Formats
 -----------------
