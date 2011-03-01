@@ -2,19 +2,23 @@ The repository at https://github.com/mustache/spec is the formal standard for
 Mustache.  It defines both normal usage and edge-case behavior for libraries
 parsing the Mustache templating language (or a superset thereof).
 
+The specification is developed as a series of YAML files, under the `specs`
+directory.
+
+Versioning
+----------
 This specification is being [semantically versioned](http://semver.org).
 Roughly described, major version changes will always represent backwards
 incompatible changes, minor version changes will always represent new language
 features and will be backwards compatible, and patch ('tiny') version changes
-will always be bug fixes.
+will always be bug fixes.  For the purposes of semantic versioning, the public
+API is the contents of the `specs` directory and the algorithm for testing
+against it.
 
 Mustache implementations SHOULD report the most recent version of the spec
 (major and minor version numbers) they have support for.  It is RECOMMENDED
 that implementations supporting at least v1.0.0 of this spec refer to
 themselves as "Mustache-like", or "Mustache-inspired".
-
-The specification is developed as a series of YAML files, under the `specs`
-directory.
 
 Alternate Formats
 -----------------
