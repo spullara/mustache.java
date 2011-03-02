@@ -16,7 +16,7 @@ overview: |
     3) If the context is an object and the method with the given name has an
     arity of 1, the method SHOULD be called with a String containing the
     unprocessed contents of the sections; the data is the value returned.
-    3) Otherwise, the data is the value returned by calling the method with
+    4) Otherwise, the data is the value returned by calling the method with
     the given name.
   If the data is not of a list type, it is coerced into a list as follows: if
   the data is truthy (e.g. `!!data == true`), use a single-element list
