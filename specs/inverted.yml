@@ -9,16 +9,22 @@ overview: |
 
   This tag's content names the data to replace the tag.  Name resolution is as
   follows:
-    1) Walk the context stack from top to bottom, finding the first context
+    1) Split the name on periods; the first part is the name to resolve, any
+    remaining parts should be retained.
+    2) Walk the context stack from top to bottom, finding the first context
     that is a) a hash containing the name as a key OR b) an object responding
     to a method with the given name.
-    2) If the context is a hash, the data is the value associated with the
+    3) If the context is a hash, the data is the value associated with the
     name.
-    3) If the context is an object and the method with the given name has an
+    4) If the context is an object and the method with the given name has an
     arity of 1, the method SHOULD be called with a String containing the
     unprocessed contents of the sections; the data is the value returned.
-    3) Otherwise, the data is the value returned by calling the method with
+    5) Otherwise, the data is the value returned by calling the method with
     the given name.
+    6) If any name parts were retained in step 1, each should be resolved
+    against a context stack containing only the result from the former
+    resolution.  If any part fails resolution, the result should be considered
+    falsey, and should interpolate as the empty string.
   If the data is not of a list type, it is coerced into a list as follows: if
   the data is truthy (e.g. `!!data == true`), use a single-element list
   containing the data, otherwise use an empty list.
@@ -91,6 +97,26 @@ tests:
     data: { }
     template: "[{{^missing}}Cannot find key 'missing'!{{/missing}}]"
     expected: "[Cannot find key 'missing'!]"
+
+  # Dotted Names
+
+  - name: Dotted Names - Truthy
+    desc: Dotted names should be valid for Inverted Section tags.
+    data: { a: { b: { c: true } } }
+    template: '"{{^a.b.c}}Not Here{{/a.b.c}}" == ""'
+    expected: '"" == ""'
+
+  - name: Dotted Names - Falsey
+    desc: Dotted names should be valid for Inverted Section tags.
+    data: { a: { b: { c: false } } }
+    template: '"{{^a.b.c}}Not Here{{/a.b.c}}" == "Not Here"'
+    expected: '"Not Here" == "Not Here"'
+
+  - name: Dotted Names - Broken Chains
+    desc: Dotted names that cannot be resolved should be considered falsey.
+    data: { a: { } }
+    template: '"{{^a.b.c}}Not Here{{/a.b.c}}" == "Not Here"'
+    expected: '"Not Here" == "Not Here"'
 
   # Whitespace Sensitivity
 
