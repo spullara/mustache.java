@@ -96,6 +96,29 @@ tests:
     template: "| A {{#bool}}B {{#bool}}C{{/bool}} D{{/bool}} E |"
     expected: "| A  E |"
 
+  # Implicit Iterators
+
+  - name: Implicit Iterator - String
+    desc: Implicit iterators should directly interpolate strings.
+    data:
+      list: [ 'a', 'b', 'c', 'd', 'e' ]
+    template: '"{{#list}}({{.}}){{/list}}"'
+    expected: '"(a)(b)(c)(d)(e)"'
+
+  - name: Implicit Iterator - Integer
+    desc: Implicit iterators should cast integers to strings and interpolate.
+    data:
+      list: [ 1, 2, 3, 4, 5 ]
+    template: '"{{#list}}({{.}}){{/list}}"'
+    expected: '"(1)(2)(3)(4)(5)"'
+
+  - name: Implicit Iterator - Decimal
+    desc: Implicit iterators should cast decimals to strings and interpolate.
+    data:
+      list: [ 1.10, 2.20, 3.30, 4.40, 5.50 ]
+    template: '"{{#list}}({{.}}){{/list}}"'
+    expected: '"(1.1)(2.2)(3.3)(4.4)(5.5)"'
+
   # Whitespace Sensitivity
 
   - name: Surrounding Whitespace
