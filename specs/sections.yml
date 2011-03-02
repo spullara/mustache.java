@@ -96,6 +96,26 @@ tests:
     template: "| A {{#bool}}B {{#bool}}C{{/bool}} D{{/bool}} E |"
     expected: "| A  E |"
 
+  # Dotted Names
+
+  - name: Dotted Names - Truthy
+    desc: Dotted names should be valid for Section tags.
+    data: { a: { b: { c: true } } }
+    template: '"{{#a.b.c}}Here{{/a.b.c}}" == "Here"'
+    expected: '"Here" == "Here"'
+
+  - name: Dotted Names - Falsey
+    desc: Dotted names should be valid for Section tags.
+    data: { a: { b: { c: false } } }
+    template: '"{{#a.b.c}}Here{{/a.b.c}}" == ""'
+    expected: '"" == ""'
+
+  - name: Dotted Names - Broken Chains
+    desc: Dotted names that cannot be resolved should be considered falsey.
+    data: { a: { } }
+    template: '"{{#a.b.c}}Here{{/a.b.c}}" == ""'
+    expected: '"" == ""'
+
   # Whitespace Sensitivity
 
   - name: Surrounding Whitespace
