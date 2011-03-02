@@ -3,7 +3,9 @@
     A single period (`.`) may now be used as a name in Interpolation tags,
     which represents the top of stack (cast as a String).
   Dotted names.
-    Names containing one or more periods
+    Names containing one or more periods should be resolved as chained
+    properties; naïvely, this is like nesting section tags, but with some
+    built-in scoping protections.
 
 2011-03-02: v1.0.1
   Clarifying a point in the README about version compliance.
