@@ -1,3 +1,32 @@
+overview: |
+  Inverted Section tags and End Section tags are used in combination to wrap a
+  section of the template.
+
+  These tags' content MUST be a non-whitespace character sequence NOT
+  containing the current closing delimiter; each Inverted Section tag MUST be
+  followed by an End Section tag with the same content within the same
+  section.
+
+  This tag's content names the data to replace the tag.  Name resolution is as
+  follows:
+    1) Walk the context stack from top to bottom, finding the first context
+    that is a) a hash containing the name as a key OR b) an object responding
+    to a method with the given name.
+    2) If the context is a hash, the data is the value associated with the
+    name.
+    3) If the context is an object and the method with the given name has an
+    arity of 1, the method SHOULD be called with a String containing the
+    unprocessed contents of the sections; the data is the value returned.
+    3) Otherwise, the data is the value returned by calling the method with
+    the given name.
+  If the data is not of a list type, it is coerced into a list as follows: if
+  the data is truthy (e.g. `!!data == true`), use a single-element list
+  containing the data, otherwise use an empty list.
+
+  This section MUST NOT be rendered unless the data list is empty.
+
+  Inverted Section and End Section tags SHOULD be treated as standalone when
+  appropriate.
 tests:
   - name: Falsey
     desc: Falsey sections should have their contents rendered.

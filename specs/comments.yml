@@ -1,3 +1,11 @@
+overview: |
+  Comment tags represent content that should never appear in the resulting
+  output.
+
+  The tag's content may contain any substring (including newlines) EXCEPT the
+  closing delimiter.
+
+  Comment tags tags SHOULD be treated as standalone when appropriate.
 tests:
   - name: Inline
     desc: Comment blocks should be removed from the template.

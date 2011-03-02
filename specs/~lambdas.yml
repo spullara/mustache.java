@@ -1,3 +1,15 @@
+overview: |
+  Lambdas are a special-cased data type for use in interpolations and
+  sections.
+
+  When used as the data value for an Interpolation tag, the lambda MUST be
+  treatable as an arity 0 function, and invoked as such.  The returned value
+  MUST be rendered, then interpolated in place of the lambda.
+
+  When used as the data value for a Section tag, the lambda MUST be treatable
+  as an arity 1 function, and invoked as such (passing a String containing the
+  unprocessed section contents).  The returned value MUST be rendered, then
+  interpolated in place of the section.
 tests:
   - name: Interpolation
     desc: A lambda's return value should be interpolated.
