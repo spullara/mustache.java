@@ -4,8 +4,9 @@ overview: |
   The tag's content MUST be a non-whitespace character sequence NOT containing
   the current closing delimiter.
 
-  This tag's content names the data to replace the tag.  Name resolution is as
-  follows:
+  This tag's content names the data to replace the tag.  A single period (`.`)
+  indicates that the item currently sitting atop the context stack should be
+  used; otherwise, name resolution is as follows:
     1) Walk the context stack from top to bottom, finding the first context
     that is a) a hash containing the name as a key OR b) an object responding
     to a method with the given name.
