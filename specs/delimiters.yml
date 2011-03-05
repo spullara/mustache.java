@@ -131,6 +131,12 @@ tests:
       Begin.
       End.
 
+  - name: Standalone Line Endings
+    desc: '"\r\n" should be considered a newline for standalone tags.'
+    data: { }
+    template: "|\r\n{{= @ @ =}}\r\n|"
+    expected: "|\r\n|"
+
   # Whitespace Insensitivity
 
   - name: Pair with Padding

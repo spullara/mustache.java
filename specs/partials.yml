@@ -50,6 +50,13 @@ tests:
     partials: { partial: ">\n>" }
     expected: "  |  >\n>\n"
 
+  - name: Standalone Line Endings
+    desc: '"\r\n" should be considered a newline for standalone tags.'
+    data: { }
+    template: "|\r\n{{>partial}}\r\n|"
+    partials: { partial: ">" }
+    expected: "|\r\n>|"
+
   - name: Standalone Indentation
     desc: Each line of the partial should be indented before rendering.
     data: { content: "<\n->" }

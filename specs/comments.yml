@@ -46,6 +46,12 @@ tests:
       Begin.
       End.
 
+  - name: Standalone Line Endings
+    desc: '"\r\n" should be considered a newline for standalone tags.'
+    data: { }
+    template: "|\r\n{{! Standalone Comment }}\r\n|"
+    expected: "|\r\n|"
+
   - name: Multiline Standalone
     desc: All standalone comment lines should be removed.
     data: { }
