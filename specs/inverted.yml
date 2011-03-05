@@ -106,6 +106,12 @@ tests:
     template: " | {{^boolean}} {{! Important Whitespace }}\n {{/boolean}} | \n"
     expected: " |  \n  | \n"
 
+  - name: Indented Inline Sections
+    desc: Single-line sections should not alter surrounding whitespace.
+    data: { boolean: false }
+    template: " {{^boolean}}NO{{/boolean}}\n {{^boolean}}WAY{{/boolean}}\n"
+    expected: " NO\n WAY\n"
+
   - name: Standalone Lines
     desc: Standalone lines should be removed from the template.
     data: { boolean: false }
