@@ -1,3 +1,7 @@
+2011-03-05: v1.0.2
+  Added tests for indented inline sections.
+  Added tests for Windows-style newlines.
+
 2011-03-02: v1.0.1
   Clarifying a point in the README about version compliance.
   Adding high-level documentation to each spec file.
