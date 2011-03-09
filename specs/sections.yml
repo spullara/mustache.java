@@ -235,6 +235,18 @@ tests:
     template: "|\r\n{{#boolean}}\r\n{{/boolean}}\r\n|"
     expected: "|\r\n|"
 
+  - name: Standalone Without Previous Line
+    desc: Standalone tags should not require a newline to precede them.
+    data: { boolean: true }
+    template: "  {{#boolean}}\n#{{/boolean}}\n/"
+    expected: "#\n/"
+
+  - name: Standalone Without Newline
+    desc: Standalone tags should not require a newline to follow them.
+    data: { boolean: true }
+    template: "#{{#boolean}}\n/\n  {{/boolean}}"
+    expected: "#\n/\n"
+
   # Whitespace Insensitivity
 
   - name: Padding

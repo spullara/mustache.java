@@ -57,6 +57,20 @@ tests:
     partials: { partial: ">" }
     expected: "|\r\n>|"
 
+  - name: Standalone Without Previous Line
+    desc: Standalone tags should not require a newline to precede them.
+    data: { }
+    template: "  {{>partial}}\n>"
+    partials: { partial: ">\n>"}
+    expected: "  >\n  >>"
+
+  - name: Standalone Without Newline
+    desc: Standalone tags should not require a newline to follow them.
+    data: { }
+    template: ">\n  {{>partial}}"
+    partials: { partial: ">\n>" }
+    expected: ">\n  >\n  >"
+
   - name: Standalone Indentation
     desc: Each line of the partial should be indented before rendering.
     data: { content: "<\n->" }

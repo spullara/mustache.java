@@ -1,3 +1,9 @@
+2011-03-??: v1.1.2
+  Added tests for standalone tags at string boundaries.
+
+2011-03-??: v1.0.3
+  Added tests for standalone tags at string boundaries.
+
 2011-03-05: v1.1.1
   Added tests for indented inline sections.
   Added tests for Windows-style newlines.

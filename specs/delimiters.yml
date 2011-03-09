@@ -137,6 +137,18 @@ tests:
     template: "|\r\n{{= @ @ =}}\r\n|"
     expected: "|\r\n|"
 
+  - name: Standalone Without Previous Line
+    desc: Standalone tags should not require a newline to precede them.
+    data: { }
+    template: "  {{=@ @=}}\n="
+    expected: "="
+
+  - name: Standalone Without Newline
+    desc: Standalone tags should not require a newline to follow them.
+    data: { }
+    template: "=\n  {{=@ @=}}"
+    expected: "=\n"
+
   # Whitespace Insensitivity
 
   - name: Pair with Padding
