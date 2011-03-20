@@ -1,4 +1,4 @@
-2011-03-??: v1.0.3
+2011-03-20: v1.0.3
   Added tests for standalone tags at string boundaries.
   Added tests for rendering lambda returns after delimiter changes.
 
