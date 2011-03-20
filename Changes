@@ -1,5 +1,6 @@
 2011-03-??: v1.0.3
   Added tests for standalone tags at string boundaries.
+  Added tests for rendering lambda returns after delimiter changes.
 
 2011-03-05: v1.0.2
   Added tests for indented inline sections.

@@ -4,12 +4,13 @@ overview: |
 
   When used as the data value for an Interpolation tag, the lambda MUST be
   treatable as an arity 0 function, and invoked as such.  The returned value
-  MUST be rendered, then interpolated in place of the lambda.
+  MUST be rendered against the default delimiters, then interpolated in place
+  of the lambda.
 
   When used as the data value for a Section tag, the lambda MUST be treatable
   as an arity 1 function, and invoked as such (passing a String containing the
-  unprocessed section contents).  The returned value MUST be rendered, then
-  interpolated in place of the section.
+  unprocessed section contents).  The returned value MUST be rendered against
+  the current delimiters, then interpolated in place of the section.
 tests:
   - name: Interpolation
     desc: A lambda's return value should be interpolated.
@@ -35,6 +36,19 @@ tests:
         python: 'lambda: "{{planet}}"'
     template: "Hello, {{lambda}}!"
     expected: "Hello, world!"
+
+  - name: Interpolation - Alternate Delimiters
+    desc: A lambda's return value should parse with the default delimiters.
+    data:
+      planet: "world"
+      lambda: !code
+        ruby:   'proc { "|planet| => {{planet}}" }'
+        perl:   'sub { "|planet| => {{planet}}" }'
+        js:     'function() { return "|planet| => {{planet}}" }'
+        php:    'return "|planet| => {{planet}}";'
+        python: 'lambda: "|planet| => {{planet}}"'
+    template: "{{= | | =}}\nHello, (|&lambda|)!"
+    expected: "Hello, (|planet| => world)!"
 
   - name: Interpolation - Multiple Calls
     desc: Interpolated lambdas should not be cached.
@@ -85,6 +99,19 @@ tests:
         python: 'lambda text: "%s{{planet}}%s" % (text, text)'
     template: "<{{#lambda}}-{{/lambda}}>"
     expected: "<-Earth->"
+
+  - name: Section - Alternate Delimiters
+    desc: Lambdas used for sections should parse with the current delimiters.
+    data:
+      planet: "Earth"
+      lambda: !code
+        ruby:   'proc { |text| "#{text}{{planet}} => |planet|#{text}" }'
+        perl:   'sub { $_[0] . "{{planet}} => |planet|" . $_[0] }'
+        js:     'function(txt) { return txt + "{{planet}} => |planet|" + txt }'
+        php:    'return $text . "{{planet}} => |planet|" . $text;'
+        python: 'lambda text: "%s{{planet}} => |planet|%s" % (text, text)'
+    template: "{{= | | =}}<|#lambda|-|/lambda|>"
+    expected: "<-{{planet}} => Earth->"
 
   - name: Section - Multiple Calls
     desc: Lambdas used for sections should not be cached.
