@@ -5,3 +5,7 @@
 target
 *~
 .idea
+*.swp
+.classpath
+.project
+.settings
