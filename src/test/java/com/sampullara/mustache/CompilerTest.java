@@ -306,6 +306,36 @@ public class CompilerTest extends TestCase {
 
   }
 
+  @SuppressWarnings("serial")
+  public void testCurrentElementInArray() throws IOException, MustacheException {
+      
+      MustacheCompiler c = init();
+      Mustache m = c.parseFile("simple_array.html");
+      StringWriter sw = new StringWriter();
+      FutureWriter writer = new FutureWriter(sw);
+      m.execute(writer, new Scope(new HashMap<String, Object>() {
+          {
+              put("list", Arrays.asList(1,2,3));
+          }
+      }));
+      writer.flush();
+      assertEquals(getContents(root, "simple_array.txt"), sw.toString());
+      
+      /*
+       * verify null elements in a list are properly handled when using {{.}} 
+       */
+      sw = new StringWriter();
+      writer = new FutureWriter(sw);
+      m.execute(writer, new Scope(new HashMap<String, Object>() {
+          {
+              put("list", Arrays.asList(null,null));
+          }
+      }));
+      writer.flush();
+      assertEquals("\n\n", sw.toString());
+      
+  }
+  
   public void testReadme() throws MustacheException, IOException {
     MustacheCompiler c = init();
     Mustache m = c.parseFile("items.html");
