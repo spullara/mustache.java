@@ -37,9 +37,13 @@ import static com.sampullara.mustache.Scope.NULL;
  * Time: 10:12:47 AM
  */
 public abstract class Mustache {
+  
   protected static Logger logger = Logger.getLogger(Mustache.class.getName());
   private static final boolean debug = Boolean.getBoolean("mustache.debug");
   public static final boolean trace = Boolean.getBoolean("mustache.trace");
+  
+  private static final String IMPLICIT_CURRENT_ELEMENT_TOKEN = ".";
+  
   private File root;
   private String path;
 
@@ -485,7 +489,13 @@ public abstract class Mustache {
 
   protected Object getValue(Scope s, String name) {
     try {
+        
       Object o = s.get(name);
+      
+      if (o == null && IMPLICIT_CURRENT_ELEMENT_TOKEN.equals(name)) {
+          o = s.values().iterator().next();
+      }
+      
       if (o == null && debug) {
         StringBuilder sb = new StringBuilder();
         for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
