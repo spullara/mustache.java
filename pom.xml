@@ -82,7 +82,7 @@
     </repository>
     <repository>
       <id>javarants snapshots</id>
-      <url>http://www.javarants.com/snapshots/</url>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </repository>
   </repositories>
 
@@ -92,12 +92,12 @@
       <url>scp://www.javarants.com/mnt/data/sites/javarants/sites/</url>
     </site>
     <repository>
-      <id>www.javarants.com</id>
-      <url>scp://www.javarants.com/mnt/data/sites/javarants/repository/</url>
+      <id>sonatype-nexus-staging</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
     </repository>
     <snapshotRepository>
-      <id>www.javarants.com</id>
-      <url>scp://www.javarants.com/mnt/data/sites/javarants/snapshots/</url>
+      <id>sonatype-nexus-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
 
