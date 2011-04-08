@@ -536,7 +536,7 @@ public abstract class Mustache {
           matcher.appendReplacement(sb, "\\\\");
           break;
         case '"':
-          matcher.appendReplacement(sb, "\"");
+          matcher.appendReplacement(sb, "&quot;");
           break;
         case '<':
           matcher.appendReplacement(sb, "&lt;");
