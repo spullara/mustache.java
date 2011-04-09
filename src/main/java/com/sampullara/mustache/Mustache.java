@@ -388,7 +388,6 @@ public abstract class Mustache {
     if (value == null || (value instanceof Boolean && !((Boolean) value))) {
       return EMPTY;
     }
-    final Object finalValue = value;
     return new Iterable<Scope>() {
       public Iterator<Scope> iterator() {
         return new Iterator<Scope>() {
@@ -480,9 +479,33 @@ public abstract class Mustache {
             (value != null && !(value instanceof Iterable) && !(value instanceof Boolean))) {
       return EMPTY;
     }
-    Scope scope = new Scope(s);
+    final Scope scope = new Scope(s);
     scope.put(name, true);
-    return Arrays.asList(scope);
+    return new Iterable<Scope>() {
+
+      @Override
+      public Iterator<Scope> iterator() {
+        return new Iterator<Scope>() {
+          Scope value = scope;
+
+          @Override
+          public boolean hasNext() {
+            return value != null;
+          }
+
+          @Override
+          public Scope next() {
+            Scope tmp = value;
+            value = null;
+            return tmp;
+          }
+
+          @Override
+          public void remove() {
+          }
+        };
+      }
+    };
   }
 
   private static Map<String, Boolean> missing = new ConcurrentHashMap<String, Boolean>();
@@ -491,9 +514,10 @@ public abstract class Mustache {
     try {
         
       Object o = s.get(name);
-      
+
       if (o == null && IMPLICIT_CURRENT_ELEMENT_TOKEN.equals(name)) {
-          o = s.values().iterator().next();
+        // TODO: is this definitely true?
+        o = s.values().iterator().next();
       }
       
       if (o == null && debug) {
@@ -521,7 +545,7 @@ public abstract class Mustache {
     return null;
   }
 
-  private static Pattern findToEncode = Pattern.compile("&(?!\\w+;)|[\"<>\\\\]");
+  private static Pattern findToEncode = Pattern.compile("&(?!\\w+;)|[\"<>\\\\\n]");
 
   public static String encode(String value) {
     StringBuffer sb = new StringBuffer();
@@ -543,6 +567,9 @@ public abstract class Mustache {
           break;
         case '>':
           matcher.appendReplacement(sb, "&gt;");
+          break;
+        case '\n':
+          matcher.appendReplacement(sb, "&#10;");
           break;
       }
     }
