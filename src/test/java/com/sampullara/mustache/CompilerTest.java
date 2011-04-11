@@ -1,7 +1,7 @@
 package com.sampullara.mustache;
 
 import com.google.common.base.Function;
-import com.google.common.util.concurrent.ValueFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.sampullara.util.FutureWriter;
 import com.sampullara.util.http.JSONHttpRequest;
 import junit.framework.TestCase;
@@ -403,7 +403,7 @@ public class CompilerTest extends TestCase {
       String description;
 
       Future<String> desc() throws InterruptedException {
-        final ValueFuture<String> result = ValueFuture.create();
+        final SettableFuture<String> result = SettableFuture.create();
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
           @Override

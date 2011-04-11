@@ -1,6 +1,6 @@
 package com.sampullara.util.http;
 
-import com.google.common.util.concurrent.ValueFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import org.eclipse.jetty.client.ContentExchange;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -38,7 +38,7 @@ public class XMLHttpRequest extends HttpRequest<Document> {
 
   @Override
   public Future<Document> execute() throws IOException {
-    final ValueFuture<Document> future = ValueFuture.create();
+    final SettableFuture<Document> future = SettableFuture.create();
     ContentExchange exchange = new ContentExchange() {
       protected void onResponseComplete() throws IOException {
         super.onResponseComplete();

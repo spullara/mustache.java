@@ -1,6 +1,6 @@
 package com.sampullara.util.http;
 
-import com.google.common.util.concurrent.ValueFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;
@@ -26,7 +26,7 @@ public class JSONHttpRequest extends HttpRequest<JsonNode> {
 
   @Override
   public Future<JsonNode> execute() throws IOException {
-    final ValueFuture<JsonNode> future = ValueFuture.create();
+    final SettableFuture<JsonNode> future = SettableFuture.create();
     ContentExchange exchange = new ContentExchange() {
       protected void onResponseComplete() throws IOException {
         try {

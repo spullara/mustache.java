@@ -43,7 +43,7 @@ public abstract class Mustache {
   public static final boolean trace = Boolean.getBoolean("mustache.trace");
   
   private static final String IMPLICIT_CURRENT_ELEMENT_TOKEN = ".";
-  
+
   private File root;
   private String path;
 
@@ -547,7 +547,8 @@ public abstract class Mustache {
 
   private static Pattern findToEncode = Pattern.compile("&(?!\\w+;)|[\"<>\\\\\n]");
 
-  public static String encode(String value) {
+  // Override this in a super class if you don't want encoding.
+  public String encode(String value) {
     StringBuffer sb = new StringBuffer();
     Matcher matcher = findToEncode.matcher(value);
     while (matcher.find()) {
