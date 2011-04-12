@@ -305,7 +305,7 @@ public class MustacheCompiler {
           }
         }
         onlywhitespace = (c == ' ' || c == '\t') && onlywhitespace;
-        template.append((char) c);
+        append(template, (char) c, onlywhitespace);
       }
       writeText(code, template.toString());
       code.append(footer);
@@ -369,6 +369,10 @@ public class MustacheCompiler {
       throw new MustacheException("Failed to compile code: " + e);
     }
     return result;
+  }
+
+  protected void append(StringBuilder template, char c, boolean onlywhitespace) {
+    template.append(c);
   }
 
   protected void writeText(StringBuilder sb, String text) {
