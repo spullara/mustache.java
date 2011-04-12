@@ -371,7 +371,7 @@ public class MustacheCompiler {
     return result;
   }
 
-  private void writeText(StringBuilder sb, String text) {
+  protected void writeText(StringBuilder sb, String text) {
     if (text.length() != 0) {
       text = text.replace("\\", "\\\\");
       text = text.replace("\"", "\\\"");
