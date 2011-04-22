@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -30,31 +31,26 @@ public class Scope extends HashMap {
 
   private Object parent;
   private Scope parentScope;
-  private Logger logger;
+  private static Logger logger = Logger.getLogger(Mustache.class.getName());
 
   public Scope() {
-    logger = Logger.getLogger(getClass().getName());
   }
 
   public Scope(Object parent) {
     if (parent instanceof Scope) {
       this.parentScope = (Scope) parent;
-      logger = Logger.getLogger(getClass().getName());
     } else {
       this.parent = parent;
-      logger = Logger.getLogger(parent.getClass().getName());
     }
   }
 
   public Scope(Scope parentScope) {
     this.parentScope = parentScope;
-    logger = Logger.getLogger(getClass().getName());
   }
 
   public Scope(Object parent, Scope parentScope) {
     this.parentScope = parentScope;
     this.parent = parent;
-    logger = Logger.getLogger(getClass().getName());
   }
 
   public Scope getParentScope() {
@@ -69,7 +65,7 @@ public class Scope extends HashMap {
   public Object get(Object o, Scope scope) {
     String name = o.toString();
     Object value = null;
-    String[] components = DOT_PATTERN.split(name);
+    Iterable<String> components = split(name, ".");
     Scope current = this;
     Scope currentScope = scope;
     for (String component : components) {
@@ -237,4 +233,35 @@ public class Scope extends HashMap {
   public Object getParent() {
     return parent;
   }
+
+  private static Iterable<String> split(final String s, final String d) {
+    return new Iterable<String>() {
+      public Iterator<String> iterator() {
+        return new Iterator<String>() {
+          int length = s.length();
+          int current = 0;
+
+          public boolean hasNext() {
+            return current < length;
+          }
+
+          public String next() {
+            int start = current;
+            int i = s.indexOf(d, start);
+            if (i == -1) {
+              current = length;
+              return s.substring(start);
+            } else {
+              current = i + d.length();
+              return s.substring(start, i);
+            }
+          }
+
+          public void remove() {
+          }
+        };
+      }
+    };
+  }
+
 }
