@@ -513,11 +513,16 @@ public abstract class Mustache {
   protected Object getValue(Scope s, String name) {
     try {
         
-      Object o = s.get(name);
-
-      if (o == null && IMPLICIT_CURRENT_ELEMENT_TOKEN.equals(name)) {
-        // TODO: is this definitely true?
+      Object o;
+      // TODO: If we get the implicit current element, we just grab the
+      // first value from the current scope. This is somewhat dangerous
+      // if used in the wrong scope or if some additional values have
+      // been added to the scope. We might want to figure out a more robust
+      // way to implement this. If you do not use "." it won't matter
+      if (IMPLICIT_CURRENT_ELEMENT_TOKEN.equals(name)) {
         o = s.values().iterator().next();
+      } else {
+        o = s.get(name);
       }
       
       if (o == null && debug) {

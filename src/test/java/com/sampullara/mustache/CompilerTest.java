@@ -55,6 +55,26 @@ public class CompilerTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
+  public void testProperties() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheCompiler c = new MustacheCompiler(root);
+    Mustache m = c.parseFile("simple.html");
+    c.setOutputDirectory("target/classes");
+    StringWriter sw = new StringWriter();
+    FutureWriter writer = new FutureWriter(sw);
+    m.execute(writer, new Scope(new Object() {
+      String getName() { return "Chris"; }
+      int getValue() { return 10000; }
+
+      int taxed_value() {
+        return (int) (this.getValue() - (this.getValue() * 0.4));
+      }
+
+      boolean isIn_ca() { return true; }
+    }));
+    writer.flush();
+    assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
   public void testSimpleWithMap() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheCompiler c = new MustacheCompiler(root);
     Mustache m = c.parseFile("simple.html");

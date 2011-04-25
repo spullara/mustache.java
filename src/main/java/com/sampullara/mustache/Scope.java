@@ -2,6 +2,9 @@ package com.sampullara.mustache;
 
 import org.codehaus.jackson.JsonNode;
 
+import java.beans.BeanDescriptor;
+import java.beans.BeanInfo;
+import java.beans.Beans;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -27,7 +30,6 @@ public class Scope extends HashMap {
   protected static Map<Class, Map<String, AccessibleObject>> cache = new ConcurrentHashMap<Class, Map<String, AccessibleObject>>();
   public static final Iterable EMPTY = new ArrayList(0);
   public static final Object NULL = new Object() { public String toString() { return ""; }};
-  private static final Pattern DOT_PATTERN = Pattern.compile("\\.");
 
   private Object parent;
   private Scope parentScope;
@@ -148,6 +150,19 @@ public class Scope extends HashMap {
           member.setAccessible(true);
           members.put(name, member);
         } catch (NoSuchMethodException e1) {
+          String propertyname = name.substring(0, 1).toUpperCase() + (name.length() > 1 ? name.substring(1) : "");
+          try {
+            member = getMethod("get" + propertyname, aClass);
+            member.setAccessible(true);
+            members.put(name, member);
+          } catch (NoSuchMethodException e2) {
+            try {
+              member = getMethod("is" + propertyname, aClass);
+              member.setAccessible(true);
+              members.put(name, member);
+            } catch (NoSuchMethodException e3) {
+            }
+          }
         }
       }
     }
