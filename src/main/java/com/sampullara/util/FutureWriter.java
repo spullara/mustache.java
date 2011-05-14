@@ -1,9 +1,9 @@
 package com.sampullara.util;
 
 import com.sampullara.mustache.Mustache;
+import com.sampullara.mustache.MustacheTrace;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
@@ -137,9 +137,9 @@ public class FutureWriter extends Writer {
         try {
           o = work.get(50, TimeUnit.MILLISECONDS);
         } catch(TimeoutException te) {
-          Mustache.Trace.Event flushEvent = null;
+          MustacheTrace.Event flushEvent = null;
           if (top && Mustache.trace) {
-            flushEvent = Mustache.Trace.addEvent("flush_wait", "FutureWriter");
+            flushEvent = MustacheTrace.addEvent("flush_wait", "FutureWriter");
           }
           writer.flush();
           o = work.get();
