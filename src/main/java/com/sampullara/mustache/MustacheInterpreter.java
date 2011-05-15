@@ -2,11 +2,14 @@ package com.sampullara.mustache;
 
 import com.sampullara.util.FutureWriter;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -19,31 +22,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MustacheInterpreter {
 
   private final Class<? extends Mustache> superclass;
+  private final File root;
 
-  public MustacheInterpreter() {
+  public MustacheInterpreter(File root) {
+    this.root = root;
     superclass = null;
   }
 
-  public MustacheInterpreter(Class<? extends Mustache> superclass) {
+  public MustacheInterpreter(Class<? extends Mustache> superclass, File root) {
     this.superclass = superclass;
-  }
-
-  public void interpret(FutureWriter fw, ExecutorService es, Scope scope, Reader template) throws MustacheException {
-    char[] chars = new char[8192];
-    StringWriter sw = new StringWriter();
-    int read;
-    try {
-      while ((read = template.read(chars)) != -1) {
-        sw.write(chars, 0, read);
-      }
-    } catch (IOException e) {
-      throw new MustacheException("Failed to read template", e);
-    }
-    interpret(fw, es, scope, sw.toString(), null);
-  }
-
-  public void interpret(FutureWriter fw, ExecutorService es, Scope scope, String template) throws MustacheException {
-    interpret(fw, es, scope, template, null);
+    this.root = root;
   }
 
   private Mustache newMustache() throws MustacheException {
@@ -61,115 +49,188 @@ public class MustacheInterpreter {
     }
   }
 
-  public int interpret(FutureWriter fw, final ExecutorService es, final Scope scope, final String template, String tag) throws MustacheException {
+  public static interface Code {
+    void execute(FutureWriter fw, Scope scope) throws MustacheException;
+  }
+
+  public void execute(List<Code> codes, FutureWriter fw, Scope scope) throws MustacheException {
+    for (Code code : codes) {
+      code.execute(fw, scope);
+    }
+  }
+
+  public List<Code> compile(final Reader br) throws MustacheException {
+    return compile(br, null, new AtomicInteger(0));
+  }
+
+  public List<Code> compile(final Reader br, String tag, final AtomicInteger currentLine) throws MustacheException {
+    final List<Code> list = new ArrayList<Code>();
     // Base level
-    Mustache m = newMustache();
+    final Mustache m = newMustache();
 
     // Now we grab the mustache template
     String sm = "{{";
     String em = "}}";
 
+    int c;
+    boolean onlywhitespace = true;
+    boolean iterable = currentLine.get() != 0;
+    currentLine.compareAndSet(0, 1);
+    StringBuilder out = new StringBuilder();
     try {
-      int c;
-      final AtomicInteger pos = new AtomicInteger(0);
-      boolean onlywhitespace = true;
-      while (pos.get() < template.length()) {
-        c = template.charAt(pos.getAndIncrement());
+      while ((c = br.read()) != -1) {
         if (c == '\r') {
           continue;
         }
         // Increment the line
         if (c == '\n') {
-          if (!onlywhitespace) {
-            fw.write("\n");
+          currentLine.incrementAndGet();
+          if (!iterable || (iterable && !onlywhitespace)) {
+            out.append("\n");
           }
 
+          iterable = false;
           onlywhitespace = true;
           continue;
         }
         // Check for a mustache start
         if (c == sm.charAt(0)) {
-          if (template.charAt(pos.getAndIncrement()) == sm.charAt(1)) {
+          br.mark(1);
+          if (br.read() == sm.charAt(1)) {
+            write(list, out);
+            out = new StringBuilder();
             // Two mustaches, now capture command
             StringBuilder sb = new StringBuilder();
-            while (pos.get() < template.length()) {
-              c = template.charAt(pos.getAndIncrement());
+            while ((c = br.read()) != -1) {
+              br.mark(1);
               if (c == em.charAt(0)) {
-                if (template.charAt(pos.getAndIncrement()) == em.charAt(1)) {
+                if (br.read() == em.charAt(1)) {
                   // Matched end
                   break;
                 } else {
                   // Only one
-                  pos.getAndDecrement();
+                  br.reset();
                 }
               }
               sb.append((char) c);
             }
-            String command = sb.toString().trim();
-            char ch = command.charAt(0);
+            final String command = sb.toString().trim();
+            final char ch = command.charAt(0);
             final String variable = command.substring(1);
             switch (ch) {
-              case '#': {
-                final String substring = template.substring(pos.get());
-                boolean first = true;
-                for (final Scope subScope : m.iterable(scope, variable)) {
-                  if (first) {
-                    pos.getAndAdd((interpret(fw, es, subScope, substring, variable)));
-                  } else {
-                    fw.enqueue(new Callable<Object>() {
-                      @Override
-                      public Object call() throws Exception {
-                        FutureWriter fw = new FutureWriter();
-                        interpret(fw, es, subScope, substring, variable);
-                        return fw;
-                      }
-                    });
-                  }
-                }
-                break;
-              }
-              case '^':  {
-                for (final Scope subScope : m.inverted(scope, variable)) {
-                  pos.getAndAdd(interpret(fw, es, subScope, template.substring(pos.get()), variable));
-                }
-                break;
-              }
+              case '#':
+              case '^':
               case '?': {
-                for (final Scope subScope : m.ifiterable(scope, variable)) {
-                  pos.getAndAdd(interpret(fw, es, subScope, template.substring(pos.get()), variable));
-                }
+                int start = currentLine.get();
+                final List<Code> codes = compile(br, variable, currentLine);
+                list.add(new Code() {
+                  @Override
+                  public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+                    Iterable<Scope> iterable = null;
+                    switch (ch) {
+                      case '#':
+                        iterable = m.iterable(scope, variable);
+                        break;
+                      case '^':
+                        iterable = m.inverted(scope, variable);
+                        break;
+                      case '?':
+                        iterable = m.ifiterable(scope, variable);
+                        break;
+                    }
+                    for (final Scope subScope : iterable) {
+                      try {
+                        fw.enqueue(new Callable<Object>() {
+                          @Override
+                          public Object call() throws Exception {
+                            FutureWriter fw = new FutureWriter();
+                            for (Code code : codes) {
+                              code.execute(fw, subScope);
+                            }
+                            return fw;
+                          }
+                        });
+                      } catch (IOException e) {
+                        throw new MustacheException("Failed to enqueue", e);
+                      }
+                    }
+                  }
+                });
+                iterable = (currentLine.get() - start) != 0;
                 break;
               }
-              case '/':
+              case '/': {
                 // Tag end
+                write(list, out);
                 if (!variable.equals(tag)) {
                   throw new MustacheException("Mismatched start/end tags: " + tag + " != " + variable);
                 }
-                return pos.get();
-              case '>':
+                return list;
+              }
+              case '>': {
+                final List<Code> codes = compile(new BufferedReader(new FileReader(new File(root, variable + ".html"))), null, currentLine);
+                list.add(new Code() {
+                  @Override
+                  public void execute(FutureWriter fw, final Scope scope) throws MustacheException {
+                    try {
+                      fw.enqueue(new Callable<Object>() {
+                        @Override
+                        public Object call() throws Exception {
+                          FutureWriter fw = new FutureWriter();
+                          for (Code code : codes) {
+                            code.execute(fw, scope);
+                          }
+                          return fw;
+                        }
+                      });
+                    } catch (IOException e) {
+                      throw new MustacheException("Failed to write", e);
+                    }
+                  }
+                });
                 break;
+              }
               case '{': {
                 // Not escaped
                 String name = variable;
                 if (em.charAt(1) != '}') {
                   name = variable.substring(0, variable.length() - 1);
                 } else {
-                  if (template.charAt(pos.getAndIncrement()) != '}') {
+                  if (br.read() != '}') {
                     throw new MustacheException("Improperly closed variable");
                   }
                 }
-                Object o = scope.get(name);
-                if (o != null) {
-                  fw.write(o.toString());
-                }
+                final String finalName = name;
+                list.add(new Code() {
+                  @Override
+                  public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+                    Object o = scope.get(finalName);
+                    if (o != null) {
+                      try {
+                        fw.write(o.toString());
+                      } catch (IOException e) {
+                        throw new MustacheException("Failed to write", e);
+                      }
+                    }
+                  }
+                });
                 break;
               }
               case '&': {
                 // Not escaped
-                Object o = scope.get(variable);
-                if (o != null) {
-                  fw.write(o.toString());
-                }
+                list.add(new Code() {
+                  @Override
+                  public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+                    Object o = scope.get(variable);
+                    if (o != null) {
+                      try {
+                        fw.write(o.toString());
+                      } catch (IOException e) {
+                        throw new MustacheException("Failed to write", e);
+                      }
+                    }
+                  }
+                });
                 break;
               }
               case '%':
@@ -180,27 +241,50 @@ public class MustacheInterpreter {
                 break;
               default: {
                 // Reference
-                Object o = scope.get(command);
-                if (o != null) {
-                  fw.write(Mustache.encode(o.toString()));
-                }
+                list.add(new Code() {
+                  @Override
+                  public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+                    Object o = scope.get(command);
+                    if (o != null) {
+                      try {
+                        fw.write(Mustache.encode(o.toString()));
+                      } catch (IOException e) {
+                        throw new MustacheException("Failed to write", e);
+                      }
+                    }
+                  }
+                });
                 break;
               }
             }
             continue;
           } else {
             // Only one
-            pos.getAndDecrement();
+            br.reset();
           }
         }
         onlywhitespace = (c == ' ' || c == '\t') && onlywhitespace;
         if (!onlywhitespace) {
-          fw.write(c);
+          out.append((char) c);
         }
       }
+      write(list, out);
     } catch (IOException e) {
-      throw new MustacheException("Failed to read template", e);
+      throw new MustacheException("Failed to read", e);
     }
-    return 0;
+    return list;
+  }
+
+  private void write(List<Code> list, StringBuilder out) {
+    final String rest = out.toString();
+    list.add(new Code() {
+      public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+        try {
+          fw.write(rest);
+        } catch (IOException e) {
+          throw new MustacheException("Failed to write", e);
+        }
+      }
+    });
   }
 }

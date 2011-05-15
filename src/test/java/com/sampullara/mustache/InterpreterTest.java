@@ -1,14 +1,7 @@
 package com.sampullara.mustache;
 
-import com.google.common.base.Function;
-import com.google.common.util.concurrent.SettableFuture;
 import com.sampullara.util.FutureWriter;
-import com.sampullara.util.http.JSONHttpRequest;
 import junit.framework.TestCase;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.MappingJsonFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,16 +10,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Tests for the compiler.
@@ -40,10 +27,11 @@ public class InterpreterTest extends TestCase {
 
   public void testSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
     ExecutorService es = Executors.newCachedThreadPool();
-    MustacheInterpreter c = new MustacheInterpreter();
+    MustacheInterpreter c = new MustacheInterpreter(root);
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
-    c.interpret(writer, es, new Scope(new Object() {
+    List<MustacheInterpreter.Code> codes = c.compile(new BufferedReader(new FileReader(new File(root, "simple.html"))));
+    c.execute(codes, writer, new Scope(new Object() {
       String name = "Chris";
       int value = 10000;
 
@@ -52,7 +40,7 @@ public class InterpreterTest extends TestCase {
       }
 
       boolean in_ca = true;
-    }), new FileReader(new File(root, "simple.html")));
+    }));
     writer.flush();
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
