@@ -76,11 +76,11 @@ public class MustacheInterpreter {
         }
         // Increment the line
         if (c == '\n') {
-          out = write(list, out);
           currentLine.incrementAndGet();
           if (!iterable || (iterable && !onlywhitespace)) {
-            write(list, new StringBuilder("\n"));
+            out.append("\n");
           }
+          out = write(list, out);
 
           iterable = false;
           onlywhitespace = true;
@@ -162,8 +162,6 @@ public class MustacheInterpreter {
                 int lines = currentLine.get() - start;
                 if (!onlywhitespace || lines == 0) {
                   write(list, out);
-                } else {
-                  System.out.println("Threw away: [" + out + "]");
                 }
                 out = new StringBuilder();
                 iterable = lines != 0;
@@ -219,7 +217,7 @@ public class MustacheInterpreter {
                 list.add(new Code() {
                   @Override
                   public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-                    Object o = scope.get(finalName);
+                    Object o = m.getValue(scope, finalName);
                     if (o != null) {
                       try {
                         fw.write(o.toString());
@@ -237,7 +235,7 @@ public class MustacheInterpreter {
                 list.add(new Code() {
                   @Override
                   public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-                    Object o = scope.get(variable);
+                    Object o = m.getValue(scope, variable);
                     if (o != null) {
                       try {
                         fw.write(o.toString());
@@ -263,7 +261,7 @@ public class MustacheInterpreter {
                 list.add(new Code() {
                   @Override
                   public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-                    Object o = scope.get(command);
+                    Object o = m.getValue(scope, command);
                     if (o != null) {
                       try {
                         fw.write(m.encode(o.toString()));

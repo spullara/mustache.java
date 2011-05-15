@@ -9,12 +9,10 @@ import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;
-import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
@@ -374,8 +372,8 @@ public class InterpreterTest extends TestCase {
     m.execute(writer, new Scope(new Context()));
     writer.flush();
     long diff = System.currentTimeMillis() - start;
-    assertTrue("Should be a little bit more than 1 second", diff > 1000 && diff < 2000);
     assertEquals(getContents(root, "items.txt"), sw.toString());
+    assertTrue("Should be a little bit more than 1 second", diff > 1000 && diff < 2000);
   }
 
   public void testReadme3() throws MustacheException, IOException {
@@ -387,8 +385,8 @@ public class InterpreterTest extends TestCase {
     m.execute(writer, new Scope(new Context()));
     writer.flush();
     long diff = System.currentTimeMillis() - start;
-    assertTrue("Should be a little bit more than 1 second", diff > 1000 && diff < 2000);
     assertEquals(getContents(root, "items3.txt"), sw.toString());
+    assertTrue("Should be a little bit more than 1 second", diff > 1000 && diff < 2000);
   }
 
   static class Context {
