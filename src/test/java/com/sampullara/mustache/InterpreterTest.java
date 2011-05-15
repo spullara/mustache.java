@@ -48,8 +48,10 @@ public class InterpreterTest extends TestCase {
 
   public void testBenchmark() throws MustacheException, IOException {
     {
+      long compile = System.currentTimeMillis();
       MustacheInterpreter c = new MustacheInterpreter(root);
       Mustache mustache = c.compile(new BufferedReader(new FileReader(new File(root, "simple.html"))));
+      System.out.println(System.currentTimeMillis() - compile);
       StringWriter sw = runtest(mustache);
       long start = System.currentTimeMillis();
       for (int i = 0; i < 100000; i++) {
@@ -58,8 +60,10 @@ public class InterpreterTest extends TestCase {
       System.out.println(System.currentTimeMillis() - start);
     }
     {
+      long compile = System.currentTimeMillis();
       MustacheCompiler c = new MustacheCompiler(root);
       Mustache mustache = c.compile(new BufferedReader(new FileReader(new File(root, "simple.html"))));
+      System.out.println(System.currentTimeMillis() - compile);
       StringWriter sw = runtest(mustache);
       long start = System.currentTimeMillis();
       for (int i = 0; i < 100000; i++) {
@@ -68,8 +72,10 @@ public class InterpreterTest extends TestCase {
       System.out.println(System.currentTimeMillis() - start);
     }
     {
+      long compile = System.currentTimeMillis();
       MustacheInterpreter c = new MustacheInterpreter(root);
       Mustache mustache = c.compile(new BufferedReader(new FileReader(new File(root, "simple.html"))));
+      System.out.println(System.currentTimeMillis() - compile);
       StringWriter sw = runtest(mustache);
       long start = System.currentTimeMillis();
       for (int i = 0; i < 100000; i++) {
@@ -78,8 +84,10 @@ public class InterpreterTest extends TestCase {
       System.out.println(System.currentTimeMillis() - start);
     }
     {
+      long compile = System.currentTimeMillis();
       MustacheCompiler c = new MustacheCompiler(root);
       Mustache mustache = c.compile(new BufferedReader(new FileReader(new File(root, "simple.html"))));
+      System.out.println(System.currentTimeMillis() - compile);
       StringWriter sw = runtest(mustache);
       long start = System.currentTimeMillis();
       for (int i = 0; i < 100000; i++) {
