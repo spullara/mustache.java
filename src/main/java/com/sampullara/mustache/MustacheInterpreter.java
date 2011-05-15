@@ -217,14 +217,7 @@ public class MustacheInterpreter {
                 list.add(new Code() {
                   @Override
                   public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-                    Object o = m.getValue(scope, finalName);
-                    if (o != null) {
-                      try {
-                        fw.write(o.toString());
-                      } catch (IOException e) {
-                        throw new MustacheException("Failed to write", e);
-                      }
-                    }
+                    m.write(fw, scope, finalName, false);
                   }
                 });
                 break;
@@ -235,14 +228,7 @@ public class MustacheInterpreter {
                 list.add(new Code() {
                   @Override
                   public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-                    Object o = m.getValue(scope, variable);
-                    if (o != null) {
-                      try {
-                        fw.write(o.toString());
-                      } catch (IOException e) {
-                        throw new MustacheException("Failed to write", e);
-                      }
-                    }
+                    m.write(fw, scope, variable, false);
                   }
                 });
                 break;
@@ -261,14 +247,7 @@ public class MustacheInterpreter {
                 list.add(new Code() {
                   @Override
                   public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-                    Object o = m.getValue(scope, command);
-                    if (o != null) {
-                      try {
-                        fw.write(m.encode(o.toString()));
-                      } catch (IOException e) {
-                        throw new MustacheException("Failed to write", e);
-                      }
-                    }
+                    m.write(fw, scope, command, true);
                   }
                 });
                 break;
