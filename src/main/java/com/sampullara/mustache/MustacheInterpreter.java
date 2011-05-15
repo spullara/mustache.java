@@ -79,7 +79,7 @@ public class MustacheInterpreter {
           out = write(list, out);
           currentLine.incrementAndGet();
           if (!iterable || (iterable && !onlywhitespace)) {
-            out.append("\n");
+            write(list, new StringBuilder("\n"));
           }
 
           iterable = false;
@@ -123,22 +123,34 @@ public class MustacheInterpreter {
                         iterable = m.iterable(scope, variable);
                         break;
                       case '^':
+                        if (m.capturedWriter.get() != null) {
+                          m.actual.set(fw);
+                          fw = m.capturedWriter.get();
+                        }
                         iterable = m.inverted(scope, variable);
                         break;
                       case '?':
+                        if (m.capturedWriter.get() != null) {
+                          m.actual.set(fw);
+                          fw = m.capturedWriter.get();
+                        }
                         iterable = m.ifiterable(scope, variable);
                         break;
                     }
                     for (final Scope subScope : iterable) {
                       try {
+                        if (m.capturedWriter.get() != null) {
+                          m.actual.set(fw);
+                          fw = m.capturedWriter.get();
+                        }
                         fw.enqueue(new Callable<Object>() {
                           @Override
                           public Object call() throws Exception {
-                            FutureWriter fw = new FutureWriter();
+                            FutureWriter writer = new FutureWriter();
                             for (Code code : codes) {
-                              code.execute(fw, subScope);
+                              code.execute(writer, subScope);
                             }
-                            return fw;
+                            return writer;
                           }
                         });
                       } catch (IOException e) {
@@ -150,6 +162,8 @@ public class MustacheInterpreter {
                 int lines = currentLine.get() - start;
                 if (!onlywhitespace || lines == 0) {
                   write(list, out);
+                } else {
+                  System.out.println("Threw away: [" + out + "]");
                 }
                 out = new StringBuilder();
                 iterable = lines != 0;

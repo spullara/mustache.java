@@ -68,8 +68,8 @@ public abstract class Mustache {
 
   public abstract void execute(FutureWriter writer, Scope ctx) throws MustacheException;
 
-  private ThreadLocal<FutureWriter> capturedWriter = new ThreadLocal<FutureWriter>();
-  private ThreadLocal<FutureWriter> actual = new ThreadLocal<FutureWriter>();
+  protected ThreadLocal<FutureWriter> capturedWriter = new ThreadLocal<FutureWriter>();
+  protected ThreadLocal<FutureWriter> actual = new ThreadLocal<FutureWriter>();
 
   /**
    * Enqueue's a Mustache into the FutureWriter and starts evaluating it.
