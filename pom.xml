@@ -6,6 +6,7 @@
   <artifactId>mustache.java</artifactId>
   <version>0.5-SNAPSHOT</version>
   <modules>
+    <module>core</module>
     <module>compiler</module>
     <module>builder</module>
     <module>handlebar</module>

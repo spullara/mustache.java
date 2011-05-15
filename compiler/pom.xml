@@ -7,7 +7,7 @@
   <version>0.5-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>mustache.java</name>
+  <name>compiler</name>
   <description>Implementation of mustache.js for Java</description>
   <url>http://github.com/spullara/mustache.java</url>
 
@@ -37,27 +37,13 @@
   </properties>
 
   <dependencies>
-    <!-- JSON support -->
+    <!-- Core -->
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
-      <version>1.5.2</version>
+      <groupId>com.github.spullara.mustache.java</groupId>
+      <artifactId>core</artifactId>
+      <version>0.5-SNAPSHOT</version>
     </dependency>
-
-    <!-- Jetty Client -->
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-client</artifactId>
-      <version>7.2.2.v20101205</version>
-    </dependency>
-
-    <!-- Google Guava -->
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>r09</version>
-    </dependency>
-
+    
     <!-- Servlets -->
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -71,6 +57,12 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.spullara.mustache.java</groupId>
+      <artifactId>network</artifactId>
+      <version>0.5-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

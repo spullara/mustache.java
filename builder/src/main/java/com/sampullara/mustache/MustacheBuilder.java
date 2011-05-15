@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Date: 5/14/11
  * Time: 3:52 PM
  */
-public class MustacheBuilder {
+public class MustacheBuilder implements MustacheJava {
 
   private final File root;
   private Class<? extends Mustache> superclass;
@@ -43,10 +43,6 @@ public class MustacheBuilder {
     return build(new StringReader(template), template);
   }
 
-  public static interface Code {
-    void execute(FutureWriter fw, Scope scope) throws MustacheException;
-  }
-
   public Mustache build(final Reader br, String file) throws MustacheException {
     Mustache mustache;
     try {
@@ -54,6 +50,7 @@ public class MustacheBuilder {
     } catch (Exception e) {
       throw new IllegalArgumentException("Could not instantiate", e);
     }
+    mustache.setMustacheJava(this);
     mustache.setCompiled(compile(mustache, br, null, new AtomicInteger(0), file));
     return mustache;
   }
@@ -149,9 +146,7 @@ public class MustacheBuilder {
               }
               case '>': {
                 out = write(list, out);
-                String partialFile = variable + ".html";
-                final Mustache partial = build(new BufferedReader(new FileReader(new File(root, partialFile))), partialFile);
-                list.add(new PartialCode(variable, partial, file, currentLine.get()));
+                list.add(new PartialCode(variable, m, file, currentLine.get()));
                 break;
               }
               case '{': {
@@ -279,9 +274,9 @@ public class MustacheBuilder {
     private final String file;
     private final int line;
 
-    public PartialCode(String variable, Mustache partial, String file, int line) {
+    public PartialCode(String variable, Mustache m, String file, int line) throws MustacheException {
       this.variable = variable;
-      this.partial = partial;
+      this.partial = m.partial(variable);
       this.file = file;
       this.line = line;
     }
@@ -292,10 +287,8 @@ public class MustacheBuilder {
         fw.enqueue(new Callable<Object>() {
           @Override
           public Object call() throws Exception {
-            Object parent = s.get(variable);
-            Scope scope = parent == null ? s : new Scope(parent, s);
             FutureWriter fw = new FutureWriter();
-            partial.execute(fw, scope);
+            partial.partial(fw, s, variable, partial);
             return fw;
           }
         });
