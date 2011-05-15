@@ -23,9 +23,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MustacheInterpreter {
 
   private final File root;
+  private Class<? extends Mustache> superclass;
 
   public MustacheInterpreter(File root) {
     this.root = root;
+  }
+
+  public void setSuperclass(String superclass) {
+    try {
+      this.superclass = (Class<? extends Mustache>) Class.forName(superclass);
+    } catch (Exception e) {
+      throw new IllegalArgumentException("Invalid class", e);
+    }
   }
 
   public static interface Code {
@@ -33,16 +42,14 @@ public class MustacheInterpreter {
   }
 
   public Mustache compile(final Reader br) throws MustacheException {
-    return new Mustache() {
-      List<Code> compiled = compile(this, br, null, new AtomicInteger(0));
-
-      @Override
-      public void execute(FutureWriter writer, Scope ctx) throws MustacheException {
-        for (Code code : compiled) {
-          code.execute(writer, ctx);
-        }
-      }
-    };
+    Mustache mustache = null;
+    try {
+      mustache = superclass == null ? new Mustache() : superclass.newInstance();
+    } catch (Exception e) {
+      throw new IllegalArgumentException("Could not instantiate", e);
+    }
+    mustache.setCompiled(compile(mustache, br, null, new AtomicInteger(0)));
+    return mustache;
   }
 
   public Mustache parseFile(String path) throws MustacheException {

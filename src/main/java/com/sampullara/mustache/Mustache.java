@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
@@ -31,7 +32,7 @@ import static com.sampullara.mustache.Scope.NULL;
  * Date: May 3, 2010
  * Time: 10:12:47 AM
  */
-public abstract class Mustache {
+public class Mustache {
   
   protected static Logger logger = Logger.getLogger(Mustache.class.getName());
   private static final boolean debug = Boolean.getBoolean("mustache.debug");
@@ -66,7 +67,13 @@ public abstract class Mustache {
     execute(writer, new Scope(jsonNode));
   }
 
-  public abstract void execute(FutureWriter writer, Scope ctx) throws MustacheException;
+  private List<MustacheInterpreter.Code> compiled;
+
+  public void execute(FutureWriter writer, Scope ctx) throws MustacheException {
+    for (MustacheInterpreter.Code code : compiled) {
+      code.execute(writer, ctx);
+    }
+  }
 
   protected ThreadLocal<FutureWriter> capturedWriter = new ThreadLocal<FutureWriter>();
   protected ThreadLocal<FutureWriter> actual = new ThreadLocal<FutureWriter>();
@@ -156,6 +163,10 @@ public abstract class Mustache {
         }
       }
     }
+  }
+
+  public void setCompiled(List<MustacheInterpreter.Code> compiled) {
+    this.compiled = compiled;
   }
 
   private class SingleValueIterator implements Iterator {
