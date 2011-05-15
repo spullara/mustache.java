@@ -468,6 +468,7 @@ public class CompilerTest extends TestCase {
 
   protected void setUp() throws Exception {
     super.setUp();
-    root = new File("src/test/resources");
+    File file = new File("src/test/resources");
+    root = file.exists() ? file : new File("../src/test/resources");
   }
 }

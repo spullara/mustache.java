@@ -16,11 +16,11 @@ public class I18NTest  extends CompilerTest {
       private File root;
       protected void setUp() throws Exception {
         super.setUp();
-        root = new File("src/test/resources");
+        File file = new File("src/test/resources");
+        root = file.exists() ? file : new File("../src/test/resources");
      }
      public void testChinese() throws MustacheException, IOException, ExecutionException, InterruptedException {
         MustacheCompiler c = new MustacheCompiler(root);
-//         c.setDebug();
         Mustache m = c.parseFile("i18n.html");
         c.setOutputDirectory("target/classes");
         StringWriter sw = new StringWriter();

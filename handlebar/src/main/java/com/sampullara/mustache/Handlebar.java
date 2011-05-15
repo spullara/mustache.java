@@ -57,7 +57,7 @@ public class Handlebar {
       Args.usage(Handlebar.class);
       System.exit(1);
     }
-    final MustacheCompiler mc = new MustacheCompiler(new File("."));
+    final MustacheBuilder mc = new MustacheBuilder(new File("."));
     final JsonFactory jf = new MappingJsonFactory();
     Handler handler = new AbstractHandler() {
       public void handle(String s, Request r, HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
@@ -71,7 +71,7 @@ public class Handlebar {
           // Handle like a template
           String filename = pathInfo.endsWith("/") ? pathInfo + "index.html" : pathInfo.substring(1);
           try {
-            Mustache mustache = mc.compile(new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8")));
+            Mustache mustache = mc.parseFile(filename);
             FutureWriter fw = new FutureWriter(res.getWriter());
             File file = new File(mocks, base + ".json");
             res.setStatus(HttpServletResponse.SC_OK);
