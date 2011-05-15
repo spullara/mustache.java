@@ -445,7 +445,7 @@ public abstract class Mustache {
   private static Pattern findToEncode = Pattern.compile("&(?!\\w+;)|[\"<>\\\\\n]");
 
   // Override this in a super class if you don't want encoding.
-  public static String encode(String value) {
+  public String encode(String value) {
     StringBuffer sb = new StringBuffer();
     Matcher matcher = findToEncode.matcher(value);
     while (matcher.find()) {

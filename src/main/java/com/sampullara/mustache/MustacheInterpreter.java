@@ -45,6 +45,18 @@ public class MustacheInterpreter {
     };
   }
 
+  public Mustache parseFile(String path) throws MustacheException {
+    Mustache compile;
+    try {
+      BufferedReader br = new BufferedReader(new FileReader(new File(root, path)));
+      compile = compile(br);
+      br.close();
+    } catch (IOException e) {
+      throw new MustacheException("Failed to read", e);
+    }
+    return compile;
+  }
+
   protected List<Code> compile(final Mustache m, final Reader br, String tag, final AtomicInteger currentLine) throws MustacheException {
     final List<Code> list = new ArrayList<Code>();
 
