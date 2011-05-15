@@ -39,21 +39,21 @@ public class MustacheInterpreter {
   }
 
   public Mustache parse(String template) throws MustacheException {
-    return compile(new StringReader(template));
+    return compile(new StringReader(template), template);
   }
 
   public static interface Code {
     void execute(FutureWriter fw, Scope scope) throws MustacheException;
   }
 
-  public Mustache compile(final Reader br) throws MustacheException {
+  public Mustache compile(final Reader br, String file) throws MustacheException {
     Mustache mustache;
     try {
       mustache = superclass == null ? new Mustache() : superclass.newInstance();
     } catch (Exception e) {
       throw new IllegalArgumentException("Could not instantiate", e);
     }
-    mustache.setCompiled(compile(mustache, br, null, new AtomicInteger(0)));
+    mustache.setCompiled(compile(mustache, br, null, new AtomicInteger(0), file));
     return mustache;
   }
 
@@ -61,7 +61,7 @@ public class MustacheInterpreter {
     Mustache compile;
     try {
       BufferedReader br = new BufferedReader(new FileReader(new File(root, path)));
-      compile = compile(br);
+      compile = compile(br, path);
       br.close();
     } catch (IOException e) {
       throw new MustacheException("Failed to read", e);
@@ -69,7 +69,7 @@ public class MustacheInterpreter {
     return compile;
   }
 
-  protected List<Code> compile(final Mustache m, final Reader br, String tag, final AtomicInteger currentLine) throws MustacheException {
+  protected List<Code> compile(final Mustache m, final Reader br, String tag, final AtomicInteger currentLine, String file) throws MustacheException {
     final List<Code> list = new ArrayList<Code>();
 
     // Now we grab the mustache template
@@ -125,57 +125,13 @@ public class MustacheInterpreter {
               case '^':
               case '?': {
                 int start = currentLine.get();
-                final List<Code> codes = compile(m, br, variable, currentLine);
+                final List<Code> codes = compile(m, br, variable, currentLine, file);
                 int lines = currentLine.get() - start;
                 if (!onlywhitespace || lines == 0) {
                   write(list, out);
                 }
                 out = new StringBuilder();
-                list.add(new Code() {
-                  @Override
-                  public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-                    Iterable<Scope> iterable = null;
-                    switch (ch) {
-                      case '#':
-                        iterable = m.iterable(scope, variable);
-                        break;
-                      case '^':
-                        if (m.capturedWriter.get() != null) {
-                          m.actual.set(fw);
-                          fw = m.capturedWriter.get();
-                        }
-                        iterable = m.inverted(scope, variable);
-                        break;
-                      case '?':
-                        if (m.capturedWriter.get() != null) {
-                          m.actual.set(fw);
-                          fw = m.capturedWriter.get();
-                        }
-                        iterable = m.ifiterable(scope, variable);
-                        break;
-                    }
-                    for (final Scope subScope : iterable) {
-                      try {
-                        if (m.capturedWriter.get() != null) {
-                          m.actual.set(fw);
-                          fw = m.capturedWriter.get();
-                        }
-                        fw.enqueue(new Callable<Object>() {
-                          @Override
-                          public Object call() throws Exception {
-                            FutureWriter writer = new FutureWriter();
-                            for (Code code : codes) {
-                              code.execute(writer, subScope);
-                            }
-                            return writer;
-                          }
-                        });
-                      } catch (IOException e) {
-                        throw new MustacheException("Failed to enqueue", e);
-                      }
-                    }
-                  }
-                });
+                list.add(new SubCode(ch, m, variable, codes, file, currentLine.get()));
                 iterable = lines != 0;
                 break;
               }
@@ -185,33 +141,16 @@ public class MustacheInterpreter {
                   write(list, out);
                 }
                 if (!variable.equals(tag)) {
-                  throw new MustacheException("Mismatched start/end tags: " + tag + " != " + variable);
+                  throw new MustacheException("Mismatched start/end tags: " + tag + " != " + variable + " in " + file + ":" + currentLine);
                 }
 
                 return list;
               }
               case '>': {
                 out = write(list, out);
-                final Mustache partial = compile(new BufferedReader(new FileReader(new File(root, variable + ".html"))));
-                list.add(new Code() {
-                  @Override
-                  public void execute(FutureWriter fw, final Scope s) throws MustacheException {
-                    try {
-                      fw.enqueue(new Callable<Object>() {
-                        @Override
-                        public Object call() throws Exception {
-                          Object parent = s.get(variable);
-                          Scope scope = parent == null ? s : new Scope(parent, s);
-                          FutureWriter fw = new FutureWriter();
-                          partial.execute(fw, scope);
-                          return fw;
-                        }
-                      });
-                    } catch (IOException e) {
-                      throw new MustacheException("Failed to write", e);
-                    }
-                  }
-                });
+                String partialFile = variable + ".html";
+                final Mustache partial = compile(new BufferedReader(new FileReader(new File(root, partialFile))), partialFile);
+                list.add(new PartialCode(variable, partial, file, currentLine.get()));
                 break;
               }
               case '{': {
@@ -222,27 +161,17 @@ public class MustacheInterpreter {
                   name = variable.substring(0, variable.length() - 1);
                 } else {
                   if (br.read() != '}') {
-                    throw new MustacheException("Improperly closed variable");
+                    throw new MustacheException("Improperly closed variable in " + file + ":" + currentLine);
                   }
                 }
                 final String finalName = name;
-                list.add(new Code() {
-                  @Override
-                  public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-                    m.write(fw, scope, finalName, false);
-                  }
-                });
+                list.add(new WriteValueCode(m, finalName, false));
                 break;
               }
               case '&': {
                 // Not escaped
                 out = write(list, out);
-                list.add(new Code() {
-                  @Override
-                  public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-                    m.write(fw, scope, variable, false);
-                  }
-                });
+                list.add(new WriteValueCode(m, variable, false));
                 break;
               }
               case '%':
@@ -256,12 +185,7 @@ public class MustacheInterpreter {
               default: {
                 // Reference
                 out = write(list, out);
-                list.add(new Code() {
-                  @Override
-                  public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-                    m.write(fw, scope, command, true);
-                  }
-                });
+                list.add(new WriteValueCode(m, command, true));
                 break;
               }
             }
@@ -282,16 +206,134 @@ public class MustacheInterpreter {
   }
 
   private StringBuilder write(List<Code> list, StringBuilder out) {
-    final String rest = out.toString();
-    list.add(new Code() {
-      public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+    list.add(new WriteCode(out.toString()));
+    return new StringBuilder();
+  }
+
+  private static class SubCode implements Code {
+    private final char ch;
+    private final Mustache m;
+    private final String variable;
+    private final List<Code> codes;
+    private final int line;
+    private final String file;
+
+    public SubCode(char ch, Mustache m, String variable, List<Code> codes, String file, int line) {
+      this.ch = ch;
+      this.m = m;
+      this.variable = variable;
+      this.codes = codes;
+      this.line = line;
+      this.file = file;
+    }
+
+    @Override
+    public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+      Iterable<Scope> iterable = null;
+      switch (ch) {
+        case '#':
+          iterable = m.iterable(scope, variable);
+          break;
+        case '^':
+          if (m.capturedWriter.get() != null) {
+            m.actual.set(fw);
+            fw = m.capturedWriter.get();
+          }
+          iterable = m.inverted(scope, variable);
+          break;
+        case '?':
+          if (m.capturedWriter.get() != null) {
+            m.actual.set(fw);
+            fw = m.capturedWriter.get();
+          }
+          iterable = m.ifiterable(scope, variable);
+          break;
+      }
+      for (final Scope subScope : iterable) {
         try {
-          fw.write(rest);
+          if (m.capturedWriter.get() != null) {
+            m.actual.set(fw);
+            fw = m.capturedWriter.get();
+          }
+          fw.enqueue(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+              FutureWriter writer = new FutureWriter();
+              for (Code code : codes) {
+                code.execute(writer, subScope);
+              }
+              return writer;
+            }
+          });
         } catch (IOException e) {
-          throw new MustacheException("Failed to write", e);
+          throw new MustacheException("Execution failed: " + file + ":" + line, e);
         }
       }
-    });
-    return new StringBuilder();
+    }
+  }
+
+  private static class PartialCode implements Code {
+    private final String variable;
+    private final Mustache partial;
+    private final String file;
+    private final int line;
+
+    public PartialCode(String variable, Mustache partial, String file, int line) {
+      this.variable = variable;
+      this.partial = partial;
+      this.file = file;
+      this.line = line;
+    }
+
+    @Override
+    public void execute(FutureWriter fw, final Scope s) throws MustacheException {
+      try {
+        fw.enqueue(new Callable<Object>() {
+          @Override
+          public Object call() throws Exception {
+            Object parent = s.get(variable);
+            Scope scope = parent == null ? s : new Scope(parent, s);
+            FutureWriter fw = new FutureWriter();
+            partial.execute(fw, scope);
+            return fw;
+          }
+        });
+      } catch (IOException e) {
+        throw new MustacheException("Execution failed: " + file + ":" + line, e);
+      }
+    }
+  }
+
+  private static class WriteValueCode implements Code {
+    private final Mustache m;
+    private final String finalName;
+    private final boolean encoded;
+
+    public WriteValueCode(Mustache m, String finalName, boolean encoded) {
+      this.m = m;
+      this.finalName = finalName;
+      this.encoded = encoded;
+    }
+
+    @Override
+    public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+      m.write(fw, scope, finalName, encoded);
+    }
+  }
+
+  private static class WriteCode implements Code {
+    private final String rest;
+
+    public WriteCode(String rest) {
+      this.rest = rest;
+    }
+
+    public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+      try {
+        fw.write(rest);
+      } catch (IOException e) {
+        throw new MustacheException("Failed to write", e);
+      }
+    }
   }
 }
