@@ -76,6 +76,7 @@ public class MustacheInterpreter {
         }
         // Increment the line
         if (c == '\n') {
+          out = write(list, out);
           currentLine.incrementAndGet();
           if (!iterable || (iterable && !onlywhitespace)) {
             out.append("\n");
@@ -89,8 +90,6 @@ public class MustacheInterpreter {
         if (c == sm.charAt(0)) {
           br.mark(1);
           if (br.read() == sm.charAt(1)) {
-            write(list, out);
-            out = new StringBuilder();
             // Two mustaches, now capture command
             StringBuilder sb = new StringBuilder();
             while ((c = br.read()) != -1) {
@@ -148,18 +147,27 @@ public class MustacheInterpreter {
                     }
                   }
                 });
-                iterable = (currentLine.get() - start) != 0;
+                int lines = currentLine.get() - start;
+                if (!onlywhitespace || lines == 0) {
+                  write(list, out);
+                }
+                out = new StringBuilder();
+                iterable = lines != 0;
                 break;
               }
               case '/': {
                 // Tag end
-                write(list, out);
+                if (!onlywhitespace) {
+                  write(list, out);
+                }
                 if (!variable.equals(tag)) {
                   throw new MustacheException("Mismatched start/end tags: " + tag + " != " + variable);
                 }
+
                 return list;
               }
               case '>': {
+                out = write(list, out);
                 final List<Code> codes = compile(m, new BufferedReader(new FileReader(new File(root, variable + ".html"))), null, currentLine);
                 list.add(new Code() {
                   @Override
@@ -183,6 +191,7 @@ public class MustacheInterpreter {
                 break;
               }
               case '{': {
+                out = write(list, out);
                 // Not escaped
                 String name = variable;
                 if (em.charAt(1) != '}') {
@@ -210,6 +219,7 @@ public class MustacheInterpreter {
               }
               case '&': {
                 // Not escaped
+                out = write(list, out);
                 list.add(new Code() {
                   @Override
                   public void execute(FutureWriter fw, Scope scope) throws MustacheException {
@@ -227,19 +237,22 @@ public class MustacheInterpreter {
               }
               case '%':
                 // Pragmas
+                out = write(list, out);
                 break;
               case '!':
                 // Comment
+                out = write(list, out);
                 break;
               default: {
                 // Reference
+                out = write(list, out);
                 list.add(new Code() {
                   @Override
                   public void execute(FutureWriter fw, Scope scope) throws MustacheException {
                     Object o = scope.get(command);
                     if (o != null) {
                       try {
-                        fw.write(Mustache.encode(o.toString()));
+                        fw.write(m.encode(o.toString()));
                       } catch (IOException e) {
                         throw new MustacheException("Failed to write", e);
                       }
@@ -256,9 +269,7 @@ public class MustacheInterpreter {
           }
         }
         onlywhitespace = (c == ' ' || c == '\t') && onlywhitespace;
-        if (!onlywhitespace) {
-          out.append((char) c);
-        }
+        out.append((char) c);
       }
       write(list, out);
     } catch (IOException e) {
@@ -267,7 +278,7 @@ public class MustacheInterpreter {
     return list;
   }
 
-  private void write(List<Code> list, StringBuilder out) {
+  private StringBuilder write(List<Code> list, StringBuilder out) {
     final String rest = out.toString();
     list.add(new Code() {
       public void execute(FutureWriter fw, Scope scope) throws MustacheException {
@@ -278,5 +289,6 @@ public class MustacheInterpreter {
         }
       }
     });
+    return new StringBuilder();
   }
 }
