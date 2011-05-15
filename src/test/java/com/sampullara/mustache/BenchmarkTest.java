@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * TODO: Edit this
+ * Compare compilation with interpreter.
  * <p/>
  * User: sam
  * Date: 5/14/11

@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class Mustache {
     execute(writer, new Scope(jsonNode));
   }
 
-  private List<MustacheInterpreter.Code> compiled;
+  private MustacheInterpreter.Code[] compiled;
 
   public void execute(FutureWriter writer, Scope ctx) throws MustacheException {
     for (MustacheInterpreter.Code code : compiled) {
@@ -166,7 +167,7 @@ public class Mustache {
   }
 
   public void setCompiled(List<MustacheInterpreter.Code> compiled) {
-    this.compiled = compiled;
+    this.compiled = new ArrayList<MustacheInterpreter.Code>(compiled).toArray(new MustacheInterpreter.Code[compiled.size()]);
   }
 
   private class SingleValueIterator implements Iterator {

@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -70,7 +73,7 @@ public class MustacheInterpreter {
   }
 
   protected List<Code> compile(final Mustache m, final Reader br, String tag, final AtomicInteger currentLine, String file) throws MustacheException {
-    final List<Code> list = new ArrayList<Code>();
+    final List<Code> list = new LinkedList<Code>();
 
     // Now we grab the mustache template
     String sm = "{{";
@@ -214,7 +217,7 @@ public class MustacheInterpreter {
     private final char ch;
     private final Mustache m;
     private final String variable;
-    private final List<Code> codes;
+    private final Code[] codes;
     private final int line;
     private final String file;
 
@@ -222,7 +225,7 @@ public class MustacheInterpreter {
       this.ch = ch;
       this.m = m;
       this.variable = variable;
-      this.codes = codes;
+      this.codes = new ArrayList<Code>(codes).toArray(new Code[codes.size()]);
       this.line = line;
       this.file = file;
     }
