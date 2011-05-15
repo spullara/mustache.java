@@ -373,7 +373,7 @@ public class InterpreterTest extends TestCase {
     writer.flush();
     long diff = System.currentTimeMillis() - start;
     assertEquals(getContents(root, "items.txt"), sw.toString());
-    assertTrue("Should be a little bit more than 1 second: " + diff, diff > 1000 && diff < 2000);
+    assertTrue("Should be a little bit more than 1 second: " + diff, diff > 999 && diff < 2000);
   }
 
   public void testReadme3() throws MustacheException, IOException {
@@ -386,7 +386,7 @@ public class InterpreterTest extends TestCase {
     writer.flush();
     long diff = System.currentTimeMillis() - start;
     assertEquals(getContents(root, "items3.txt"), sw.toString());
-    assertTrue("Should be a little bit more than 1 second: " + diff, diff > 1000 && diff < 2000);
+    assertTrue("Should be a little bit more than 1 second: " + diff, diff > 999 && diff < 2000);
   }
 
   static class Context {
