@@ -42,7 +42,7 @@ public class Mustache {
 
   private File root;
   private String path;
-  private MustacheJava mj;
+  protected MustacheJava mj;
 
   public void setRoot(File root) {
     this.root = root;
