@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  * Date: May 4, 2010
  * Time: 9:59:58 AM
  */
-public class MustacheCompiler {
+public class MustacheCompiler implements MustacheJava {
   private File root;
   private static String header, middle, footer;
   private Logger logger = Logger.getLogger(getClass().getName());
@@ -96,12 +96,14 @@ public class MustacheCompiler {
     this.outputDirectory = outputDirectory;
   }
 
+  @Override
   public synchronized Mustache parse(String partial) throws MustacheException {
     AtomicInteger currentLine = new AtomicInteger(0);
     BufferedReader br = new BufferedReader(new StringReader(partial));
     return compile(br, new Stack<String>(), currentLine, null);
   }
 
+  @Override
   public synchronized Mustache parseFile(String path) throws MustacheException {
     AtomicInteger currentLine = new AtomicInteger(0);
     File file = new File(root, path);
@@ -262,7 +264,7 @@ public class MustacheCompiler {
                 writeText(code, template.toString());
                 template = new StringBuilder();
                 String partialName = sb.substring(1).trim();
-                code.append("partial(w, s, \"").append(partialName).append("\");");
+                code.append("partial(w, s, \"").append(partialName).append("\", partial(\"").append(partialName).append("\"));");
                 break;
               case '{':
                 // Not escaped
@@ -324,6 +326,7 @@ public class MustacheCompiler {
         ClassLoader classLoader = parent == null ? MustacheCompiler.class.getClassLoader() : parent;
         Mustache mustache = (Mustache) classLoader.loadClass("com.sampullara.mustaches." + className).newInstance();
         mustache.setRoot(root);
+        mustache.setMustacheJava(this);
         return mustache;
       } catch (Exception e) {
         StringBuilder declaration = new StringBuilder();
@@ -368,6 +371,7 @@ public class MustacheCompiler {
     } catch (Exception e) {
       throw new MustacheException("Failed to compile code: " + e);
     }
+    result.setMustacheJava(this);
     return result;
   }
 

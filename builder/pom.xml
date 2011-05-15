@@ -7,7 +7,7 @@
   <version>0.5-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>mustache.java</name>
+  <name>builder</name>
   <description>Implementation of mustache.js for Java</description>
   <url>http://github.com/spullara/mustache.java</url>
 
@@ -37,33 +37,11 @@
   </properties>
 
   <dependencies>
-    <!-- JSON support -->
+    <!-- Core -->
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
-      <version>1.5.2</version>
-    </dependency>
-
-    <!-- Jetty Client -->
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-client</artifactId>
-      <version>7.2.2.v20101205</version>
-    </dependency>
-
-    <!-- Google Guava -->
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>r09</version>
-    </dependency>
-
-    <!-- Servlets -->
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.5</version>
-      <scope>provided</scope>
+      <groupId>com.github.spullara.mustache.java</groupId>
+      <artifactId>core</artifactId>
+      <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <!-- Testing -->
@@ -73,13 +51,15 @@
       <version>4.8.1</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.github.spullara.mustache.java</groupId>
+      <artifactId>compiler</artifactId>
+      <version>0.5-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <repositories>
-    <repository>
-      <id>javarants releases</id>
-      <url>http://www.javarants.com/repository/</url>
-    </repository>
     <repository>
       <id>javarants snapshots</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
@@ -87,10 +67,6 @@
   </repositories>
 
   <distributionManagement>
-    <site>
-      <id>www.javarants.com</id>
-      <url>scp://www.javarants.com/mnt/data/sites/javarants/sites/</url>
-    </site>
     <repository>
       <id>sonatype-nexus-staging</id>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
@@ -114,4 +90,5 @@
       </plugin>
     </plugins>
   </build>
+
 </project>
