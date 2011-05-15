@@ -13,7 +13,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * TODO: Edit this
+ * A pseudo interpreter / compiler. Instead of compiling to Java code, it compiles to a
+ * list of instructions to execute.
  * <p/>
  * User: sam
  * Date: 5/14/11
@@ -21,52 +22,31 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MustacheInterpreter {
 
-  private final Class<? extends Mustache> superclass;
   private final File root;
 
   public MustacheInterpreter(File root) {
     this.root = root;
-    superclass = null;
-  }
-
-  public MustacheInterpreter(Class<? extends Mustache> superclass, File root) {
-    this.superclass = superclass;
-    this.root = root;
-  }
-
-  private Mustache newMustache() throws MustacheException {
-    if (superclass == null) {
-      return new Mustache() {
-        @Override
-        public void execute(FutureWriter writer, Scope ctx) throws MustacheException {
-        }
-      };
-    }
-    try {
-      return superclass.newInstance();
-    } catch (Exception e) {
-      throw new MustacheException("Could not create superclass", e);
-    }
   }
 
   public static interface Code {
     void execute(FutureWriter fw, Scope scope) throws MustacheException;
   }
 
-  public void execute(List<Code> codes, FutureWriter fw, Scope scope) throws MustacheException {
-    for (Code code : codes) {
-      code.execute(fw, scope);
-    }
+  public Mustache compile(final Reader br) throws MustacheException {
+    return new Mustache() {
+      List<Code> compiled = compile(this, br, null, new AtomicInteger(0));
+
+      @Override
+      public void execute(FutureWriter writer, Scope ctx) throws MustacheException {
+        for (Code code : compiled) {
+          code.execute(writer, ctx);
+        }
+      }
+    };
   }
 
-  public List<Code> compile(final Reader br) throws MustacheException {
-    return compile(br, null, new AtomicInteger(0));
-  }
-
-  public List<Code> compile(final Reader br, String tag, final AtomicInteger currentLine) throws MustacheException {
+  protected List<Code> compile(final Mustache m, final Reader br, String tag, final AtomicInteger currentLine) throws MustacheException {
     final List<Code> list = new ArrayList<Code>();
-    // Base level
-    final Mustache m = newMustache();
 
     // Now we grab the mustache template
     String sm = "{{";
@@ -122,7 +102,7 @@ public class MustacheInterpreter {
               case '^':
               case '?': {
                 int start = currentLine.get();
-                final List<Code> codes = compile(br, variable, currentLine);
+                final List<Code> codes = compile(m, br, variable, currentLine);
                 list.add(new Code() {
                   @Override
                   public void execute(FutureWriter fw, Scope scope) throws MustacheException {
@@ -168,7 +148,7 @@ public class MustacheInterpreter {
                 return list;
               }
               case '>': {
-                final List<Code> codes = compile(new BufferedReader(new FileReader(new File(root, variable + ".html"))), null, currentLine);
+                final List<Code> codes = compile(m, new BufferedReader(new FileReader(new File(root, variable + ".html"))), null, currentLine);
                 list.add(new Code() {
                   @Override
                   public void execute(FutureWriter fw, final Scope scope) throws MustacheException {

@@ -10,10 +10,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Tests for the compiler.
@@ -26,12 +23,16 @@ public class InterpreterTest extends TestCase {
   private File root;
 
   public void testSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    ExecutorService es = Executors.newCachedThreadPool();
     MustacheInterpreter c = new MustacheInterpreter(root);
+    Mustache mustache = c.compile(new BufferedReader(new FileReader(new File(root, "simple.html"))));
+    StringWriter sw = runtest(mustache);
+    assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
+  private StringWriter runtest(Mustache mustache) throws MustacheException, IOException {
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
-    List<MustacheInterpreter.Code> codes = c.compile(new BufferedReader(new FileReader(new File(root, "simple.html"))));
-    c.execute(codes, writer, new Scope(new Object() {
+    mustache.execute(writer, new Scope(new Object() {
       String name = "Chris";
       int value = 10000;
 
@@ -42,7 +43,50 @@ public class InterpreterTest extends TestCase {
       boolean in_ca = true;
     }));
     writer.flush();
-    assertEquals(getContents(root, "simple.txt"), sw.toString());
+    return sw;
+  }
+
+  public void testBenchmark() throws MustacheException, IOException {
+    {
+      MustacheInterpreter c = new MustacheInterpreter(root);
+      Mustache mustache = c.compile(new BufferedReader(new FileReader(new File(root, "simple.html"))));
+      StringWriter sw = runtest(mustache);
+      long start = System.currentTimeMillis();
+      for (int i = 0; i < 100000; i++) {
+        runtest(mustache);
+      }
+      System.out.println(System.currentTimeMillis() - start);
+    }
+    {
+      MustacheCompiler c = new MustacheCompiler(root);
+      Mustache mustache = c.compile(new BufferedReader(new FileReader(new File(root, "simple.html"))));
+      StringWriter sw = runtest(mustache);
+      long start = System.currentTimeMillis();
+      for (int i = 0; i < 100000; i++) {
+        runtest(mustache);
+      }
+      System.out.println(System.currentTimeMillis() - start);
+    }
+    {
+      MustacheInterpreter c = new MustacheInterpreter(root);
+      Mustache mustache = c.compile(new BufferedReader(new FileReader(new File(root, "simple.html"))));
+      StringWriter sw = runtest(mustache);
+      long start = System.currentTimeMillis();
+      for (int i = 0; i < 100000; i++) {
+        runtest(mustache);
+      }
+      System.out.println(System.currentTimeMillis() - start);
+    }
+    {
+      MustacheCompiler c = new MustacheCompiler(root);
+      Mustache mustache = c.compile(new BufferedReader(new FileReader(new File(root, "simple.html"))));
+      StringWriter sw = runtest(mustache);
+      long start = System.currentTimeMillis();
+      for (int i = 0; i < 100000; i++) {
+        runtest(mustache);
+      }
+      System.out.println(System.currentTimeMillis() - start);
+    }
   }
 
   protected String getContents(File root, String file) throws IOException {
