@@ -182,18 +182,18 @@ public class MustacheInterpreter {
               }
               case '>': {
                 out = write(list, out);
-                final List<Code> codes = compile(m, new BufferedReader(new FileReader(new File(root, variable + ".html"))), null, currentLine);
+                final Mustache partial = compile(new BufferedReader(new FileReader(new File(root, variable + ".html"))));
                 list.add(new Code() {
                   @Override
-                  public void execute(FutureWriter fw, final Scope scope) throws MustacheException {
+                  public void execute(FutureWriter fw, final Scope s) throws MustacheException {
                     try {
                       fw.enqueue(new Callable<Object>() {
                         @Override
                         public Object call() throws Exception {
+                          Object parent = s.get(variable);
+                          Scope scope = parent == null ? s : new Scope(parent, s);
                           FutureWriter fw = new FutureWriter();
-                          for (Code code : codes) {
-                            code.execute(fw, scope);
-                          }
+                          partial.execute(fw, scope);
                           return fw;
                         }
                       });
