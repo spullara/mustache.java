@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -37,12 +38,16 @@ public class MustacheInterpreter {
     }
   }
 
+  public Mustache parse(String template) throws MustacheException {
+    return compile(new StringReader(template));
+  }
+
   public static interface Code {
     void execute(FutureWriter fw, Scope scope) throws MustacheException;
   }
 
   public Mustache compile(final Reader br) throws MustacheException {
-    Mustache mustache = null;
+    Mustache mustache;
     try {
       mustache = superclass == null ? new Mustache() : superclass.newInstance();
     } catch (Exception e) {
@@ -121,6 +126,11 @@ public class MustacheInterpreter {
               case '?': {
                 int start = currentLine.get();
                 final List<Code> codes = compile(m, br, variable, currentLine);
+                int lines = currentLine.get() - start;
+                if (!onlywhitespace || lines == 0) {
+                  write(list, out);
+                }
+                out = new StringBuilder();
                 list.add(new Code() {
                   @Override
                   public void execute(FutureWriter fw, Scope scope) throws MustacheException {
@@ -166,11 +176,6 @@ public class MustacheInterpreter {
                     }
                   }
                 });
-                int lines = currentLine.get() - start;
-                if (!onlywhitespace || lines == 0) {
-                  write(list, out);
-                }
-                out = new StringBuilder();
                 iterable = lines != 0;
                 break;
               }
