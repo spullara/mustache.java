@@ -73,8 +73,6 @@ public class FutureWriter extends Writer {
     es.shutdownNow();
   }
 
-  int total = 0;
-
   /**
    * Optimize for the degenerate case of a set of strings being appended to the writer.
    *
@@ -104,7 +102,6 @@ public class FutureWriter extends Writer {
       throw new IOException("closed");
     }
     last = null;
-    total++;
     ordered.add(future);
   }
 
@@ -178,7 +175,6 @@ public class FutureWriter extends Writer {
             writer.write(o.toString());
           }
         }
-        total--;
       }
       if (top) {
         writer.flush();
