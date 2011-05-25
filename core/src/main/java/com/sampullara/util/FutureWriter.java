@@ -10,6 +10,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -26,8 +27,22 @@ public class FutureWriter extends Writer {
 
   private AppendableCallable last;
   private ConcurrentLinkedQueue<Future<Object>> ordered = new ConcurrentLinkedQueue<Future<Object>>();
-  private static ExecutorService es = new ThreadPoolExecutor(10, 100, 60, TimeUnit.SECONDS,
+  private static ExecutorService es;
+  static {
+    ThreadPoolExecutor executor = new ThreadPoolExecutor(10, 100, 60, TimeUnit.SECONDS,
           new ArrayBlockingQueue<Runnable>(10), new ThreadPoolExecutor.CallerRunsPolicy());
+    executor.setThreadFactory(new ThreadFactory() {
+      int i = 0;
+      @Override
+      public Thread newThread(Runnable runnable) {
+        Thread thread = new Thread(runnable);
+        thread.setDaemon(true);
+        thread.setName("Mustache-FutureWriter-" + i++);
+        return thread;
+      }
+    });
+    es = executor;
+  }
   private Writer writer;
   private boolean closed = false;
 
@@ -39,7 +54,7 @@ public class FutureWriter extends Writer {
     old.shutdown();
   }
 
-  public FutureWriter() {    
+  public FutureWriter() {
   }
 
   public FutureWriter(Writer writer) {
@@ -57,8 +72,6 @@ public class FutureWriter extends Writer {
   public static void shutdown() {
     es.shutdownNow();
   }
-
-  int total = 0;
 
   /**
    * Optimize for the degenerate case of a set of strings being appended to the writer.
@@ -89,7 +102,6 @@ public class FutureWriter extends Writer {
       throw new IOException("closed");
     }
     last = null;
-    total++;
     ordered.add(future);
   }
 
@@ -163,13 +175,9 @@ public class FutureWriter extends Writer {
             writer.write(o.toString());
           }
         }
-        total--;
       }
       if (top) {
         writer.flush();
-      }
-      if (total != 0) {
-        throw new AssertionError("Enqueued work != executed work: " + total);
       }
     } catch (Exception e) {
       throw new IOException("Failed to flush", e);

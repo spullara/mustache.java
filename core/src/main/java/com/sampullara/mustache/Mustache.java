@@ -60,6 +60,14 @@ public class Mustache {
     return path;
   }
 
+  public final void execute(Writer writer, Map map) throws MustacheException {
+    execute(new FutureWriter(writer), new Scope(map));
+  }
+
+  public final void execute(Writer writer, JsonNode jsonNode) throws MustacheException {
+    execute(new FutureWriter(writer), new Scope(jsonNode));
+  }
+
   public final void execute(FutureWriter writer, Map map) throws MustacheException {
     execute(writer, new Scope(map));
   }
