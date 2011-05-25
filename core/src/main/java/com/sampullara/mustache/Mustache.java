@@ -353,10 +353,16 @@ public class Mustache {
     this.mj = mj;
   }
 
+  private Map<String, Mustache> partialCache = new ConcurrentHashMap<String, Mustache>();
+
   protected Mustache partial(String name) throws MustacheException {
-    Mustache mustache = mj.parseFile(name + ".html");
-    mustache.setMustacheJava(mj);
-    mustache.setRoot(root);
+    Mustache mustache = partialCache.get(name);
+    if (mustache == null) {
+      mustache = mj.parseFile(name + ".html");
+      mustache.setMustacheJava(mj);
+      mustache.setRoot(root);
+      partialCache.put(name, mustache);
+    }
     return mustache;
   }
 

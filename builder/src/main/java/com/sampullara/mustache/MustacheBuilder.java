@@ -50,6 +50,8 @@ public class MustacheBuilder implements MustacheJava {
     } catch (Exception e) {
       throw new IllegalArgumentException("Could not instantiate", e);
     }
+    mustache.setRoot(root);
+    mustache.setPath(file);
     mustache.setMustacheJava(this);
     mustache.setCompiled(compile(mustache, br, null, new AtomicInteger(0), file));
     return mustache;
@@ -270,13 +272,13 @@ public class MustacheBuilder implements MustacheJava {
 
   private static class PartialCode implements Code {
     private final String variable;
-    private final Mustache partial;
+    private Mustache m;
     private final String file;
     private final int line;
 
     public PartialCode(String variable, Mustache m, String file, int line) throws MustacheException {
       this.variable = variable;
-      this.partial = m.partial(variable);
+      this.m = m;
       this.file = file;
       this.line = line;
     }
@@ -284,6 +286,7 @@ public class MustacheBuilder implements MustacheJava {
     @Override
     public void execute(FutureWriter fw, final Scope s) throws MustacheException {
       try {
+        final Mustache partial = m.partial(variable);
         fw.enqueue(new Callable<Object>() {
           @Override
           public Object call() throws Exception {
