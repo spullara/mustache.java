@@ -366,11 +366,17 @@ public class Mustache {
   protected Mustache partial(String name) throws MustacheException {
     Mustache mustache = partialCache.get(name);
     if (mustache == null) {
-      mustache = mj.parseFile(name + ".html");
-      mustache.setMustacheJava(mj);
-      mustache.setRoot(root);
+      mustache = compilePartial(name);
       partialCache.put(name, mustache);
     }
+    return mustache;
+  }
+
+  protected Mustache compilePartial(String name) throws MustacheException {
+    Mustache mustache;
+    mustache = mj.parseFile(name + ".html");
+    mustache.setMustacheJava(mj);
+    mustache.setRoot(root);
     return mustache;
   }
 
