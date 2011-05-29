@@ -373,10 +373,17 @@ public class Mustache {
   }
 
   protected Mustache compilePartial(String name) throws MustacheException {
+    MustacheTrace.Event event = null;
+    if (trace) {
+      event = MustacheTrace.addEvent("compile partial: " + name, root.getName());
+    }
     Mustache mustache;
     mustache = mj.parseFile(name + ".html");
     mustache.setMustacheJava(mj);
     mustache.setRoot(root);
+    if (trace) {
+      event.end();
+    }
     return mustache;
   }
 
