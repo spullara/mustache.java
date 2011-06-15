@@ -25,13 +25,6 @@
       <version>1.5.2</version>
     </dependency>
 
-    <!-- Jetty Client -->
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-client</artifactId>
-      <version>7.2.2.v20101205</version>
-    </dependency>
-
     <!-- Google Guava -->
     <dependency>
       <groupId>com.google.guava</groupId>
