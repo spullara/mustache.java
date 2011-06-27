@@ -54,6 +54,37 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
+  public void testSimpleTwice() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheBuilder c = new MustacheBuilder(root);
+    Mustache m = c.parseFile("simple.html");
+    StringWriter sw = new StringWriter();
+    FutureWriter writer = new FutureWriter(sw);
+    m.execute(writer, new Scope(new Object() {
+      String name = "Chris";
+      int value = 10000;
+
+      int taxed_value() {
+        return (int) (this.value - (this.value * 0.4));
+      }
+
+      boolean in_ca = true;
+    }));
+    writer.flush();
+    m.execute(writer, new Scope(new Object() {
+      String name = "Chris";
+      int value = 10000;
+
+      int taxed_value() {
+        return (int) (this.value - (this.value * 0.4));
+      }
+
+      boolean in_ca = true;
+    }));
+    writer.flush();
+    String contents = getContents(root, "simple.txt");
+    assertEquals(contents + contents, sw.toString());
+  }
+
   public void testProperties() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheBuilder c = new MustacheBuilder(root);
     Mustache m = c.parseFile("simple.html");
