@@ -179,6 +179,9 @@ public class FutureWriter extends Writer {
       if (top) {
         writer.flush();
       }
+      // Reset
+      ordered.clear();
+      last = null;
     } catch (Exception e) {
       throw new IOException("Failed to flush", e);
     }
