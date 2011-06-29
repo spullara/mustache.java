@@ -22,9 +22,9 @@
   <dependencies>
     <!-- Mustache -->
     <dependency>
-      <groupId>com.google.code.cli-parser</groupId>
-      <artifactId>cli</artifactId>
-      <version>7</version>
+      <groupId>com.github.spullara.cli-parser</groupId>
+      <artifactId>cli-parser</artifactId>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
@@ -47,17 +47,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <repositories>
-    <repository>
-      <id>javarants releases</id>
-      <url>http://www.javarants.com/repository/</url>
-    </repository>
-    <repository>
-      <id>javarants snapshots</id>
-      <url>http://www.javarants.com/snapshots/</url>
-    </repository>
-  </repositories>
 
   <build>
     <plugins>
