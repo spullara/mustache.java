@@ -7,7 +7,8 @@ overview: |
 
   This tag's content names the partial to inject.  Set Delimiter tags MUST NOT
   affect the parsing of a partial.  The partial MUST be rendered against the
-  context stack local to the tag.
+  context stack local to the tag.  If the named partial cannot be found, the
+  empty string SHOULD be used instead, as in interpolations.
 
   Partial tags SHOULD be treated as standalone when appropriate.  If this tag
   is used standalone, any whitespace preceding the tag should treated as
@@ -18,6 +19,13 @@ tests:
     data: { }
     template: '"{{>text}}"'
     partials: { text: 'from partial' }
+    expected: '"from partial"'
+
+  - name: Failed Lookup
+    desc: The empty string should be used when the named partial is not found.
+    data: { }
+    template: '"{{>text}}"'
+    partials: { }
     expected: '"from partial"'
 
   - name: Context
