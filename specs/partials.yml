@@ -26,7 +26,7 @@ tests:
     data: { }
     template: '"{{>text}}"'
     partials: { }
-    expected: '"from partial"'
+    expected: '""'
 
   - name: Context
     desc: The greater-than operator should operate within the current context.
