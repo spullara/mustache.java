@@ -2,9 +2,9 @@ package com.sampullara.mustache;
 
 import org.codehaus.jackson.JsonNode;
 
-import java.beans.BeanDescriptor;
-import java.beans.BeanInfo;
-import java.beans.Beans;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -16,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 /**
  * The scope of the executing Mustache can include an object and a map of strings.  Each scope can also have a
@@ -27,9 +26,20 @@ import java.util.regex.Pattern;
  * Time: 4:14:26 PM
  */
 public class Scope extends HashMap {
-  protected static Map<Class, Map<String, AccessibleObject>> cache = new ConcurrentHashMap<Class, Map<String, AccessibleObject>>();
+  protected static ClassValue<Map<String, MethodHandle>> cache = new ClassValue<Map<String, MethodHandle>>() {
+    @Override
+    protected Map<String, MethodHandle> computeValue(Class<?> type) {
+      return new ConcurrentHashMap<>();
+    }
+  };
+
   public static final Iterable EMPTY = new ArrayList(0);
-  public static final Object NULL = new Object() { public String toString() { return ""; }};
+  public static final Object NULL = new Object() {
+    public String toString() {
+      return "";
+    }
+  };
+  private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
   private Object parent;
   private Scope parentScope;
@@ -113,99 +123,84 @@ public class Scope extends HashMap {
     return v;
   }
 
-  private static class Nothing extends AccessibleObject {}
-  private static Nothing nothing = new Nothing();
+  private static Object nothingField = new Object();
+  private static MethodHandle nothing;
+
+  static {
+    try {
+      nothing = MethodHandles.lookup().unreflectGetter(Scope.class.getDeclaredField("nothingField"));
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      e.printStackTrace();
+      throw new AssertionError("Failed to find field", e);
+    }
+  }
 
   private Object handleObject(Scope scope, String name, Object v) {
     Class aClass = parent.getClass();
-    Map<String, AccessibleObject> members;
-    synchronized (Mustache.class) {
-      // Don't overload methods in your contexts
-      members = cache.get(aClass);
-      if (members == null) {
-        members = new ConcurrentHashMap<String, AccessibleObject>();
-
-        cache.put(aClass, members);
-      }
-    }
-    AccessibleObject member = members.get(name);
-    if (member == nothing) return null;
-    if (member == null) {
-      try {
-        member = getField(name, aClass);
-        member.setAccessible(true);
-        members.put(name, member);
-      } catch (NoSuchFieldException e) {
-        // Not set
-      }
-    }
-    if (member == null) {
-      try {
-        member = getMethod(name, aClass);
-        member.setAccessible(true);
-        members.put(name, member);
-      } catch (NoSuchMethodException e) {
+    Map<String, MethodHandle> handleMap = cache.get(aClass);
+    MethodHandle handle = handleMap.get(name);
+    if (handle == nothing) return null;
+    AccessibleObject member;
+    try {
+      if (handle == null) {
         try {
-          member = getMethod(name, aClass, Scope.class);
-          member.setAccessible(true);
-          members.put(name, member);
-        } catch (NoSuchMethodException e1) {
-          String propertyname = name.substring(0, 1).toUpperCase() + (name.length() > 1 ? name.substring(1) : "");
+          Field field = getField(name, aClass);
+          field.setAccessible(true);
+          handleMap.put(name, handle = MethodHandles.lookup().unreflectGetter(field));
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+          // Not set
+        }
+      }
+      if (handle == null) {
+        try {
+          Method method = getMethod(name, aClass);
+          method.setAccessible(true);
+          handleMap.put(name, handle = LOOKUP.unreflect(method));
+        } catch (IllegalAccessException | NoSuchMethodException e) {
           try {
-            member = getMethod("get" + propertyname, aClass);
-            member.setAccessible(true);
-            members.put(name, member);
-          } catch (NoSuchMethodException e2) {
+            Method method = getMethod(name, aClass, Scope.class);
+            method.setAccessible(true);
+            handleMap.put(name, handle = LOOKUP.unreflect(method));
+          } catch (IllegalAccessException | NoSuchMethodException e1) {
+            String propertyname = name.substring(0, 1).toUpperCase() + (name.length() > 1 ? name.substring(1) : "");
             try {
-              member = getMethod("is" + propertyname, aClass);
-              member.setAccessible(true);
-              members.put(name, member);
-            } catch (NoSuchMethodException e3) {
+              Method method = getMethod("get" + propertyname, aClass);
+              method.setAccessible(true);
+              handleMap.put(name, handle = LOOKUP.unreflect(method));
+            } catch (IllegalAccessException | NoSuchMethodException e2) {
+              try {
+                Method method = getMethod("is" + propertyname, aClass);
+                method.setAccessible(true);
+                handleMap.put(name, handle = LOOKUP.unreflect(method));
+              } catch (IllegalAccessException | NoSuchMethodException e3) {
+                // Not set
+              }
             }
           }
         }
       }
-    }
-    try {
-      if (member instanceof Field) {
-        Field field = (Field) member;
-        v = field.get(parent);
-        if (v == null) {
-          if (field.getType().isAssignableFrom(Iterable.class)) {
-            v = EMPTY;
-          } else {
-            v = NULL;
-          }
-        }
-      } else if (member instanceof Method) {
-        Method method = (Method) member;
-        if (method.getParameterTypes().length == 0) {
-          v = method.invoke(parent);
+      if (handle != null) {
+        if (handle.type().parameterCount() == 1) {
+          v = handle.invoke(parent);
         } else {
-          v = method.invoke(parent, scope);
-        }
-        if (v == null) {
-          if (method.getReturnType().isAssignableFrom(Iterable.class)) {
-            v = EMPTY;
-          } else {
-            v = NULL;
-          }
+          v = handle.invoke(parent, scope);
         }
       }
-    } catch (Exception e) {
+    } catch (Throwable e) {
+      e.printStackTrace();
       // Might be nice for debugging but annoying in practice
       logger.log(Level.WARNING, "Failed to get value for " + name, e);
     }
-    if (member == null) {
-      members.put(name, nothing);
+    if (handle == null) {
+      handleMap.put(name, nothing);
     }
     return v;
   }
 
-  private AccessibleObject getMethod(String name, Class aClass, Class... params) throws NoSuchMethodException {
-    AccessibleObject member;
+  private Method getMethod(String name, Class aClass, Class... params) throws NoSuchMethodException {
+    Method method;
     try {
-      member = aClass.getDeclaredMethod(name, params);
+      method = aClass.getDeclaredMethod(name, params);
     } catch (NoSuchMethodException nsme) {
       Class superclass = aClass.getSuperclass();
       if (superclass != Object.class) {
@@ -213,13 +208,13 @@ public class Scope extends HashMap {
       }
       throw nsme;
     }
-    return member;
+    return method;
   }
 
-  private AccessibleObject getField(String name, Class aClass) throws NoSuchFieldException {
-    AccessibleObject member;
+  private Field getField(String name, Class aClass) throws NoSuchFieldException {
+    Field field;
     try {
-      member = aClass.getDeclaredField(name);
+      field = aClass.getDeclaredField(name);
     } catch (NoSuchFieldException nsfe) {
       Class superclass = aClass.getSuperclass();
       if (superclass != Object.class) {
@@ -227,7 +222,7 @@ public class Scope extends HashMap {
       }
       throw nsfe;
     }
-    return member;
+    return field;
   }
 
   private Object handleJsonNode(String name) {

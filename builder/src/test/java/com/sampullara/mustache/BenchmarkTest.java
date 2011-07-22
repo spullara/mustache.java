@@ -20,6 +20,7 @@ import java.util.List;
  * Time: 9:28 PM
  */
 public class BenchmarkTest extends TestCase {
+  private static final int TIME = 5000;
   private File root;
 
   protected void setUp() throws Exception {
@@ -53,7 +54,7 @@ public class BenchmarkTest extends TestCase {
         complextest(m);
         end = System.currentTimeMillis();
         total++;
-        if (end - start > 1000) break;
+        if (end - start > TIME) break;
       }
       System.out.println("Interpreted: " + total);
     }
@@ -70,7 +71,7 @@ public class BenchmarkTest extends TestCase {
         complextest(m);
         end = System.currentTimeMillis();
         total++;
-        if (end - start > 1000) break;
+        if (end - start > TIME) break;
       }
       System.out.println("Compiler: " + total);
     }
