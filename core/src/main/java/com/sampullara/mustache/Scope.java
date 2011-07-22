@@ -142,7 +142,6 @@ public class Scope extends HashMap {
       if (handle == null) {
         try {
           Field field = getField(name, aClass);
-          field.setAccessible(true);
           handleMap.put(name, handle = MethodHandles.lookup().unreflectGetter(field));
         } catch (IllegalAccessException | NoSuchFieldException e) {
           // Not set
@@ -151,23 +150,19 @@ public class Scope extends HashMap {
       if (handle == null) {
         try {
           Method method = getMethod(name, aClass);
-          method.setAccessible(true);
           handleMap.put(name, handle = LOOKUP.unreflect(method));
         } catch (IllegalAccessException | NoSuchMethodException e) {
           try {
             Method method = getMethod(name, aClass, Scope.class);
-            method.setAccessible(true);
             handleMap.put(name, handle = LOOKUP.unreflect(method));
           } catch (IllegalAccessException | NoSuchMethodException e1) {
             String propertyname = name.substring(0, 1).toUpperCase() + (name.length() > 1 ? name.substring(1) : "");
             try {
               Method method = getMethod("get" + propertyname, aClass);
-              method.setAccessible(true);
               handleMap.put(name, handle = LOOKUP.unreflect(method));
             } catch (IllegalAccessException | NoSuchMethodException e2) {
               try {
                 Method method = getMethod("is" + propertyname, aClass);
-                method.setAccessible(true);
                 handleMap.put(name, handle = LOOKUP.unreflect(method));
               } catch (IllegalAccessException | NoSuchMethodException e3) {
                 // Not set
@@ -205,6 +200,7 @@ public class Scope extends HashMap {
       }
       throw nsme;
     }
+    method.setAccessible(true);
     return method;
   }
 
@@ -219,6 +215,7 @@ public class Scope extends HashMap {
       }
       throw nsfe;
     }
+    field.setAccessible(true);
     return field;
   }
 
