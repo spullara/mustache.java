@@ -51,6 +51,9 @@ public class RuntimeJavaCompiler {
     }
     final CompilerClassLoader ccl = new CompilerClassLoader(loader);
     JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+    if (compiler == null) {
+      throw new AssertionError("The system Java compiler is unavailable. You may need to install the JDK vs the JRE.");
+    }
     StandardJavaFileManager jfm = compiler.getStandardFileManager(null, null, null);
     ForwardingJavaFileManager<StandardJavaFileManager> fjfm = new ClassLoaderFileManager(jfm, ccl, loader);
     List<JavaFileObject> sources = new ArrayList<JavaFileObject>();
