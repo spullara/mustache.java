@@ -4,8 +4,6 @@ import org.codehaus.jackson.JsonNode;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -124,11 +122,11 @@ public class Scope extends HashMap {
   }
 
   private static Object nothingField = new Object();
-  private static MethodHandle nothing;
+  private static MethodHandle NOHANDLE;
 
   static {
     try {
-      nothing = MethodHandles.lookup().unreflectGetter(Scope.class.getDeclaredField("nothingField"));
+      NOHANDLE = MethodHandles.lookup().unreflectGetter(Scope.class.getDeclaredField("nothingField"));
     } catch (IllegalAccessException | NoSuchFieldException e) {
       e.printStackTrace();
       throw new AssertionError("Failed to find field", e);
@@ -139,8 +137,7 @@ public class Scope extends HashMap {
     Class aClass = parent.getClass();
     Map<String, MethodHandle> handleMap = cache.get(aClass);
     MethodHandle handle = handleMap.get(name);
-    if (handle == nothing) return null;
-    AccessibleObject member;
+    if (handle == NOHANDLE) return null;
     try {
       if (handle == null) {
         try {
@@ -192,7 +189,7 @@ public class Scope extends HashMap {
       logger.log(Level.WARNING, "Failed to get value for " + name, e);
     }
     if (handle == null) {
-      handleMap.put(name, nothing);
+      handleMap.put(name, NOHANDLE);
     }
     return v;
   }
