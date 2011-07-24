@@ -7,6 +7,7 @@
   <version>0.5-SNAPSHOT</version>
   <modules>
     <module>core</module>
+    <module>java7-support</module>
     <module>compiler</module>
     <module>builder</module>
     <module>handlebar</module>
@@ -34,8 +35,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.6</source>
+          <target>1.6</target>
             <encoding>UTF-8</encoding>
         </configuration>
       </plugin>

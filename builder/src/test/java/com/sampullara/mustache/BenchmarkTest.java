@@ -20,7 +20,7 @@ import java.util.List;
  * Time: 9:28 PM
  */
 public class BenchmarkTest extends TestCase {
-  private static final int TIME = 2000;
+  private static final int TIME = 5000;
   private File root;
 
   protected void setUp() throws Exception {
