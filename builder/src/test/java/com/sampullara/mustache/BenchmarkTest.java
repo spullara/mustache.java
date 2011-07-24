@@ -41,39 +41,41 @@ public class BenchmarkTest extends TestCase {
   }
 
   public void testComplex() throws MustacheException, IOException {
-    {
-      long start = System.currentTimeMillis();
-      MustacheBuilder c = new MustacheBuilder(root);
-      Mustache m = c.parseFile("complex.html");
-      System.out.println("Interpreted compilation: " + (System.currentTimeMillis() - start));
-      complextest(m);
-      start = System.currentTimeMillis();
-      long end;
-      int total = 0;
-      while (true) {
+    for (int i = 0; i < 3; i++) {
+      {
+        long start = System.currentTimeMillis();
+        MustacheBuilder c = new MustacheBuilder(root);
+        Mustache m = c.parseFile("complex.html");
+        System.out.println("Interpreted compilation: " + (System.currentTimeMillis() - start));
         complextest(m);
-        end = System.currentTimeMillis();
-        total++;
-        if (end - start > TIME) break;
+        start = System.currentTimeMillis();
+        long end;
+        int total = 0;
+        while (true) {
+          complextest(m);
+          end = System.currentTimeMillis();
+          total++;
+          if (end - start > TIME) break;
+        }
+        System.out.println("Interpreted: " + total);
       }
-      System.out.println("Interpreted: " + total);
-    }
-    {
-      long start = System.currentTimeMillis();
-      MustacheCompiler c = new MustacheCompiler(root);
-      Mustache m = c.parseFile("complex.html");
-      System.out.println("Native compilation: " + (System.currentTimeMillis() - start));
-      complextest(m);
-      start = System.currentTimeMillis();
-      long end;
-      int total = 0;
-      while (true) {
+      {
+        long start = System.currentTimeMillis();
+        MustacheCompiler c = new MustacheCompiler(root);
+        Mustache m = c.parseFile("complex.html");
+        System.out.println("Native compilation: " + (System.currentTimeMillis() - start));
         complextest(m);
-        end = System.currentTimeMillis();
-        total++;
-        if (end - start > TIME) break;
+        start = System.currentTimeMillis();
+        long end;
+        int total = 0;
+        while (true) {
+          complextest(m);
+          end = System.currentTimeMillis();
+          total++;
+          if (end - start > TIME) break;
+        }
+        System.out.println("Compiler: " + total);
       }
-      System.out.println("Compiler: " + total);
     }
   }
 

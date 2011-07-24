@@ -7,10 +7,10 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>core</artifactId>
+  <artifactId>java7-support</artifactId>
   <packaging>jar</packaging>
 
-  <name>core</name>
+  <name>java7-support</name>
   <url>http://maven.apache.org</url>
 
   <properties>
@@ -18,18 +18,10 @@
   </properties>
 
   <dependencies>
-    <!-- JSON support -->
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
-      <version>1.5.2</version>
-    </dependency>
-
-    <!-- Google Guava -->
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>r09</version>
+      <groupId>com.github.spullara.mustache.java</groupId>
+      <artifactId>core</artifactId>
+      <version>0.5-SNAPSHOT</version>
     </dependency>
 
     <!-- Test -->
@@ -40,5 +32,19 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+            <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
