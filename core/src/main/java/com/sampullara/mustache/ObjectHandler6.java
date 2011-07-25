@@ -18,8 +18,6 @@ import java.util.logging.Logger;
  */
 public class ObjectHandler6 implements ObjectHandler {
   protected static Map<Class, Map<String, AccessibleObject>> cache = new ConcurrentHashMap<Class, Map<String, AccessibleObject>>();
-  public static final Iterable EMPTY = new ArrayList(0);
-  public static final Object NULL = new Object() { public String toString() { return ""; }};
   private static Logger logger = Logger.getLogger(Mustache.class.getName());
 
   private static class Nothing extends AccessibleObject {}
@@ -84,9 +82,9 @@ public class ObjectHandler6 implements ObjectHandler {
         value = field.get(parent);
         if (value == null) {
           if (field.getType().isAssignableFrom(Iterable.class)) {
-            value = EMPTY;
+            value = Scope.EMPTY;
           } else {
-            value = NULL;
+            value = Scope.NULL;
           }
         }
       } else if (member instanceof Method) {
@@ -98,9 +96,9 @@ public class ObjectHandler6 implements ObjectHandler {
         }
         if (value == null) {
           if (method.getReturnType().isAssignableFrom(Iterable.class)) {
-            value = EMPTY;
+            value = Scope.EMPTY;
           } else {
-            value = NULL;
+            value = Scope.NULL;
           }
         }
       }
