@@ -93,6 +93,7 @@ public class Handlebar {
               BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
               JsonParser parser = jf.createJsonParser(br);
               JsonNode json = parser.readValueAsTree();
+              br.close();
               mustache.execute(fw, new Scope(json, new Scope(parameters)));
             } else {
               mustache.execute(fw, new Scope(parameters));
