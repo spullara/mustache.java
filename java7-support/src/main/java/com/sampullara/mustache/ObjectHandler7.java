@@ -81,6 +81,13 @@ public class ObjectHandler7 implements ObjectHandler {
           value = handle.invoke(parent, scope);
         }
       }
+      if (value == null) {
+        if (handle.type().returnType().isAssignableFrom(Iterable.class)) {
+          value = Scope.EMPTY;
+        } else {
+          value = Scope.NULL;
+        }
+      }
     } catch (Throwable e) {
       // Might be nice for debugging but annoying in practice
       logger.log(Level.WARNING, "Failed to get value for " + name, e);
