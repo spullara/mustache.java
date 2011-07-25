@@ -45,7 +45,7 @@
     <!-- Core -->
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
-      <artifactId>java7-support</artifactId>
+      <artifactId>core</artifactId>
       <version>0.5-SNAPSHOT</version>
     </dependency>
 

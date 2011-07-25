@@ -7,7 +7,6 @@
   <version>0.5-SNAPSHOT</version>
   <modules>
     <module>core</module>
-    <module>java7-support</module>
     <module>compiler</module>
     <module>builder</module>
     <module>handlebar</module>
