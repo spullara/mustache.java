@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -58,7 +59,8 @@ public class RuntimeJavaCompiler {
     ForwardingJavaFileManager<StandardJavaFileManager> fjfm = new ClassLoaderFileManager(jfm, ccl, loader);
     List<JavaFileObject> sources = new ArrayList<JavaFileObject>();
     sources.add(new JavaSourceFromString(className, code));
-    JavaCompiler.CompilationTask task = compiler.getTask(printWriter, fjfm, null, null, null, sources);
+    Iterable<String> options = Arrays.asList("-source", "6", "-target", "6");
+    JavaCompiler.CompilationTask task = compiler.getTask(printWriter, fjfm, null, options, null, sources);
     task.call();
     return ccl;
   }
