@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
@@ -69,10 +70,12 @@ public class MustacheBuilder implements MustacheJava {
     try {
       BufferedReader br;
       if (root == null) {
-        br = new BufferedReader(
-                new InputStreamReader(
-                        MustacheBuilder.class.getClassLoader().getResourceAsStream(path),
-                        Charsets.UTF_8));
+        InputStream resourceAsStream =
+                MustacheBuilder.class.getClassLoader().getResourceAsStream(path);
+        if (resourceAsStream == null) {
+          throw new MustacheException(path + " not found in classpath");
+        }
+        br = new BufferedReader(new InputStreamReader(resourceAsStream, Charsets.UTF_8));
       } else {
         br = new BufferedReader(new FileReader(new File(root, path)));
       }
