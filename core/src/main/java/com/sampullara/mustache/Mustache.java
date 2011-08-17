@@ -375,16 +375,21 @@ public class Mustache {
   protected Mustache compilePartial(String name) throws MustacheException {
     MustacheTrace.Event event = null;
     if (trace) {
-      event = MustacheTrace.addEvent("compile partial: " + name, root.getName());
+      event = MustacheTrace.addEvent("compile partial: " + name, root == null ? "classpath" : root.getName());
     }
     Mustache mustache;
-    mustache = mj.parseFile(name + ".html");
+    mustache = mj.parseFile(name + "." + getPartialExtension());
     mustache.setMustacheJava(mj);
     mustache.setRoot(root);
     if (trace) {
       event.end();
     }
     return mustache;
+  }
+
+  protected String getPartialExtension() {
+    int index = path.lastIndexOf(".");
+    return path.substring(index + 1);
   }
 
   protected void partial(FutureWriter writer, Scope s, final String name, Mustache partial) throws MustacheException {

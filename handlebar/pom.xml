@@ -24,7 +24,7 @@
     <dependency>
       <groupId>com.github.spullara.cli-parser</groupId>
       <artifactId>cli-parser</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>

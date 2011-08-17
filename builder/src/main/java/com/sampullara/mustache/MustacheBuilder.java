@@ -1,11 +1,10 @@
 package com.sampullara.mustache;
 
-import com.sampullara.util.FutureWriter;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -13,6 +12,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.google.common.base.Charsets;
+
+import com.sampullara.util.FutureWriter;
 
 /**
  * A pseudo interpreter / compiler. Instead of compiling to Java code, it compiles to a
@@ -26,6 +29,10 @@ public class MustacheBuilder implements MustacheJava {
 
   private final File root;
   private Class<? extends Mustache> superclass;
+
+  public MustacheBuilder() {
+    this.root = null;
+  }
 
   public MustacheBuilder(File root) {
     this.root = root;
@@ -60,7 +67,15 @@ public class MustacheBuilder implements MustacheJava {
   public Mustache parseFile(String path) throws MustacheException {
     Mustache compile;
     try {
-      BufferedReader br = new BufferedReader(new FileReader(new File(root, path)));
+      BufferedReader br;
+      if (root == null) {
+        br = new BufferedReader(
+                new InputStreamReader(
+                        MustacheBuilder.class.getClassLoader().getResourceAsStream(path),
+                        Charsets.UTF_8));
+      } else {
+        br = new BufferedReader(new FileReader(new File(root, path)));
+      }
       compile = build(br, path);
       br.close();
     } catch (IOException e) {
@@ -131,7 +146,17 @@ public class MustacheBuilder implements MustacheJava {
                   write(list, out);
                 }
                 out = new StringBuilder();
-                list.add(new SubCode(ch, m, variable, codes, file, currentLine.get()));
+                switch (ch) {
+                  case '#':
+                    list.add(new IterableCode(m, variable, codes, file, currentLine.get()));
+                    break;
+                  case '^':
+                    list.add(new InvertedIterableCode(m, variable, codes, file, currentLine.get()));
+                    break;
+                  case '?':
+                    list.add(new IfIterableCode(m, variable, codes, file, currentLine.get()));
+                    break;
+                }
                 iterable = lines != 0;
                 break;
               }
@@ -141,7 +166,8 @@ public class MustacheBuilder implements MustacheJava {
                   write(list, out);
                 }
                 if (!variable.equals(tag)) {
-                  throw new MustacheException("Mismatched start/end tags: " + tag + " != " + variable + " in " + file + ":" + currentLine);
+                  throw new MustacheException(
+                          "Mismatched start/end tags: " + tag + " != " + variable + " in " + file + ":" + currentLine);
                 }
 
                 return list;
@@ -159,7 +185,8 @@ public class MustacheBuilder implements MustacheJava {
                   name = variable.substring(0, variable.length() - 1);
                 } else {
                   if (br.read() != '}') {
-                    throw new MustacheException("Improperly closed variable in " + file + ":" + currentLine);
+                    throw new MustacheException(
+                            "Improperly closed variable in " + file + ":" + currentLine);
                   }
                 }
                 final String finalName = name;
@@ -208,16 +235,14 @@ public class MustacheBuilder implements MustacheJava {
     return new StringBuilder();
   }
 
-  private static class SubCode implements Code {
-    private final char ch;
-    private final Mustache m;
-    private final String variable;
+  private abstract static class SubCode implements Code {
+    protected final Mustache m;
+    protected final String variable;
     private final Code[] codes;
     private final int line;
     private final String file;
 
-    public SubCode(char ch, Mustache m, String variable, List<Code> codes, String file, int line) {
-      this.ch = ch;
+    public SubCode(Mustache m, String variable, List<Code> codes, String file, int line) {
       this.m = m;
       this.variable = variable;
       this.codes = new ArrayList<Code>(codes).toArray(new Code[codes.size()]);
@@ -226,47 +251,72 @@ public class MustacheBuilder implements MustacheJava {
     }
 
     @Override
-    public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-      Iterable<Scope> iterable = null;
-      switch (ch) {
-        case '#':
-          iterable = m.iterable(scope, variable);
-          break;
-        case '^':
-          if (m.capturedWriter.get() != null) {
-            m.actual.set(fw);
-            fw = m.capturedWriter.get();
-          }
-          iterable = m.inverted(scope, variable);
-          break;
-        case '?':
-          if (m.capturedWriter.get() != null) {
-            m.actual.set(fw);
-            fw = m.capturedWriter.get();
-          }
-          iterable = m.ifiterable(scope, variable);
-          break;
-      }
-      for (final Scope subScope : iterable) {
-        try {
-          if (m.capturedWriter.get() != null) {
-            m.actual.set(fw);
-            fw = m.capturedWriter.get();
-          }
-          fw.enqueue(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-              FutureWriter writer = new FutureWriter();
-              for (Code code : codes) {
-                code.execute(writer, subScope);
-              }
-              return writer;
+    public abstract void execute(FutureWriter fw, Scope scope) throws MustacheException;
+
+    protected void execute(FutureWriter fw, Iterable<Scope> iterable) throws MustacheException {
+      if (iterable != null) {
+        for (final Scope subScope : iterable) {
+          try {
+            if (m.capturedWriter.get() != null) {
+              m.actual.set(fw);
+              fw = m.capturedWriter.get();
             }
-          });
-        } catch (IOException e) {
-          throw new MustacheException("Execution failed: " + file + ":" + line, e);
+            fw.enqueue(new Callable<Object>() {
+              @Override
+              public Object call() throws Exception {
+                FutureWriter writer = new FutureWriter();
+                for (Code code : codes) {
+                  code.execute(writer, subScope);
+                }
+                return writer;
+              }
+            });
+          } catch (IOException e) {
+            throw new MustacheException("Execution failed: " + file + ":" + line, e);
+          }
         }
       }
+    }
+  }
+
+  private static class IterableCode extends SubCode {
+    public IterableCode(Mustache m, String variable, List<Code> codes, String file, int line) {
+      super(m, variable, codes, file, line);
+    }
+
+    @Override
+    public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+      execute(fw, m.iterable(scope, variable));
+    }
+  }
+
+  private static class IfIterableCode extends SubCode {
+    public IfIterableCode(Mustache m, String variable, List<Code> codes, String file, int line) {
+      super(m, variable, codes, file, line);
+    }
+
+    @Override
+    public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+      if (m.capturedWriter.get() != null) {
+        m.actual.set(fw);
+        fw = m.capturedWriter.get();
+      }
+      execute(fw, m.ifiterable(scope, variable));
+    }
+  }
+
+  private static class InvertedIterableCode extends SubCode {
+    public InvertedIterableCode(Mustache m, String variable, List<Code> codes, String file, int line) {
+      super(m, variable, codes, file, line);
+    }
+
+    @Override
+    public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+      if (m.capturedWriter.get() != null) {
+        m.actual.set(fw);
+        fw = m.capturedWriter.get();
+      }
+      execute(fw, m.inverted(scope, variable));
     }
   }
 
