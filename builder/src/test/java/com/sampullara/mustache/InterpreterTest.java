@@ -512,7 +512,7 @@ public class InterpreterTest extends TestCase {
   protected void setUp() throws Exception {
     super.setUp();
     File file = new File("src/test/resources");
-    root = file.exists() ? file : new File("../src/test/resources");
+    root = new File(file, "simple.html").exists() ? file : new File("../src/test/resources");
   }
 
 }

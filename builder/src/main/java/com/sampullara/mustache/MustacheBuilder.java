@@ -82,7 +82,7 @@ public class MustacheBuilder implements MustacheJava {
       compile = build(br, path);
       br.close();
     } catch (IOException e) {
-      throw new MustacheException("Failed to read", e);
+      throw new MustacheException("Failed to read " + new File(root, path), e);
     }
     return compile;
   }
