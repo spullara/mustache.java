@@ -56,6 +56,12 @@ public class InterpreterTest extends TestCase {
 
   public void testClassLoaderSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheBuilder c = new MustacheBuilder();
+    classLoaderTest(c);
+    MustacheBuilder c2 = new MustacheBuilder("path");
+    classLoaderTest(c2);
+  }
+
+  private void classLoaderTest(MustacheBuilder c) throws MustacheException, IOException {
     Mustache m = c.parseFile("classloader.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
@@ -373,7 +379,7 @@ public class InterpreterTest extends TestCase {
 
   @SuppressWarnings("serial")
   public void testCurrentElementInArray() throws IOException, MustacheException {
-      
+
       MustacheBuilder c = init();
       Mustache m = c.parseFile("simple_array.html");
       StringWriter sw = new StringWriter();
@@ -385,9 +391,9 @@ public class InterpreterTest extends TestCase {
       }));
       writer.flush();
       assertEquals(getContents(root, "simple_array.txt"), sw.toString());
-      
+
       /*
-       * verify null elements in a list are properly handled when using {{.}} 
+       * verify null elements in a list are properly handled when using {{.}}
        */
       sw = new StringWriter();
       writer = new FutureWriter(sw);
@@ -398,9 +404,9 @@ public class InterpreterTest extends TestCase {
       }));
       writer.flush();
       assertEquals("\n\n", sw.toString());
-      
+
   }
-  
+
   public void testReadme() throws MustacheException, IOException {
     MustacheBuilder c = init();
     Mustache m = c.parseFile("items.html");

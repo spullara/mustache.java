@@ -28,15 +28,23 @@ import com.sampullara.util.FutureWriter;
  */
 public class MustacheBuilder implements MustacheJava {
 
+  private final String classpathRoot;
   private final File root;
   private Class<? extends Mustache> superclass;
 
   public MustacheBuilder() {
     this.root = null;
+    this.classpathRoot = null;
+  }
+
+  public MustacheBuilder(String classpathRoot) {
+    this.root = null;
+    this.classpathRoot = classpathRoot;
   }
 
   public MustacheBuilder(File root) {
     this.root = root;
+    this.classpathRoot = null;
   }
 
   public void setSuperclass(String superclass) {
@@ -70,8 +78,9 @@ public class MustacheBuilder implements MustacheJava {
     try {
       BufferedReader br;
       if (root == null) {
+        String fullPath = classpathRoot == null ? path : classpathRoot + "/" + path;
         InputStream resourceAsStream =
-                MustacheBuilder.class.getClassLoader().getResourceAsStream(path);
+                MustacheBuilder.class.getClassLoader().getResourceAsStream(fullPath);
         if (resourceAsStream == null) {
           throw new MustacheException(path + " not found in classpath");
         }
