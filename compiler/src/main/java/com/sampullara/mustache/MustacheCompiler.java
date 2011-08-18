@@ -188,6 +188,7 @@ public class MustacheCompiler implements MustacheJava {
             char ch = command.charAt(0);
             switch (ch) {
               case '#':
+              case '_':
               case '^':
               case '?':
                 // Tag start
@@ -216,6 +217,7 @@ public class MustacheCompiler implements MustacheJava {
                 int variableNum = num.incrementAndGet();
                 switch(ch) {
                   case '#':
+                  case '_':
                     code.append("iterable(w, s, \"");
                     code.append(startTag);
                     code.append("\", ").append(sub.getClass().getName()).append(".class);");
