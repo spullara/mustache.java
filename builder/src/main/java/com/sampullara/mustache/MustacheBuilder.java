@@ -15,6 +15,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 import com.sampullara.util.FutureWriter;
 
@@ -150,6 +153,7 @@ public class MustacheBuilder implements MustacheJava {
             switch (ch) {
               case '#':
               case '^':
+              case '_':
               case '?': {
                 int start = currentLine.get();
                 final List<Code> codes = compile(m, br, variable, currentLine, file);
@@ -167,6 +171,9 @@ public class MustacheBuilder implements MustacheJava {
                     break;
                   case '?':
                     list.add(new IfIterableCode(m, variable, codes, file, currentLine.get()));
+                    break;
+                  case '_':
+                    list.add(new FunctionCode(m, variable, codes, file, currentLine.get()));
                     break;
                 }
                 iterable = lines != 0;
@@ -299,6 +306,24 @@ public class MustacheBuilder implements MustacheJava {
     @Override
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
       execute(fw, m.iterable(scope, variable));
+    }
+  }
+
+  private static class FunctionCode extends SubCode {
+    public FunctionCode(Mustache m, String variable, List<Code> codes, String file, int line) {
+      super(m, variable, codes, file, line);
+    }
+
+    @Override
+    public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+      Object function = m.getValue(scope, variable);
+      if (function instanceof Function) {
+        execute(fw, m.function(scope, (Function) function));
+      } else if (function == null) {
+        execute(fw, Lists.newArrayList(scope));
+      } else {
+        throw new MustacheException("Not a function: " + function);
+      }
     }
   }
 

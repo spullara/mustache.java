@@ -246,53 +246,12 @@ public class Mustache {
       String traceName = parent == null ? s.getClass().getName() : parent.getClass().getName();
       event = MustacheTrace.addEvent("iterable: " + name, traceName);
     }
-    final String finalName = name;
     final Object value = getValue(s, name);
     if (value instanceof Function) {
       if (trace) {
         event.end();
       }
-      final Function f = (Function) value;
-      return new Iterable<Scope>() {
-        @Override
-        public Iterator<Scope> iterator() {
-          return new Iterator<Scope>() {
-            boolean first = true;
-            StringWriter writer = new StringWriter();
-
-            @Override
-            public synchronized boolean hasNext() {
-              if (first) {
-                capturedWriter.set(new FutureWriter(writer));
-              } else {
-                try {
-                  capturedWriter.get().flush();
-                  capturedWriter.set(null);
-                  Object apply = f.apply(writer.toString());
-                  actual.get().write(apply == null ? null : String.valueOf(apply));
-                  actual.set(null);
-                } catch (Exception e) {
-                  logger.log(Level.SEVERE, "Could not apply function: " + f, e);
-                }
-              }
-              return first;
-            }
-
-            @Override
-            public synchronized Scope next() {
-              if (first) {
-                first = false;
-                return s;
-              }
-              throw new NoSuchElementException();
-            }
-
-            @Override
-            public void remove() {
-            }
-          };
-        }
-      };
+      return function(s, (Function) value);
     }
     if (trace) {
       event.end();
@@ -345,12 +304,55 @@ public class Mustache {
             } else {
               scope = new Scope(s);
             }
-            scope.put(finalName, value);
+            scope.put(name, value);
             return scope;
           }
 
           public void remove() {
             throw new UnsupportedOperationException();
+          }
+        };
+      }
+    };
+  }
+
+  public Iterable<Scope> function(final Scope s, final Function f) {
+    return new Iterable<Scope>() {
+      @Override
+      public Iterator<Scope> iterator() {
+        return new Iterator<Scope>() {
+          boolean first = true;
+          StringWriter writer = new StringWriter();
+
+          @Override
+          public synchronized boolean hasNext() {
+            if (first) {
+              capturedWriter.set(new FutureWriter(writer));
+            } else {
+              try {
+                capturedWriter.get().flush();
+                capturedWriter.set(null);
+                Object apply = f.apply(writer.toString());
+                actual.get().write(apply == null ? null : String.valueOf(apply));
+                actual.set(null);
+              } catch (Exception e) {
+                logger.log(Level.SEVERE, "Could not apply function: " + f, e);
+              }
+            }
+            return first;
+          }
+
+          @Override
+          public synchronized Scope next() {
+            if (first) {
+              first = false;
+              return s;
+            }
+            throw new NoSuchElementException();
+          }
+
+          @Override
+          public void remove() {
           }
         };
       }
