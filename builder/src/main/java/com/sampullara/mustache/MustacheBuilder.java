@@ -149,7 +149,7 @@ public class MustacheBuilder implements MustacheJava {
             }
             final String command = sb.toString().trim();
             final char ch = command.charAt(0);
-            final String variable = command.substring(1);
+            final String variable = command.substring(1).trim();
             switch (ch) {
               case '#':
               case '^':
