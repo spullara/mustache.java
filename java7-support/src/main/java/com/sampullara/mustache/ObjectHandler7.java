@@ -82,7 +82,7 @@ public class ObjectHandler7 implements ObjectHandler {
         }
       }
       if (value == null) {
-        if (handle.type().returnType().isAssignableFrom(Iterable.class)) {
+        if (handle != null && handle.type().returnType().isAssignableFrom(Iterable.class)) {
           value = Scope.EMPTY;
         } else {
           value = Scope.NULL;
