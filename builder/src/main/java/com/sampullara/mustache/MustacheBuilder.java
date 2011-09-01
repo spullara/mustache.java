@@ -1,5 +1,10 @@
 package com.sampullara.mustache;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import com.sampullara.util.FutureWriter;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -13,13 +18,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import com.google.common.base.Charsets;
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-
-import com.sampullara.util.FutureWriter;
 
 /**
  * A pseudo interpreter / compiler. Instead of compiling to Java code, it compiles to a

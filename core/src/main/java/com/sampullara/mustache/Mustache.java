@@ -42,6 +42,7 @@ public class Mustache {
 
   private File root;
   private String path;
+  private Code[] compiled;
   protected MustacheJava mj;
 
   public void setRoot(File root) {
@@ -60,24 +61,79 @@ public class Mustache {
     return path;
   }
 
-  public final void execute(Writer writer, Map map) throws MustacheException {
-    execute(new FutureWriter(writer), new Scope(map));
+  /**
+   * Execute the Mustache using a Map as the backing data and write the result
+   * to the provided writer.
+   *
+   * @param writer
+   * @param map
+   * @return
+   * @throws MustacheException
+   */
+  public final void execute(Writer writer, Map map) throws MustacheException, IOException {
+    FutureWriter fw = new FutureWriter(writer);
+    execute(fw, new Scope(map));
+    fw.flush();
   }
 
-  public final void execute(Writer writer, JsonNode jsonNode) throws MustacheException {
-    execute(new FutureWriter(writer), new Scope(jsonNode));
+  /**
+   * Execute the Mustache using a JsonNode as the backing data and write the
+   * result to the provided writer.
+   *
+   * @param writer
+   * @param jsonNode
+   * @return
+   * @throws MustacheException
+   */
+  public final void execute(Writer writer, JsonNode jsonNode) throws MustacheException, IOException {
+    FutureWriter fw = new FutureWriter(writer);
+    execute(fw, new Scope(jsonNode));
+    fw.flush();
   }
 
+  /**
+   * Execute the Mustache using a scope as the backing data and write the
+   * result to the provided writer.
+   *
+   * @param writer
+   * @param map
+   * @throws MustacheException
+   */
+  public final void execute(Writer writer, Scope ctx) throws MustacheException, IOException {
+    FutureWriter fw = new FutureWriter(writer);
+    execute(fw, ctx);
+    fw.flush();
+  }
+
+  /**
+   * Execute the Mustache using a Map as the backing data.
+   *
+   * @param writer
+   * @param map
+   * @throws MustacheException
+   */
   public final void execute(FutureWriter writer, Map map) throws MustacheException {
     execute(writer, new Scope(map));
   }
 
+  /**
+   * Execute the Mustache using a JsonNode as a the backing data.
+   *
+   * @param writer
+   * @param jsonNode
+   * @throws MustacheException
+   */
   public final void execute(FutureWriter writer, JsonNode jsonNode) throws MustacheException {
     execute(writer, new Scope(jsonNode));
   }
 
-  private Code[] compiled;
-
+  /**
+   * Execute the Mustache using the provided Scope as the backing data.
+   *
+   * @param writer
+   * @param ctx
+   * @throws MustacheException
+   */
   public void execute(FutureWriter writer, Scope ctx) throws MustacheException {
     for (Code code : compiled) {
       code.execute(writer, ctx);
@@ -88,7 +144,7 @@ public class Mustache {
   protected ThreadLocal<FutureWriter> actual = new ThreadLocal<FutureWriter>();
 
   /**
-   * Enqueue's a Mustache into the FutureWriter and starts evaluating it.
+   * Enqueue's a Mustache into the FutureWriter.
    *
    * @param writer
    * @param m

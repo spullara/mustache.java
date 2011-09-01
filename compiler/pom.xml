@@ -75,7 +75,7 @@
   <repositories>
     <repository>
       <id>javarants releases</id>
-      <url>http://www.javarants.com/repository/</url>
+      <url>https://oss.sonatype.org/content/repositories/releases/</url>
     </repository>
     <repository>
       <id>javarants snapshots</id>

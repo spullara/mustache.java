@@ -134,7 +134,7 @@ public class InterpreterTest extends TestCase {
     Mustache m = c.parseFile("simple.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
-    m.execute(writer, new HashMap() {{
+    m.execute(writer, new HashMap<String, Object>() {{
       put("name", "Chris");
       put("value", 10000);
       put("taxed_value", 6000);
@@ -145,6 +145,46 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testSimpleWithJson() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheBuilder c = new MustacheBuilder(root);
+    Mustache m = c.parseFile("simple.html");
+    StringWriter sw = new StringWriter();
+    JsonFactory jf = new MappingJsonFactory();
+    JsonNode jsonNode = jf.createJsonParser("{\"name\":\"Chris\", \"value\":10000, \"taxed_value\":6000,\"in_ca\":true}").readValueAsTree();
+    m.execute(sw, jsonNode);
+    assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
+  public void testSimpleAndWriter() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheBuilder c = new MustacheBuilder(root);
+    Mustache m = c.parseFile("simple.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Scope(new Object() {
+      String name = "Chris";
+      int value = 10000;
+
+      int taxed_value() {
+        return (int) (this.value - (this.value * 0.4));
+      }
+
+      boolean in_ca = true;
+    }));
+    assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
+  public void testSimpleWithMapAndWriter() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheBuilder c = new MustacheBuilder(root);
+    Mustache m = c.parseFile("simple.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new HashMap<String, Object>() {{
+      put("name", "Chris");
+      put("value", 10000);
+      put("taxed_value", 6000);
+      put("in_ca", true);
+    }});
+    assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
+  public void testSimpleWithJsonAndWriter() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheBuilder c = new MustacheBuilder(root);
     Mustache m = c.parseFile("simple.html");
     StringWriter sw = new StringWriter();
