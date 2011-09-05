@@ -120,7 +120,7 @@ public class MustacheBuilder implements MustacheJava {
           if (!iterable || (iterable && !onlywhitespace)) {
             out.append("\n");
           }
-          out = write(list, out);
+          out = write(list, out, currentLine.intValue());
 
           iterable = false;
           onlywhitespace = true;
@@ -157,7 +157,7 @@ public class MustacheBuilder implements MustacheJava {
                 final List<Code> codes = compile(m, br, variable, currentLine, file);
                 int lines = currentLine.get() - start;
                 if (!onlywhitespace || lines == 0) {
-                  write(list, out);
+                  write(list, out, currentLine.intValue());
                 }
                 out = new StringBuilder();
                 switch (ch) {
@@ -180,7 +180,7 @@ public class MustacheBuilder implements MustacheJava {
               case '/': {
                 // Tag end
                 if (!onlywhitespace) {
-                  write(list, out);
+                  write(list, out, currentLine.intValue());
                 }
                 if (!variable.equals(tag)) {
                   throw new MustacheException(
@@ -190,12 +190,12 @@ public class MustacheBuilder implements MustacheJava {
                 return list;
               }
               case '>': {
-                out = write(list, out);
+                out = write(list, out, currentLine.intValue());
                 list.add(new PartialCode(variable, m, file, currentLine.get()));
                 break;
               }
               case '{': {
-                out = write(list, out);
+                out = write(list, out, currentLine.intValue());
                 // Not escaped
                 String name = variable;
                 if (em.charAt(1) != '}') {
@@ -207,27 +207,27 @@ public class MustacheBuilder implements MustacheJava {
                   }
                 }
                 final String finalName = name;
-                list.add(new WriteValueCode(m, finalName, false));
+                list.add(new WriteValueCode(m, finalName, false, currentLine.intValue()));
                 break;
               }
               case '&': {
                 // Not escaped
-                out = write(list, out);
-                list.add(new WriteValueCode(m, variable, false));
+                out = write(list, out, currentLine.intValue());
+                list.add(new WriteValueCode(m, variable, false, currentLine.intValue()));
                 break;
               }
               case '%':
                 // Pragmas
-                out = write(list, out);
+                out = write(list, out, currentLine.intValue());
                 break;
               case '!':
                 // Comment
-                out = write(list, out);
+                out = write(list, out, currentLine.intValue());
                 break;
               default: {
                 // Reference
-                out = write(list, out);
-                list.add(new WriteValueCode(m, command, true));
+                out = write(list, out, currentLine.intValue());
+                list.add(new WriteValueCode(m, command, true, currentLine.intValue()));
                 break;
               }
             }
@@ -240,15 +240,15 @@ public class MustacheBuilder implements MustacheJava {
         onlywhitespace = (c == ' ' || c == '\t') && onlywhitespace;
         out.append((char) c);
       }
-      write(list, out);
+      write(list, out, currentLine.intValue());
     } catch (IOException e) {
       throw new MustacheException("Failed to read", e);
     }
     return list;
   }
 
-  private StringBuilder write(List<Code> list, StringBuilder out) {
-    list.add(new WriteCode(out.toString()));
+  private StringBuilder write(List<Code> list, StringBuilder out, int line) {
+    list.add(new WriteCode(out.toString(), line));
     return new StringBuilder();
   }
 
@@ -283,6 +283,9 @@ public class MustacheBuilder implements MustacheJava {
               public Object call() throws Exception {
                 FutureWriter writer = new FutureWriter();
                 for (Code code : codes) {
+                  if (Mustache.debug) {
+                    Mustache.line.set(code.getLine());
+                  }
                   code.execute(writer, subScope);
                 }
                 return writer;
@@ -293,6 +296,10 @@ public class MustacheBuilder implements MustacheJava {
           }
         }
       }
+    }
+
+    public int getLine() {
+      return line;
     }
   }
 
@@ -384,30 +391,44 @@ public class MustacheBuilder implements MustacheJava {
         throw new MustacheException("Execution failed: " + file + ":" + line, e);
       }
     }
+
+    @Override
+    public int getLine() {
+      return line;
+    }
   }
 
   private static class WriteValueCode implements Code {
     private final Mustache m;
     private final String name;
     private final boolean encoded;
+    private final int line;
 
-    public WriteValueCode(Mustache m, String name, boolean encoded) {
+    public WriteValueCode(Mustache m, String name, boolean encoded, int line) {
       this.m = m;
       this.name = name;
       this.encoded = encoded;
+      this.line = line;
     }
 
     @Override
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
       m.write(fw, scope, name, encoded);
     }
+
+    @Override
+    public int getLine() {
+      return line;
+    }
   }
 
   private static class WriteCode implements Code {
     private final String rest;
+    private final int line;
 
-    public WriteCode(String rest) {
+    public WriteCode(String rest, int line) {
       this.rest = rest;
+      this.line = line;
     }
 
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
@@ -416,6 +437,11 @@ public class MustacheBuilder implements MustacheJava {
       } catch (IOException e) {
         throw new MustacheException("Failed to write", e);
       }
+    }
+
+    @Override
+    public int getLine() {
+      return line;
     }
   }
 }

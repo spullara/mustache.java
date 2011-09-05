@@ -11,5 +11,6 @@ import com.sampullara.util.FutureWriter;
  */
 public interface Code {
   void execute(FutureWriter fw, Scope scope) throws MustacheException;
+  int getLine();
 }
 

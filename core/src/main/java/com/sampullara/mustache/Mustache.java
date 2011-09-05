@@ -35,10 +35,12 @@ import static com.sampullara.mustache.Scope.NULL;
 public class Mustache {
 
   protected static Logger logger = Logger.getLogger(Mustache.class.getName());
-  private static final boolean debug = Boolean.getBoolean("mustache.debug");
+  protected static final boolean debug = Boolean.getBoolean("mustache.debug");
   public static final boolean trace = Boolean.getBoolean("mustache.trace");
-
   private static final String IMPLICIT_CURRENT_ELEMENT_TOKEN = ".";
+
+  // Debug
+  protected static final ThreadLocal<Integer> line = new ThreadLocal<Integer>();
 
   private File root;
   private String path;
@@ -95,8 +97,8 @@ public class Mustache {
    * Execute the Mustache using a scope as the backing data and write the
    * result to the provided writer.
    *
-   * @param writer
-   * @param map
+   * @param writer a writer to write to
+   * @param ctx context of the execution
    * @throws MustacheException
    */
   public final void execute(Writer writer, Scope ctx) throws MustacheException, IOException {
@@ -136,6 +138,9 @@ public class Mustache {
    */
   public void execute(FutureWriter writer, Scope ctx) throws MustacheException {
     for (Code code : compiled) {
+      if (debug) {
+        line.set(code.getLine());
+      }
       code.execute(writer, ctx);
     }
   }
@@ -538,10 +543,12 @@ public class Mustache {
             break;
           }
         }
+        if (sb.length() == 0) {
+          sb.append(path).append(":").append(line.get());
+        }
         String location = name + " @ " + sb;
         if (!name.startsWith("_") && missing.put(location, true) == null) {
-          final Object parent = s.getParent();
-          logger.warning("No field, method or key found for: " + location + (parent == null ? "" : " with base scope parent: " + parent.getClass().getName()));
+          logger.warning("No field, method or key found for: " + location + " " + s);
         }
       }
       if (o == NULL) {
