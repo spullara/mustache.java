@@ -637,5 +637,6 @@ public class MustacheBuilder implements MustacheJava {
     public void append(String append) {
       rest.append(append);
     }
+
   }
 }
