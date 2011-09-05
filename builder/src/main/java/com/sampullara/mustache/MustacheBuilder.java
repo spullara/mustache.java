@@ -247,8 +247,21 @@ public class MustacheBuilder implements MustacheJava {
     return list;
   }
 
+  /**
+   * Ignore empty strings and append to the previous code if it was also a write.
+   */
   private StringBuilder write(List<Code> list, StringBuilder out, int line) {
-    list.add(new WriteCode(out.toString(), line));
+    String text = out.toString();
+    if (text.length() > 0) {
+      int size = list.size();
+      Code code;
+      if (size > 0 && (code = list.get(size - 1)) instanceof WriteCode) {
+        WriteCode writeCode = (WriteCode) code;
+        writeCode.append(text);
+      } else {
+        list.add(new WriteCode(text, line));
+      }
+    }
     return new StringBuilder();
   }
 
@@ -423,17 +436,17 @@ public class MustacheBuilder implements MustacheJava {
   }
 
   private static class WriteCode implements Code {
-    private final String rest;
+    private final StringBuffer rest;
     private final int line;
 
     public WriteCode(String rest, int line) {
-      this.rest = rest;
+      this.rest = new StringBuffer(rest);
       this.line = line;
     }
 
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
       try {
-        fw.write(rest);
+        fw.write(rest.toString());
       } catch (IOException e) {
         throw new MustacheException("Failed to write", e);
       }
@@ -443,5 +456,10 @@ public class MustacheBuilder implements MustacheJava {
     public int getLine() {
       return line;
     }
+
+    public void append(String append) {
+      rest.append(append);
+    }
+
   }
 }
