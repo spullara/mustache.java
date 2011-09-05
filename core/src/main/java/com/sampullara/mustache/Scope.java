@@ -169,4 +169,8 @@ public class Scope extends HashMap {
     };
   }
 
+  public String toString() {
+    return super.toString() + " <- " + parent + " <- " + parentScope;
+  }
+
 }
