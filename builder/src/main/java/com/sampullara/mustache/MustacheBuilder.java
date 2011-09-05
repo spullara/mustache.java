@@ -13,11 +13,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.sampullara.mustache.Mustache.truncate;
 
 /**
  * A pseudo interpreter / compiler. Instead of compiling to Java code, it compiles to a
@@ -81,7 +86,7 @@ public class MustacheBuilder implements MustacheJava {
       if (root == null) {
         String fullPath = classpathRoot == null ? path : classpathRoot + "/" + path;
         InputStream resourceAsStream =
-                MustacheBuilder.class.getClassLoader().getResourceAsStream(fullPath);
+            MustacheBuilder.class.getClassLoader().getResourceAsStream(fullPath);
         if (resourceAsStream == null) {
           throw new MustacheException(path + " not found in classpath");
         }
@@ -184,7 +189,7 @@ public class MustacheBuilder implements MustacheJava {
                 }
                 if (!variable.equals(tag)) {
                   throw new MustacheException(
-                          "Mismatched start/end tags: " + tag + " != " + variable + " in " + file + ":" + currentLine);
+                      "Mismatched start/end tags: " + tag + " != " + variable + " in " + file + ":" + currentLine);
                 }
 
                 return list;
@@ -203,7 +208,7 @@ public class MustacheBuilder implements MustacheJava {
                 } else {
                   if (br.read() != '}') {
                     throw new MustacheException(
-                            "Improperly closed variable in " + file + ":" + currentLine);
+                        "Improperly closed variable in " + file + ":" + currentLine);
                   }
                 }
                 final String finalName = name;
@@ -268,7 +273,7 @@ public class MustacheBuilder implements MustacheJava {
   private abstract static class SubCode implements Code {
     protected final Mustache m;
     protected final String variable;
-    private final Code[] codes;
+    protected final Code[] codes;
     private final int line;
     private final String file;
 
@@ -325,6 +330,30 @@ public class MustacheBuilder implements MustacheJava {
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
       execute(fw, m.iterable(scope, variable));
     }
+
+    @Override
+    public Scope unparse(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+      // I think we have to make iteration greedy and match until we can't find a match
+      List<Scope> results = new ArrayList<Scope>();
+      Scope result;
+      do {
+        result = new Scope();
+        for (int i = 0; i < codes.length && result != null; i++) {
+          if (Mustache.debug) {
+            Mustache.line.set(codes[i].getLine());
+          }
+          Code[] truncate = truncate(codes, i + 1);
+          result = codes[i].unparse(result, text, position, truncate);
+        }
+        if (result != null && result.size() > 0) {
+          results.add(result);
+        } else break;
+      } while (true);
+      if (results.size() != 0) {
+        current.put(variable, results);
+      }
+      return current;
+    }
   }
 
   private static class FunctionCode extends SubCode {
@@ -343,6 +372,46 @@ public class MustacheBuilder implements MustacheJava {
         throw new MustacheException("Not a function: " + function);
       }
     }
+
+    static class MapFunction implements Function<String, String> {
+      private Map<String, String> map = new HashMap<String, String>();
+
+      void put(String input, String value) {
+        map.put(input, value);
+      }
+
+      @Override
+      public String apply(String input) {
+        return map.get(input);
+      }
+
+      public String toString() {
+        return map.toString();
+      }
+    }
+
+    @Override
+    public Scope unparse(Scope current, final String text, final AtomicInteger position, Code[] next) throws MustacheException {
+      final String value = unparseValueCode(current, text, position, next, false);
+      if (value == null) return null;
+      MapFunction function = (FunctionCode.MapFunction) current.get(variable);
+      if (function == null) {
+        function = new MapFunction();
+        put(current, variable, function);
+      }
+      StringWriter sw = new StringWriter();
+      FutureWriter fw = new FutureWriter(sw);
+      try {
+        for (Code code : codes) {
+          code.execute(fw, current);
+        }
+        fw.flush();
+      } catch (IOException e) {
+        throw new MustacheException("Failed to evaluate function body", e);
+      }
+      function.put(sw.toString(), value);
+      return current;
+    }
   }
 
   private static class IfIterableCode extends SubCode {
@@ -358,6 +427,23 @@ public class MustacheBuilder implements MustacheJava {
       }
       execute(fw, m.ifiterable(scope, variable));
     }
+
+    @Override
+    public Scope unparse(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+      // Like the iterable version with only one
+      Scope result = new Scope();
+      for (int i = 0; i < codes.length && result != null; i++) {
+        if (Mustache.debug) {
+          Mustache.line.set(codes[i].getLine());
+        }
+        Code[] truncate = truncate(codes, i + 1);
+        result = codes[i].unparse(result, text, position, truncate);
+      }
+      if (result != null && result.size() > 0) {
+        put(current, variable, result);
+      }
+      return current;
+    }
   }
 
   private static class InvertedIterableCode extends SubCode {
@@ -372,6 +458,24 @@ public class MustacheBuilder implements MustacheJava {
         fw = m.capturedWriter.get();
       }
       execute(fw, m.inverted(scope, variable));
+    }
+
+    @Override
+    public Scope unparse(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+      // Like the iterable version with only one
+      Scope result = new Scope();
+      for (int i = 0; i < codes.length && result != null; i++) {
+        if (Mustache.debug) {
+          Mustache.line.set(codes[i].getLine());
+        }
+        Code[] truncate = truncate(codes, i + 1);
+        result = codes[i].unparse(result, text, position, truncate);
+      }
+      if (result != null) {
+        current.putAll(result);
+        put(current, variable, false);
+      }
+      return current;
     }
   }
 
@@ -409,6 +513,14 @@ public class MustacheBuilder implements MustacheJava {
     public int getLine() {
       return line;
     }
+
+    @Override
+    public Scope unparse(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+      Scope unparse = m.partial(variable).unparse(text, position);
+      if (unparse == null) return null;
+      put(current, variable, unparse);
+      return current;
+    }
   }
 
   private static class WriteValueCode implements Code {
@@ -432,6 +544,59 @@ public class MustacheBuilder implements MustacheJava {
     @Override
     public int getLine() {
       return line;
+    }
+
+    @Override
+    public Scope unparse(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+      String value = unparseValueCode(current, text, position, next, encoded);
+      if (value != null) {
+        put(current, name, value);
+        return current;
+      }
+      return null;
+    }
+
+  }
+
+  private static String unparseValueCode(Scope current, String text, AtomicInteger position, Code[] next, boolean encoded) throws MustacheException {
+    AtomicInteger probePosition = new AtomicInteger(position.get());
+    Code[] truncate = truncate(next, 1);
+    Scope result = null;
+    int lastposition = position.get();
+    while (next.length != 0 && probePosition.get() < text.length()) {
+      lastposition = probePosition.get();
+      result = next[0].unparse(current, text, probePosition, truncate);
+      if (result == null) {
+        probePosition.incrementAndGet();
+      } else {
+        break;
+      }
+    }
+    if (result != null) {
+      String value = text.substring(position.get(), lastposition);
+      if (encoded) {
+        // Decode
+      }
+      position.set(lastposition);
+      return value;
+    }
+    return null;
+  }
+
+  private static void put(Scope result, String name, Object value) {
+    String[] splits = name.split("[.]");
+    Scope depth = result;
+    for (int i = 0; i < splits.length; i++) {
+      if (i < splits.length - 1) {
+        Scope tmp = (Scope) result.get(splits[i]);
+        if (tmp == null) {
+          tmp = new Scope();
+        }
+        depth.put(splits[i], tmp);
+        depth = tmp;
+      } else {
+        depth.put(splits[i], value);
+      }
     }
   }
 
@@ -457,9 +622,27 @@ public class MustacheBuilder implements MustacheJava {
       return line;
     }
 
+<<<<<<< HEAD
+    @Override
+    public Scope unparse(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+      if (position.get() + rest.length() <= text.length()) {
+        String substring = text.substring(position.get(), position.get() + rest.length());
+        if (rest.toString().equals(substring)) {
+          position.addAndGet(rest.length());
+          return current;
+        }
+      }
+      return null;
+    }
+
+    public void append(String append) {
+      rest.append(append);
+    }
+=======
     public void append(String append) {
       rest.append(append);
     }
 
+>>>>>>> master
   }
 }

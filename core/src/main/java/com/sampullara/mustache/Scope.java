@@ -113,10 +113,6 @@ public class Scope extends HashMap {
         v = parentScope.get(name, scope);
       }
     }
-    if (v == null) {
-      // Might be nice for debugging but annoying in practice
-      // logger.warning("No field, method or key found for: " + name);
-    }
     return v;
   }
 
@@ -170,7 +166,7 @@ public class Scope extends HashMap {
   }
 
   public String toString() {
-    return super.toString() + " <- " + parent + " <- " + parentScope;
+    return (size() == 0 ? "" : super.toString()) + (parent == null ? "" : " <- " + parent) + (parentScope == null ? "" : " <- " + parentScope);
   }
 
 }
