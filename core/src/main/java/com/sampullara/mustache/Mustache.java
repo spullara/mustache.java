@@ -17,6 +17,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -61,6 +62,36 @@ public class Mustache {
 
   public String getPath() {
     return path;
+  }
+
+  public Scope unparse(String text) throws MustacheException {
+    AtomicInteger position = new AtomicInteger(0);
+    Scope unparse = unparse(text, position);
+    if (unparse == null) {
+      int min = Math.min(position.get() + 50, position.get() + Math.max(0, text.length() - position.get()));
+      throw new MustacheException("Failed to match template at " + path + ":" + line.get() + " with text " +
+          text.substring(position.get(), min));
+    }
+    return unparse;
+  }
+
+  protected Scope unparse(String text, AtomicInteger position) throws MustacheException {
+    Scope current = new Scope();
+    for (int i = 0; i < compiled.length && current != null; i++) {
+      if (debug) {
+        line.set(compiled[i].getLine());
+      }
+      Code[] truncate = truncate(compiled, i + 1);
+      current = compiled[i].unparse(current, text, position, truncate);
+    }
+    return current;
+  }
+
+  public static Code[] truncate(Code[] codes, int start) {
+    if (codes.length <= 1) return new Code[0];
+    Code[] next = new Code[codes.length - start];
+    System.arraycopy(codes, start, next, 0, next.length);
+    return next;
   }
 
   /**
