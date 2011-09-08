@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -510,12 +511,23 @@ public class Mustache {
       String traceName = parent == null ? s.getClass().getName() : parent.getClass().getName();
       event = MustacheTrace.addEvent("inverted: " + name, traceName);
     }
-    final Object value = getValue(s, name);
+    Object possibleFuture = getValue(s, name);
+    while (possibleFuture instanceof Future) {
+      try {
+        possibleFuture = ((Future) possibleFuture).get();
+      } catch (Exception e) {
+        logger.log(Level.SEVERE, "Could not get inverted: " + name, e);
+        return null;
+      }
+    }
+    final Object value = possibleFuture;
     if (trace) {
       event.end();
     }
+
     boolean isntEmpty = value instanceof Iterable && ((Iterable) value).iterator().hasNext();
-    if (isntEmpty || (value instanceof Boolean && ((Boolean) value)) ||
+    if (isntEmpty ||
+            (value instanceof Boolean && ((Boolean) value)) ||
         (value != null && !(value instanceof Iterable) && !(value instanceof Boolean))) {
       return EMPTY;
     }

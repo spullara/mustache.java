@@ -23,13 +23,14 @@ fs.readFile("src/test/resources/complex.html", function(err, data) {
   var html = m.to_html(template, view);
   var start = new Date().getTime();
   var total = 0;
+  sys.puts(m.to_html(template, view));
   while(true) {
     m.to_html(template, view);
     total++;
-    if (new Date().getTime() - start > 1000) {
+    if (new Date().getTime() - start > 5000) {
       break;
     }
   }
-  sys.puts(total);
+  sys.puts(total / 5);
 });
 

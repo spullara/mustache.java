@@ -27,10 +27,10 @@ public class MustacheTrace {
     public String name;
     public String parameter;
 
-    public Event(String name, String parameter, String unique) {
+    public Event(String name, String parameter, String thread) {
       this.name = name;
       this.parameter = parameter;
-      this.thread = unique;
+      this.thread = thread;
     }
 
     public String toString() {
