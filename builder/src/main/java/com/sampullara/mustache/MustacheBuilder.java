@@ -249,6 +249,7 @@ public class MustacheBuilder implements MustacheJava {
     } catch (IOException e) {
       throw new MustacheException("Failed to read", e);
     }
+    list.add(new EOFCode(currentLine.intValue()));
     return list;
   }
 
@@ -516,7 +517,9 @@ public class MustacheBuilder implements MustacheJava {
 
     @Override
     public Scope unparse(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
-      Scope unparse = m.partial(variable).unparse(text, position);
+      String partialText = unparseValueCode(current, text, position, next, false);
+      AtomicInteger partialPosition = new AtomicInteger(0);
+      Scope unparse = m.partial(variable).unparse(partialText, partialPosition);
       if (unparse == null) return null;
       put(current, variable, unparse);
       return current;
@@ -597,6 +600,32 @@ public class MustacheBuilder implements MustacheJava {
       } else {
         depth.put(splits[i], value);
       }
+    }
+  }
+
+  private static class EOFCode implements Code {
+
+    private final int line;
+
+    public EOFCode(int line) {
+      this.line = line;
+    }
+
+    @Override
+    public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+      // NOP
+    }
+
+    @Override
+    public int getLine() {
+      return line;
+    }
+
+    @Override
+    public Scope unparse(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+      // End of text
+      position.set(text.length());
+      return current;
     }
   }
 
