@@ -96,7 +96,7 @@ public class Scope extends HashMap {
           try {
             parent = ((Future) parent).get();
           } catch (Exception e) {
-            throw new RuntimeException("Failed to get value from future");
+            throw new RuntimeException("Failed to get value from future", e);
           }
         }
         if (parent instanceof Map) {

@@ -10,15 +10,17 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
-* TODO: Edit this
-* <p/>
-* User: sam
-* Date: 5/14/11
-* Time: 3:40 PM
-*/
+ * Trace all calls to underlying mustache backing code for performance
+ * and concurrency analysis.
+ * <p/>
+ * User: sam
+ * Date: 5/14/11
+ * Time: 3:40 PM
+ */
 public class MustacheTrace {
   private static ThreadLocal<MustacheTrace> traceThreadLocal = new ThreadLocal<MustacheTrace>();
   private static Map<Long, MustacheTrace> traces = new ConcurrentHashMap<Long, MustacheTrace>();
+  private long unique;
 
   public static class Event {
     public long start = System.currentTimeMillis();
@@ -34,7 +36,8 @@ public class MustacheTrace {
     }
 
     public String toString() {
-      return start + ",\"" + end + ",\"" + name.replace("\"", "\\\"") + "\",\"" + parameter.replace("\"", "\\\"") + "\"";
+      return start + ",\"" + end + ",\"" + name.replace("\"", "\\\"") + "\",\"" + parameter.replace(
+              "\"", "\\\"") + "\"";
     }
 
     public void end() {
@@ -46,9 +49,10 @@ public class MustacheTrace {
 
   public synchronized static Event addEvent(String name, String parameter) {
     MustacheTrace trace = traceThreadLocal.get();
-    Event event = new Event(name, parameter, Thread.currentThread().getName());
+    String threadName = Thread.currentThread().getName();
+    Event event = new Event(name, parameter, threadName);
     if (trace == null) {
-      Mustache.logger.info("Current trace not set");
+      Mustache.logger.info("Current trace not set in thread " + threadName);
     } else {
       trace.events.add(event);
     }
@@ -83,11 +87,11 @@ public class MustacheTrace {
         extra = range - before;
       }
       int total = before + during + after;
-      if (total < 80) {
-        during += 80 - total;
+      if (total < range) {
+        during += range - total;
       }
-      if (total > 80) {
-        during -= total - 80;
+      if (total > range) {
+        during -= total - range;
       }
       if (during == 0) continue;
       for (int i = 0; i < before; i++) {
@@ -115,6 +119,11 @@ public class MustacheTrace {
       trace = new MustacheTrace();
       traces.put(unique, trace);
     }
+    trace.unique = unique;
     traceThreadLocal.set(trace);
+  }
+
+  public synchronized static long getUniqueId() {
+    return traceThreadLocal.get().unique;
   }
 }
