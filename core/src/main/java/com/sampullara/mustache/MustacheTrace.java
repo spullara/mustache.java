@@ -77,7 +77,10 @@ public class MustacheTrace {
       }
     });
     for (Event event : trace.events) {
-      int during = (int) Math.round((event.end - event.start) * scale);
+      long interval = event.end - event.start;
+      // Ignore times at or below the accuracy
+      if (interval <= 1) continue;
+      int during = (int) Math.round(interval * scale);
       int before = (int) Math.round((event.start - min) * scale);
       int after = (int) Math.round((max - event.end) * scale);
       int extra = 0;
@@ -109,7 +112,7 @@ public class MustacheTrace {
       w.write(" ");
       w.write(event.name);
       w.write(", ");
-      w.write(String.valueOf(event.end - event.start));
+      w.write(String.valueOf(interval));
       w.write("ms\n");
     }
     w.write("Time: " + (max - min) + "ms Operations: " + trace.events.size() + "\n");
