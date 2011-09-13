@@ -108,7 +108,9 @@ public class MustacheTrace {
       }
       w.write(" ");
       w.write(event.name);
-      w.write("\n");
+      w.write(", ");
+      w.write(String.valueOf(event.end - event.start));
+      w.write("ms\n");
     }
     w.write("Time: " + (max - min) + "ms Operations: " + trace.events.size() + "\n");
   }
