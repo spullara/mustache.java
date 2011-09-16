@@ -30,17 +30,19 @@ public class Scope extends HashMap {
   private Scope parentScope;
   private static Logger logger = Logger.getLogger(Mustache.class.getName());
 
-  private static ObjectHandler handleObject;
+  private static ObjectHandler defaultHandleObject;
   static {
     try {
       Class.forName("java.lang.invoke.MethodHandle");
-      handleObject = (ObjectHandler) Class.forName("com.sampullara.mustache.ObjectHandler7").newInstance();
+      defaultHandleObject = (ObjectHandler) Class.forName("com.sampullara.mustache.ObjectHandler7").newInstance();
       logger.info("MethodHandle object handler enabled");
     } catch (Exception e) {
-      handleObject = new ObjectHandler6();
+      defaultHandleObject = new ObjectHandler6();
       logger.info("Reflection object handler enabled");
     }
   }
+
+  private ObjectHandler handleObject = defaultHandleObject;
 
   public Scope() {
   }
@@ -60,6 +62,10 @@ public class Scope extends HashMap {
   public Scope(Object parent, Scope parentScope) {
     this.parentScope = parentScope;
     this.parent = parent;
+  }
+
+  public void setHandleObject(ObjectHandler handleObject) {
+    this.handleObject = handleObject;
   }
 
   public Scope getParentScope() {
