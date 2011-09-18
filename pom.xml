@@ -4,6 +4,8 @@
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>mustache.java</artifactId>
   <version>0.5-SNAPSHOT</version>
+  <description>Implementation of the Mustache language in Java.</description>
+
   <modules>
     <module>core</module>
     <module>compiler</module>
