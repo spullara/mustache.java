@@ -9,7 +9,6 @@
 
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>builder</artifactId>
-  <version>0.5-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>builder</name>
