@@ -2,7 +2,7 @@
   <parent>
     <groupId>com.github.spullara.mustache.java</groupId>
     <artifactId>mustache.java</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -44,7 +44,7 @@
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>core</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>0.5</version>
     </dependency>
     
     <!-- Servlets -->
@@ -65,7 +65,7 @@
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>network</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>0.5</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
