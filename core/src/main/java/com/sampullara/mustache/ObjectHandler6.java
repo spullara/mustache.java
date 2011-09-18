@@ -3,14 +3,13 @@ package com.sampullara.mustache;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * TODO: Edit this
+ * Lookup objects using reflection and execute them the same way.
  * <p/>
  * User: sam
  * Date: 7/24/11
@@ -33,7 +32,6 @@ public class ObjectHandler6 implements ObjectHandler {
       members = cache.get(aClass);
       if (members == null) {
         members = new ConcurrentHashMap<String, AccessibleObject>();
-
         cache.put(aClass, members);
       }
     }
@@ -42,7 +40,6 @@ public class ObjectHandler6 implements ObjectHandler {
     if (member == null) {
       try {
         member = getField(name, aClass);
-        member.setAccessible(true);
         members.put(name, member);
       } catch (NoSuchFieldException e) {
         // Not set
@@ -51,23 +48,19 @@ public class ObjectHandler6 implements ObjectHandler {
     if (member == null) {
       try {
         member = getMethod(name, aClass);
-        member.setAccessible(true);
         members.put(name, member);
       } catch (NoSuchMethodException e) {
         try {
           member = getMethod(name, aClass, Scope.class);
-          member.setAccessible(true);
           members.put(name, member);
         } catch (NoSuchMethodException e1) {
           String propertyname = name.substring(0, 1).toUpperCase() + (name.length() > 1 ? name.substring(1) : "");
           try {
             member = getMethod("get" + propertyname, aClass);
-            member.setAccessible(true);
             members.put(name, member);
           } catch (NoSuchMethodException e2) {
             try {
               member = getMethod("is" + propertyname, aClass);
-              member.setAccessible(true);
               members.put(name, member);
             } catch (NoSuchMethodException e3) {
               // Nothing to be done
@@ -112,8 +105,8 @@ public class ObjectHandler6 implements ObjectHandler {
     return value;
   }
 
-  private static AccessibleObject getMethod(String name, Class aClass, Class... params) throws NoSuchMethodException {
-    AccessibleObject member;
+  public static Method getMethod(String name, Class aClass, Class... params) throws NoSuchMethodException {
+    Method member;
     try {
       member = aClass.getDeclaredMethod(name, params);
     } catch (NoSuchMethodException nsme) {
@@ -123,11 +116,12 @@ public class ObjectHandler6 implements ObjectHandler {
       }
       throw nsme;
     }
+    member.setAccessible(true);
     return member;
   }
 
-  private static AccessibleObject getField(String name, Class aClass) throws NoSuchFieldException {
-    AccessibleObject member;
+  public static Field getField(String name, Class aClass) throws NoSuchFieldException {
+    Field member;
     try {
       member = aClass.getDeclaredField(name);
     } catch (NoSuchFieldException nsfe) {
@@ -137,6 +131,7 @@ public class ObjectHandler6 implements ObjectHandler {
       }
       throw nsfe;
     }
+    member.setAccessible(true);
     return member;
   }
 

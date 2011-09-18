@@ -9,6 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.sampullara.mustache.ObjectHandler6.getField;
+import static com.sampullara.mustache.ObjectHandler6.getMethod;
+
 /**
  * Implementation of Handle Object for Java VMs that include MethodHandles.
  * <p/>
@@ -98,33 +101,4 @@ public class ObjectHandler7 implements ObjectHandler {
     return value;
   }
 
-  private static Method getMethod(String name, Class aClass, Class... params) throws NoSuchMethodException {
-    Method method;
-    try {
-      method = aClass.getDeclaredMethod(name, params);
-    } catch (NoSuchMethodException nsme) {
-      Class superclass = aClass.getSuperclass();
-      if (superclass != Object.class) {
-        return getMethod(name, superclass, params);
-      }
-      throw nsme;
-    }
-    method.setAccessible(true);
-    return method;
-  }
-
-  private static Field getField(String name, Class aClass) throws NoSuchFieldException {
-    Field field;
-    try {
-      field = aClass.getDeclaredField(name);
-    } catch (NoSuchFieldException nsfe) {
-      Class superclass = aClass.getSuperclass();
-      if (superclass != Object.class) {
-        return getField(name, superclass);
-      }
-      throw nsfe;
-    }
-    field.setAccessible(true);
-    return field;
-  }
 }
