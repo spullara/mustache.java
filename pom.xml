@@ -17,6 +17,30 @@
   <name>mustache.java</name>
   <url>http://github.com/spullar/mustache.java</url>
 
+  <developers>
+    <developer>
+      <id>spullara</id>
+      <name>Sam Pullara</name>
+      <email>spullara@yahoo.com</email>
+      <url>http://javarants.com</url>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+      </roles>
+      <timezone>-8</timezone>
+      <properties>
+      </properties>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
   <scm>
     <connection>scm:git:git@github.com:spullara/mustache.java.git</connection>
     <developerConnection>scm:git:git@github.com:spullara/mustache.java.git</developerConnection>
@@ -44,6 +68,19 @@
           <target>1.6</target>
           <encoding>UTF-8</encoding>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
