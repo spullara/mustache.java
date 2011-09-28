@@ -3,6 +3,7 @@ package com.sampullara.mustache;
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.SettableFuture;
 import com.sampullara.util.FutureWriter;
+import com.sampullara.util.TemplateFunction;
 import com.sampullara.util.http.JSONHttpRequest;
 import junit.framework.TestCase;
 import org.codehaus.jackson.JsonFactory;
@@ -52,6 +53,17 @@ public class InterpreterTest extends TestCase {
     }));
     writer.flush();
     assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
+  public void testIdentitySimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheBuilder c = new MustacheBuilder(root);
+    Mustache m = c.parseFile("simple.html");
+    StringWriter sw = new StringWriter();
+    FutureWriter writer = new FutureWriter(sw);
+    m.execute(writer, IdentityScope.one);
+    writer.flush();
+    assertEquals(getContents(root, "simple.html").replaceAll("\\s+", ""), sw.toString().replaceAll(
+            "\\s+", ""));
   }
 
   public void testClassLoaderSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
@@ -216,6 +228,27 @@ public class InterpreterTest extends TestCase {
     }));
     writer.flush();
     assertEquals(getContents(root, "lambda.txt"), sw.toString());
+  }
+
+  public void testTemplateLamda() throws MustacheException, IOException {
+    MustacheBuilder c = new MustacheBuilder(root);
+    Mustache m = c.parseFile("templatelambda.html");
+    StringWriter sw = new StringWriter();
+    FutureWriter writer = new FutureWriter(sw);
+    m.execute(writer, new Scope(new Object() {
+      String name = "Sam";
+      TemplateFunction translate = new TemplateFunction() {
+        @Override
+        public String apply(String input) {
+          if (input.equals("Hello {{name}}")) {
+            return "{{name}}, Hola!";
+          }
+          return null;
+        }
+      };
+    }));
+    writer.flush();
+    assertEquals(getContents(root, "templatelambda.txt"), sw.toString());
   }
 
   public void testSimpleWithSave() throws MustacheException, IOException, ExecutionException, InterruptedException {
