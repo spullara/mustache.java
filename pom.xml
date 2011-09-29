@@ -12,7 +12,7 @@
     <module>builder</module>
     <module>handlebar</module>
     <module>network</module>
-    <module>java7-support</module>
+<!--    <module>java7-support</module>-->
   </modules>
   <packaging>pom</packaging>
 
@@ -71,7 +71,7 @@
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
-      <plugin>
+<!--      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
         <executions>
@@ -83,7 +83,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
+      </plugin>-->
     </plugins>
   </build>
 

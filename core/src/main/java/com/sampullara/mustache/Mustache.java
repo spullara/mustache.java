@@ -2,7 +2,10 @@ package com.sampullara.mustache;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+
 import com.sampullara.util.FutureWriter;
+import com.sampullara.util.TemplateFunction;
 import org.codehaus.jackson.JsonNode;
 
 import java.io.File;
@@ -16,7 +19,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -333,6 +335,9 @@ public class Mustache {
    * @return
    */
   protected Iterable<Scope> iterable(final Scope s, final String name) {
+    if (s == IdentityScope.one) {
+      return Lists.newArrayList(s);
+    }
     MustacheTrace.Event event = null;
     if (trace) {
       Object parent = s.getParent();
@@ -409,7 +414,17 @@ public class Mustache {
     };
   }
 
-  public Iterable<Scope> function(final Scope s, final Function f) {
+  // Memory leak if you abuse TemplateFunction
+  private static Map<String, Mustache> templateFunctionCache = new ConcurrentHashMap<String, Mustache>();
+
+  public Iterable<Scope> function(final Scope scope, final Function f) {
+    final boolean templateFunction = f instanceof TemplateFunction;
+    final Scope s;
+    if (templateFunction) {
+      s = IdentityScope.one;
+    } else {
+      s = scope;
+    }
     return new Iterable<Scope>() {
       @Override
       public Iterator<Scope> iterator() {
@@ -426,7 +441,19 @@ public class Mustache {
                 capturedWriter.get().flush();
                 capturedWriter.set(null);
                 Object apply = f.apply(writer.toString());
-                actual.get().write(apply == null ? null : String.valueOf(apply));
+                String applyString = apply == null ? null : String.valueOf(apply);
+                if (templateFunction) {
+                  if (applyString != null) {
+                    Mustache mustache = templateFunctionCache.get(applyString);
+                    if (mustache == null) {
+                      mustache = mj.parse(applyString);
+                      templateFunctionCache.put(applyString, mustache);
+                    }
+                    mustache.execute(actual.get(), scope);
+                  }
+                } else {
+                  actual.get().write(applyString);
+                }
                 actual.set(null);
               } catch (Exception e) {
                 logger.log(Level.SEVERE, "Could not apply function: " + f, e);
