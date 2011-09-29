@@ -24,6 +24,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Tests for the compiler.
@@ -357,6 +358,31 @@ public class InterpreterTest extends TestCase {
     m.execute(writer, scope);
     writer.flush();
     assertEquals(getContents(root, "template_partial.txt"), sw.toString());
+  }
+
+  public static class PartialChanged extends Mustache {
+    static AtomicBoolean executed = new AtomicBoolean(false);
+    protected Mustache compilePartial(String name) throws MustacheException {
+      executed.set(true);
+      return super.compilePartial(name);
+    }
+  }
+
+  public void testPartialOverride() throws MustacheException, IOException {
+    MustacheBuilder c = init();
+    c.setSuperclass(PartialChanged.class.getName());
+    Mustache m = c.parseFile("template_partial.html");
+    StringWriter sw = new StringWriter();
+    FutureWriter writer = new FutureWriter(sw);
+    Scope scope = new Scope();
+    scope.put("title", "Welcome");
+    scope.put("template_partial_2", new Object() {
+      String again = "Goodbye";
+    });
+    m.execute(writer, scope);
+    writer.flush();
+    assertEquals(getContents(root, "template_partial.txt"), sw.toString());
+    assertTrue(PartialChanged.executed.get());
   }
 
   public void testComplex() throws MustacheException, IOException {
