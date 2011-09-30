@@ -54,6 +54,10 @@ public class FutureWriter extends Writer {
     old.shutdown();
   }
 
+  public static ExecutorService getExecutorService() {
+    return es;
+  }
+
   public FutureWriter() {
   }
 
