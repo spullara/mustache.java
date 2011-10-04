@@ -1,8 +1,5 @@
 package com.sampullara.util;
 
-import com.sampullara.mustache.Mustache;
-import com.sampullara.mustache.MustacheTrace;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -14,6 +11,9 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import com.sampullara.mustache.Mustache;
+import com.sampullara.mustache.MustacheTrace;
 
 /**
  * This class sit in front of a writer and doesn't flush until Done is called on it.  Until then it queues up
@@ -28,11 +28,13 @@ public class FutureWriter extends Writer {
   private AppendableCallable last;
   private ConcurrentLinkedQueue<Future<Object>> ordered = new ConcurrentLinkedQueue<Future<Object>>();
   private static ExecutorService es;
+
   static {
     ThreadPoolExecutor executor = new ThreadPoolExecutor(10, 100, 60, TimeUnit.SECONDS,
-          new ArrayBlockingQueue<Runnable>(10), new ThreadPoolExecutor.CallerRunsPolicy());
+            new ArrayBlockingQueue<Runnable>(10), new ThreadPoolExecutor.CallerRunsPolicy());
     executor.setThreadFactory(new ThreadFactory() {
       int i = 0;
+
       @Override
       public Thread newThread(Runnable runnable) {
         Thread thread = new Thread(runnable);
@@ -43,6 +45,7 @@ public class FutureWriter extends Writer {
     });
     es = executor;
   }
+
   private Writer writer;
   private boolean closed = false;
 

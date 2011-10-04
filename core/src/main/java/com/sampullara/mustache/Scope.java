@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  * Date: May 3, 2010
  * Time: 4:14:26 PM
  */
-public class Scope extends HashMap {
+public class Scope extends HashMap<Object, Object> {
 
   public static final Iterable EMPTY = new ArrayList(0);
   public static final Object NULL = new Object() {
