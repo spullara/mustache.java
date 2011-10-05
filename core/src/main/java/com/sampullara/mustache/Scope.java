@@ -1,8 +1,5 @@
 package com.sampullara.mustache;
 
-import org.codehaus.jackson.JsonNode;
-
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,6 +12,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
+
+import org.codehaus.jackson.JsonNode;
 
 /**
  * The scope of the executing Mustache can include an object and a map of strings.  Each scope can also have a
@@ -38,10 +37,12 @@ public class Scope extends HashMap<Object, Object> {
   private static Logger logger = Logger.getLogger(Mustache.class.getName());
 
   private static ObjectHandler defaultHandleObject;
+
   static {
     try {
       Class.forName("java.lang.invoke.MethodHandle");
-      defaultHandleObject = (ObjectHandler) Class.forName("com.sampullara.mustache.ObjectHandler7").newInstance();
+      defaultHandleObject = (ObjectHandler) Class.forName(
+              "com.sampullara.mustache.ObjectHandler7").newInstance();
       logger.info("MethodHandle object handler enabled");
     } catch (Exception e) {
       defaultHandleObject = new ObjectHandler6();
@@ -81,7 +82,20 @@ public class Scope extends HashMap<Object, Object> {
 
   @Override
   public Object get(Object o) {
-    return get(o, this);
+    long start = 0;
+    if (Mustache.profile) {
+      start = System.nanoTime();
+    }
+    try {
+      return get(o, this);
+    } finally {
+      if (Mustache.profile) {
+        long diff = System.nanoTime() - start;
+        Average newaverage = new Average();
+        Average average = profile.putIfAbsent(o.toString(), newaverage);
+        (average == null ? newaverage : average).increment(diff);
+      }
+    }
   }
 
   public Object get(Object o, Scope scope) {
@@ -90,13 +104,20 @@ public class Scope extends HashMap<Object, Object> {
     Iterable<String> components = split(name, ".");
     Scope current = this;
     Scope currentScope = scope;
-    for (String component : components) {
-      value = current.localGet(currentScope, component);
+    if (components == null) {
+      value = current.localGet(currentScope, name);
       if (value == null || value == NULL) {
         return null;
       }
-      currentScope = current;
-      current = new Scope(value);
+    } else {
+      for (String component : components) {
+        value = current.localGet(currentScope, component);
+        if (value == null || value == NULL) {
+          return null;
+        }
+        currentScope = current;
+        current = new Scope(value);
+      }
     }
     return value;
   }
@@ -106,21 +127,25 @@ public class Scope extends HashMap<Object, Object> {
   private static class Average implements Comparable<Average> {
     private AtomicLong total = new AtomicLong(0);
     private AtomicLong num = new AtomicLong(0);
+
     public void increment(long increase) {
       num.incrementAndGet();
       total.addAndGet(increase);
     }
+
     public int compareTo(Average other) {
       double l = other.average() - average();
       return l < 0 ? -1 : l > 0 ? 1 : 0;
     }
+
     public double average() {
       return total.doubleValue() / num.longValue();
     }
   }
 
   public static void report() {
-    List<Map.Entry<String,Average>> entries = new ArrayList<Map.Entry<String, Average>>(profile.entrySet());
+    List<Map.Entry<String, Average>> entries = new ArrayList<Map.Entry<String, Average>>(
+            profile.entrySet());
     logger.info("Top 10 Average");
     Collections.sort(entries, new Comparator<Map.Entry<String, Average>>() {
       @Override
@@ -129,7 +154,8 @@ public class Scope extends HashMap<Object, Object> {
       }
     });
     for (Map.Entry<String, Average> entry : entries.subList(0, 10)) {
-      logger.info(entry.getKey() + ": " + entry.getValue().average() + " (" + entry.getValue().total + " / "  + entry.getValue().num + ")");
+      logger.info(
+              entry.getKey() + ": " + entry.getValue().average() + " (" + entry.getValue().total + " / " + entry.getValue().num + ")");
     }
     logger.info("Top 10 Total");
     Collections.sort(entries, new Comparator<Map.Entry<String, Average>>() {
@@ -140,16 +166,13 @@ public class Scope extends HashMap<Object, Object> {
       }
     });
     for (Map.Entry<String, Average> entry : entries.subList(0, 10)) {
-      logger.info(entry.getKey() + ": " + entry.getValue().average() + " (" + entry.getValue().total + " / "  + entry.getValue().num + ")");
+      logger.info(
+              entry.getKey() + ": " + entry.getValue().average() + " (" + entry.getValue().total + " / " + entry.getValue().num + ")");
     }
     profile.clear();
   }
 
   private Object localGet(Scope scope, String name) {
-    long start = 0;
-    if (Mustache.profile) {
-      start = System.nanoTime();
-    }
     Object v = super.get(name);
     if (v == null) {
       if (parent != null) {
@@ -174,12 +197,6 @@ public class Scope extends HashMap<Object, Object> {
         v = parentScope.get(name, scope);
       }
     }
-    if (Mustache.profile) {
-      long diff = System.nanoTime() - start;
-      Average newaverage = new Average();
-      Average average = profile.putIfAbsent(name, newaverage);
-      (average == null ? newaverage : average).increment(diff);
-    }
     return v;
   }
 
@@ -203,6 +220,7 @@ public class Scope extends HashMap<Object, Object> {
   }
 
   private static Iterable<String> split(final String s, final String d) {
+    if (!s.contains(d)) return null;
     return new Iterable<String>() {
       public Iterator<String> iterator() {
         return new Iterator<String>() {
