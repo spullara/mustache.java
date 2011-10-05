@@ -41,6 +41,7 @@ public class Mustache {
   protected static Logger logger = Logger.getLogger(Mustache.class.getName());
   protected static final boolean debug = Boolean.getBoolean("mustache.debug");
   public static final boolean trace = Boolean.getBoolean("mustache.trace");
+  public static final boolean profile = Boolean.getBoolean("mustache.profile");
   private static final String IMPLICIT_CURRENT_ELEMENT_TOKEN = ".";
 
   // Debug
@@ -367,7 +368,7 @@ public class Mustache {
             if (i == null) {
               if (iterable instanceof Future) {
                 try {
-                  iterable = ((Future) value).get();
+                  iterable = ((Future) iterable).get();
                   if (iterable == null || (iterable instanceof Boolean && !((Boolean) iterable))) {
                     return false;
                   }
