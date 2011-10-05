@@ -129,7 +129,7 @@ public class Scope extends HashMap<Object, Object> {
       }
     });
     for (Map.Entry<String, Average> entry : entries.subList(0, 10)) {
-      logger.info(entry.getKey() + ": " + entry.getValue().average() + " (" + entry.getValue().total + ")");
+      logger.info(entry.getKey() + ": " + entry.getValue().average() + " (" + entry.getValue().total + " / "  + entry.getValue().num + ")");
     }
     logger.info("Top 10 Total");
     Collections.sort(entries, new Comparator<Map.Entry<String, Average>>() {
@@ -140,7 +140,7 @@ public class Scope extends HashMap<Object, Object> {
       }
     });
     for (Map.Entry<String, Average> entry : entries.subList(0, 10)) {
-      logger.info(entry.getKey() + ": " + entry.getValue().average() + " (" + entry.getValue().total + ")");
+      logger.info(entry.getKey() + ": " + entry.getValue().average() + " (" + entry.getValue().total + " / "  + entry.getValue().num + ")");
     }
     profile.clear();
   }
