@@ -37,7 +37,7 @@ public class UnparseTest {
     }));
     assertEquals(getContents(root, "reallysimple.txt"), sw.toString());
 
-    Scope scope = m.unparse(sw.toString());
+    Scope scope = m.unexecute(sw.toString());
     assertEquals("Chris", scope.get("name"));
     assertEquals("10000", scope.get("value"));
   }
@@ -59,7 +59,7 @@ public class UnparseTest {
     }));
     assertEquals(getContents(root, "unambiguoussimple.txt"), sw.toString());
 
-    Scope scope = m.unparse(sw.toString());
+    Scope scope = m.unexecute(sw.toString());
     assertEquals("Chris", scope.get("name"));
     assertEquals("10000", scope.get("value"));
     Scope in_ca = new Scope();
@@ -112,7 +112,7 @@ public class UnparseTest {
     m.execute(sw, scope);
     assertEquals(getContents(root, "complex.txt"), sw.toString());
 
-    scope = m.unparse(sw.toString());
+    scope = m.unexecute(sw.toString());
     sw = new StringWriter();
     m.execute(sw, scope);
     assertEquals(getContents(root, "complex.txt"), sw.toString());
@@ -133,7 +133,7 @@ public class UnparseTest {
     m.execute(sw, scope);
     assertEquals(getContents(root, "template_partial.txt"), sw.toString());
 
-    scope = m.unparse(sw.toString());
+    scope = m.unexecute(sw.toString());
     sw = new StringWriter();
     m.execute(sw, scope);
     System.out.println(scope);
@@ -160,7 +160,7 @@ public class UnparseTest {
     }));
     assertEquals(getContents(root, "explicitlambda.txt"), sw.toString());
 
-    Scope scope = m.unparse(sw.toString());
+    Scope scope = m.unexecute(sw.toString());
     sw = new StringWriter();
     m.execute(sw, scope);
     System.out.println(scope);

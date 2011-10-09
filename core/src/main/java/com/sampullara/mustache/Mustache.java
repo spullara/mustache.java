@@ -69,25 +69,25 @@ public class Mustache {
     return path;
   }
 
-  public Scope unparse(String text) throws MustacheException {
+  public Scope unexecute(String text) throws MustacheException {
     AtomicInteger position = new AtomicInteger(0);
-    Scope unparse = unparse(text, position);
-    if (unparse == null) {
+    Scope unexecuted = unexecute(text, position);
+    if (unexecuted == null) {
       int min = Math.min(position.get() + 50, position.get() + Math.max(0, text.length() - position.get()));
       throw new MustacheException("Failed to match template at " + path + ":" + line.get() + " with text " +
           text.substring(position.get(), min));
     }
-    return unparse;
+    return unexecuted;
   }
 
-  protected Scope unparse(String text, AtomicInteger position) throws MustacheException {
+  protected Scope unexecute(String text, AtomicInteger position) throws MustacheException {
     Scope current = new Scope();
     for (int i = 0; i < compiled.length && current != null; i++) {
       if (debug) {
         line.set(compiled[i].getLine());
       }
       Code[] truncate = truncate(compiled, i + 1);
-      current = compiled[i].unparse(current, text, position, truncate);
+      current = compiled[i].unexecute(current, text, position, truncate);
     }
     return current;
   }

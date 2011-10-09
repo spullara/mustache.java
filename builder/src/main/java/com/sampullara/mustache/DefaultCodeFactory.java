@@ -135,7 +135,7 @@ public class DefaultCodeFactory implements CodeFactory {
     }
 
     @Override
-    public Scope unparse(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+    public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
       // I think we have to make iteration greedy and match until we can't find a match
       List<Scope> results = new ArrayList<Scope>();
       Scope result;
@@ -146,7 +146,7 @@ public class DefaultCodeFactory implements CodeFactory {
             Mustache.line.set(codes[i].getLine());
           }
           Code[] truncate = truncate(codes, i + 1);
-          result = codes[i].unparse(result, text, position, truncate);
+          result = codes[i].unexecute(result, text, position, truncate);
         }
         if (result != null && result.size() > 0) {
           results.add(result);
@@ -185,8 +185,8 @@ public class DefaultCodeFactory implements CodeFactory {
     }
 
     @Override
-    public Scope unparse(Scope current, final String text, final AtomicInteger position, Code[] next) throws MustacheException {
-      final String value = unparseValueCode(current, text, position, next, false);
+    public Scope unexecute(Scope current, final String text, final AtomicInteger position, Code[] next) throws MustacheException {
+      final String value = unexecuteValueCode(current, text, position, next, false);
       if (value == null) return null;
       Map<String, String> function = (Map<String, String>) current.get(variable);
       if (function == null) {
@@ -228,7 +228,7 @@ public class DefaultCodeFactory implements CodeFactory {
     }
 
     @Override
-    public Scope unparse(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+    public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
       // Like the iterable version with only one
       Scope result = new Scope();
       for (int i = 0; i < codes.length && result != null; i++) {
@@ -236,7 +236,7 @@ public class DefaultCodeFactory implements CodeFactory {
           Mustache.line.set(codes[i].getLine());
         }
         Code[] truncate = truncate(codes, i + 1);
-        result = codes[i].unparse(result, text, position, truncate);
+        result = codes[i].unexecute(result, text, position, truncate);
       }
       if (result != null && result.size() > 0) {
         put(current, variable, result);
@@ -265,7 +265,7 @@ public class DefaultCodeFactory implements CodeFactory {
     }
 
     @Override
-    public Scope unparse(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+    public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
       // Like the iterable version with only one
       Scope result = new Scope();
       for (int i = 0; i < codes.length && result != null; i++) {
@@ -273,7 +273,7 @@ public class DefaultCodeFactory implements CodeFactory {
           Mustache.line.set(codes[i].getLine());
         }
         Code[] truncate = truncate(codes, i + 1);
-        result = codes[i].unparse(result, text, position, truncate);
+        result = codes[i].unexecute(result, text, position, truncate);
       }
       if (result != null) {
         current.putAll(result);
@@ -323,12 +323,12 @@ public class DefaultCodeFactory implements CodeFactory {
     }
 
     @Override
-    public Scope unparse(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
-      String partialText = unparseValueCode(current, text, position, next, false);
+    public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+      String partialText = unexecuteValueCode(current, text, position, next, false);
       AtomicInteger partialPosition = new AtomicInteger(0);
-      Scope unparse = m.partial(variable).unparse(partialText, partialPosition);
-      if (unparse == null) return null;
-      put(current, variable, unparse);
+      Scope unexecuted = m.partial(variable).unexecute(partialText, partialPosition);
+      if (unexecuted == null) return null;
+      put(current, variable, unexecuted);
       return current;
     }
   }
@@ -367,8 +367,8 @@ public class DefaultCodeFactory implements CodeFactory {
     }
 
     @Override
-    public Scope unparse(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
-      String value = unparseValueCode(current, text, position, next, encoded);
+    public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+      String value = unexecuteValueCode(current, text, position, next, encoded);
       if (value != null) {
         put(current, name, value);
         return current;
@@ -378,14 +378,14 @@ public class DefaultCodeFactory implements CodeFactory {
 
   }
 
-  private static String unparseValueCode(Scope current, String text, AtomicInteger position, Code[] next, boolean encoded) throws MustacheException {
+  private static String unexecuteValueCode(Scope current, String text, AtomicInteger position, Code[] next, boolean encoded) throws MustacheException {
     AtomicInteger probePosition = new AtomicInteger(position.get());
     Code[] truncate = truncate(next, 1);
     Scope result = null;
     int lastposition = position.get();
     while (next.length != 0 && probePosition.get() < text.length()) {
       lastposition = probePosition.get();
-      result = next[0].unparse(current, text, probePosition, truncate);
+      result = next[0].unexecute(current, text, probePosition, truncate);
       if (result == null) {
         probePosition.incrementAndGet();
       } else {
@@ -439,7 +439,7 @@ public class DefaultCodeFactory implements CodeFactory {
     }
 
     @Override
-    public Scope unparse(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+    public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
       // End of text
       position.set(text.length());
       return current;
@@ -469,7 +469,7 @@ public class DefaultCodeFactory implements CodeFactory {
     }
 
     @Override
-    public Scope unparse(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+    public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
       if (position.get() + rest.length() <= text.length()) {
         String substring = text.substring(position.get(), position.get() + rest.length());
         if (rest.toString().equals(substring)) {
