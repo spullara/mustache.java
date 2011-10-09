@@ -184,30 +184,13 @@ public class DefaultCodeFactory implements CodeFactory {
       }
     }
 
-    static class MapFunction implements Function<String, String> {
-      private Map<String, String> map = new HashMap<String, String>();
-
-      void put(String input, String value) {
-        map.put(input, value);
-      }
-
-      @Override
-      public String apply(String input) {
-        return map.get(input);
-      }
-
-      public String toString() {
-        return map.toString();
-      }
-    }
-
     @Override
     public Scope unparse(Scope current, final String text, final AtomicInteger position, Code[] next) throws MustacheException {
       final String value = unparseValueCode(current, text, position, next, false);
       if (value == null) return null;
-      FunctionCode.MapFunction function = (FunctionCode.MapFunction) current.get(variable);
+      Map<String, String> function = (Map<String, String>) current.get(variable);
       if (function == null) {
-        function = new FunctionCode.MapFunction();
+        function = new HashMap<String, String>();
         put(current, variable, function);
       }
       StringWriter sw = new StringWriter();

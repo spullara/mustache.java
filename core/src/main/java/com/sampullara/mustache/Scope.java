@@ -1,5 +1,12 @@
 package com.sampullara.mustache;
 
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.MappingJsonFactory;
+
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,8 +19,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
-
-import org.codehaus.jackson.JsonNode;
 
 /**
  * The scope of the executing Mustache can include an object and a map of strings.  Each scope can also have a
@@ -254,4 +259,16 @@ public class Scope extends HashMap<Object, Object> {
     return (size() == 0 ? "" : super.toString()) + (parent == null ? "" : " <- " + parent) + (parentScope == null ? "" : " <- " + parentScope);
   }
 
+  public String toJSON() throws MustacheException {
+    StringWriter sw = new StringWriter();
+    JsonFactory jf = new MappingJsonFactory();
+    try {
+      JsonGenerator jg = jf.createJsonGenerator(sw);
+      jg.writeObject(this);
+      jg.flush();
+    } catch (IOException e) {
+      throw new MustacheException(e);
+    }
+    return sw.toString();
+  }
 }
