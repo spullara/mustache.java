@@ -1,5 +1,8 @@
 package com.sampullara.util;
 
+import com.sampullara.mustache.Mustache;
+import com.sampullara.mustache.MustacheTrace;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -11,9 +14,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import com.sampullara.mustache.Mustache;
-import com.sampullara.mustache.MustacheTrace;
 
 /**
  * This class sit in front of a writer and doesn't flush until Done is called on it.  Until then it queues up
@@ -94,7 +94,7 @@ public class FutureWriter extends Writer {
       last.append(cs);
     } else {
       AppendableCallable call = new AppendableCallable(cs);
-      enqueue(es.submit(call));
+      enqueue(call);
       last = call;
     }
   }

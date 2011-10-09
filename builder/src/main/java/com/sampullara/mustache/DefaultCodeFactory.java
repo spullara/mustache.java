@@ -1,5 +1,9 @@
 package com.sampullara.mustache;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import com.sampullara.util.FutureWriter;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -8,11 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
-
-import com.sampullara.util.FutureWriter;
 
 import static com.sampullara.mustache.Mustache.truncate;
 
@@ -85,10 +84,7 @@ public class DefaultCodeFactory implements CodeFactory {
       if (iterable != null) {
         for (final Scope subScope : iterable) {
           try {
-            if (m.capturedWriter.get() != null) {
-              m.actual.set(fw);
-              fw = m.capturedWriter.get();
-            }
+            fw = m.pushWriter(fw);
             fw.enqueue(new Callable<Object>() {
               @Override
               public Object call() throws Exception {
@@ -236,10 +232,7 @@ public class DefaultCodeFactory implements CodeFactory {
 
     @Override
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-      if (m.capturedWriter.get() != null) {
-        m.actual.set(fw);
-        fw = m.capturedWriter.get();
-      }
+      fw = m.pushWriter(fw);
       try {
         if (scope == IdentityScope.one) {
           identity("?", fw, scope);
@@ -276,10 +269,7 @@ public class DefaultCodeFactory implements CodeFactory {
 
     @Override
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-      if (m.capturedWriter.get() != null) {
-        m.actual.set(fw);
-        fw = m.capturedWriter.get();
-      }
+      fw = m.pushWriter(fw);
       try {
         if (scope == IdentityScope.one) {
           identity("^", fw, scope);

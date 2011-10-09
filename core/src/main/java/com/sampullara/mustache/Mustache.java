@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -180,11 +181,21 @@ public class Mustache {
     }
   }
 
-  protected ThreadLocal<FutureWriter> capturedWriter = new ThreadLocal<FutureWriter>();
-  protected ThreadLocal<FutureWriter> actual = new ThreadLocal<FutureWriter>();
+  protected ThreadLocal<Stack<FutureWriter>> capturedWriter = new ThreadLocal<Stack<FutureWriter>>() {
+    @Override
+    protected Stack<FutureWriter> initialValue() {
+      return new Stack<FutureWriter>();
+    }
+  };
+  protected ThreadLocal<Stack<FutureWriter>> actual = new ThreadLocal<Stack<FutureWriter>>() {
+    @Override
+    protected Stack<FutureWriter> initialValue() {
+      return new Stack<FutureWriter>();
+    }
+  };
 
   /**
-   * Enqueue's a Mustache into the FutureWriter.
+   * Enqueues a Mustache into the FutureWriter.
    *
    * @param writer
    * @param m
@@ -192,10 +203,7 @@ public class Mustache {
    * @throws IOException
    */
   protected void enqueue(FutureWriter writer, final Mustache m, final Scope s) throws IOException {
-    if (capturedWriter.get() != null) {
-      actual.set(writer);
-      writer = capturedWriter.get();
-    }
+    writer = pushWriter(writer);
     writer.enqueue(new Callable<Object>() {
       @Override
       public Object call() throws Exception {
@@ -206,6 +214,14 @@ public class Mustache {
         return fw;
       }
     });
+  }
+
+  protected FutureWriter pushWriter(FutureWriter writer) {
+    if (capturedWriter.get().size() > 0) {
+      actual.get().push(writer);
+      writer = capturedWriter.get().peek();
+    }
+    return writer;
   }
 
   /**
@@ -312,10 +328,7 @@ public class Mustache {
   }
 
   protected void iterable(FutureWriter writer, final Scope s, final String name, final Class<? extends Mustache> sub) throws IOException {
-    if (capturedWriter.get() != null) {
-      actual.set(writer);
-      writer = capturedWriter.get();
-    }
+    writer = pushWriter(writer);
     writer.enqueue(new Callable<Object>() {
       @Override
       public Object call() throws Exception {
@@ -436,11 +449,10 @@ public class Mustache {
           @Override
           public synchronized boolean hasNext() {
             if (first) {
-              capturedWriter.set(new FutureWriter(writer));
+              capturedWriter.get().push(new FutureWriter(writer));
             } else {
               try {
-                capturedWriter.get().flush();
-                capturedWriter.set(null);
+                capturedWriter.get().pop().flush();
                 Object apply = f.apply(writer.toString());
                 String applyString = apply == null ? null : String.valueOf(apply);
                 if (templateFunction) {
@@ -450,12 +462,11 @@ public class Mustache {
                       mustache = mj.parse(applyString);
                       templateFunctionCache.put(applyString, mustache);
                     }
-                    mustache.execute(actual.get(), scope);
+                    mustache.execute(actual.get().pop(), scope);
                   }
                 } else {
-                  actual.get().write(applyString);
+                  actual.get().pop().write(applyString);
                 }
-                actual.set(null);
               } catch (Exception e) {
                 logger.log(Level.SEVERE, "Could not apply function: " + f, e);
               }
