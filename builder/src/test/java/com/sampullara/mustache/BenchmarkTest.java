@@ -1,7 +1,6 @@
 package com.sampullara.mustache;
 
 import com.sampullara.util.FutureWriter;
-import com.sampullara.util.ImmediateExecutorService;
 import junit.framework.TestCase;
 
 import java.io.BufferedReader;
@@ -42,7 +41,7 @@ public class BenchmarkTest extends TestCase {
   }
 
   public void testComplex() throws MustacheException, IOException {
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 2; i++) {
       {
         long start = System.currentTimeMillis();
         MustacheBuilder c = new MustacheBuilder(root);
@@ -78,8 +77,8 @@ public class BenchmarkTest extends TestCase {
         System.out.println("Compiler: " + total);
       }
     }
-    FutureWriter.setExecutorService(new ImmediateExecutorService());
-    for (int i = 0; i < 3; i++) {
+    FutureWriter.setExecutorService(null);
+    for (int i = 0; i < 2; i++) {
       {
         long start = System.currentTimeMillis();
         MustacheBuilder c = new MustacheBuilder(root);

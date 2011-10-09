@@ -77,7 +77,9 @@ public class FutureWriter extends Writer {
   }
 
   public static void shutdown() {
-    es.shutdownNow();
+    if (es != null) {
+      es.shutdownNow();
+    }
   }
 
   /**
@@ -100,7 +102,12 @@ public class FutureWriter extends Writer {
   }
 
   public void enqueue(Callable<Object> callable) throws IOException {
-    Future<Object> future = es.submit(callable);
+    Future<Object> future;
+    if (es == null) {
+      future = new ImmediateFuture<Object>(callable);
+    } else {
+      future = es.submit(callable);
+    }
     enqueue(future);
   }
 
