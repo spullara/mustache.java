@@ -190,7 +190,7 @@ public class DefaultCodeFactory implements CodeFactory {
       if (value == null) return null;
       Map<String, String> function = (Map<String, String>) current.get(variable);
       if (function == null) {
-        function = new HashMap<String, String>();
+        function = new UnexecuteFunction();
         put(current, variable, function);
       }
       StringWriter sw = new StringWriter();
@@ -206,6 +206,14 @@ public class DefaultCodeFactory implements CodeFactory {
       function.put(sw.toString(), value);
       return current;
     }
+
+    private static class UnexecuteFunction extends HashMap<String, String> implements Function<String, String> {
+      @Override
+      public String apply(String input) {
+        return get(input);
+      }
+    }
+
   }
 
   private static class IfIterableCode extends SubCode {

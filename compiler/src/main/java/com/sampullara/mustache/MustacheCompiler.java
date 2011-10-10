@@ -30,6 +30,7 @@ import java.util.logging.Logger;
  * Date: May 4, 2010
  * Time: 9:59:58 AM
  */
+@Deprecated
 public class MustacheCompiler implements MustacheJava {
   private File root;
   private static String header, middle, footer;
