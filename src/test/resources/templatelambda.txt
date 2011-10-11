@@ -1,4 +1,3 @@
 Sam, Hola!
 Sam, Hola!
-Hola, <a href="">Sam</a>
 Hola, <a href="">Sam</a>!
