@@ -243,6 +243,8 @@ public class InterpreterTest extends TestCase {
         public String apply(String input) {
           if (input.equals("Hello {{name}}")) {
             return "{{name}}, Hola!";
+          } else if (input.equals("Hello {{>user}}")) {
+            return "Hola, {{>user}}";
           }
           return null;
         }

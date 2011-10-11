@@ -460,6 +460,7 @@ public class Mustache {
                     Mustache mustache = templateFunctionCache.get(applyString);
                     if (mustache == null) {
                       mustache = mj.parse(applyString);
+                      mustache.setPath(getPath());
                       templateFunctionCache.put(applyString, mustache);
                     }
                     mustache.execute(actual.get().pop(), scope);
