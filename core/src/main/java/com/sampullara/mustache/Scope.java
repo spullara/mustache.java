@@ -1,10 +1,5 @@
 package com.sampullara.mustache;
 
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.MappingJsonFactory;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -19,6 +14,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
+
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.MappingJsonFactory;
 
 /**
  * The scope of the executing Mustache can include an object and a map of strings.  Each scope can also have a
@@ -150,30 +150,33 @@ public class Scope extends HashMap<Object, Object> {
 
   public static void report() {
     List<Map.Entry<String, Average>> entries = new ArrayList<Map.Entry<String, Average>>(profile.entrySet());
-    logger.info("Top 10 Average");
-    Collections.sort(entries, new Comparator<Map.Entry<String, Average>>() {
-      @Override
-      public int compare(Map.Entry<String, Average> o1, Map.Entry<String, Average> o2) {
-        return o1.getValue().compareTo(o2.getValue());
+    if (entries.size() > 0) {
+      logger.info("Top 10 Average");
+      Collections.sort(entries, new Comparator<Map.Entry<String, Average>>() {
+        @Override
+        public int compare(Map.Entry<String, Average> o1, Map.Entry<String, Average> o2) {
+          return o1.getValue().compareTo(o2.getValue());
+        }
+      });
+      for (Map.Entry<String, Average> entry : entries.subList(0,
+              Math.min(entries.size() - 1, 10))) {
+        logger.info(
+                entry.getKey() + ": " + entry.getValue().average() + " (" + entry.getValue().total + " / " + entry.getValue().num + ")");
       }
-    });
-    for (Map.Entry<String, Average> entry : entries.subList(0, Math.max(entries.size(), 10))) {
-      logger.info(
-              entry.getKey() + ": " + entry.getValue().average() + " (" + entry.getValue().total + " / " + entry.getValue().num + ")");
-    }
-    logger.info("Top 10 Total");
-    Collections.sort(entries, new Comparator<Map.Entry<String, Average>>() {
-      @Override
-      public int compare(Map.Entry<String, Average> o1, Map.Entry<String, Average> o2) {
-        long l = o2.getValue().total.longValue() - o1.getValue().total.longValue();
-        return l < 0 ? -1 : l > 0 ? 1 : 0;
+      logger.info("Top 10 Total");
+      Collections.sort(entries, new Comparator<Map.Entry<String, Average>>() {
+        @Override
+        public int compare(Map.Entry<String, Average> o1, Map.Entry<String, Average> o2) {
+          long l = o2.getValue().total.longValue() - o1.getValue().total.longValue();
+          return l < 0 ? -1 : l > 0 ? 1 : 0;
+        }
+      });
+      for (Map.Entry<String, Average> entry : entries.subList(0, 10)) {
+        logger.info(
+                entry.getKey() + ": " + entry.getValue().average() + " (" + entry.getValue().total + " / " + entry.getValue().num + ")");
       }
-    });
-    for (Map.Entry<String, Average> entry : entries.subList(0, 10)) {
-      logger.info(
-              entry.getKey() + ": " + entry.getValue().average() + " (" + entry.getValue().total + " / " + entry.getValue().num + ")");
+      profile.clear();
     }
-    profile.clear();
   }
 
   private Object localGet(Scope scope, String name) {
