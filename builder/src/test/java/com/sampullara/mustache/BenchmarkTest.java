@@ -76,6 +76,20 @@ public class BenchmarkTest extends TestCase {
         }
         System.out.println("Compiler: " + total);
       }
+      {
+        Mustache m = handcoded();
+        complextest(m);
+        long start = System.currentTimeMillis();
+        long end;
+        int total = 0;
+        while (true) {
+          complextest(m);
+          end = System.currentTimeMillis();
+          total++;
+          if (end - start > TIME) break;
+        }
+        System.out.println("Hand coded: " + total);
+      }
     }
     FutureWriter.setExecutorService(null);
     for (int i = 0; i < 2; i++) {
@@ -113,46 +127,113 @@ public class BenchmarkTest extends TestCase {
         }
         System.out.println("Compiler: " + total);
       }
+      {
+        Mustache m = handcoded();
+        complextest(m);
+        long start = System.currentTimeMillis();
+        long end;
+        int total = 0;
+        while (true) {
+          complextest(m);
+          end = System.currentTimeMillis();
+          total++;
+          if (end - start > TIME) break;
+        }
+        System.out.println("Hand coded: " + total);
+      }
     }
   }
 
+  private Mustache handcoded() {
+    final BenchmarkTest.ComplexObject co = new BenchmarkTest.ComplexObject();
+    return new Mustache() {
+      Mustache item = new Mustache() {
+        @Override
+        public void execute(FutureWriter writer, Scope ctx) throws MustacheException {
+          BenchmarkTest.ComplexObject.Color color = (BenchmarkTest.ComplexObject.Color) ctx.getParent();
+          try {
+            if (color.current) {
+              writer.write("      <li><strong>");
+              writer.write(color.name);
+              writer.write("</strong></li>\n");
+            }
+            if (co.link(ctx)) {
+              writer.write("      <li><a href=\"");
+              writer.write(color.url);
+              writer.write(">");
+              writer.write(color.name);
+              writer.write("</a></li>\n");
+            }
+          } catch (IOException e) {
+            throw new MustacheException(e);
+          }
+        }
+      };
+      @Override
+      public void execute(FutureWriter writer, Scope ctx) throws MustacheException {
+        try {
+          writer.write("<h1>");
+          writer.write(co.header);
+          writer.write("</h1>\n");
+          Scope s = new Scope(co);
+          if (co.list(s)) {
+            writer.write("  <ul>\n");
+            for (BenchmarkTest.ComplexObject.Color color : co.item) {
+              item.execute(writer, new Scope(color));
+            }
+            writer.write("  </ul>\n");
+          }
+          if (co.empty(s)) {
+            writer.write("  <p>The list is empty.</p>\n");
+          }
+          if (!co.empty(s)) {
+            writer.write("  <p>The list is not empty.</p>\n");
+          }
+        } catch (IOException e) {
+          throw new MustacheException(e);
+        }
+      }
+    };
+  }
+
   private StringWriter complextest(Mustache m) throws MustacheException, IOException {
-    Scope scope = new Scope(new Object() {
-      String header = "Colors";
-      List item = Arrays.asList(
-              new Object() {
-                String name = "red";
-                boolean current = true;
-                String url = "#Red";
-              },
-              new Object() {
-                String name = "green";
-                boolean current = false;
-                String url = "#Green";
-              },
-              new Object() {
-                String name = "blue";
-                boolean current = false;
-                String url = "#Blue";
-              }
-      );
-
-      boolean link(Scope s) {
-        return !((Boolean) s.get("current"));
-      }
-
-      boolean list(Scope s) {
-        return ((List) s.get("item")).size() != 0;
-      }
-
-      boolean empty(Scope s) {
-        return ((List) s.get("item")).size() == 0;
-      }
-    });
+    Scope scope = new Scope(new ComplexObject());
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
     m.execute(writer, scope);
     writer.flush();
     return sw;
+  }
+
+  private static class ComplexObject {
+    String header = "Colors";
+    List<Color> item = Arrays.asList(
+            new Color("red", true, "#Red"),
+            new Color("green", false, "#Green"),
+            new Color("blue", false, "#Blue")
+    );
+
+    boolean link(Scope s) {
+      return !((Boolean) s.get("current"));
+    }
+
+    boolean list(Scope s) {
+      return ((List) s.get("item")).size() != 0;
+    }
+
+    boolean empty(Scope s) {
+      return ((List) s.get("item")).size() == 0;
+    }
+
+    private static class Color {
+      Color(String name, boolean current, String url) {
+        this.name = name;
+        this.current = current;
+        this.url = url;
+      }
+      String name;
+      boolean current;
+      String url;
+    }
   }
 }
