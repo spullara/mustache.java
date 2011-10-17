@@ -149,8 +149,7 @@ public class Scope extends HashMap<Object, Object> {
   }
 
   public static void report() {
-    List<Map.Entry<String, Average>> entries = new ArrayList<Map.Entry<String, Average>>(
-            profile.entrySet());
+    List<Map.Entry<String, Average>> entries = new ArrayList<Map.Entry<String, Average>>(profile.entrySet());
     logger.info("Top 10 Average");
     Collections.sort(entries, new Comparator<Map.Entry<String, Average>>() {
       @Override
@@ -158,7 +157,7 @@ public class Scope extends HashMap<Object, Object> {
         return o1.getValue().compareTo(o2.getValue());
       }
     });
-    for (Map.Entry<String, Average> entry : entries.subList(0, 10)) {
+    for (Map.Entry<String, Average> entry : entries.subList(0, Math.max(entries.size(), 10))) {
       logger.info(
               entry.getKey() + ": " + entry.getValue().average() + " (" + entry.getValue().total + " / " + entry.getValue().num + ")");
     }
