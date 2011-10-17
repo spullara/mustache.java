@@ -188,7 +188,7 @@ public class DefaultCodeFactory implements CodeFactory {
     public Scope unexecute(Scope current, final String text, final AtomicInteger position, Code[] next) throws MustacheException {
       final String value = unexecuteValueCode(current, text, position, next, false);
       if (value == null) return null;
-      Map<String, String> function = (Map<String, String>) current.get(variable);
+      Scope function = (Scope) current.get(variable);
       if (function == null) {
         function = new UnexecuteFunction();
         put(current, variable, function);
@@ -207,10 +207,11 @@ public class DefaultCodeFactory implements CodeFactory {
       return current;
     }
 
-    private static class UnexecuteFunction extends HashMap<String, String> implements Function<String, String> {
+    private static class UnexecuteFunction extends Scope implements Function<String, String> {
       @Override
       public String apply(String input) {
-        return get(input);
+        Object o = get(input);
+        return o == null ? "" : o.toString();
       }
     }
 

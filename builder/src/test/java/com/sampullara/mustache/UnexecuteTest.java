@@ -1,6 +1,9 @@
 package com.sampullara.mustache;
 
 import com.google.common.base.Function;
+
+import com.sampullara.util.FutureWriter;
+import com.sampullara.util.TemplateFunction;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -22,12 +25,12 @@ import static junit.framework.Assert.assertEquals;
  * Date: 9/5/11
  * Time: 10:49 AM
  */
-public class UnparseTest {
+public class UnexecuteTest {
 
   private static File root;
 
   @Test
-  public void testReallySimpleUnparse() throws MustacheException, IOException {
+  public void testReallySimpleUnexecute() throws MustacheException, IOException {
     MustacheJava c = init();
     Mustache m = c.parseFile("reallysimple.html");
     StringWriter sw = new StringWriter();
@@ -43,7 +46,7 @@ public class UnparseTest {
   }
 
   @Test
-  public void testSimpleUnparse() throws MustacheException, IOException {
+  public void testSimpleUnexecute() throws MustacheException, IOException {
     MustacheJava c = init();
     Mustache m = c.parseFile("unambiguoussimple.html");
     StringWriter sw = new StringWriter();
@@ -72,7 +75,7 @@ public class UnparseTest {
   }
 
   @Test
-  public void testComplexUnparse() throws MustacheException, IOException {
+  public void testComplexUnexecute() throws MustacheException, IOException {
     Scope scope = new Scope(new Object() {
       String header = "Colors";
       List item = Arrays.asList(
@@ -116,6 +119,37 @@ public class UnparseTest {
     sw = new StringWriter();
     m.execute(sw, scope);
     assertEquals(getContents(root, "complex.txt"), sw.toString());
+
+    System.out.println(scope);
+  }
+
+  @Test
+  public void testTemplateLamda() throws MustacheException, IOException {
+    MustacheBuilder c = new MustacheBuilder(root);
+    Mustache m = c.parseFile("unexecutetemplatelambda.html");
+    StringWriter sw = new StringWriter();
+    FutureWriter writer = new FutureWriter(sw);
+    m.execute(writer, new Scope(new Object() {
+      String name = "Sam";
+      TemplateFunction translate = new TemplateFunction() {
+        @Override
+        public String apply(String input) {
+          if (input.equals("Hello {{name}}")) {
+            return "{{name}}, Hola!";
+          } else if (input.equals("Hello {{>user}}!")) {
+            return "Hola, {{>user}}!";
+          }
+          return null;
+        }
+      };
+    }));
+    writer.flush();
+    assertEquals(getContents(root, "unexecutetemplatelambda.txt"), sw.toString());
+
+    Scope scope = m.unexecute(sw.toString());
+    sw = new StringWriter();
+    m.execute(sw, scope);
+    assertEquals(getContents(root, "unexecutetemplatelambda.txt"), sw.toString());
 
     System.out.println(scope);
   }
@@ -165,6 +199,16 @@ public class UnparseTest {
     m.execute(sw, scope);
     System.out.println(scope);
     assertEquals(getContents(root, "explicitlambda.txt"), sw.toString());
+  }
+
+  @Test
+  public void testIbis() throws MustacheException, IOException {
+    MustacheBuilder c = new MustacheBuilder(root);
+    Mustache m = c.parseFile("ibis.html");
+    Scope unexecute = m.unexecute(getContents(root, "ibis-1107586786643355109.html"));
+    StringWriter sw = new StringWriter();
+    m.execute(sw, unexecute);
+    assertEquals(getContents(root, "ibis-1107586786643355109.html"), sw.toString());
   }
 
   private MustacheBuilder init() {
