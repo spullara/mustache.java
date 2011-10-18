@@ -1,12 +1,14 @@
 package com.sampullara.mustache;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.SettableFuture;
 import com.sampullara.util.FutureWriter;
 import com.sampullara.util.TemplateFunction;
 import com.sampullara.util.http.JSONHttpRequest;
 import junit.framework.TestCase;
 import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;
@@ -54,6 +56,25 @@ public class InterpreterTest extends TestCase {
     }));
     writer.flush();
     assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
+  public void testXSS() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheBuilder c = new MustacheBuilder(root);
+    Mustache m = c.parseFile("xss.html");
+    final StringWriter json = new StringWriter();
+    ImmutableMap<String, Object> of = ImmutableMap.<String, Object>of("foo", "bar", "\"baz\"", 42);
+    MappingJsonFactory jf = new MappingJsonFactory();
+    JsonGenerator jg = jf.createJsonGenerator(json);
+    jg.writeObject(of);
+    jg.flush();
+    StringWriter sw = new StringWriter();
+    FutureWriter writer = new FutureWriter(sw);
+    m.execute(writer, new Scope(new Object() {
+      String message = "I <3 Ponies!";
+      String object = json.toString();
+    }));
+    writer.flush();
+    assertEquals(getContents(root, "xss.txt"), sw.toString());
   }
 
   public void testIdentitySimple() throws MustacheException, IOException, ExecutionException, InterruptedException {

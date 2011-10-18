@@ -175,6 +175,27 @@ public class UnexecuteTest {
   }
 
   @Test
+  public void testPartial2() throws MustacheException, IOException {
+    MustacheBuilder c = init();
+    Mustache m = c.parseFile("template_partial2.html");
+    StringWriter sw = new StringWriter();
+    Scope scope = new Scope();
+    scope.put("title", "Welcome");
+    scope.put("template_partial_2", new Object() {
+      String again = "Goodbye";
+    });
+    scope.put("test", true);
+    m.execute(sw, scope);
+    assertEquals(getContents(root, "template_partial2.txt"), sw.toString());
+
+    scope = m.unexecute(sw.toString());
+    sw = new StringWriter();
+    m.execute(sw, scope);
+    System.out.println(scope);
+    assertEquals(getContents(root, "template_partial2.txt"), sw.toString());
+  }
+
+  @Test
   public void testSimpleLamda() throws MustacheException, IOException {
     MustacheBuilder c = new MustacheBuilder(root);
     Mustache m = c.parseFile("explicitlambda.html");

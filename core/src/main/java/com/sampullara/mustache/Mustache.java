@@ -87,6 +87,7 @@ public class Mustache {
         line.set(compiled[i].getLine());
       }
       Code[] truncate = truncate(compiled, i + 1);
+      System.out.println("Unexecute " + compiled[i].toString());
       current = compiled[i].unexecute(current, text, position, truncate);
     }
     return current;
