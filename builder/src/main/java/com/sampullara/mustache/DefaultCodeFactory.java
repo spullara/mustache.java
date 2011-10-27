@@ -140,6 +140,7 @@ public class DefaultCodeFactory implements CodeFactory {
       List<Scope> results = new ArrayList<Scope>();
       Scope result;
       do {
+        int start = position.get();
         result = new Scope();
         for (int i = 0; i < codes.length && result != null; i++) {
           if (Mustache.debug) {
@@ -150,7 +151,10 @@ public class DefaultCodeFactory implements CodeFactory {
         }
         if (result != null && result.size() > 0) {
           results.add(result);
-        } else break;
+        } else {
+          position.set(start);
+          break;
+        }
       } while (true);
       if (results.size() != 0) {
         current.put(variable, results);
