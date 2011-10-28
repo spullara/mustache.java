@@ -1,0 +1,13 @@
+<html>
+<head>
+<title>Subtitle</title>
+<script src="jquery.min.js"></script>
+</head>
+<body>
+<div class="body">
+Hello, world!
+</div>
+<div class="footer">
+</div>
+</body>
+</html>

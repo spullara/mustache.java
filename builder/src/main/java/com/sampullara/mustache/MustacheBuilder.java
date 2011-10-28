@@ -148,6 +148,9 @@ public class MustacheBuilder implements MustacheJava {
               case '#':
               case '^':
               case '_':
+              case '<':
+              case '$':
+              case '=':
               case '?': {
                 int start = currentLine.get();
                 final List<Code> codes = compile(m, br, variable, currentLine, file);
@@ -168,6 +171,15 @@ public class MustacheBuilder implements MustacheJava {
                     break;
                   case '_':
                     list.add(cf.function(m, variable, codes, file, currentLine.get()));
+                    break;
+                  case '<':
+                    list.add(cf.extend(m, variable, codes, file, currentLine.get()));
+                    break;
+                  case '$':
+                    list.add(cf.name(m, variable, codes, file, currentLine.get()));
+                    break;
+                  case '=':
+                    list.add(cf.replace(m, variable, codes, file, currentLine.get()));
                     break;
                 }
                 iterable = lines != 0;

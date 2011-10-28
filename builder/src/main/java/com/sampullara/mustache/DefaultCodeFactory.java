@@ -7,6 +7,7 @@ import com.sampullara.util.FutureWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,21 @@ public class DefaultCodeFactory implements CodeFactory {
   @Override
   public Code eof(int line) {
     return new EOFCode(line);
+  }
+
+  @Override
+  public Code extend(Mustache m, String variable, List<Code> codes, String file, int i) {
+    return new ExtendCode(m, variable, codes, file, i);
+  }
+
+  @Override
+  public Code name(Mustache m, String variable, List<Code> codes, String file, int i) {
+    return new ExtendNameCode(m, variable, codes, file, i);
+  }
+
+  @Override
+  public Code replace(Mustache m, String variable, List<Code> codes, String file, int i) {
+    return new ExtendReplaceCode(m, variable, codes, file, i);
   }
 
   private abstract static class SubCode implements Code {
@@ -343,6 +359,112 @@ public class DefaultCodeFactory implements CodeFactory {
       if (unexecuted == null) return null;
       put(current, variable, unexecuted);
       return current;
+    }
+  }
+
+  /**
+   * Implementation strategy:
+   * - Load extension template codes
+   * - Load local template codes
+   * - Execute extension template codes, replacing named sections with local replacements
+   */
+
+  private static abstract class ExtendBaseCode extends SubCode {
+
+    public ExtendBaseCode(Mustache m, String variable, List<Code> codes, String file, int line) {
+      super(m, variable, codes, file, line);
+    }
+
+    public String getName() {
+      return variable;
+    }
+  }
+
+  private static class ExtendCode extends ExtendBaseCode {
+
+    private Map<String, ExtendReplaceCode> replaceMap;
+
+    public ExtendCode(Mustache m, String variable, List<Code> codes, String file, int line) {
+      super(m, variable, codes, file, line);
+      replaceMap = new HashMap<String, ExtendReplaceCode>();
+      for (Code code : codes) {
+        if (code instanceof ExtendReplaceCode) {
+          ExtendReplaceCode erc = (ExtendReplaceCode) code;
+          replaceMap.put(erc.getName(), erc);
+        } else if (code instanceof WriteCode) {
+          // ignore text
+        } else {
+          throw new IllegalArgumentException("Illegal code in extend section: " + code.getClass().getName());
+        }
+      }
+    }
+
+    @Override
+    public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+      Map<String, ExtendReplaceCode> debugMap = null;
+      if (Mustache.debug) {
+        debugMap = new HashMap<String, ExtendReplaceCode>(replaceMap);
+      }
+      Mustache partial = m.partial(variable);
+      Code[] supercodes = partial.getCompiled();
+      for (Code code : supercodes) {
+        if (code instanceof ExtendNameCode) {
+          ExtendNameCode enc = (ExtendNameCode) code;
+          ExtendReplaceCode extendReplaceCode = replaceMap.get(enc.getName());
+          if (extendReplaceCode != null) {
+            if (Mustache.debug) {
+              debugMap.remove(enc.getName());
+            }
+            extendReplaceCode.execute(fw, scope);
+            continue;
+          }
+        }
+        code.execute(fw, scope);
+      }
+      if (Mustache.debug) {
+        if (debugMap.size() > 0) {
+          throw new MustacheException("Replacement sections failed to match named sections: " + debugMap.keySet());
+        }
+      }
+    }
+
+    @Override
+    public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+      return new Scope();
+    }
+  }
+
+  private static class ExtendNameCode extends ExtendBaseCode {
+
+    public ExtendNameCode(Mustache m, String variable, List<Code> codes, String file, int line) {
+      super(m, variable, codes, file, line);
+    }
+
+    @Override
+    public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+      execute(fw, Arrays.asList(new Scope()));
+    }
+
+    @Override
+    public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+      return new Scope();
+    }
+  }
+
+  private static class ExtendReplaceCode extends ExtendBaseCode {
+
+    public ExtendReplaceCode(Mustache m, String variable, List<Code> codes, String file, int line) {
+      super(m, variable, codes, file, line);
+    }
+
+    @Override
+    public void execute(FutureWriter fw, Scope scope) throws MustacheException {
+      execute(fw, Arrays.asList(new Scope()));
+    }
+
+    @Override
+    public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
+      return new Scope();
     }
   }
 

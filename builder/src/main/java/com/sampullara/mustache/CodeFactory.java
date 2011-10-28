@@ -14,4 +14,7 @@ public interface CodeFactory {
   Code value(Mustache m, String name, boolean encode, int line);
   Code write(String s, int line);
   Code eof(int line);
+  Code extend(Mustache m, String variable, List<Code> codes, String file, int i);
+  Code name(Mustache m, String variable, List<Code> codes, String file, int i);
+  Code replace(Mustache m, String variable, List<Code> codes, String file, int i);
 }

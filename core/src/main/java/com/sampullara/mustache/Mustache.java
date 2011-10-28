@@ -290,6 +290,10 @@ public class Mustache {
     this.compiled = new ArrayList<Code>(compiled).toArray(new Code[compiled.size()]);
   }
 
+  public Code[] getCompiled() {
+    return compiled;
+  }
+
   private class SingleValueIterator implements Iterator {
     private boolean done;
     private Object value;
