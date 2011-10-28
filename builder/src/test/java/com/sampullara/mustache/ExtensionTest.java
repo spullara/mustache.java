@@ -30,20 +30,6 @@ public class ExtensionTest {
     assertEquals(getContents(root, "sub.txt"), sw.toString());
   }
 
-  @Test
-  public void testTooMany() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheBuilder c = new MustacheBuilder(root);
-    try {
-      Mustache m = c.parseFile("toomany.html");
-      StringWriter sw = new StringWriter();
-      FutureWriter writer = new FutureWriter(sw);
-      m.execute(writer, new Scope());
-      writer.flush();
-      fail("Should fail");
-    } catch (Exception e) {
-    }
-  }
-
   protected String getContents(File root, String file) throws IOException {
     BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(root, file)),"UTF-8"));
     StringWriter capture = new StringWriter();
@@ -57,7 +43,6 @@ public class ExtensionTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    System.setProperty("mustache.debug", "true");
     File file = new File("src/test/resources");
     root = new File(file, "sub.html").exists() ? file : new File("../src/test/resources");
   }
