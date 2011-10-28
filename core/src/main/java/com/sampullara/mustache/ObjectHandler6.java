@@ -24,6 +24,7 @@ public class ObjectHandler6 implements ObjectHandler {
 
   @Override
   public Object handleObject(Object parent, Scope scope, String name) {
+    if (parent == null) return null;
     Object value = null;
     Class aClass = parent.getClass();
     Map<String, AccessibleObject> members;
