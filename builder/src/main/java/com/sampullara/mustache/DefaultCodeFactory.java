@@ -447,30 +447,6 @@ public class DefaultCodeFactory implements CodeFactory {
     }
   }
 
-  private static class ExtendNameCode extends ExtendBaseCode {
-
-    public ExtendNameCode(Mustache m, String variable, List<Code> codes, String file, int line) {
-      super(m, variable, codes, file, line);
-    }
-
-    @Override
-    public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-      execute(fw, Arrays.asList(scope));
-    }
-
-    @Override
-    public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
-      for (int i = 0; i < codes.length; i++) {
-        if (Mustache.debug) {
-          Mustache.line.set(codes[i].getLine());
-        }
-        Code[] truncate = truncate(codes, i + 1);
-        current = codes[i].unexecute(current, text, position, truncate);
-      }
-      return current;
-    }
-  }
-
   private static class ExtendReplaceCode extends ExtendBaseCode {
 
     public ExtendReplaceCode(Mustache m, String variable, List<Code> codes, String file, int line) {
@@ -492,6 +468,12 @@ public class DefaultCodeFactory implements CodeFactory {
         current = codes[i].unexecute(current, text, position, truncate);
       }
       return current;
+    }
+  }
+
+  private static class ExtendNameCode extends ExtendReplaceCode {
+    public ExtendNameCode(Mustache m, String variable, List<Code> codes, String file, int line) {
+      super(m, variable, codes, file, line);
     }
   }
 
