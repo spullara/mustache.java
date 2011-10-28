@@ -27,6 +27,7 @@ public class ExtensionTest {
     FutureWriter writer = new FutureWriter(sw);
     Scope scope = new Scope();
     scope.put("name", "Sam");
+    scope.put("randomid", "asdlkfj");
     m.execute(writer, scope);
     writer.flush();
     assertEquals(getContents(root, "sub.txt"), sw.toString());
