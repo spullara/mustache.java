@@ -442,7 +442,7 @@ public class DefaultCodeFactory implements CodeFactory {
 
     @Override
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-      execute(fw, Arrays.asList(new Scope()));
+      execute(fw, Arrays.asList(scope));
     }
 
     @Override
@@ -459,7 +459,7 @@ public class DefaultCodeFactory implements CodeFactory {
 
     @Override
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-      execute(fw, Arrays.asList(new Scope()));
+      execute(fw, Arrays.asList(scope));
     }
 
     @Override

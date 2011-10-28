@@ -13,7 +13,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 public class ExtensionTest {
 
@@ -25,7 +24,9 @@ public class ExtensionTest {
     Mustache m = c.parseFile("sub.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
-    m.execute(writer, new Scope());
+    Scope ctx = new Scope();
+    ctx.put("name", "Sam");
+    m.execute(writer, ctx);
     writer.flush();
     assertEquals(getContents(root, "sub.txt"), sw.toString());
   }
