@@ -217,9 +217,11 @@ public class Mustache {
   }
 
   protected FutureWriter pushWriter(FutureWriter writer) {
-    if (capturedWriter.get().size() > 0) {
-      actual.get().push(writer);
-      writer = capturedWriter.get().peek();
+    Stack<FutureWriter> capturedStack = capturedWriter.get();
+    if (capturedStack.size() > 0) {
+      Stack<FutureWriter> actualStack = actual.get();
+      actualStack.push(writer);
+      writer = capturedStack.peek();
     }
     return writer;
   }
