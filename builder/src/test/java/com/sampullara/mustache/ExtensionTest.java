@@ -9,6 +9,7 @@ import java.io.StringWriter;
 import java.util.concurrent.ExecutionException;
 
 import com.sampullara.util.FutureWriter;
+import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -24,11 +25,17 @@ public class ExtensionTest {
     Mustache m = c.parseFile("sub.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
-    Scope ctx = new Scope();
-    ctx.put("name", "Sam");
-    m.execute(writer, ctx);
+    Scope scope = new Scope();
+    scope.put("name", "Sam");
+    m.execute(writer, scope);
     writer.flush();
     assertEquals(getContents(root, "sub.txt"), sw.toString());
+
+    scope = m.unexecute(sw.toString());
+    sw = new StringWriter();
+    m.execute(sw, scope);
+    System.out.println(scope);
+    Assert.assertEquals(getContents(root, "sub.txt"), sw.toString());
   }
 
   protected String getContents(File root, String file) throws IOException {

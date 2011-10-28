@@ -430,7 +430,20 @@ public class DefaultCodeFactory implements CodeFactory {
 
     @Override
     public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
-      return new Scope();
+      Mustache partial = m.partial(variable);
+      Code[] supercodes = partial.getCompiled();
+      for (Code code : supercodes) {
+        if (code instanceof ExtendNameCode) {
+          ExtendNameCode enc = (ExtendNameCode) code;
+          ExtendReplaceCode extendReplaceCode = replaceMap.get(enc.getName());
+          if (extendReplaceCode != null) {
+            extendReplaceCode.unexecute(current, text, position, next);
+            continue;
+          }
+        }
+        code.unexecute(current, text, position, next);
+      }
+      return current;
     }
   }
 
@@ -447,7 +460,14 @@ public class DefaultCodeFactory implements CodeFactory {
 
     @Override
     public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
-      return new Scope();
+      for (int i = 0; i < codes.length; i++) {
+        if (Mustache.debug) {
+          Mustache.line.set(codes[i].getLine());
+        }
+        Code[] truncate = truncate(codes, i + 1);
+        current = codes[i].unexecute(current, text, position, truncate);
+      }
+      return current;
     }
   }
 
@@ -464,7 +484,14 @@ public class DefaultCodeFactory implements CodeFactory {
 
     @Override
     public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
-      return new Scope();
+      for (int i = 0; i < codes.length; i++) {
+        if (Mustache.debug) {
+          Mustache.line.set(codes[i].getLine());
+        }
+        Code[] truncate = truncate(codes, i + 1);
+        current = codes[i].unexecute(current, text, position, truncate);
+      }
+      return current;
     }
   }
 
