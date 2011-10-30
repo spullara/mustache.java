@@ -378,19 +378,20 @@ public class DefaultCodeFactory implements CodeFactory {
 
   private static class ExtendCode extends ExtendBaseCode {
 
-    private Map<String, ExtendNameCode> replaceMap;
     private Mustache partial;
 
     public ExtendCode(Mustache m, String variable, List<Code> codes, String file, int line) throws MustacheException {
       super(m, variable, codes, file, line);
-      replaceMap = new HashMap<String, ExtendNameCode>();
+      Map<String, ExtendNameCode> replaceMap = new HashMap<String, ExtendNameCode>();
       for (Code code : codes) {
         if (code instanceof ExtendNameCode) {
+          // put name codes in the map
           ExtendNameCode erc = (ExtendNameCode) code;
           replaceMap.put(erc.getName(), erc);
         } else if (code instanceof WriteCode) {
           // ignore text
         } else {
+          // fail on everything else
           throw new IllegalArgumentException(
                   "Illegal code in extend section: " + code.getClass().getName());
         }
@@ -401,16 +402,17 @@ public class DefaultCodeFactory implements CodeFactory {
       }
       partial = m.partial(variable);
       Code[] supercodes = partial.getCompiled();
-      replaceCode(supercodes);
+      // recursively replace named sections with replacements
+      replaceCode(supercodes, replaceMap, debugMap);
       if (Mustache.debug) {
-        if (debugMap.size() > 0) {
+        if (debugMap != null && debugMap.size() > 0) {
           throw new MustacheException(
                   "Replacement sections failed to match named sections: " + debugMap.keySet());
         }
       }
     }
 
-    private void replaceCode(Code[] supercodes) {
+    private void replaceCode(Code[] supercodes, Map<String, ExtendNameCode> replaceMap, Map<String, ExtendNameCode> debugMap) {
       for (int i = 0; i < supercodes.length; i++) {
         Code code = supercodes[i];
         if (code instanceof ExtendNameCode) {
@@ -419,11 +421,14 @@ public class DefaultCodeFactory implements CodeFactory {
           if (extendReplaceCode != null) {
             supercodes[i] = extendReplaceCode;
           } else {
-            replaceCode(enc.codes);
+            if (Mustache.debug) {
+              debugMap.remove(enc.getName());
+            }
+            replaceCode(enc.codes, replaceMap, debugMap);
           }
         } else if (code instanceof SubCode) {
           SubCode subcode = (SubCode) code;
-          replaceCode(subcode.codes);
+          replaceCode(subcode.codes, replaceMap, debugMap);
         }
       }
     }
@@ -446,20 +451,10 @@ public class DefaultCodeFactory implements CodeFactory {
 
     @Override
     public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
-      Mustache partial = m.partial(variable);
       Code[] supercodes = partial.getCompiled();
       for (int i = 0; i < supercodes.length; i++) {
         Code[] truncate = truncate(supercodes, i + 1, next);
-        Code code = supercodes[i];
-        if (code instanceof ExtendNameCode) {
-          ExtendNameCode namedSection = (ExtendNameCode) code;
-          ExtendNameCode replacement = replaceMap.get(namedSection.getName());
-          if (replacement != null) {
-            replacement.unexecute(current, text, position, truncate);
-            continue;
-          }
-        }
-        code.unexecute(current, text, position, truncate);
+        supercodes[i].unexecute(current, text, position, truncate);
       }
       return current;
     }
@@ -491,7 +486,6 @@ public class DefaultCodeFactory implements CodeFactory {
           Mustache.line.set(codes[i].getLine());
         }
         Code[] truncate = truncate(codes, i + 1, next);
-        if (truncate.length == 0) truncate = next;
         current = codes[i].unexecute(current, text, position, truncate);
       }
       return current;
