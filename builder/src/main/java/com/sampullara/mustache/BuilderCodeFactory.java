@@ -17,11 +17,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.sampullara.mustache.Mustache.truncate;
 
 /**
- * The default code factory is designed to work well with the default Mustache implementation.
+ * The builder code factory is designed to work well with the default Mustache implementation.
  * In many cases where you significantly change the behavior of the default Mustache class you
  * may want to have your own CodeFactory that works with it.
  */
-public class DefaultCodeFactory implements CodeFactory {
+public class BuilderCodeFactory implements CodeFactory {
 
   @Override
   public Code iterable(Mustache m, String variable, List<Code> codes, String file, int line) {

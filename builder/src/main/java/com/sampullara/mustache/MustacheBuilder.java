@@ -27,7 +27,7 @@ public class MustacheBuilder implements MustacheJava {
   private final String classpathRoot;
   private final File root;
   private Class<? extends Mustache> superclass;
-  private CodeFactory cf = new DefaultCodeFactory();
+  private CodeFactory cf = new BuilderCodeFactory();
 
   public MustacheBuilder() {
     this.root = null;
