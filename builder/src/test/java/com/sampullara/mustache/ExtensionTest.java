@@ -1,5 +1,10 @@
 package com.sampullara.mustache;
 
+import com.sampullara.util.FutureWriter;
+import junit.framework.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,11 +12,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.concurrent.ExecutionException;
-
-import com.sampullara.util.FutureWriter;
-import junit.framework.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 

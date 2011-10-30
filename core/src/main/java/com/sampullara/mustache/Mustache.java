@@ -86,17 +86,17 @@ public class Mustache {
       if (debug) {
         line.set(compiled[i].getLine());
       }
-      Code[] truncate = truncate(compiled, i + 1);
+      Code[] truncate = truncate(compiled, i + 1, new Code[0]);
       current = compiled[i].unexecute(current, text, position, truncate);
     }
     return current;
   }
 
-  public static Code[] truncate(Code[] codes, int start) {
-    if (codes.length <= 1) return new Code[0];
-    Code[] next = new Code[codes.length - start];
-    System.arraycopy(codes, start, next, 0, next.length);
-    return next;
+  public static Code[] truncate(Code[] codes, int start, Code[] next) {
+    if (codes.length <= 1) return next;
+    Code[] truncate = new Code[codes.length - start];
+    System.arraycopy(codes, start, truncate, 0, truncate.length);
+    return truncate;
   }
 
   /**

@@ -178,9 +178,6 @@ public class MustacheBuilder implements MustacheJava {
                   case '$':
                     list.add(cf.name(m, variable, codes, file, currentLine.get()));
                     break;
-                  case '=':
-                    list.add(cf.replace(m, variable, codes, file, currentLine.get()));
-                    break;
                 }
                 iterable = lines != 0;
                 break;
