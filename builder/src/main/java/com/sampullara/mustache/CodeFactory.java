@@ -10,10 +10,10 @@ public interface CodeFactory {
   Code function(Mustache m, String variable, List<Code> codes, String file, int line);
   Code ifIterable(Mustache m, String variable, List<Code> codes, String file, int line);
   Code notIterable(Mustache m, String variable, List<Code> codes, String file, int line);
-  Code partial(Mustache m, String variable, String file, int line);
+  Code partial(Mustache m, String variable, String file, int line) throws MustacheException;
   Code value(Mustache m, String name, boolean encode, int line);
   Code write(String s, int line);
   Code eof(int line);
-  Code extend(Mustache m, String variable, List<Code> codes, String file, int i);
+  Code extend(Mustache m, String variable, List<Code> codes, String file, int i) throws MustacheException;
   Code name(Mustache m, String variable, List<Code> codes, String file, int i);
 }

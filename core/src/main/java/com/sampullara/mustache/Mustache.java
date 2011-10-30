@@ -465,8 +465,7 @@ public class Mustache {
                   if (applyString != null) {
                     Mustache mustache = templateFunctionCache.get(applyString);
                     if (mustache == null) {
-                      mustache = mj.parse(applyString);
-                      mustache.setPath(getPath());
+                      mustache = mj.parse(applyString, getPath());
                       templateFunctionCache.put(applyString, mustache);
                     }
                     mustache.execute(actual.get().pop(), scope);
@@ -505,12 +504,7 @@ public class Mustache {
   private Map<String, Mustache> partialCache = new ConcurrentHashMap<String, Mustache>();
 
   protected Mustache partial(String name) throws MustacheException {
-    Mustache mustache = partialCache.get(name);
-    if (mustache == null) {
-      mustache = compilePartial(name);
-      partialCache.put(name, mustache);
-    }
-    return mustache;
+    return compilePartial(name);
   }
 
   protected Mustache compilePartial(String name) throws MustacheException {

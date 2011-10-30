@@ -52,8 +52,8 @@ public class MustacheBuilder implements MustacheJava {
     }
   }
 
-  public Mustache parse(String template) throws MustacheException {
-    return build(new StringReader(template), template);
+  public Mustache parse(String template, String path) throws MustacheException {
+    return build(new StringReader(template), path);
   }
 
   public Mustache build(final Reader br, String file) throws MustacheException {

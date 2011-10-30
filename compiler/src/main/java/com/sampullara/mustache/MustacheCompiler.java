@@ -98,10 +98,12 @@ public class MustacheCompiler implements MustacheJava {
   }
 
   @Override
-  public synchronized Mustache parse(String partial) throws MustacheException {
+  public synchronized Mustache parse(String partial, String path) throws MustacheException {
     AtomicInteger currentLine = new AtomicInteger(0);
     BufferedReader br = new BufferedReader(new StringReader(partial));
-    return compile(br, new Stack<String>(), currentLine, null);
+    Mustache compile = compile(br, new Stack<String>(), currentLine, null);
+    compile.setPath(path);
+    return compile;
   }
 
   @Override

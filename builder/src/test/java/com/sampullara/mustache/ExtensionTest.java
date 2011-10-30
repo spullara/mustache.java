@@ -39,6 +39,26 @@ public class ExtensionTest {
     Assert.assertEquals(getContents(root, "sub.txt"), sw.toString());
   }
 
+  @Test
+  public void testSubSub() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheBuilder c = new MustacheBuilder(root);
+    Mustache m = c.parseFile("subsub.html");
+    StringWriter sw = new StringWriter();
+    FutureWriter writer = new FutureWriter(sw);
+    Scope scope = new Scope();
+    scope.put("name", "Sam");
+    scope.put("randomid", "asdlkfj");
+    m.execute(writer, scope);
+    writer.flush();
+    assertEquals(getContents(root, "subsub.txt"), sw.toString());
+
+    scope = m.unexecute(sw.toString());
+    sw = new StringWriter();
+    m.execute(sw, scope);
+    System.out.println(scope);
+    Assert.assertEquals(getContents(root, "subsub.txt"), sw.toString());
+  }
+
   protected String getContents(File root, String file) throws IOException {
     BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(root, file)),"UTF-8"));
     StringWriter capture = new StringWriter();

@@ -44,7 +44,7 @@ public class DefaultCodeFactory implements CodeFactory {
   }
 
   @Override
-  public Code partial(Mustache m, String variable, String file, int line) {
+  public Code partial(Mustache m, String variable, String file, int line) throws MustacheException {
     return new PartialCode(m, variable, file, line);
   }
 
@@ -64,7 +64,7 @@ public class DefaultCodeFactory implements CodeFactory {
   }
 
   @Override
-  public Code extend(Mustache m, String variable, List<Code> codes, String file, int i) {
+  public Code extend(Mustache m, String variable, List<Code> codes, String file, int i) throws MustacheException {
     return new ExtendCode(m, variable, codes, file, i);
   }
 
@@ -312,12 +312,14 @@ public class DefaultCodeFactory implements CodeFactory {
     private Mustache m;
     private final String file;
     private final int line;
+    private Mustache partial;
 
-    public PartialCode(Mustache m, String variable, String file, int line) {
+    public PartialCode(Mustache m, String variable, String file, int line) throws MustacheException {
       this.variable = variable;
       this.m = m;
       this.file = file;
       this.line = line;
+      partial = m.partial(variable);
     }
 
     @Override
@@ -326,7 +328,6 @@ public class DefaultCodeFactory implements CodeFactory {
         if (scope == IdentityScope.one) {
           fw.append("{{>").append(variable).append("}}");
         } else {
-          final Mustache partial = m.partial(variable);
           fw.enqueue(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
@@ -378,8 +379,9 @@ public class DefaultCodeFactory implements CodeFactory {
   private static class ExtendCode extends ExtendBaseCode {
 
     private Map<String, ExtendNameCode> replaceMap;
+    private Mustache partial;
 
-    public ExtendCode(Mustache m, String variable, List<Code> codes, String file, int line) {
+    public ExtendCode(Mustache m, String variable, List<Code> codes, String file, int line) throws MustacheException {
       super(m, variable, codes, file, line);
       replaceMap = new HashMap<String, ExtendNameCode>();
       for (Code code : codes) {
@@ -393,6 +395,37 @@ public class DefaultCodeFactory implements CodeFactory {
                   "Illegal code in extend section: " + code.getClass().getName());
         }
       }
+      Map<String, ExtendNameCode> debugMap = null;
+      if (Mustache.debug) {
+        debugMap = new HashMap<String, ExtendNameCode>(replaceMap);
+      }
+      partial = m.partial(variable);
+      Code[] supercodes = partial.getCompiled();
+      replaceCode(supercodes);
+      if (Mustache.debug) {
+        if (debugMap.size() > 0) {
+          throw new MustacheException(
+                  "Replacement sections failed to match named sections: " + debugMap.keySet());
+        }
+      }
+    }
+
+    private void replaceCode(Code[] supercodes) {
+      for (int i = 0; i < supercodes.length; i++) {
+        Code code = supercodes[i];
+        if (code instanceof ExtendNameCode) {
+          ExtendNameCode enc = (ExtendNameCode) code;
+          ExtendNameCode extendReplaceCode = replaceMap.get(enc.getName());
+          if (extendReplaceCode != null) {
+            supercodes[i] = extendReplaceCode;
+          } else {
+            replaceCode(enc.codes);
+          }
+        } else if (code instanceof SubCode) {
+          SubCode subcode = (SubCode) code;
+          replaceCode(subcode.codes);
+        }
+      }
     }
 
     @Override
@@ -404,31 +437,9 @@ public class DefaultCodeFactory implements CodeFactory {
           throw new MustacheException("Execution failed: " + file + ":" + line, e);
         }
       } else {
-        Map<String, ExtendNameCode> debugMap = null;
-        if (Mustache.debug) {
-          debugMap = new HashMap<String, ExtendNameCode>(replaceMap);
-        }
-        Mustache partial = m.partial(variable);
         Code[] supercodes = partial.getCompiled();
         for (Code code : supercodes) {
-          if (code instanceof ExtendNameCode) {
-            ExtendNameCode enc = (ExtendNameCode) code;
-            ExtendNameCode extendReplaceCode = replaceMap.get(enc.getName());
-            if (extendReplaceCode != null) {
-              if (Mustache.debug) {
-                debugMap.remove(enc.getName());
-              }
-              extendReplaceCode.execute(fw, scope);
-              continue;
-            }
-          }
           code.execute(fw, scope);
-        }
-        if (Mustache.debug) {
-          if (debugMap.size() > 0) {
-            throw new MustacheException(
-                    "Replacement sections failed to match named sections: " + debugMap.keySet());
-          }
         }
       }
     }
