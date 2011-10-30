@@ -12,7 +12,7 @@
     <module>builder</module>
     <module>handlebar</module>
     <module>network</module>
-<!--    <module>java7-support</module>-->
+    <module>java7-support</module>
   </modules>
   <packaging>pom</packaging>
 
@@ -46,7 +46,7 @@
   <scm>
     <connection>scm:git:git@github.com:spullara/mustache.java.git</connection>
     <developerConnection>scm:git:git@github.com:spullara/mustache.java.git</developerConnection>
-    <url>git@github.com:spullara/mustache.java.git</url>
+    <url>git://github.com:spullara/mustache.java.git</url>
   </scm>
 
   <distributionManagement>
@@ -71,7 +71,7 @@
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
-<!--      <plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
         <executions>
@@ -83,7 +83,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>-->
+      </plugin>
     </plugins>
   </build>
 
