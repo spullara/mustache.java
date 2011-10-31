@@ -392,8 +392,7 @@ public class Mustache {
                     return false;
                   }
                 } catch (Exception e) {
-                  logger.log(Level.SEVERE, "Could not get iterable: " + name, e);
-                  return false;
+                  throw new RuntimeException(e);
                 }
               }
               if (iterable instanceof Iterable && !(iterable instanceof JsonNode && !(((JsonNode) iterable).isArray()))) {
@@ -474,7 +473,7 @@ public class Mustache {
                   actual.get().pop().write(applyString);
                 }
               } catch (Exception e) {
-                logger.log(Level.SEVERE, "Could not apply function: " + f, e);
+                throw new RuntimeException(e);
               }
             }
             return first;
@@ -556,8 +555,7 @@ public class Mustache {
       try {
         possibleFuture = ((Future) possibleFuture).get();
       } catch (Exception e) {
-        logger.log(Level.SEVERE, "Could not get inverted: " + name, e);
-        return null;
+        throw new RuntimeException(e);
       }
     }
     final Object value = possibleFuture;
@@ -639,9 +637,8 @@ public class Mustache {
       }
       return o;
     } catch (Exception e) {
-      logger.warning("Failed: " + e + " using " + name);
+      throw new RuntimeException(e);
     }
-    return null;
   }
 
   private static Pattern findToEncode = Pattern.compile("&(?!\\w+;)|[\"<>\\\\\n]");
