@@ -8,7 +8,6 @@
 
   <modules>
     <module>core</module>
-    <module>compiler</module>
     <module>builder</module>
     <module>handlebar</module>
     <module>network</module>
