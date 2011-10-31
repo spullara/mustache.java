@@ -60,23 +60,6 @@ public class BenchmarkTest extends TestCase {
         System.out.println("Interpreted: " + total);
       }
       {
-        long start = System.currentTimeMillis();
-        MustacheCompiler c = new MustacheCompiler(root);
-        Mustache m = c.parseFile("complex.html");
-        System.out.println("Native compilation: " + (System.currentTimeMillis() - start));
-        complextest(m);
-        start = System.currentTimeMillis();
-        long end;
-        int total = 0;
-        while (true) {
-          complextest(m);
-          end = System.currentTimeMillis();
-          total++;
-          if (end - start > TIME) break;
-        }
-        System.out.println("Compiler: " + total);
-      }
-      {
         Mustache m = handcoded();
         complextest(m);
         long start = System.currentTimeMillis();
@@ -109,23 +92,6 @@ public class BenchmarkTest extends TestCase {
           if (end - start > TIME) break;
         }
         System.out.println("Interpreted: " + total);
-      }
-      {
-        long start = System.currentTimeMillis();
-        MustacheCompiler c = new MustacheCompiler(root);
-        Mustache m = c.parseFile("complex.html");
-        System.out.println("Native compilation: " + (System.currentTimeMillis() - start));
-        complextest(m);
-        start = System.currentTimeMillis();
-        long end;
-        int total = 0;
-        while (true) {
-          complextest(m);
-          end = System.currentTimeMillis();
-          total++;
-          if (end - start > TIME) break;
-        }
-        System.out.println("Compiler: " + total);
       }
       {
         Mustache m = handcoded();

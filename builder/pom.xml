@@ -56,12 +56,6 @@
     </dependency>
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
-      <artifactId>compiler</artifactId>
-      <version>0.6.1-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>network</artifactId>
       <version>0.6.1-SNAPSHOT</version>
       <scope>test</scope>
