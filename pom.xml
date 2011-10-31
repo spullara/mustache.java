@@ -46,6 +46,7 @@
   <scm>
     <connection>scm:git:git://github.com/spullara/mustache.java.git</connection>
     <developerConnection>scm:git:git://github.com/spullara/mustache.java.git</developerConnection>
+    <url>scm:git:git://github.com/spullara/mustache.java.git</url>
   </scm>
 
   <distributionManagement>
