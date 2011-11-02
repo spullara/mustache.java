@@ -12,8 +12,20 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Time: 1:26 PM
  */
 public interface Code {
+  /**
+   * Execute the code and write to the future writer using scope.
+   *
+   * @param fw
+   * @param scope
+   * @throws MustacheException
+   */
   void execute(FutureWriter fw, Scope scope) throws MustacheException;
 
+  /**
+   * The first line for the code element.
+   *
+   * @return
+   */
   int getLine();
 
   /**
@@ -21,10 +33,6 @@ public interface Code {
    * containing the unexecuted data or null to indicate it was not a match. We avoid
    * using a Reader for simplicity over efficiency since this isn't a high
    * performance API but typically for development or test time.
-   *
-   * Experimental!
-   *
-   *
    *
    * @param current scope that we are currently using
    * @param text full text to parse
@@ -35,6 +43,12 @@ public interface Code {
    */
   Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException;
 
+  /**
+   * Return the template that created this code.
+   *
+   * @param fw
+   * @throws MustacheException
+   */
   void identity(FutureWriter fw) throws MustacheException;
 }
 

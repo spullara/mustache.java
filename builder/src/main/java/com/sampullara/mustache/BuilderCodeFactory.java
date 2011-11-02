@@ -201,7 +201,7 @@ public class BuilderCodeFactory implements CodeFactory {
 
     @Override
     public Scope unexecute(Scope current, final String text, final AtomicInteger position, Code[] next) throws MustacheException {
-      final String value = unexecuteValueCode(current, text, position, next, false);
+      final String value = unexecuteValueCode(m, current, text, position, next, false);
       if (value == null) return null;
       Scope function = (Scope) current.get(variable);
       if (function == null) {
@@ -329,7 +329,7 @@ public class BuilderCodeFactory implements CodeFactory {
 
     @Override
     public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
-      String partialText = unexecuteValueCode(current, text, position, next, false);
+      String partialText = unexecuteValueCode(m, current, text, position, next, false);
       AtomicInteger partialPosition = new AtomicInteger(0);
       Scope unexecuted = m.partial(variable).unexecute(partialText, partialPosition);
       if (unexecuted == null) return null;
@@ -490,7 +490,7 @@ public class BuilderCodeFactory implements CodeFactory {
 
     @Override
     public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
-      String value = unexecuteValueCode(current, text, position, next, encoded);
+      String value = unexecuteValueCode(m, current, text, position, next, encoded);
       if (value != null) {
         put(current, name, value);
         return current;
@@ -511,7 +511,7 @@ public class BuilderCodeFactory implements CodeFactory {
 
   }
 
-  private static String unexecuteValueCode(Scope current, String text, AtomicInteger position, Code[] next, boolean encoded) throws MustacheException {
+  private static String unexecuteValueCode(Mustache m, Scope current, String text, AtomicInteger position, Code[] next, boolean encoded) throws MustacheException {
     AtomicInteger probePosition = new AtomicInteger(position.get());
     Code[] truncate = truncate(next, 1, next);
     Scope result = null;
@@ -528,7 +528,7 @@ public class BuilderCodeFactory implements CodeFactory {
     if (result != null) {
       String value = text.substring(position.get(), lastposition);
       if (encoded) {
-        // Decode
+        value = m.decode(value);
       }
       position.set(lastposition);
       return value;

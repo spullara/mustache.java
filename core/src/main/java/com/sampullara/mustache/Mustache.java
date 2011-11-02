@@ -659,4 +659,9 @@ public class Mustache {
     matcher.appendTail(sb);
     return sb.toString();
   }
+
+  public String decode(String value) {
+    return value.replaceAll("&quot;", "\"").replaceAll("&lt;", "<").replaceAll("&gt;", ">")
+            .replaceAll("&#10;", "\n").replaceAll("\\\\", "\\").replaceAll("&amp;", "&");
+  }
 }
