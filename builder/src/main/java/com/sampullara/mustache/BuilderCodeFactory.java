@@ -94,7 +94,7 @@ public class BuilderCodeFactory implements CodeFactory {
     @Override
     public abstract void execute(FutureWriter fw, Scope scope) throws MustacheException;
 
-    protected void execute(FutureWriter fw, Iterable<Scope> iterable) throws MustacheException {
+    protected void execute(FutureWriter fw, final Iterable<Scope> iterable) throws MustacheException {
       if (iterable != null) {
         for (final Scope subScope : iterable) {
           try {
@@ -107,7 +107,11 @@ public class BuilderCodeFactory implements CodeFactory {
                   if (Mustache.debug) {
                     Mustache.line.set(code.getLine());
                   }
-                  code.execute(writer, subScope);
+                  if (iterable instanceof FunctionIterator && ((FunctionIterator) iterable).isTemplateFunction()) {
+                    code.identity(writer);
+                  } else {
+                    code.execute(writer, subScope);
+                  }
                 }
                 return writer;
               }
@@ -146,11 +150,7 @@ public class BuilderCodeFactory implements CodeFactory {
 
     @Override
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-      if (scope == IdentityScope.one) {
-        identity(fw);
-      } else {
-        execute(fw, m.iterable(scope, variable));
-      }
+      execute(fw, m.iterable(scope, variable));
     }
 
     @Override
@@ -189,17 +189,13 @@ public class BuilderCodeFactory implements CodeFactory {
 
     @Override
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-      if (scope == IdentityScope.one) {
-        identity(fw);
+      Object function = m.getValue(scope, variable);
+      if (function instanceof Function) {
+        execute(fw, m.function(scope, (Function) function));
+      } else if (function == null) {
+        execute(fw, Lists.newArrayList(scope));
       } else {
-        Object function = m.getValue(scope, variable);
-        if (function instanceof Function) {
-          execute(fw, m.function(scope, (Function) function));
-        } else if (function == null) {
-          execute(fw, Lists.newArrayList(scope));
-        } else {
-          throw new MustacheException("Not a function: " + function);
-        }
+        throw new MustacheException("Not a function: " + function);
       }
     }
 
@@ -244,11 +240,7 @@ public class BuilderCodeFactory implements CodeFactory {
     @Override
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
       fw = m.pushWriter(fw);
-      if (scope == IdentityScope.one) {
-        identity(fw);
-      } else {
-        execute(fw, m.ifiterable(scope, variable));
-      }
+      execute(fw, m.ifiterable(scope, variable));
     }
 
     @Override
@@ -277,11 +269,7 @@ public class BuilderCodeFactory implements CodeFactory {
     @Override
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
       fw = m.pushWriter(fw);
-      if (scope == IdentityScope.one) {
-        identity(fw);
-      } else {
-        execute(fw, m.inverted(scope, variable));
-      }
+      execute(fw, m.inverted(scope, variable));
     }
 
     @Override
@@ -321,18 +309,14 @@ public class BuilderCodeFactory implements CodeFactory {
     @Override
     public void execute(FutureWriter fw, final Scope scope) throws MustacheException {
       try {
-        if (scope == IdentityScope.one) {
-          identity(fw);
-        } else {
-          fw.enqueue(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-              FutureWriter fw = new FutureWriter();
-              partial.partial(fw, scope, variable, partial);
-              return fw;
-            }
-          });
-        }
+        fw.enqueue(new Callable<Object>() {
+          @Override
+          public Object call() throws Exception {
+            FutureWriter fw = new FutureWriter();
+            partial.partial(fw, scope, variable, partial);
+            return fw;
+          }
+        });
       } catch (IOException e) {
         throw new MustacheException("Execution failed: " + file + ":" + line, e);
       }
@@ -440,17 +424,9 @@ public class BuilderCodeFactory implements CodeFactory {
 
     @Override
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-      if (scope == IdentityScope.one) {
-        try {
-          fw.append("{{<").append(variable).append("}}");
-        } catch (IOException e) {
-          throw new MustacheException("Execution failed: " + file + ":" + line, e);
-        }
-      } else {
-        Code[] supercodes = partial.getCompiled();
-        for (Code code : supercodes) {
-          code.execute(fw, scope);
-        }
+      Code[] supercodes = partial.getCompiled();
+      for (Code code : supercodes) {
+        code.execute(fw, scope);
       }
     }
 
@@ -473,11 +449,7 @@ public class BuilderCodeFactory implements CodeFactory {
 
     @Override
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-      if (scope == IdentityScope.one) {
-        identity(fw);
-      } else {
-        execute(fw, Arrays.asList(scope));
-      }
+      execute(fw, Arrays.asList(scope));
     }
 
     @Override
@@ -508,11 +480,7 @@ public class BuilderCodeFactory implements CodeFactory {
 
     @Override
     public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-      if (scope == IdentityScope.one) {
-        identity(fw);
-      } else {
-        m.write(fw, scope, name, encoded);
-      }
+      m.write(fw, scope, name, encoded);
     }
 
     @Override

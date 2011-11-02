@@ -82,7 +82,7 @@ public class InterpreterTest extends TestCase {
     Mustache m = c.parseFile("simple.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
-    m.execute(writer, IdentityScope.one);
+    m.identity(writer);
     writer.flush();
     assertEquals(getContents(root, "simple.html").replaceAll("\\s+", ""), sw.toString().replaceAll(
             "\\s+", ""));

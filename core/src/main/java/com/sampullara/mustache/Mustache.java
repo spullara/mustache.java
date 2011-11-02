@@ -181,6 +181,15 @@ public class Mustache {
     }
   }
 
+  public void identity(FutureWriter writer) throws MustacheException {
+    for (Code code : compiled) {
+      if (debug) {
+        line.set(code.getLine());
+      }
+      code.identity(writer);
+    }
+  }
+
   protected ThreadLocal<Stack<FutureWriter>> capturedWriter = new ThreadLocal<Stack<FutureWriter>>() {
     @Override
     protected Stack<FutureWriter> initialValue() {
@@ -333,20 +342,6 @@ public class Mustache {
     }), 1);
   }
 
-  protected void iterable(FutureWriter writer, final Scope s, final String name, final Class<? extends Mustache> sub) throws IOException {
-    writer = pushWriter(writer);
-    writer.enqueue(new Callable<Object>() {
-      @Override
-      public Object call() throws Exception {
-        FutureWriter fw = new FutureWriter();
-        for (Scope s1 : iterable(s, name)) {
-          enqueue(fw, sub.newInstance(), s1);
-        }
-        return fw;
-      }
-    });
-  }
-
   /**
    * Iterate over a named value. If there is only one value return a single value iterator.
    *
@@ -355,9 +350,6 @@ public class Mustache {
    * @return
    */
   protected Iterable<Scope> iterable(final Scope s, final String name) {
-    if (s == IdentityScope.one) {
-      return Lists.newArrayList(s);
-    }
     MustacheTrace.Event event = null;
     if (trace) {
       Object parent = s.getParent();
@@ -436,15 +428,9 @@ public class Mustache {
   // Memory leak if you abuse TemplateFunction
   private static Map<String, Mustache> templateFunctionCache = new ConcurrentHashMap<String, Mustache>();
 
-  public Iterable<Scope> function(final Scope scope, final Function f) {
+  public FunctionIterator function(final Scope scope, final Function f) {
     final boolean templateFunction = f instanceof TemplateFunction;
-    final Scope s;
-    if (templateFunction) {
-      s = IdentityScope.one;
-    } else {
-      s = scope;
-    }
-    return new Iterable<Scope>() {
+    return new FunctionIterator(f) {
       @Override
       public Iterator<Scope> iterator() {
         return new Iterator<Scope>() {
@@ -483,7 +469,7 @@ public class Mustache {
           public synchronized Scope next() {
             if (first) {
               first = false;
-              return s;
+              return scope;
             }
             throw new NoSuchElementException();
           }
