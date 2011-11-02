@@ -75,6 +75,35 @@ public class UnexecuteTest {
   }
 
   @Test
+  public void testSimpleUnexecuteEncoded() throws MustacheException, IOException {
+    MustacheJava c = init();
+    Mustache m = c.parseFile("unambiguoussimple.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Scope(new Object() {
+      String name = "<Chris>";
+      int value = 10000;
+
+      int taxed_value() {
+        return (int) (this.value - (this.value * 0.4));
+      }
+
+      boolean in_ca = true;
+    }));
+    assertEquals(getContents(root, "unambiguoussimpleencoded.txt"), sw.toString());
+
+    Scope scope = m.unexecute(sw.toString());
+    assertEquals("<Chris>", scope.get("name"));
+    assertEquals("10000", scope.get("value"));
+    Scope in_ca = new Scope();
+    in_ca.put("taxed_value", "6000");
+    assertEquals(Arrays.asList(in_ca), scope.get("in_ca"));
+
+    sw = new StringWriter();
+    m.execute(sw, scope);
+    assertEquals(getContents(root, "unambiguoussimpleencoded.txt"), sw.toString());
+  }
+
+  @Test
   public void testComplexUnexecute() throws MustacheException, IOException {
     Scope scope = new Scope(new Object() {
       String header = "Colors";
