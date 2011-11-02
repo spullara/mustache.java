@@ -40,6 +40,18 @@ public class ExtensionTest {
   }
 
   @Test
+  public void testFollow() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheBuilder c = new MustacheBuilder(root);
+    Mustache m = c.parseFile("follownomenu.html");
+    StringWriter sw = new StringWriter();
+    FutureWriter writer = new FutureWriter(sw);
+    Scope scope = new Scope();
+    m.execute(writer, scope);
+    writer.flush();
+    assertEquals(getContents(root, "follownomenu.txt"), sw.toString());
+  }
+
+  @Test
   public void testSubSub() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheBuilder c = new MustacheBuilder(root);
     Mustache m = c.parseFile("subsub.html");
