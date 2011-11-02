@@ -34,5 +34,7 @@ public interface Code {
    * @throws MustacheException if the text does not match the template
    */
   Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException;
+
+  void identity(FutureWriter fw) throws MustacheException;
 }
 
