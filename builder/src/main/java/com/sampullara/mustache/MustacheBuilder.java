@@ -1,9 +1,8 @@
 package com.sampullara.mustache;
 
-import com.google.common.base.Charsets;
-
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +12,8 @@ import java.io.StringReader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.google.common.base.Charsets;
 
 /**
  * A pseudo interpreter / compiler. Instead of compiling to Java code, it compiles to a
@@ -24,24 +25,44 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MustacheBuilder implements MustacheJava {
 
-  private final String classpathRoot;
-  private final File root;
   private Class<? extends Mustache> superclass;
   private CodeFactory cf = new BuilderCodeFactory();
+  private MustacheContext mc;
 
   public MustacheBuilder() {
-    this.root = null;
-    this.classpathRoot = null;
+    this((String)null);
   }
 
-  public MustacheBuilder(String classpathRoot) {
-    this.root = null;
-    this.classpathRoot = classpathRoot;
+  public MustacheBuilder(final String classpath) {
+    this(new MustacheContext() {
+      @Override
+      public Reader getReader(String path) throws MustacheException {
+        String fullPath = classpath == null ? path : classpath + "/" + path;
+        InputStream resourceAsStream =
+                MustacheBuilder.class.getClassLoader().getResourceAsStream(fullPath);
+        if (resourceAsStream == null) {
+          throw new MustacheException(path + " not found in classpath");
+        }
+        return new BufferedReader(new InputStreamReader(resourceAsStream, Charsets.UTF_8));
+      }
+    });
   }
 
-  public MustacheBuilder(File root) {
-    this.root = root;
-    this.classpathRoot = null;
+  public MustacheBuilder(final File root) {
+    this(new MustacheContext() {
+      @Override
+      public Reader getReader(String path) throws MustacheException {
+        try {
+          return new BufferedReader(new FileReader(new File(root, path)));
+        } catch (FileNotFoundException e) {
+          throw new MustacheException("Failed to find path: " + path, e);
+        }
+      }
+    });
+  }
+
+  public MustacheBuilder(MustacheContext mc) {
+    this.mc = mc;
   }
 
   public void setSuperclass(String superclass) {
@@ -56,41 +77,21 @@ public class MustacheBuilder implements MustacheJava {
     return build(new StringReader(template), path);
   }
 
-  public Mustache build(final Reader br, String file) throws MustacheException {
+  public Mustache build(final Reader br, String path) throws MustacheException {
     Mustache mustache;
     try {
       mustache = superclass == null ? new Mustache() : superclass.newInstance();
     } catch (Exception e) {
       throw new IllegalArgumentException("Could not instantiate", e);
     }
-    mustache.setRoot(root);
-    mustache.setPath(file);
     mustache.setMustacheJava(this);
-    mustache.setCompiled(compile(mustache, br, null, new AtomicInteger(0), file));
+    mustache.setName(path);
+    mustache.setCompiled(compile(mustache, br, null, new AtomicInteger(0), path));
     return mustache;
   }
 
   public Mustache parseFile(String path) throws MustacheException {
-    Mustache compile;
-    try {
-      BufferedReader br;
-      if (root == null) {
-        String fullPath = classpathRoot == null ? path : classpathRoot + "/" + path;
-        InputStream resourceAsStream =
-            MustacheBuilder.class.getClassLoader().getResourceAsStream(fullPath);
-        if (resourceAsStream == null) {
-          throw new MustacheException(path + " not found in classpath");
-        }
-        br = new BufferedReader(new InputStreamReader(resourceAsStream, Charsets.UTF_8));
-      } else {
-        br = new BufferedReader(new FileReader(new File(root, path)));
-      }
-      compile = build(br, path);
-      br.close();
-    } catch (IOException e) {
-      throw new MustacheException("Failed to read " + new File(root, path), e);
-    }
-    return compile;
+    return build(mc.getReader(path), path);
   }
 
   protected List<Code> compile(final Mustache m, final Reader br, String tag, final AtomicInteger currentLine, String file) throws MustacheException {
@@ -189,7 +190,7 @@ public class MustacheBuilder implements MustacheJava {
                 }
                 if (!variable.equals(tag)) {
                   throw new MustacheException(
-                      "Mismatched start/end tags: " + tag + " != " + variable + " in " + file + ":" + currentLine);
+                          "Mismatched start/end tags: " + tag + " != " + variable + " in " + file + ":" + currentLine);
                 }
 
                 return list;
@@ -208,7 +209,7 @@ public class MustacheBuilder implements MustacheJava {
                 } else {
                   if (br.read() != '}') {
                     throw new MustacheException(
-                        "Improperly closed variable in " + file + ":" + currentLine);
+                            "Improperly closed variable in " + file + ":" + currentLine);
                   }
                 }
                 final String finalName = name;
@@ -246,6 +247,7 @@ public class MustacheBuilder implements MustacheJava {
         out.append((char) c);
       }
       write(list, out, currentLine.intValue());
+      br.close();
     } catch (IOException e) {
       throw new MustacheException("Failed to read", e);
     }

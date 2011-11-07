@@ -2,13 +2,11 @@ package com.sampullara.mustache;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 import com.sampullara.util.FutureWriter;
 import com.sampullara.util.TemplateFunction;
 import org.codehaus.jackson.JsonNode;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -22,7 +20,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,33 +45,16 @@ public class Mustache {
   // Debug
   protected static final ThreadLocal<Integer> line = new ThreadLocal<Integer>();
 
-  private File root;
-  private String path;
+  private String name;
   private Code[] compiled;
   protected MustacheJava mj;
-
-  public void setRoot(File root) {
-    this.root = root;
-  }
-
-  public File getRoot() {
-    return root;
-  }
-
-  public void setPath(String path) {
-    this.path = path;
-  }
-
-  public String getPath() {
-    return path;
-  }
 
   public Scope unexecute(String text) throws MustacheException {
     AtomicInteger position = new AtomicInteger(0);
     Scope unexecuted = unexecute(text, position);
     if (unexecuted == null) {
       int min = Math.min(position.get() + 50, position.get() + Math.max(0, text.length() - position.get()));
-      throw new MustacheException("Failed to match template at " + path + ":" + line.get() + " with text " +
+      throw new MustacheException("Failed to match template at " + name + ":" + line.get() + " with text " +
           text.substring(position.get(), min));
     }
     return unexecuted;
@@ -217,8 +197,6 @@ public class Mustache {
       @Override
       public Object call() throws Exception {
         FutureWriter fw = new FutureWriter();
-        m.setRoot(getRoot());
-        m.setPath(getPath());
         m.execute(fw, s);
         return fw;
       }
@@ -303,6 +281,14 @@ public class Mustache {
 
   public Code[] getCompiled() {
     return compiled;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String filename) {
+    this.name = filename;
   }
 
   private class SingleValueIterator implements Iterator {
@@ -450,7 +436,7 @@ public class Mustache {
                   if (applyString != null) {
                     Mustache mustache = templateFunctionCache.get(applyString);
                     if (mustache == null) {
-                      mustache = mj.parse(applyString, getPath());
+                      mustache = mj.parse(applyString, name);
                       templateFunctionCache.put(applyString, mustache);
                     }
                     mustache.execute(actual.get().pop(), scope);
@@ -495,12 +481,11 @@ public class Mustache {
   protected Mustache compilePartial(String name) throws MustacheException {
     MustacheTrace.Event event = null;
     if (trace) {
-      event = MustacheTrace.addEvent("compile partial: " + name, root == null ? "classpath" : root.getName());
+      event = MustacheTrace.addEvent("compile partial: " + name, "");
     }
     Mustache mustache;
     mustache = mj.parseFile(name + "." + getPartialExtension());
     mustache.setMustacheJava(mj);
-    mustache.setRoot(root);
     if (trace) {
       event.end();
     }
@@ -508,8 +493,8 @@ public class Mustache {
   }
 
   protected String getPartialExtension() {
-    int index = path.lastIndexOf(".");
-    return path.substring(index + 1);
+    int index = name.lastIndexOf(".");
+    return name.substring(index + 1);
   }
 
   protected void partial(FutureWriter writer, Scope s, final String name, Mustache partial) throws MustacheException {
@@ -606,12 +591,12 @@ public class Mustache {
         for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
           String className = ste.getClassName();
           if (className.startsWith("com.sampullara.mustaches.Mustache")) {
-            sb.append(path).append(":").append(ste.getLineNumber());
+            sb.append(this.name).append(":").append(ste.getLineNumber());
             break;
           }
         }
         if (sb.length() == 0) {
-          sb.append(path).append(":").append(line.get());
+          sb.append(this.name).append(":").append(line.get());
         }
         String location = name + " @ " + sb;
         if (!name.startsWith("_") && missing.put(location, true) == null) {

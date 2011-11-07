@@ -296,7 +296,7 @@ public class BuilderCodeFactory implements CodeFactory {
     private Mustache m;
     private final String file;
     private final int line;
-    private Mustache partial;
+    private volatile Mustache partial;
 
     public PartialCode(Mustache m, String variable, String file, int line) throws MustacheException {
       this.variable = variable;
