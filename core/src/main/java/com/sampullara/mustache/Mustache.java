@@ -74,10 +74,8 @@ public class Mustache {
 
   public static Code[] truncate(Code[] codes, int start, Code[] next) {
     if (codes.length <= 1) return next;
-    int length = codes.length - start;
-    Code[] truncate = new Code[length + (next == null ? 0 : next.length)];
-    System.arraycopy(codes, start, truncate, 0, length);
-    if (next != null) System.arraycopy(next, 0, truncate, length, next.length);
+    Code[] truncate = new Code[codes.length - start];
+    System.arraycopy(codes, start, truncate, 0, truncate.length);
     return truncate;
   }
 

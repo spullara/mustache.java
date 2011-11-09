@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -274,7 +275,7 @@ public class UnexecuteTest {
           path = "modules/" + name.split(":")[1];
         }
         try {
-          return new BufferedReader(new InputStreamReader(ClassLoader.getSystemResource("ibis2/" + path).openStream()));
+          return new BufferedReader(new FileReader(new File(root, "ibis2/" + path)));
         } catch (Exception e) {
           throw new MustacheException("Failed to open: " + path, e);
         }
@@ -305,7 +306,7 @@ public class UnexecuteTest {
   @BeforeClass
   public static void setUp() throws Exception {
     File file = new File("src/test/resources");
-    root = new File(file, "super.html").exists() ? file : new File("builder/src/test/resources");
+    root = new File(file, "simple.html").exists() ? file : new File("../src/test/resources");
   }
 
 }
