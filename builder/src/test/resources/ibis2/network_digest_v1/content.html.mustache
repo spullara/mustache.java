@@ -1,0 +1,38 @@
+<tr>
+  <td style="background-color: #fff; padding: 25px 40px 22px;">
+      {{#top_tweets}}
+        {{#tweets}}
+        <table style="{{status_box}}" width="100%" cellpadding="0" cellspacing="0" border="0" class="status">
+          <tr>
+            <td valign="top" style="padding: 15px 10px 15px 15px">
+              <a href="{{user_account_url}}" style="text-decoration: none;">
+                <img src="{{user.profile_image_url.get}}"/>
+              </a>
+            </td>
+
+            <td valign="top" width="100%" style="padding: 15px 15px 15px 0;">
+              <div style="line-height: 15px;" class="user">
+              <span style="">{{user.name}}</span> <span style="#ccc">@{{user.screen_name}}</span>
+              </div>
+
+              <div style="padding: 3px 0 0Bi; " class="text">
+                {{{linkified_text}}}
+              </div>
+
+                {{retweet_count}}{{fav_count}}{{reply_count}}
+                {{explicit_timestamp}}
+
+                {{{source.get}}}
+            </td>
+          </tr>
+        </table>
+        {{/tweets}}
+      {{/top_tweets}}
+
+
+    {{#include_wtf}}
+      {{>modules:wtf}}
+    {{/include_wtf}}
+
+  </td>
+</tr>

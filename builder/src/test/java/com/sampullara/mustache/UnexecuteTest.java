@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
@@ -261,12 +262,37 @@ public class UnexecuteTest {
     assertEquals(getContents(root, "ibis-1107586786643355109.html"), sw.toString());
   }
 
+  @Test
+  public void testIbis2() throws MustacheException, IOException {
+    MustacheBuilder c = new MustacheBuilder(new MustacheContext() {
+      @Override
+      public BufferedReader getReader(String name) throws MustacheException {
+        String path = name;
+        if (name.startsWith("dir:")) {
+          path = "network_digest_v1/" + name.split(":")[1];
+        } else if (name.startsWith("modules:")) {
+          path = "modules/" + name.split(":")[1];
+        }
+        try {
+          return new BufferedReader(new InputStreamReader(ClassLoader.getSystemResource("ibis2/" + path).openStream()));
+        } catch (Exception e) {
+          throw new MustacheException("Failed to open: " + path, e);
+        }
+      }
+    });
+    Mustache m = c.parseFile("content.html.mustache");
+    Scope unexecute = m.unexecute(getContents(root, "ibis2/test.html"));
+    StringWriter sw = new StringWriter();
+    m.execute(sw, unexecute);
+    assertEquals(getContents(root, "ibis2/test.html"), sw.toString());
+  }
+
   private MustacheBuilder init() {
     return new MustacheBuilder(root);
   }
 
   protected String getContents(File root, String file) throws IOException {
-    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(root, file)),"UTF-8"));
+    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(root, file)), "UTF-8"));
     StringWriter capture = new StringWriter();
     char[] buffer = new char[8192];
     int read;
@@ -279,7 +305,7 @@ public class UnexecuteTest {
   @BeforeClass
   public static void setUp() throws Exception {
     File file = new File("src/test/resources");
-    root = new File(file, "simple.html").exists() ? file : new File("../src/test/resources");
+    root = new File(file, "super.html").exists() ? file : new File("builder/src/test/resources");
   }
 
 }

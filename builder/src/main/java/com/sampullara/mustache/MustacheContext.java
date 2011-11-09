@@ -1,5 +1,6 @@
 package com.sampullara.mustache;
 
+import java.io.BufferedReader;
 import java.io.Reader;
 
 /**
@@ -8,5 +9,5 @@ import java.io.Reader;
  * on names.
  */
 public interface MustacheContext {
-  Reader getReader(String name) throws MustacheException;
+  BufferedReader getReader(String name) throws MustacheException;
 }

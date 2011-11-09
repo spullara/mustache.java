@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.DataFormatException;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -513,10 +514,10 @@ public class BuilderCodeFactory implements CodeFactory {
 
   private static String unexecuteValueCode(Mustache m, Scope current, String text, AtomicInteger position, Code[] next, boolean encoded) throws MustacheException {
     AtomicInteger probePosition = new AtomicInteger(position.get());
-    Code[] truncate = truncate(next, 1, next);
+    Code[] truncate = truncate(next, 1, null);
     Scope result = null;
     int lastposition = position.get();
-    while (next.length != 0 && probePosition.get() < text.length()) {
+    while (next.length > 0 && probePosition.get() < text.length()) {
       lastposition = probePosition.get();
       result = next[0].unexecute(current, text, probePosition, truncate);
       if (result == null) {

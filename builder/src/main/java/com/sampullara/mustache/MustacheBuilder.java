@@ -36,7 +36,7 @@ public class MustacheBuilder implements MustacheJava {
   public MustacheBuilder(final String classpath) {
     this(new MustacheContext() {
       @Override
-      public Reader getReader(String path) throws MustacheException {
+      public BufferedReader getReader(String path) throws MustacheException {
         String fullPath = classpath == null ? path : classpath + "/" + path;
         InputStream resourceAsStream =
                 MustacheBuilder.class.getClassLoader().getResourceAsStream(fullPath);
@@ -51,7 +51,7 @@ public class MustacheBuilder implements MustacheJava {
   public MustacheBuilder(final File root) {
     this(new MustacheContext() {
       @Override
-      public Reader getReader(String path) throws MustacheException {
+      public BufferedReader getReader(String path) throws MustacheException {
         try {
           return new BufferedReader(new FileReader(new File(root, path)));
         } catch (FileNotFoundException e) {
