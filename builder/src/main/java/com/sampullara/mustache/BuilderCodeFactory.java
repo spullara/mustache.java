@@ -330,11 +330,17 @@ public class BuilderCodeFactory implements CodeFactory {
 
     @Override
     public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
-      String partialText = unexecuteValueCode(m, current, text, position, next, false);
-      AtomicInteger partialPosition = new AtomicInteger(0);
-      Scope unexecuted = m.partial(variable).unexecute(partialText, partialPosition);
-      if (unexecuted == null) return null;
-      put(current, variable, unexecuted);
+      Mustache partial = m.partial(variable);
+      Code[] compiled = partial.getCompiled();
+      Scope unexecuted = new Scope();
+      for (int i = 0; i < compiled.length && unexecuted != null; i++) {
+        if (compiled[i] instanceof EOFCode) break;
+        Code[] truncate = truncate(compiled, i + 1, new Code[0]);
+        unexecuted = compiled[i].unexecute(unexecuted, text, position, truncate);
+      }
+      if (unexecuted != null) {
+        put(current, variable, unexecuted);
+      }
       return current;
     }
 
