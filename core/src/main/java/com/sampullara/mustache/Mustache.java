@@ -1,12 +1,5 @@
 package com.sampullara.mustache;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-
-import com.sampullara.util.FutureWriter;
-import com.sampullara.util.TemplateFunction;
-import org.codehaus.jackson.JsonNode;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -23,6 +16,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+
+import com.sampullara.util.FutureWriter;
+import com.sampullara.util.TemplateFunction;
+import org.codehaus.jackson.JsonNode;
 
 import static com.sampullara.mustache.Scope.EMPTY;
 import static com.sampullara.mustache.Scope.NULL;
@@ -49,13 +49,23 @@ public class Mustache {
   private Code[] compiled;
   protected MustacheJava mj;
 
+  /**
+   * Given text that was created by or that matches the shape of a mustache
+   * template, return the scope that can be used to recreate the text.
+   *
+   * @param text
+   * @return
+   * @throws MustacheException
+   */
   public Scope unexecute(String text) throws MustacheException {
     AtomicInteger position = new AtomicInteger(0);
     Scope unexecuted = unexecute(text, position);
     if (unexecuted == null) {
-      int min = Math.min(position.get() + 50, position.get() + Math.max(0, text.length() - position.get()));
-      throw new MustacheException("Failed to match template at " + name + ":" + line.get() + " with text " +
-          text.substring(position.get(), min));
+      int min = Math.min(position.get() + 50,
+              position.get() + Math.max(0, text.length() - position.get()));
+      throw new MustacheException(
+              "Failed to match template at " + name + ":" + line.get() + " with text " +
+                      text.substring(position.get(), min));
     }
     return unexecuted;
   }
@@ -114,7 +124,7 @@ public class Mustache {
    * result to the provided writer.
    *
    * @param writer a writer to write to
-   * @param ctx context of the execution
+   * @param ctx    context of the execution
    * @throws MustacheException
    */
   public final void execute(Writer writer, Scope ctx) throws MustacheException, IOException {
@@ -537,7 +547,7 @@ public class Mustache {
     boolean isntEmpty = value instanceof Iterable && ((Iterable) value).iterator().hasNext();
     if (isntEmpty ||
             (value instanceof Boolean && ((Boolean) value)) ||
-        (value != null && !(value instanceof Iterable) && !(value instanceof Boolean))) {
+            (value != null && !(value instanceof Iterable) && !(value instanceof Boolean))) {
       return EMPTY;
     }
     final Scope scope = new Scope(s);
