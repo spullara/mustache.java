@@ -3,6 +3,7 @@ package com.sampullara.mustache;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -117,6 +118,9 @@ public class ObjectHandler6 implements ObjectHandler {
       }
       throw nsme;
     }
+    if ((member.getModifiers() | Modifier.PRIVATE) == Modifier.PRIVATE) {
+      throw new NoSuchMethodException("Only public, protected and package methods allowed");
+    }
     member.setAccessible(true);
     return member;
   }
@@ -131,6 +135,9 @@ public class ObjectHandler6 implements ObjectHandler {
         return getField(name, superclass);
       }
       throw nsfe;
+    }
+    if ((member.getModifiers() | Modifier.PRIVATE) == Modifier.PRIVATE) {
+      throw new NoSuchFieldException("Only public, protected and package fields allowed");
     }
     member.setAccessible(true);
     return member;

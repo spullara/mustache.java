@@ -51,7 +51,6 @@ public class InterpreterTest extends TestCase {
       int taxed_value() {
         return (int) (this.value - (this.value * 0.4));
       }
-
       boolean in_ca = true;
     }));
     writer.flush();
@@ -72,6 +71,9 @@ public class InterpreterTest extends TestCase {
       }
 
       boolean in_ca = true;
+
+      // Should not be accessible
+      private String test = "Test";
     }));
     writer.flush();
     assertEquals(getContents(root, "security.txt"), sw.toString());
