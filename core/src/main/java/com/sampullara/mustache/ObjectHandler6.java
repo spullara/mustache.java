@@ -118,7 +118,7 @@ public class ObjectHandler6 implements ObjectHandler {
       }
       throw nsme;
     }
-    if ((member.getModifiers() | Modifier.PRIVATE) == Modifier.PRIVATE) {
+    if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
       throw new NoSuchMethodException("Only public, protected and package methods allowed");
     }
     member.setAccessible(true);
@@ -136,7 +136,7 @@ public class ObjectHandler6 implements ObjectHandler {
       }
       throw nsfe;
     }
-    if ((member.getModifiers() | Modifier.PRIVATE) == Modifier.PRIVATE) {
+    if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
       throw new NoSuchFieldException("Only public, protected and package fields allowed");
     }
     member.setAccessible(true);
