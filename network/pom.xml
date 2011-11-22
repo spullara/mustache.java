@@ -77,15 +77,4 @@
     </dependency>
   </dependencies>
 
-  <repositories>
-    <repository>
-      <id>javarants releases</id>
-      <url>http://www.javarants.com/repository/</url>
-    </repository>
-    <repository>
-      <id>javarants snapshots</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </repository>
-  </repositories>
-
 </project>
