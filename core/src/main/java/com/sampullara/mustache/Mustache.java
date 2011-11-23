@@ -22,7 +22,6 @@ import com.google.common.collect.Iterables;
 
 import com.sampullara.util.FutureWriter;
 import com.sampullara.util.TemplateFunction;
-import org.codehaus.jackson.JsonNode;
 
 import static com.sampullara.mustache.Scope.EMPTY;
 import static com.sampullara.mustache.Scope.NULL;
@@ -90,32 +89,17 @@ public class Mustache {
   }
 
   /**
-   * Execute the Mustache using a Map as the backing data and write the result
+   * Execute the Mustache using an object as the backing data and write the result
    * to the provided writer.
    *
    * @param writer
-   * @param map
+   * @param parent
    * @return
    * @throws MustacheException
    */
-  public final void execute(Writer writer, Map map) throws MustacheException, IOException {
+  public final void execute(Writer writer, Object parent) throws MustacheException, IOException {
     FutureWriter fw = new FutureWriter(writer);
-    execute(fw, new Scope(map));
-    fw.flush();
-  }
-
-  /**
-   * Execute the Mustache using a JsonNode as the backing data and write the
-   * result to the provided writer.
-   *
-   * @param writer
-   * @param jsonNode
-   * @return
-   * @throws MustacheException
-   */
-  public final void execute(Writer writer, JsonNode jsonNode) throws MustacheException, IOException {
-    FutureWriter fw = new FutureWriter(writer);
-    execute(fw, new Scope(jsonNode));
+    execute(fw, new Scope(parent));
     fw.flush();
   }
 
@@ -145,14 +129,14 @@ public class Mustache {
   }
 
   /**
-   * Execute the Mustache using a JsonNode as a the backing data.
+   * Execute the Mustache using an object as a the backing data.
    *
    * @param writer
-   * @param jsonNode
+   * @param parent
    * @throws MustacheException
    */
-  public final void execute(FutureWriter writer, JsonNode jsonNode) throws MustacheException {
-    execute(writer, new Scope(jsonNode));
+  public final void execute(FutureWriter writer, Object parent) throws MustacheException {
+    execute(writer, new Scope(parent));
   }
 
   /**
@@ -301,34 +285,6 @@ public class Mustache {
     this.name = filename;
   }
 
-  private class SingleValueIterator implements Iterator {
-    private boolean done;
-    private Object value;
-
-    SingleValueIterator(Object value) {
-      this.value = value;
-    }
-
-    @Override
-    public boolean hasNext() {
-      return !done;
-    }
-
-    @Override
-    public Object next() {
-      if (!done) {
-        done = true;
-        return value;
-      }
-      throw new NoSuchElementException();
-    }
-
-    @Override
-    public void remove() {
-      done = true;
-    }
-  }
-
   protected Iterable<Scope> ifiterable(final Scope s, final String name) {
     return Iterables.limit(Iterables.transform(iterable(s, name), new Function<Scope, Scope>() {
       public Scope apply(Scope scope) {
@@ -383,11 +339,7 @@ public class Mustache {
                   throw new RuntimeException(e);
                 }
               }
-              if (iterable instanceof Iterable && !(iterable instanceof JsonNode && !(((JsonNode) iterable).isArray()))) {
-                i = ((Iterable) iterable).iterator();
-              } else {
-                i = new SingleValueIterator(iterable);
-              }
+              i = s.getObjectHandler().iterate(iterable);
             }
             return i.hasNext();
           }

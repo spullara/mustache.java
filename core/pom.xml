@@ -17,13 +17,6 @@
   </properties>
 
   <dependencies>
-    <!-- JSON support -->
-    <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
-      <version>1.5.2</version>
-    </dependency>
-
     <!-- Google Guava -->
     <dependency>
       <groupId>com.google.guava</groupId>

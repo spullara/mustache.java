@@ -1,5 +1,7 @@
 package com.sampullara.mustache;
 
+import java.util.Iterator;
+
 /**
  * TODO: Edit this
  * <p/>
@@ -9,4 +11,5 @@ package com.sampullara.mustache;
  */
 public interface ObjectHandler {
   Object handleObject(Object parent, Scope scope, String name);
+  Iterator iterate(Object object);
 }
