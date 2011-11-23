@@ -286,7 +286,7 @@ public class UnexecuteTest {
     StringWriter sw = new StringWriter();
     m.execute(sw, unexecute);
     assertEquals(getContents(root, "ibis2/test.html"), sw.toString());
-    System.out.println(Util.toJSON(unexecute));
+    System.out.println(unexecute);
   }
 
   private MustacheBuilder init() {
