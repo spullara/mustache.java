@@ -6,8 +6,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.codehaus.jackson.JsonNode;
 
 /**
  * Lookup objects using reflection and execute them the same way.
@@ -26,7 +29,17 @@ public class ObjectHandler6 implements ObjectHandler {
   @Override
   public Object handleObject(Object parent, Scope scope, String name) {
     if (parent == null) return null;
+    if (parent instanceof Future) {
+      try {
+        parent = ((Future) parent).get();
+      } catch (Exception e) {
+        throw new RuntimeException("Failed to get value from future", e);
+      }
+    }
     Object value = null;
+    if (parent instanceof Map) {
+      return ((Map) parent).get(name);
+    }
     Class aClass = parent.getClass();
     Map<String, AccessibleObject> members;
     synchronized (Mustache.class) {

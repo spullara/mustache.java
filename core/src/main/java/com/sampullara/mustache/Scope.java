@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
@@ -149,7 +148,8 @@ public class Scope extends HashMap<Object, Object> {
   }
 
   public static void report() {
-    List<Map.Entry<String, Average>> entries = new ArrayList<Map.Entry<String, Average>>(profile.entrySet());
+    List<Map.Entry<String, Average>> entries = new ArrayList<Map.Entry<String, Average>>(
+            profile.entrySet());
     if (entries.size() > 0) {
       logger.info("Top 10 Average");
       Collections.sort(entries, new Comparator<Map.Entry<String, Average>>() {
@@ -183,41 +183,13 @@ public class Scope extends HashMap<Object, Object> {
     Object v = super.get(name);
     if (v == null) {
       if (parent != null) {
-        if (parent instanceof Future) {
-          try {
-            parent = ((Future) parent).get();
-          } catch (Exception e) {
-            throw new RuntimeException("Failed to get value from future", e);
-          }
-        }
-        if (parent instanceof Map) {
-          v = ((Map) parent).get(name);
-        } else if (parent instanceof JsonNode) {
-          v = handleJsonNode(name);
-        } else {
-          v = handleObject.handleObject(parent, scope, name);
-        }
+        v = handleObject.handleObject(parent, scope, name);
       }
     }
     if (v == null) {
       if (parentScope != null) {
         v = parentScope.get(name, scope);
       }
-    }
-    return v;
-  }
-
-  private Object handleJsonNode(String name) {
-    Object v;
-    JsonNode jsonNode = (JsonNode) parent;
-    JsonNode result = jsonNode.get(name);
-    if (result == null || result.isNull()) return null;
-    if (result.isTextual()) {
-      v = result.getTextValue();
-    } else if (result.isBoolean()) {
-      v = result.getBooleanValue();
-    } else {
-      v = result;
     }
     return v;
   }
@@ -259,18 +231,5 @@ public class Scope extends HashMap<Object, Object> {
 
   public String toString() {
     return (size() == 0 ? "" : super.toString()) + (parent == null ? "" : " <- " + parent) + (parentScope == null ? "" : " <- " + parentScope);
-  }
-
-  public String toJSON() throws MustacheException {
-    StringWriter sw = new StringWriter();
-    JsonFactory jf = new MappingJsonFactory();
-    try {
-      JsonGenerator jg = jf.createJsonGenerator(sw);
-      jg.writeObject(this);
-      jg.flush();
-    } catch (IOException e) {
-      throw new MustacheException(e);
-    }
-    return sw.toString();
   }
 }
