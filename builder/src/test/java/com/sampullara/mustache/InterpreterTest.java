@@ -57,6 +57,29 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
+  public void testBrokenSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    try {
+      MustacheBuilder c = new MustacheBuilder(root);
+      Mustache m = c.parseFile("brokensimple.html");
+      StringWriter sw = new StringWriter();
+      FutureWriter writer = new FutureWriter(sw);
+      m.execute(writer, new Scope(new Object() {
+        String name = "Chris";
+        int value = 10000;
+
+        int taxed_value() {
+          return (int) (this.value - (this.value * 0.4));
+        }
+
+        boolean in_ca = true;
+      }));
+      writer.flush();
+      fail("Should have failed: " + sw.toString());
+    } catch (Exception e) {
+      // success
+    }
+  }
+
   public void testSecurity() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheBuilder c = new MustacheBuilder(root);
     Mustache m = c.parseFile("security.html");

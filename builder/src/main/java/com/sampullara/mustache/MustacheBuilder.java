@@ -231,6 +231,10 @@ public class MustacheBuilder implements MustacheJava {
                 out = write(list, out, currentLine.intValue());
                 break;
               default: {
+                if (c == -1) {
+                  throw new MustacheException(
+                          "Improperly closed variable in " + file + ":" + currentLine);
+                }
                 // Reference
                 out = write(list, out, currentLine.intValue());
                 list.add(cf.value(m, command, true, currentLine.intValue()));
