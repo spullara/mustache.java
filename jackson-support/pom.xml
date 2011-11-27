@@ -4,7 +4,7 @@
   <parent>
     <artifactId>mustache.java</artifactId>
     <groupId>com.github.spullara.mustache.java</groupId>
-    <version>0.6.2-SNAPSHOT</version>
+    <version>0.6.3-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -30,22 +30,20 @@
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>core</artifactId>
-      <version>0.6.2-SNAPSHOT</version>
-    </dependency>
-
-    <!-- Base -->
-    <dependency>
-      <groupId>com.github.spullara.mustache.java</groupId>
-      <artifactId>builder</artifactId>
-      <version>0.6.2-SNAPSHOT</version>
-      <scope>test</scope>
+      <version>0.6.3-SNAPSHOT</version>
     </dependency>
 
     <!-- Testing -->
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
+      <artifactId>builder</artifactId>
+      <version>0.6.3-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>network</artifactId>
-      <version>0.6.2-SNAPSHOT</version>
+      <version>0.6.3-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>

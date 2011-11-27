@@ -32,7 +32,7 @@
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>jackson-support</artifactId>
-      <version>0.6.2-SNAPSHOT</version>
+      <version>0.6.3-SNAPSHOT</version>
     </dependency>
 
     <!-- Jetty -->

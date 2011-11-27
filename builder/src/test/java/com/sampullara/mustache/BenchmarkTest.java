@@ -20,7 +20,7 @@ import java.util.List;
  * Time: 9:28 PM
  */
 public class BenchmarkTest extends TestCase {
-  private static final int TIME = 5000;
+  private static final int TIME = 2000;
   private File root;
 
   protected void setUp() throws Exception {
@@ -41,12 +41,12 @@ public class BenchmarkTest extends TestCase {
   }
 
   public void testComplex() throws MustacheException, IOException {
+    System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 2; i++) {
       {
         long start = System.currentTimeMillis();
         MustacheBuilder c = new MustacheBuilder(root);
         Mustache m = c.parseFile("complex.html");
-        System.out.println("Interpreted compilation: " + (System.currentTimeMillis() - start));
         complextest(m);
         start = System.currentTimeMillis();
         long end;
@@ -57,7 +57,7 @@ public class BenchmarkTest extends TestCase {
           total++;
           if (end - start > TIME) break;
         }
-        System.out.println("Interpreted: " + total);
+        System.out.println("Interpreted parallel: " + total/TIME);
       }
       {
         Mustache m = handcoded();
@@ -71,7 +71,7 @@ public class BenchmarkTest extends TestCase {
           total++;
           if (end - start > TIME) break;
         }
-        System.out.println("Hand coded: " + total);
+        System.out.println("Hand coded parallel: " + total/TIME);
       }
     }
     FutureWriter.setExecutorService(null);
@@ -80,7 +80,6 @@ public class BenchmarkTest extends TestCase {
         long start = System.currentTimeMillis();
         MustacheBuilder c = new MustacheBuilder(root);
         Mustache m = c.parseFile("complex.html");
-        System.out.println("Interpreted compilation: " + (System.currentTimeMillis() - start));
         complextest(m);
         start = System.currentTimeMillis();
         long end;
@@ -91,7 +90,7 @@ public class BenchmarkTest extends TestCase {
           total++;
           if (end - start > TIME) break;
         }
-        System.out.println("Interpreted: " + total);
+        System.out.println("Interpreted serial: " + total/TIME);
       }
       {
         Mustache m = handcoded();
@@ -105,7 +104,7 @@ public class BenchmarkTest extends TestCase {
           total++;
           if (end - start > TIME) break;
         }
-        System.out.println("Hand coded: " + total);
+        System.out.println("Hand coded serial: " + total/TIME);
       }
     }
   }
