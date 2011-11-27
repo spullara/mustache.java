@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.base.Charsets;
+import com.sampullara.mustache.code.BuilderCodeFactory;
+import com.sampullara.mustache.code.WriteCode;
 
 /**
  * A pseudo interpreter / compiler. Instead of compiling to Java code, it compiles to a

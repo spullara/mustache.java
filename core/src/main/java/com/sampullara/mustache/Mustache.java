@@ -1,5 +1,10 @@
 package com.sampullara.mustache;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.sampullara.util.FutureWriter;
+import com.sampullara.util.TemplateFunction;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -17,12 +22,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-
-import com.sampullara.util.FutureWriter;
-import com.sampullara.util.TemplateFunction;
-
 import static com.sampullara.mustache.Scope.EMPTY;
 import static com.sampullara.mustache.Scope.NULL;
 
@@ -35,17 +34,33 @@ import static com.sampullara.mustache.Scope.NULL;
  */
 public class Mustache {
 
-  protected static Logger logger = Logger.getLogger(Mustache.class.getName());
-  protected static final boolean debug = Boolean.getBoolean("mustache.debug");
-  public static final boolean trace = Boolean.getBoolean("mustache.trace");
-  public static final boolean profile = Boolean.getBoolean("mustache.profile");
+  // The implicit element token
   private static final String IMPLICIT_CURRENT_ELEMENT_TOKEN = ".";
 
-  // Debug
-  protected static final ThreadLocal<Integer> line = new ThreadLocal<Integer>();
+  // Logging
+  public static Logger logger = Logger.getLogger(Mustache.class.getName());
 
+  // Debug configuration variables
+
+  // Line number tracker for code
+  public static final ThreadLocal<Integer> line = new ThreadLocal<Integer>();
+
+  // Report missing values
+  public static final boolean debug = Boolean.getBoolean("mustache.debug");
+
+  // Trace execution of code
+  public static final boolean trace = Boolean.getBoolean("mustache.trace");
+
+  // Profile the time it takes to execute code and construct a hotspots list
+  public static final boolean profile = Boolean.getBoolean("mustache.profile");
+
+  // The name of the template
   private String name;
+
+  // The code of the template
   private Code[] compiled;
+
+  // A reference to the generator of the template
   protected MustacheJava mj;
 
   /**
@@ -97,7 +112,7 @@ public class Mustache {
    * @return
    * @throws MustacheException
    */
-  public final void execute(Writer writer, Object parent) throws MustacheException, IOException {
+  public void execute(Writer writer, Object parent) throws MustacheException, IOException {
     FutureWriter fw = new FutureWriter(writer);
     execute(fw, new Scope(parent));
     fw.flush();
@@ -111,21 +126,10 @@ public class Mustache {
    * @param ctx    context of the execution
    * @throws MustacheException
    */
-  public final void execute(Writer writer, Scope ctx) throws MustacheException, IOException {
+  public void execute(Writer writer, Scope ctx) throws MustacheException, IOException {
     FutureWriter fw = new FutureWriter(writer);
     execute(fw, ctx);
     fw.flush();
-  }
-
-  /**
-   * Execute the Mustache using a Map as the backing data.
-   *
-   * @param writer
-   * @param map
-   * @throws MustacheException
-   */
-  public final void execute(FutureWriter writer, Map map) throws MustacheException {
-    execute(writer, new Scope(map));
   }
 
   /**
@@ -135,7 +139,7 @@ public class Mustache {
    * @param parent
    * @throws MustacheException
    */
-  public final void execute(FutureWriter writer, Object parent) throws MustacheException {
+  public void execute(FutureWriter writer, Object parent) throws MustacheException {
     execute(writer, new Scope(parent));
   }
 
@@ -197,7 +201,7 @@ public class Mustache {
     });
   }
 
-  protected FutureWriter pushWriter(FutureWriter writer) {
+  public FutureWriter pushWriter(FutureWriter writer) {
     Stack<FutureWriter> capturedStack = capturedWriter.get();
     if (capturedStack.size() > 0) {
       Stack<FutureWriter> actualStack = actual.get();
@@ -216,7 +220,7 @@ public class Mustache {
    * @param encode
    * @throws MustacheException
    */
-  protected void write(Writer writer, Scope s, String name, boolean encode) throws MustacheException {
+  public void write(Writer writer, Scope s, String name, boolean encode) throws MustacheException {
     MustacheTrace.Event event = null;
     if (trace) {
       Object parent = s.getParent();
@@ -285,7 +289,7 @@ public class Mustache {
     this.name = filename;
   }
 
-  protected Iterable<Scope> ifiterable(final Scope s, final String name) {
+  public Iterable<Scope> ifiterable(final Scope s, final String name) {
     return Iterables.limit(Iterables.transform(iterable(s, name), new Function<Scope, Scope>() {
       public Scope apply(Scope scope) {
         scope.remove(name);
@@ -301,7 +305,7 @@ public class Mustache {
    * @param name
    * @return
    */
-  protected Iterable<Scope> iterable(final Scope s, final String name) {
+  public Iterable<Scope> iterable(final Scope s, final String name) {
     MustacheTrace.Event event = null;
     if (trace) {
       Object parent = s.getParent();
@@ -436,7 +440,7 @@ public class Mustache {
 
   private Map<String, Mustache> partialCache = new ConcurrentHashMap<String, Mustache>();
 
-  protected Mustache partial(String name) throws MustacheException {
+  public Mustache partial(String name) throws MustacheException {
     return compilePartial(name);
   }
 
@@ -459,7 +463,7 @@ public class Mustache {
     return name.substring(index + 1);
   }
 
-  protected void partial(FutureWriter writer, Scope s, final String name, Mustache partial) throws MustacheException {
+  public void partial(FutureWriter writer, Scope s, final String name, Mustache partial) throws MustacheException {
     if (name != null) {
       MustacheTrace.Event event = null;
       if (trace) {
@@ -476,7 +480,7 @@ public class Mustache {
     }
   }
 
-  protected Iterable<Scope> inverted(final Scope s, final String name) {
+  public Iterable<Scope> inverted(final Scope s, final String name) {
     MustacheTrace.Event event = null;
     if (trace) {
       Object parent = s.getParent();
@@ -533,7 +537,7 @@ public class Mustache {
 
   private static Map<String, Boolean> missing = new ConcurrentHashMap<String, Boolean>();
 
-  protected Object getValue(Scope s, String name) {
+  public Object getValue(Scope s, String name) {
     try {
 
       Object o;
@@ -576,7 +580,8 @@ public class Mustache {
 
   private static Pattern findToEncode = Pattern.compile("&(?!\\w+;)|[\"<>\\\\\n]");
 
-  // Override this in a super class if you don't want encoding.
+  // Override this in a super class if you don't want encoding or would like
+  // to change the way encoding works.
   public String encode(String value) {
     StringBuffer sb = new StringBuffer();
     Matcher matcher = findToEncode.matcher(value);

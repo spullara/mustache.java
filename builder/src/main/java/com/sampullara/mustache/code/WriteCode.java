@@ -1,4 +1,6 @@
-package com.sampullara.mustache;
+package com.sampullara.mustache.code;
+
+import com.sampullara.mustache.Code;
 
 /**
  * Created by IntelliJ IDEA.

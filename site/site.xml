@@ -10,7 +10,7 @@
       <item name="mustache.js" href="http://github.com/janl/mustache.js/" />
     </links>
 
-    <menu name="mustache.java 0.1">
+    <menu name="mustache.java">
       <item name="Introduction" href="index.html"/>
       <item name="Download" href="download.html"/>
       <item name="Release Notes" href="release-notes.html" />
