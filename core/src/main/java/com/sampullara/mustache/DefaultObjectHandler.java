@@ -4,10 +4,16 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.google.common.base.Function;
+import com.google.common.collect.MapMaker;
 
 /**
  * Lookup objects using reflection and execute them the same way.
@@ -16,27 +22,40 @@ import java.util.logging.Logger;
  * Date: 7/24/11
  * Time: 3:02 PM
  */
-public class ObjectHandler6 implements ObjectHandler {
-  protected static Map<Class, Map<String, AccessibleObject>> cache = new ConcurrentHashMap<Class, Map<String, AccessibleObject>>();
+public class DefaultObjectHandler implements ObjectHandler {
+  // Create a map if one doesn't already exist
+  protected static Map<Class, Map<String, AccessibleObject>> cache = new MapMaker().makeComputingMap(
+          new Function<Class, Map<String, AccessibleObject>>() {
+            @Override
+            public Map<String, AccessibleObject> apply(Class input) {
+              return new ConcurrentHashMap<String, AccessibleObject>();
+            }
+          });
   private static Logger logger = Logger.getLogger(Mustache.class.getName());
 
-  private static class Nothing extends AccessibleObject {}
+  private static class Nothing extends AccessibleObject {
+  }
+
   private static Nothing nothing = new Nothing();
 
   @Override
   public Object handleObject(Object parent, Scope scope, String name) {
     if (parent == null) return null;
-    Object value = null;
-    Class aClass = parent.getClass();
-    Map<String, AccessibleObject> members;
-    synchronized (Mustache.class) {
-      // Don't overload methods in your contexts
-      members = cache.get(aClass);
-      if (members == null) {
-        members = new ConcurrentHashMap<String, AccessibleObject>();
-        cache.put(aClass, members);
+    if (parent instanceof Future) {
+      try {
+        parent = ((Future) parent).get();
+      } catch (Exception e) {
+        throw new RuntimeException("Failed to get value from future", e);
       }
     }
+    Object value = null;
+    if (parent instanceof Map) {
+      return ((Map) parent).get(name);
+    }
+    Class aClass = parent.getClass();
+    Map<String, AccessibleObject> members;
+    // Don't overload methods in your contexts
+    members = cache.get(aClass);
     AccessibleObject member = members.get(name);
     if (member == nothing) return null;
     if (member == null) {
@@ -56,7 +75,8 @@ public class ObjectHandler6 implements ObjectHandler {
           member = getMethod(name, aClass, Scope.class);
           members.put(name, member);
         } catch (NoSuchMethodException e1) {
-          String propertyname = name.substring(0, 1).toUpperCase() + (name.length() > 1 ? name.substring(1) : "");
+          String propertyname = name.substring(0,
+                  1).toUpperCase() + (name.length() > 1 ? name.substring(1) : "");
           try {
             member = getMethod("get" + propertyname, aClass);
             members.put(name, member);
@@ -107,6 +127,19 @@ public class ObjectHandler6 implements ObjectHandler {
     return value;
   }
 
+  @Override
+  public Iterator iterate(Object object) {
+    Iterator i;
+    if (object instanceof Iterator) {
+      return (Iterator) object;
+    } else if (object instanceof Iterable) {
+      i = ((Iterable) object).iterator();
+    } else {
+      i = new SingleValueIterator(object);
+    }
+    return i;
+  }
+
   public static Method getMethod(String name, Class aClass, Class... params) throws NoSuchMethodException {
     Method member;
     try {
@@ -141,6 +174,34 @@ public class ObjectHandler6 implements ObjectHandler {
     }
     member.setAccessible(true);
     return member;
+  }
+
+  protected static class SingleValueIterator implements Iterator {
+    private boolean done;
+    private Object value;
+
+    public SingleValueIterator(Object value) {
+      this.value = value;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return !done;
+    }
+
+    @Override
+    public Object next() {
+      if (!done) {
+        done = true;
+        return value;
+      }
+      throw new NoSuchElementException();
+    }
+
+    @Override
+    public void remove() {
+      done = true;
+    }
   }
 
 }

@@ -11,6 +11,6 @@ public class BlogExample {
     String content = Files.toString(new File("src/test/resources/template.html"), Charsets.UTF_8);
     Mustache mustache = new MustacheBuilder().parse(template, "template");
     Scope unexecuted = mustache.unexecute(content);
-    System.out.println(unexecuted.toJSON());
+    System.out.println(unexecuted);
   }
 }

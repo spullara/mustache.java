@@ -2,6 +2,7 @@ package com.sampullara.mustache;
 
 import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
+import com.sampullara.mustache.json.JsonObjectHandler;
 import com.sampullara.util.FutureWriter;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
@@ -57,6 +58,7 @@ public class Handlebar {
       Args.usage(Handlebar.class);
       System.exit(1);
     }
+    Scope.setDefaultObjectHandler(new JsonObjectHandler());
     final MustacheBuilder mc = new MustacheBuilder(new File("."));
     final JsonFactory jf = new MappingJsonFactory();
     Handler handler = new AbstractHandler() {
