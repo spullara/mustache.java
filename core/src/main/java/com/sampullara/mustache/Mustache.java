@@ -1,7 +1,7 @@
 package com.sampullara.mustache;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.MapMaker;
 import com.sampullara.util.FutureWriter;
 import com.sampullara.util.TemplateFunction;
 
@@ -22,6 +22,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.google.common.collect.Iterables.limit;
+import static com.google.common.collect.Iterables.transform;
 import static com.sampullara.mustache.Scope.EMPTY;
 import static com.sampullara.mustache.Scope.NULL;
 
@@ -159,6 +161,12 @@ public class Mustache {
     }
   }
 
+  /**
+   * Regenerate the original template.
+   * 
+   * @param writer
+   * @throws MustacheException
+   */
   public void identity(FutureWriter writer) throws MustacheException {
     for (Code code : compiled) {
       if (debug) {
@@ -182,25 +190,11 @@ public class Mustache {
   };
 
   /**
-   * Enqueues a Mustache into the FutureWriter.
-   *
+   * Used for capturing bodies during evaluation.
+   * 
    * @param writer
-   * @param m
-   * @param s
-   * @throws IOException
+   * @return
    */
-  protected void enqueue(FutureWriter writer, final Mustache m, final Scope s) throws IOException {
-    writer = pushWriter(writer);
-    writer.enqueue(new Callable<Object>() {
-      @Override
-      public Object call() throws Exception {
-        FutureWriter fw = new FutureWriter();
-        m.execute(fw, s);
-        return fw;
-      }
-    });
-  }
-
   public FutureWriter pushWriter(FutureWriter writer) {
     Stack<FutureWriter> capturedStack = capturedWriter.get();
     if (capturedStack.size() > 0) {
@@ -289,8 +283,15 @@ public class Mustache {
     this.name = filename;
   }
 
+  /**
+   * Evaluate an if iterable by returning at most 1 iteration.
+   * 
+   * @param s
+   * @param name
+   * @return
+   */
   public Iterable<Scope> ifiterable(final Scope s, final String name) {
-    return Iterables.limit(Iterables.transform(iterable(s, name), new Function<Scope, Scope>() {
+    return limit(transform(iterable(s, name), new Function<Scope, Scope>() {
       public Scope apply(Scope scope) {
         scope.remove(name);
         return scope;
@@ -377,9 +378,17 @@ public class Mustache {
     };
   }
 
-  // Memory leak if you abuse TemplateFunction
-  private static Map<String, Mustache> templateFunctionCache = new ConcurrentHashMap<String, Mustache>();
+  // Mustache template function cache size. For i18n should be > #i18n stanzas * languages
+  private static final int SIZE = Integer.getInteger("mustache.cachesize", 100000);
+  private static Map<String, Mustache> templateFunctionCache = new MapMaker().maximumSize(SIZE).makeMap();
 
+  /**
+   * Explicit function iteration.
+   * 
+   * @param scope
+   * @param f
+   * @return
+   */
   public FunctionIterator function(final Scope scope, final Function f) {
     final boolean templateFunction = f instanceof TemplateFunction;
     return new FunctionIterator(f) {
@@ -434,12 +443,22 @@ public class Mustache {
     };
   }
 
+  /**
+   * Set the mustache creator.
+   * 
+   * @param mj
+   */
   public void setMustacheJava(MustacheJava mj) {
     this.mj = mj;
   }
 
-  private Map<String, Mustache> partialCache = new ConcurrentHashMap<String, Mustache>();
-
+  /**
+   * Compile a partial in the context of this mustache.
+   * 
+   * @param name
+   * @return
+   * @throws MustacheException
+   */
   public Mustache partial(String name) throws MustacheException {
     return compilePartial(name);
   }
@@ -463,6 +482,15 @@ public class Mustache {
     return name.substring(index + 1);
   }
 
+  /**
+   * Execute a partial in the context of this mustache.
+   * 
+   * @param writer
+   * @param s
+   * @param name
+   * @param partial
+   * @throws MustacheException
+   */
   public void partial(FutureWriter writer, Scope s, final String name, Mustache partial) throws MustacheException {
     if (name != null) {
       MustacheTrace.Event event = null;
@@ -480,6 +508,13 @@ public class Mustache {
     }
   }
 
+  /**
+   * Inversion
+   * 
+   * @param s
+   * @param name
+   * @return
+   */
   public Iterable<Scope> inverted(final Scope s, final String name) {
     MustacheTrace.Event event = null;
     if (trace) {
@@ -535,8 +570,16 @@ public class Mustache {
     };
   }
 
+  // Don't over report missing values
   private static Map<String, Boolean> missing = new ConcurrentHashMap<String, Boolean>();
 
+  /**
+   * Get a value from the scope.
+   * 
+   * @param s
+   * @param name
+   * @return
+   */
   public Object getValue(Scope s, String name) {
     try {
 
