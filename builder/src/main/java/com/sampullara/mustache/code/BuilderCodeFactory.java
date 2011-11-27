@@ -7,9 +7,6 @@ import com.sampullara.mustache.MustacheException;
 import com.sampullara.mustache.Scope;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static com.sampullara.mustache.Mustache.truncate;
 
 /**
  * The builder code factory is designed to work well with the default Mustache implementation.
@@ -66,31 +63,6 @@ public class BuilderCodeFactory implements CodeFactory {
   @Override
   public Code name(Mustache m, String variable, List<Code> codes, String file, int i) {
     return new ExtendNameCode(m, variable, codes, file, i);
-  }
-
-  public static String unexecuteValueCode(Mustache m, Scope current, String text, AtomicInteger position, Code[] next, boolean encoded) throws MustacheException {
-    AtomicInteger probePosition = new AtomicInteger(position.get());
-    Code[] truncate = truncate(next, 1, null);
-    Scope result = null;
-    int lastposition = position.get();
-    while (next.length > 0 && probePosition.get() < text.length()) {
-      lastposition = probePosition.get();
-      result = next[0].unexecute(current, text, probePosition, truncate);
-      if (result == null) {
-        probePosition.incrementAndGet();
-      } else {
-        break;
-      }
-    }
-    if (result != null) {
-      String value = text.substring(position.get(), lastposition);
-      if (encoded) {
-        value = m.decode(value);
-      }
-      position.set(lastposition);
-      return value;
-    }
-    return null;
   }
 
   public static void put(Scope result, String name, Object value) {

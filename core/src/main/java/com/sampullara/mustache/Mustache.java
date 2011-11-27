@@ -14,13 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Stack;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.google.common.collect.Iterables.limit;
 import static com.google.common.collect.Iterables.transform;
@@ -203,68 +200,6 @@ public class Mustache {
       writer = capturedStack.peek();
     }
     return writer;
-  }
-
-  /**
-   * Writes a named value from the scope with optional encoding.
-   *
-   * @param writer
-   * @param s
-   * @param name
-   * @param encode
-   * @throws MustacheException
-   */
-  public void write(Writer writer, Scope s, String name, boolean encode) throws MustacheException {
-    MustacheTrace.Event event = null;
-    if (trace) {
-      Object parent = s.getParent();
-      String traceName = parent == null ? s.getClass().getName() : parent.getClass().getName();
-      event = MustacheTrace.addEvent("get: " + name, traceName);
-    }
-    Object value = getValue(s, name);
-    if (trace) {
-      event.end();
-    }
-    if (value != null) {
-      if (value instanceof Future) {
-        try {
-          if (writer instanceof FutureWriter) {
-            FutureWriter fw = (FutureWriter) writer;
-            fw.enqueue((Future<Object>) value);
-            return;
-          }
-          value = ((Future) value).get();
-        } catch (Exception e) {
-          throw new MustacheException("Failed to evaluate future value: " + name, e);
-        }
-      }
-      if (value instanceof FutureWriter) {
-        if (writer instanceof FutureWriter) {
-          FutureWriter fw = (FutureWriter) writer;
-          final Object finalValue = value;
-          try {
-            fw.enqueue(new Callable<Object>() {
-              @Override
-              public Object call() throws Exception {
-                return finalValue;
-              }
-            });
-          } catch (IOException e) {
-            throw new MustacheException("Failed to enqueue future writer", e);
-          }
-        }
-      } else {
-        String string = String.valueOf(value);
-        if (encode) {
-          string = encode(string);
-        }
-        try {
-          writer.write(string);
-        } catch (IOException e) {
-          throw new MustacheException("Failed to write: " + e);
-        }
-      }
-    }
   }
 
   public void setCompiled(List<Code> compiled) {
@@ -484,7 +419,7 @@ public class Mustache {
 
   /**
    * Execute a partial in the context of this mustache.
-   * 
+   *
    * @param writer
    * @param s
    * @param name
@@ -510,7 +445,7 @@ public class Mustache {
 
   /**
    * Inversion
-   * 
+   *
    * @param s
    * @param name
    * @return
@@ -619,44 +554,5 @@ public class Mustache {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-  }
-
-  private static Pattern findToEncode = Pattern.compile("&(?!\\w+;)|[\"<>\\\\\n]");
-
-  // Override this in a super class if you don't want encoding or would like
-  // to change the way encoding works.
-  public String encode(String value) {
-    StringBuffer sb = new StringBuffer();
-    Matcher matcher = findToEncode.matcher(value);
-    while (matcher.find()) {
-      char c = matcher.group().charAt(0);
-      switch (c) {
-        case '&':
-          matcher.appendReplacement(sb, "&amp;");
-          break;
-        case '\\':
-          matcher.appendReplacement(sb, "\\\\");
-          break;
-        case '"':
-          matcher.appendReplacement(sb, "&quot;");
-          break;
-        case '<':
-          matcher.appendReplacement(sb, "&lt;");
-          break;
-        case '>':
-          matcher.appendReplacement(sb, "&gt;");
-          break;
-        case '\n':
-          matcher.appendReplacement(sb, "&#10;");
-          break;
-      }
-    }
-    matcher.appendTail(sb);
-    return sb.toString();
-  }
-
-  public String decode(String value) {
-    return value.replaceAll("&quot;", "\"").replaceAll("&lt;", "<").replaceAll("&gt;", ">")
-            .replaceAll("&#10;", "\n").replaceAll("\\\\", "\\").replaceAll("&amp;", "&");
   }
 }
