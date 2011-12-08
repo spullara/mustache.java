@@ -37,14 +37,18 @@ public class PartialCode implements Code {
   @Override
   public void execute(FutureWriter fw, final Scope scope) throws MustacheException {
     try {
-      fw.enqueue(new Callable<Object>() {
-        @Override
-        public Object call() throws Exception {
-          FutureWriter fw = new FutureWriter();
-          partial.partial(fw, scope, variable, partial);
-          return fw;
-        }
-      });
+      if (fw.isParallel()) {
+        fw.enqueue(new Callable<Object>() {
+          @Override
+          public Object call() throws Exception {
+            FutureWriter fw = new FutureWriter();
+            partial.partial(fw, scope, variable, partial);
+            return fw;
+          }
+        });
+      } else {
+        partial.partial(fw, scope, variable, partial);
+      }
     } catch (IOException e) {
       throw new MustacheException("Execution failed: " + file + ":" + line, e);
     }

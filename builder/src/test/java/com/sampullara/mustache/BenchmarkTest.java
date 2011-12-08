@@ -74,7 +74,7 @@ public class BenchmarkTest extends TestCase {
         System.out.println("Hand coded parallel: " + total/TIME);
       }
     }
-    FutureWriter.setExecutorService(null);
+    FutureWriter.setDefaultExecutorService(null);
     for (int i = 0; i < 2; i++) {
       {
         long start = System.currentTimeMillis();
