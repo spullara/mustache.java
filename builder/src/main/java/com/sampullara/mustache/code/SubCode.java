@@ -44,26 +44,34 @@ public abstract class SubCode implements Code {
       for (final Scope subScope : iterable) {
         try {
           fw = m.pushWriter(fw);
-          fw.enqueue(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-              FutureWriter writer = new FutureWriter();
-              for (Code code : codes) {
-                if (Mustache.debug) {
-                  Mustache.line.set(code.getLine());
-                }
-                if (iterable instanceof FunctionIterator && ((FunctionIterator) iterable).isTemplateFunction()) {
-                  code.identity(writer);
-                } else {
-                  code.execute(writer, subScope);
-                }
+          if (fw.isParallel()) {
+            fw.enqueue(new Callable<Object>() {
+              @Override
+              public Object call() throws Exception {
+                FutureWriter writer = new FutureWriter();
+                SubCode.this.execute(writer, iterable, subScope);
+                return writer;
               }
-              return writer;
-            }
-          });
+            });
+          } else {
+            SubCode.this.execute(fw, iterable, subScope);
+          }
         } catch (IOException e) {
           throw new MustacheException("Execution failed: " + file + ":" + line, e);
         }
+      }
+    }
+  }
+
+  private void execute(FutureWriter writer, Iterable<Scope> iterable, Scope subScope) throws MustacheException {
+    for (Code code : codes) {
+      if (Mustache.debug) {
+        Mustache.line.set(code.getLine());
+      }
+      if (iterable instanceof FunctionIterator && ((FunctionIterator) iterable).isTemplateFunction()) {
+        code.identity(writer);
+      } else {
+        code.execute(writer, subScope);
       }
     }
   }

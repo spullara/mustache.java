@@ -27,7 +27,8 @@ public class FutureWriter extends Writer {
 
   private AppendableCallable last;
   private ConcurrentLinkedQueue<Future<Object>> ordered = new ConcurrentLinkedQueue<Future<Object>>();
-  private static ExecutorService es;
+  private static ExecutorService des;
+  private ExecutorService es;
 
   static {
     ThreadPoolExecutor executor = new ThreadPoolExecutor(10, 100, 60, TimeUnit.SECONDS,
@@ -43,28 +44,30 @@ public class FutureWriter extends Writer {
         return thread;
       }
     });
-    es = executor;
+    des = executor;
   }
 
   private Writer writer;
   private boolean closed = false;
 
-  public static void setExecutorService(ExecutorService es) {
-    ExecutorService old = FutureWriter.es;
+  public static void setDefaultExecutorService(ExecutorService es) {
+    ExecutorService old = FutureWriter.des;
     // Switch to the new one
-    FutureWriter.es = es;
+    FutureWriter.des = es;
     // Gracefully shutdown the old one
     old.shutdown();
   }
 
-  public static ExecutorService getExecutorService() {
-    return es;
+  public static ExecutorService getDefaultExecutorService() {
+    return des;
   }
 
   public FutureWriter() {
+    es = des;
   }
 
   public FutureWriter(Writer writer) {
+    this();
     this.writer = writer;
   }
 
@@ -77,8 +80,8 @@ public class FutureWriter extends Writer {
   }
 
   public static void shutdown() {
-    if (es != null) {
-      es.shutdownNow();
+    if (des != null) {
+      des.shutdownNow();
     }
   }
 
@@ -119,11 +122,31 @@ public class FutureWriter extends Writer {
     ordered.add(future);
   }
 
+  public ExecutorService getExecutorService() {
+    return es;
+  }
+
+  public void setExecutorService(ExecutorService es) {
+    this.es = es;
+  }
+
+  public boolean isParallel() {
+    return es != null;
+  }
+
   private static class AppendableCallable implements Appendable, Callable<Object> {
-    StringBuffer sb;
+    StringBuilder sb;
 
     AppendableCallable(CharSequence cs) {
-      sb = new StringBuffer(cs);
+      sb = new StringBuilder(cs);
+    }
+
+    public AppendableCallable(char[] chars) {
+      sb = new StringBuilder().append(chars);
+    }
+
+    public AppendableCallable(char[] chars, int offset, int len) {
+      sb = new StringBuilder().append(chars, offset, len);
     }
 
     @Override
@@ -146,6 +169,16 @@ public class FutureWriter extends Writer {
 
     @Override
     public Object call() throws Exception {
+      return sb;
+    }
+
+    public Appendable append(char[] chars) {
+      sb.append(chars);
+      return sb;
+    }
+
+    public Appendable append(char[] chars, int offset, int len) {
+      sb.append(chars, offset, len);
       return sb;
     }
   }
@@ -215,7 +248,16 @@ public class FutureWriter extends Writer {
 
   @Override
   public void write(final char[] chars, final int i, final int i1) throws IOException {
-    enqueue(new String(chars, i, i1));
+    if (closed) {
+      throw new IOException("closed");
+    }
+    if (last != null) {
+      last.append(chars, i, i1);
+    } else {
+      AppendableCallable call = new AppendableCallable(chars, i, i1);
+      enqueue(call);
+      last = call;
+    }
   }
 
   @Override
@@ -225,7 +267,16 @@ public class FutureWriter extends Writer {
 
   @Override
   public void write(final char[] chars) throws IOException {
-    enqueue(new String(chars));
+    if (closed) {
+      throw new IOException("closed");
+    }
+    if (last != null) {
+      last.append(chars);
+    } else {
+      AppendableCallable call = new AppendableCallable(chars);
+      enqueue(call);
+      last = call;
+    }
   }
 
   @Override

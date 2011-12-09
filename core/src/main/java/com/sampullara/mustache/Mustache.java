@@ -62,6 +62,9 @@ public class Mustache {
   // A reference to the generator of the template
   protected MustacheJava mj;
 
+  // The template text
+  protected StringBuilder sb = new StringBuilder();
+
   /**
    * Given text that was created by or that matches the shape of a mustache
    * template, return the scope that can be used to recreate the text.
