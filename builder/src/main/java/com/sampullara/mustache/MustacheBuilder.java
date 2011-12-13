@@ -164,22 +164,22 @@ public class MustacheBuilder implements MustacheJava {
                 out = new StringBuilder();
                 switch (ch) {
                   case '#':
-                    list.add(cf.iterable(m, variable, codes, file, currentLine.get()));
+                    list.add(cf.iterable(m, variable, codes, file, start));
                     break;
                   case '^':
-                    list.add(cf.notIterable(m, variable, codes, file, currentLine.get()));
+                    list.add(cf.notIterable(m, variable, codes, file, start));
                     break;
                   case '?':
-                    list.add(cf.ifIterable(m, variable, codes, file, currentLine.get()));
+                    list.add(cf.ifIterable(m, variable, codes, file, start));
                     break;
                   case '_':
-                    list.add(cf.function(m, variable, codes, file, currentLine.get()));
+                    list.add(cf.function(m, variable, codes, file, start));
                     break;
                   case '<':
-                    list.add(cf.extend(m, variable, codes, file, currentLine.get()));
+                    list.add(cf.extend(m, variable, codes, file, start));
                     break;
                   case '$':
-                    list.add(cf.name(m, variable, codes, file, currentLine.get()));
+                    list.add(cf.name(m, variable, codes, file, start));
                     break;
                 }
                 iterable = lines != 0;
