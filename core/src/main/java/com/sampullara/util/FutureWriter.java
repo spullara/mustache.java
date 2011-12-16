@@ -55,7 +55,7 @@ public class FutureWriter extends Writer {
     // Switch to the new one
     FutureWriter.des = es;
     // Gracefully shutdown the old one
-    old.shutdown();
+    if (old != null) old.shutdown();
   }
 
   public static ExecutorService getDefaultExecutorService() {
