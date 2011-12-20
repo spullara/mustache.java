@@ -18,6 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.google.common.collect.Iterables.limit;
 import static com.google.common.collect.Iterables.transform;
@@ -556,6 +558,66 @@ public class Mustache {
       return o;
     } catch (Exception e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  private static Pattern escapedPattern = Pattern.compile("^&\\w+;");
+
+  // Override this in a super class if you don't want encoding or would like
+  // to change the way encoding works. Also, if you use unexecute, make sure
+  // also do the inverse in decode.
+  public String encode(String value) {
+    StringBuilder sb = new StringBuilder();
+    int position = 0;
+    int length = value.length();
+    for (int i = 0; i < length; i++) {
+      char c = value.charAt(i);
+      switch (c) {
+        case '&':
+          if (!escapedPattern.matcher(value.substring(i, length)).find()) {
+            sb.append(value, position, i);
+            position = i + 1;
+            sb.append("&amp;");
+          } else {
+            if (position != 0) {
+              sb.append(value, position, i);
+              position = i + 1;
+              sb.append("&");
+            }
+          }
+          break;
+        case '\\':
+          sb.append(value, position, i);
+          position = i + 1;
+          sb.append("\\\\");
+          break;
+        case '"':
+          sb.append(value, position, i);
+          position = i + 1;
+          sb.append("&quot;");
+          break;
+        case '<':
+          sb.append(value, position, i);
+          position = i + 1;
+          sb.append("&lt;");
+          break;
+        case '>':
+          sb.append(value, position, i);
+          position = i + 1;
+          sb.append("&gt;");
+          break;
+        case '\n':
+          sb.append(value, position, i);
+          position = i + 1;
+          sb.append("&#10;");
+          break;
+      }
+    }
+    if (position == 0) {
+      return value;
+    } else {
+      sb.append(value, position, value.length());
+      return sb.toString();
     }
   }
 }

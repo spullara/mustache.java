@@ -4,16 +4,13 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
 
 /**
  * Lookup objects using reflection and execute them the same way.
@@ -23,14 +20,18 @@ import com.google.common.collect.MapMaker;
  * Time: 3:02 PM
  */
 public class DefaultObjectHandler implements ObjectHandler {
-  // Create a map if one doesn't already exist
-  protected static Map<Class, Map<String, AccessibleObject>> cache = new MapMaker().makeComputingMap(
-          new Function<Class, Map<String, AccessibleObject>>() {
-            @Override
-            public Map<String, AccessibleObject> apply(Class input) {
-              return new ConcurrentHashMap<String, AccessibleObject>();
-            }
-          });
+  // Create a map if one doesn't already exist -- MapMaker.computerHashMap seems to be
+  // very inefficient, had to improvise
+  protected static Map<Class, Map<String, AccessibleObject>> cache = new HashMap<Class, Map<String, AccessibleObject>>() {
+    public synchronized Map<String, AccessibleObject> get(Object c) {
+      Map<String, AccessibleObject> o = super.get(c);
+      if (o == null) {
+        o = new HashMap<String, AccessibleObject>();
+        put((Class) c, o);
+      }
+      return o;
+    }
+  };
   private static Logger logger = Logger.getLogger(Mustache.class.getName());
 
   private static class Nothing extends AccessibleObject {
@@ -56,34 +57,47 @@ public class DefaultObjectHandler implements ObjectHandler {
     Map<String, AccessibleObject> members;
     // Don't overload methods in your contexts
     members = cache.get(aClass);
-    AccessibleObject member = members.get(name);
+    AccessibleObject member;
+    synchronized (members) {
+      member = members.get(name);
+    }
     if (member == nothing) return null;
     if (member == null) {
       try {
         member = getField(name, aClass);
-        members.put(name, member);
+        synchronized (members) {
+          members.put(name, member);
+        }
       } catch (NoSuchFieldException e) {
         // Not set
       }
     }
     if (member == null) {
       try {
-        member = getMethod(name, aClass);
-        members.put(name, member);
+        synchronized (members) {
+          member = getMethod(name, aClass);
+          members.put(name, member);
+        }
       } catch (NoSuchMethodException e) {
         try {
-          member = getMethod(name, aClass, Scope.class);
-          members.put(name, member);
+          synchronized (members) {
+            member = getMethod(name, aClass, Scope.class);
+            members.put(name, member);
+          }
         } catch (NoSuchMethodException e1) {
           String propertyname = name.substring(0,
                   1).toUpperCase() + (name.length() > 1 ? name.substring(1) : "");
           try {
-            member = getMethod("get" + propertyname, aClass);
-            members.put(name, member);
+            synchronized (members) {
+              member = getMethod("get" + propertyname, aClass);
+              members.put(name, member);
+            }
           } catch (NoSuchMethodException e2) {
             try {
-              member = getMethod("is" + propertyname, aClass);
-              members.put(name, member);
+              synchronized (members) {
+                member = getMethod("is" + propertyname, aClass);
+                members.put(name, member);
+              }
             } catch (NoSuchMethodException e3) {
               // Nothing to be done
             }
@@ -122,7 +136,9 @@ public class DefaultObjectHandler implements ObjectHandler {
       logger.log(Level.WARNING, "Failed to get value for " + name, e);
     }
     if (member == null) {
-      members.put(name, nothing);
+      synchronized (members) {
+        members.put(name, nothing);
+      }
     }
     return value;
   }

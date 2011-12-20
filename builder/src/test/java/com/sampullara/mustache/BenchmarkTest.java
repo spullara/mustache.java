@@ -1,8 +1,5 @@
 package com.sampullara.mustache;
 
-import com.sampullara.util.FutureWriter;
-import junit.framework.TestCase;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,6 +8,9 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
+
+import com.sampullara.util.FutureWriter;
+import junit.framework.TestCase;
 
 /**
  * Compare compilation with interpreter.

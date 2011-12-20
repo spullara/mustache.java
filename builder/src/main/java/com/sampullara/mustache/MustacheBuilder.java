@@ -144,7 +144,7 @@ public class MustacheBuilder implements MustacheJava {
               }
               sb.append((char) c);
             }
-            final String command = sb.toString().trim();
+            final String command = sb.toString();
             final char ch = command.charAt(0);
             final String variable = command.substring(1).trim();
             switch (ch) {
@@ -239,7 +239,7 @@ public class MustacheBuilder implements MustacheJava {
                 }
                 // Reference
                 out = write(list, out, currentLine.intValue());
-                list.add(cf.value(m, command, true, currentLine.intValue()));
+                list.add(cf.value(m, command.trim(), true, currentLine.intValue()));
                 break;
               }
             }

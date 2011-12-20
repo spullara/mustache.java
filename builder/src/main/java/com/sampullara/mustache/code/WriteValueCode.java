@@ -72,7 +72,7 @@ public class WriteValueCode implements Code {
       } else {
         String string = String.valueOf(value);
         if (encoded) {
-          string = encode(string);
+          string = m.encode(string);
         }
         try {
           fw.write(string);
@@ -132,41 +132,6 @@ public class WriteValueCode implements Code {
     } catch (IOException e) {
       throw new MustacheException(e);
     }
-  }
-
-  private static Pattern findToEncode = Pattern.compile("&(?!\\w+;)|[\"<>\\\\\n]");
-
-  // Override this in a super class if you don't want encoding or would like
-  // to change the way encoding works. Also, if you use unexecute, make sure
-  // also do the inverse in decode.
-  protected String encode(String value) {
-    StringBuffer sb = new StringBuffer();
-    Matcher matcher = findToEncode.matcher(value);
-    while (matcher.find()) {
-      char c = matcher.group().charAt(0);
-      switch (c) {
-        case '&':
-          matcher.appendReplacement(sb, "&amp;");
-          break;
-        case '\\':
-          matcher.appendReplacement(sb, "\\\\");
-          break;
-        case '"':
-          matcher.appendReplacement(sb, "&quot;");
-          break;
-        case '<':
-          matcher.appendReplacement(sb, "&lt;");
-          break;
-        case '>':
-          matcher.appendReplacement(sb, "&gt;");
-          break;
-        case '\n':
-          matcher.appendReplacement(sb, "&#10;");
-          break;
-      }
-    }
-    matcher.appendTail(sb);
-    return sb.toString();
   }
 
   public String decode(String value) {

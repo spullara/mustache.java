@@ -47,6 +47,14 @@
       <version>0.6.3-SNAPSHOT</version>
     </dependency>
 
+    <!-- Jackson -->
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>1.9.3</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Testing -->
     <dependency>
       <groupId>junit</groupId>

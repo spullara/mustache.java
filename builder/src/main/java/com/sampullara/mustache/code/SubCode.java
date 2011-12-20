@@ -64,7 +64,9 @@ public abstract class SubCode implements Code {
   }
 
   private void execute(FutureWriter writer, Iterable<Scope> iterable, Scope subScope) throws MustacheException {
-    for (Code code : codes) {
+    int length = codes.length;
+    for (int i = 0; i < length; i++) {
+      Code code = codes[i];
       if (Mustache.debug) {
         Mustache.line.set(code.getLine());
       }
@@ -83,7 +85,9 @@ public abstract class SubCode implements Code {
   public void identity(FutureWriter fw) throws MustacheException {
     try {
       fw.append("{{").append(marker).append(variable).append("}}");
-      for (Code code : codes) {
+      int length = codes.length;
+      for (int i = 0; i < length; i++) {
+        Code code = codes[i];
         if (Mustache.debug) {
           Mustache.line.set(code.getLine());
         }

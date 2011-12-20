@@ -24,7 +24,7 @@ public class EOFCode implements Code {
 
   @Override
   public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-    // NOP
+    // NOP, JVMTI BUG: This will show up in profile samples
   }
 
   @Override

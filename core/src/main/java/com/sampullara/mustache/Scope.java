@@ -96,7 +96,7 @@ public class Scope extends HashMap<Object, Object> {
   public Object get(Object o, Scope scope) {
     String name = o.toString();
     Object value = null;
-    Iterable<String> components = split(name, ".");
+    Iterable<String> components = split(name);
     Scope current = this;
     Scope currentScope = scope;
     if (components == null) {
@@ -189,35 +189,23 @@ public class Scope extends HashMap<Object, Object> {
     return parent;
   }
 
-  private static Iterable<String> split(final String s, final String d) {
-    if (!s.contains(d)) return null;
-    return new Iterable<String>() {
-      public Iterator<String> iterator() {
-        return new Iterator<String>() {
-          int length = s.length();
-          int current = 0;
-
-          public boolean hasNext() {
-            return current < length;
-          }
-
-          public String next() {
-            int start = current;
-            int i = s.indexOf(d, start);
-            if (i == -1) {
-              current = length;
-              return s.substring(start);
-            } else {
-              current = i + d.length();
-              return s.substring(start, i);
-            }
-          }
-
-          public void remove() {
-          }
-        };
+  private static Iterable<String> split(String s) {
+    List<String> split = null;
+    int position = 0;
+    int found;
+    while ((found = s.indexOf('.', position)) != -1) {
+      if (split == null) {
+        split = new ArrayList<String>(2);
       }
-    };
+      split.add(s.substring(position, found));
+      position = found + 1;
+    }
+    if (position == 0) {
+      return null;
+    } else {
+      split.add(s.substring(position));
+      return split;
+    }
   }
 
   public String toString() {
