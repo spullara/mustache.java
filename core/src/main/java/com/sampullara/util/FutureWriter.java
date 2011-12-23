@@ -72,7 +72,7 @@ public class FutureWriter extends Writer {
    * @param cs
    * @throws IOException
    */
-  public void enqueue(CharSequence cs) throws IOException {
+  private void enqueue(CharSequence cs) throws IOException {
     if (closed) {
       throw new IOException("closed");
     }
