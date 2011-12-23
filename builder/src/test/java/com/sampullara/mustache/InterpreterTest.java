@@ -523,7 +523,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testReadme2() throws MustacheException, IOException {
-    MustacheBuilder c = new MustacheBuilder(root);
+    MustacheBuilder c = init();
     Mustache m = c.parseFile("items2.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
@@ -536,7 +536,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testReadme3() throws MustacheException, IOException {
-    MustacheBuilder c = new MustacheBuilder(root);
+    MustacheBuilder c = init();
     Mustache m = c.parseFile("items3.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
@@ -605,6 +605,7 @@ public class InterpreterTest extends TestCase {
 
   protected void setUp() throws Exception {
     super.setUp();
+    FutureWriter.setParallel();
     File file = new File("src/test/resources");
     root = new File(file, "simple.html").exists() ? file : new File("../src/test/resources");
   }

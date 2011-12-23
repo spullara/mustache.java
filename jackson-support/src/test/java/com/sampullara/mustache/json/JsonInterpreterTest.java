@@ -62,7 +62,7 @@ public class JsonInterpreterTest extends TestCase {
   }
 
   public void testHogan() throws MustacheException, IOException {
-    FutureWriter.setDefaultExecutorService(null);
+    FutureWriter.setParallel(null);
     MustacheBuilder mb = new MustacheBuilder(root);
     Mustache parse = mb.parseFile("timeline.mustache");
     long start = System.currentTimeMillis();
