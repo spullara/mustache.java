@@ -92,6 +92,9 @@ public class WriteValueCode implements Code {
   public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
     String value = unexecuteValueCode(current, text, position, next);
     if (value != null) {
+      if (value.equals("")) {
+        System.out.println("here");
+      }
       BuilderCodeFactory.put(current, name, value);
       return current;
     }

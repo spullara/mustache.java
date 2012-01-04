@@ -77,25 +77,32 @@ public class Mustache {
    */
   public Scope unexecute(String text) throws MustacheException {
     AtomicInteger position = new AtomicInteger(0);
-    Scope unexecuted = unexecute(text, position);
-    if (unexecuted == null) {
-      int min = Math.min(position.get() + 50,
-              position.get() + Math.max(0, text.length() - position.get()));
-      throw new MustacheException(
-              "Failed to match template at " + name + ":" + line.get() + " with text " +
-                      text.substring(position.get(), min));
-    }
-    return unexecuted;
+    return unexecute(text, position);
   }
 
   protected Scope unexecute(String text, AtomicInteger position) throws MustacheException {
     Scope current = new Scope();
-    for (int i = 0; i < compiled.length && current != null; i++) {
+    for (int i = 0; i < compiled.length; i++) {
       if (debug) {
         line.set(compiled[i].getLine());
       }
       Code[] truncate = truncate(compiled, i + 1, new Code[0]);
       current = compiled[i].unexecute(current, text, position, truncate);
+      if (current == null) {
+        int min = Math.min(position.get() + 50,
+                position.get() + Math.max(0, text.length() - position.get()));
+        int linepos = 0;
+        int lines = 0;
+        while (linepos < min) {
+          int index = text.substring(linepos).indexOf("\n");
+          if (index == -1) break;
+          linepos = index + linepos + 1;
+          lines++;
+        }
+        throw new MustacheException(
+                "Failed to match template " + compiled[i] + " at " + name + ":" + compiled[i].getLine() + " with text " +
+                        text.substring(position.get(), min)+ " at line " + lines);
+      }
     }
     return current;
   }

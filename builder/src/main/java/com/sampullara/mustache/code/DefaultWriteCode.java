@@ -58,4 +58,8 @@ public class DefaultWriteCode implements WriteCode {
     rest.append(append);
   }
 
+  @Override
+  public String toString() {
+    return "[Write: " + rest + "]";
+  }
 }

@@ -109,6 +109,7 @@ public class UnexecuteTest {
   public void testComplexUnexecute() throws MustacheException, IOException {
     Scope scope = new Scope(new Object() {
       String header = "Colors";
+      boolean include = true;
       List item = Arrays.asList(
               new Object() {
                 String name = "red";
@@ -141,15 +142,15 @@ public class UnexecuteTest {
     });
 
     MustacheJava c = init();
-    Mustache m = c.parseFile("complex.html");
+    Mustache m = c.parseFile("unexecutecomplex.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, scope);
-    assertEquals(getContents(root, "complex.txt"), sw.toString());
+    assertEquals(getContents(root, "unexecutecomplex.txt"), sw.toString());
 
     scope = m.unexecute(sw.toString());
     sw = new StringWriter();
     m.execute(sw, scope);
-    assertEquals(getContents(root, "complex.txt"), sw.toString());
+    assertEquals(getContents(root, "unexecutecomplex.txt"), sw.toString());
 
     System.out.println(scope);
   }
