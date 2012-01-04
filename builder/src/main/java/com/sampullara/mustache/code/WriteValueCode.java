@@ -92,6 +92,25 @@ public class WriteValueCode implements Code {
   public Scope unexecute(Scope current, String text, AtomicInteger position, Code[] next) throws MustacheException {
     String value = unexecuteValueCode(current, text, position, next);
     if (value != null) {
+      if (value.equals("") && next != null && next.length > 0) {
+        /*
+        This doesn't work either
+        Trying to handle {{#include}}{{name}}{{/include}} case and
+        {{name}}{{other}} case cleanly when one is empty
+        */
+        try {
+          // Let's see if the next matches iff WriteCode
+          if (next[0] instanceof WriteCode) {
+            Code[] truncate = truncate(next, 1, null);
+            if (next[0].unexecute(current, text, position, truncate) != null) {
+              return null;
+            }
+          }
+        } catch (MustacheException me) {
+          // Fall through
+        }
+        // Didn't match next, put in empty string
+      }
       BuilderCodeFactory.put(current, name, value);
       return current;
     }
