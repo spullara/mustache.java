@@ -162,9 +162,11 @@ public class Mustache {
    * @throws MustacheException
    */
   public void execute(FutureWriter writer, Scope ctx) throws MustacheException {
-    for (Code code : compiled) {
-      if (debug) {
-        line.set(code.getLine());
+    int length = compiled.length;
+    for (int i = 0; i < length; i++) {
+      Code code = compiled[i];
+      if (Mustache.debug) {
+        Mustache.line.set(code.getLine());
       }
       code.execute(writer, ctx);
     }

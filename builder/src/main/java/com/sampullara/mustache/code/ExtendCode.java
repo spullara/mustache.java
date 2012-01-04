@@ -79,10 +79,7 @@ public class ExtendCode extends ExtendBaseCode {
 
   @Override
   public void execute(FutureWriter fw, Scope scope) throws MustacheException {
-    Code[] supercodes = partial.getCompiled();
-    for (Code code : supercodes) {
-      code.execute(fw, scope);
-    }
+    partial.execute(fw, scope);
   }
 
   @Override

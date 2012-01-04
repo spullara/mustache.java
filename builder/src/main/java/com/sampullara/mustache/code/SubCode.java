@@ -1,5 +1,10 @@
 package com.sampullara.mustache.code;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+
 import com.sampullara.mustache.Code;
 import com.sampullara.mustache.FunctionIterator;
 import com.sampullara.mustache.Mustache;
@@ -7,18 +12,13 @@ import com.sampullara.mustache.MustacheException;
 import com.sampullara.mustache.Scope;
 import com.sampullara.util.FutureWriter;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-
 /**
-* The base class for all codes with subcodes.
-* <p/>
-* User: sam
-* Date: 11/27/11
-* Time: 10:34 AM
-*/
+ * The base class for all codes with subcodes.
+ * <p/>
+ * User: sam
+ * Date: 11/27/11
+ * Time: 10:34 AM
+ */
 public abstract class SubCode implements Code {
   protected final String marker;
   protected final Mustache m;
@@ -63,18 +63,29 @@ public abstract class SubCode implements Code {
     }
   }
 
-  private void execute(FutureWriter writer, Iterable<Scope> iterable, Scope subScope) throws MustacheException {
+  public void executeCodes(FutureWriter fw, Scope scope) throws MustacheException {
     int length = codes.length;
     for (int i = 0; i < length; i++) {
       Code code = codes[i];
       if (Mustache.debug) {
         Mustache.line.set(code.getLine());
       }
-      if (iterable instanceof FunctionIterator && ((FunctionIterator) iterable).isTemplateFunction()) {
+      code.execute(fw, scope);
+    }
+  }
+
+  private void execute(FutureWriter writer, Iterable<Scope> iterable, Scope subScope) throws MustacheException {
+    if (iterable instanceof FunctionIterator && ((FunctionIterator) iterable).isTemplateFunction()) {
+      int length = codes.length;
+      for (int i = 0; i < length; i++) {
+        Code code = codes[i];
+        if (Mustache.debug) {
+          Mustache.line.set(code.getLine());
+        }
         code.identity(writer);
-      } else {
-        code.execute(writer, subScope);
       }
+    } else {
+      executeCodes(writer, subScope);
     }
   }
 
