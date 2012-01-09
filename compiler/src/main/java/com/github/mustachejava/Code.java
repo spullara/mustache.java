@@ -8,5 +8,6 @@ import java.util.List;
  */
 public interface Code {
   void execute(Writer writer, List<Object> scopes);
+  void identity(Writer writer);
   void append(String text);
 }

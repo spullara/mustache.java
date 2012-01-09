@@ -2,10 +2,11 @@ package com.github.mustachejava;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Writer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.github.mustachejava.impl.DefaultMustache;
 
 /**
  * A pseudo interpreter / compiler. Instead of compiling to Java code, it compiles to a
@@ -16,6 +17,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Time: 3:52 PM
  */
 public class MustacheCompiler {
+  private static final String DEFAULT_SM = "{{";
+  private static final String DEFAULT_EM = "}}";
   private CodeFactory cf;
   private boolean specCompliance;
 
@@ -33,21 +36,8 @@ public class MustacheCompiler {
   }
 
   public Mustache compile(Reader reader, String file) {
-    final Code[] codes = compile(reader, null, new AtomicInteger(0), file, "{{", "}}").toArray(new Code[0]);
-    return new Mustache() {
-      @Override
-      public void execute(Writer writer, List<Object> scopes) {
-        int length = codes.length;
-        for (int i = 0; i < length; i++) {
-          codes[i].execute(writer, scopes);
-        }
-      }
-
-      @Override
-      public void append(String text) {
-        throw new MustacheException("Unsupported");
-      }
-    };
+    Code[] codes = compile(reader, null, new AtomicInteger(0), file, DEFAULT_SM, DEFAULT_EM).toArray(new Code[0]);
+    return new DefaultMustache(codes, file, DEFAULT_SM, DEFAULT_EM);
   }
 
   public List<Code> compile(final Reader br, String tag, final AtomicInteger currentLine, String file, String sm, String em) throws MustacheException {
@@ -113,16 +103,16 @@ public class MustacheCompiler {
                 out = new StringBuilder();
                 switch (ch) {
                   case '#':
-                    list.add(cf.iterable(variable, codes, file, start));
+                    list.add(cf.iterable(variable, codes, file, start, sm, em));
                     break;
                   case '^':
-                    list.add(cf.notIterable(variable, codes, file, start));
+                    list.add(cf.notIterable(variable, codes, file, start, sm, em));
                     break;
                   case '<':
-                    list.add(cf.extend(variable, codes, file, start));
+                    list.add(cf.extend(variable, codes, file, start, sm, em));
                     break;
                   case '$':
-                    list.add(cf.name(variable, codes, file, start));
+                    list.add(cf.name(variable, codes, file, start, sm, em));
                     break;
                 }
                 iterable = lines != 0;
@@ -142,7 +132,7 @@ public class MustacheCompiler {
               }
               case '>': {
                 out = write(list, out, currentLine.intValue());
-                list.add(cf.partial(variable, file, currentLine.get()));
+                list.add(cf.partial(variable, file, currentLine.get(), sm, em));
                 break;
               }
               case '{': {
@@ -158,13 +148,13 @@ public class MustacheCompiler {
                   }
                 }
                 final String finalName = name;
-                list.add(cf.value(finalName, false, currentLine.intValue()));
+                list.add(cf.value(finalName, false, currentLine.intValue(), sm, em));
                 break;
               }
               case '&': {
                 // Not escaped
                 out = write(list, out, currentLine.intValue());
-                list.add(cf.value(variable, false, currentLine.intValue()));
+                list.add(cf.value(variable, false, currentLine.intValue(), sm, em));
                 break;
               }
               case '%':
@@ -193,7 +183,7 @@ public class MustacheCompiler {
                 }
                 // Reference
                 out = write(list, out, currentLine.intValue());
-                list.add(cf.value(command.trim(), true, currentLine.intValue()));
+                list.add(cf.value(command.trim(), true, currentLine.intValue(), sm, em));
                 break;
               }
             }
@@ -226,7 +216,7 @@ public class MustacheCompiler {
         Code code = list.get(size - 1);
         code.append(text);
       } else {
-        list.add(cf.write(text, line));
+        list.add(cf.write(text, line, null, null));
       }
     }
     return new StringBuilder();

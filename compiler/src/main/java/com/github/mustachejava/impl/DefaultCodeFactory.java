@@ -54,8 +54,8 @@ public class DefaultCodeFactory implements CodeFactory {
   }
 
   @Override
-  public Code iterable(final String variable, List<Code> codes, String file, int start) {
-    return new DefaultCode(codes.toArray(new Code[0])) {
+  public Code iterable(final String variable, List<Code> codes, String file, int start, String sm, String em) {
+    return new DefaultCode(codes.toArray(new Code[0]), variable, "#", sm, em) {
       @Override
       public void execute(Writer writer, List<Object> scopes) {
         Object resolve = resolve(scopes, variable);
@@ -67,43 +67,46 @@ public class DefaultCodeFactory implements CodeFactory {
               iteratorScopes = new ArrayList<Object>(scopes);
               iteratorScopes.add(next);
             }
-            if (codes != null) {
-              int length = codes.length;
-              for (int i1 = 0; i1 < length; i1++) {
-                codes[i1].execute(writer, iteratorScopes);
-              }
-            }
+            runCodes(writer, iteratorScopes);
           }
         }
-        if (appended != null) {
-          try {
-            writer.write(appended);
-          } catch (IOException e) {
-            throw new MustacheException(e);
-          }
-        }
+        appendText(writer);
       }
     };
   }
 
   @Override
-  public Code notIterable(String variable, List<Code> codes, String file, int start) {
+  public Code notIterable(final String variable, List<Code> codes, String file, int start, String sm, String em) {
+    return new DefaultCode(codes.toArray(new Code[0]), variable, "^", sm, em) {
+      @Override
+      public void execute(Writer writer, List<Object> scopes) {
+        Object resolve = resolve(scopes, variable);
+        if (resolve != null) {
+          Iterator i = oh.iterate(resolve);
+          if (!i.hasNext()) {
+            runCodes(writer, scopes);
+          }
+        } else {
+          runCodes(writer, scopes);
+        }
+        appendText(writer);
+      }
+    };
+  }
+
+  @Override
+  public Code name(String variable, List<Code> codes, String file, int start, String sm, String em) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Code name(String variable, List<Code> codes, String file, int start) {
+  public Code partial(String variable, String file, int line, String sm, String em) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Code partial(String variable, String file, int line) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Code value(final String variable, final boolean encoded, final int line) {
-    return new DefaultCode() {
+  public Code value(final String variable, final boolean encoded, final int line, String sm, String em) {
+    return new DefaultCode(null, variable, "", sm, em) {
       @Override
       public void execute(Writer writer, List<Object> scopes) {
         Object object = resolve(scopes, variable);
@@ -125,7 +128,7 @@ public class DefaultCodeFactory implements CodeFactory {
   }
 
   @Override
-  public Code write(final String text, int line) {
+  public Code write(final String text, int line, String sm, String em) {
     return new DefaultCode() {
       @Override
       public void execute(Writer writer, List<Object> scopes) {
@@ -134,6 +137,7 @@ public class DefaultCodeFactory implements CodeFactory {
         } catch (IOException e) {
           throw new MustacheException();
         }
+        appendText(writer);
       }
     };
   }
@@ -144,7 +148,7 @@ public class DefaultCodeFactory implements CodeFactory {
   }
 
   @Override
-  public Code extend(String variable, List<Code> codes, String file, int start) {
+  public Code extend(String variable, List<Code> codes, String file, int start, String sm, String em) {
     throw new UnsupportedOperationException();
   }
 

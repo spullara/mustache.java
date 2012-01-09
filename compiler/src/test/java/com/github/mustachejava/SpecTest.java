@@ -4,10 +4,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import com.github.mustachejava.impl.DefaultCode;
 import com.github.mustachejava.impl.DefaultCodeFactory;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
@@ -21,45 +25,73 @@ import static junit.framework.Assert.assertFalse;
  */
 public class SpecTest {
 
-  private static final MustacheCompiler MC = new MustacheCompiler(new DefaultCodeFactory());
-  static {
-    MC.setSpecCompliance(true);
-  }
   private JsonFactory jf = new MappingJsonFactory();
 
   @Test
   public void interpolations() throws IOException {
-    run(getSpec("/spec/specs/interpolation.json"));
+    run(getSpec("interpolation.json"));
   }
 
   @Test
   public void sections() throws IOException {
-    run(getSpec("/spec/specs/sections.json"));
+    run(getSpec("sections.json"));
   }
 
   @Test
   public void delimiters() throws IOException {
-    run(getSpec("/spec/specs/delimiters.json"));
+    run(getSpec("delimiters.json"));
   }
 
   @Test
   public void inverted() throws IOException {
-    run(getSpec("/spec/specs/inverted.json"));
+    run(getSpec("inverted.json"));
   }
 
   @Test
   public void partials() throws IOException {
-    run(getSpec("/spec/specs/partials.json"));
+    run(getSpec("partials.json"));
   }
 
   @Test
   public void lambdas() throws IOException {
-    run(getSpec("/spec/specs/~lambdas.json"));
+    run(getSpec("~lambdas.json"));
   }
 
   private void run(JsonNode spec) {
-    boolean failed = false;
+    int fail = 0;
+    int success = 0;
     for (final JsonNode test : spec.get("tests")) {
+      boolean failed = false;      
+      DefaultCodeFactory CF = new DefaultCodeFactory("/spec/specs") {
+        Map<String, Mustache> partialMap = new HashMap<String, Mustache>();
+        JsonNode partials = test.get("partials");
+        MustacheCompiler MC = new MustacheCompiler(this);
+        {
+          MC.setSpecCompliance(true);
+        }
+
+        @Override
+        public Code partial(final String variable, String file, int line, String sm, String em) {
+          return new DefaultCode(null, variable, ">", sm, em) {
+            @Override
+            public void execute(Writer writer, List<Object> scopes) {
+              JsonNode partialNode = partials.get(variable);
+              if (partialNode != null && !partialNode.isNull()) {
+                String partialName = partialNode.asText();
+                Mustache partial = partialMap.get(partialName);
+                if (partial == null) {
+                  partial = MC.compile(new StringReader(partialName), variable);
+                  partialMap.put(partialName, partial);
+                }
+                partial.execute(writer, scopes);
+              }
+              appendText(writer);
+            }
+          };
+        }
+      };
+      MustacheCompiler MC = new MustacheCompiler(CF);
+      MC.setSpecCompliance(true);
       String file = test.get("name").getTextValue();
       System.out.print("Running " + file + " - " + test.get("desc").getTextValue());
       StringReader template = new StringReader(test.get("template").getTextValue());
@@ -69,28 +101,36 @@ public class SpecTest {
         StringWriter writer = new StringWriter();
         compile.execute(writer, Arrays.asList((Object) new JsonMap(data)));
         String expected = test.get("expected").getTextValue();
-        if (writer.toString().equals(expected)) {
-          System.out.println(": success!");
+        if (writer.toString().replaceAll("\\s+", "").equals(expected.replaceAll("\\s+", ""))) {
+          System.out.print(": success");
+          if (writer.toString().equals(expected)) {
+            System.out.println("!");
+          } else {
+            System.out.println(", whitespace differences.");
+          }
         } else {
           System.out.println(": failed!");
           System.out.println(expected + " != " + writer.toString());
           System.out.println(test);
           failed = true;
         }
-      } catch (Exception e) {
+      } catch (Throwable e) {
         System.out.println(": exception");
         e.printStackTrace();
         System.out.println(test);
         failed = true;
       }
+      if (failed) fail++;
+      else success++;
     }
-    assertFalse(failed);
+    System.out.println("Success: " + success + " Fail: " + fail);
+    assertFalse(fail > 0);
   }
 
   private JsonNode getSpec(String spec) throws IOException {
     return jf.createJsonParser(new InputStreamReader(
             SpecTest.class.getResourceAsStream(
-                    spec))).readValueAsTree();
+                    "/spec/specs/" + spec))).readValueAsTree();
   }
 
   private static class JsonMap extends HashMap {
