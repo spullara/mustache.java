@@ -26,6 +26,10 @@ public class MustacheCompiler {
 
   public Mustache compile(String file) {
     Reader reader = cf.getReader(file);
+    return compile(reader, file);
+  }
+  
+  public Mustache compile(Reader reader, String file) {
     final Code[] codes = compile(reader, null, new AtomicInteger(0), file).toArray(new Code[0]);
     return new Mustache() {
       @Override
@@ -207,9 +211,8 @@ public class MustacheCompiler {
     String text = out.toString();
     if (text.length() > 0) {
       int size = list.size();
-      Code code;
       if (size > 0) {
-        code = list.get(size - 1);
+        Code code = list.get(size - 1);
         code.append(text);
       } else {
         list.add(cf.write(text, line));

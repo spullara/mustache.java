@@ -24,6 +24,7 @@ import com.github.mustachejava.ObjectHandler;
  * Time: 3:02 PM
  */
 public class DefaultObjectHandler implements ObjectHandler {
+
   // Create a map if one doesn't already exist -- MapMaker.computerHashMap seems to be
   // very inefficient, had to improvise
   protected static Map<Class, Map<String, AccessibleObject>> cache = new HashMap<Class, Map<String, AccessibleObject>>() {
@@ -36,6 +37,7 @@ public class DefaultObjectHandler implements ObjectHandler {
       return o;
     }
   };
+
   private static Logger logger = Logger.getLogger(Mustache.class.getName());
 
   private static class Nothing extends AccessibleObject {
@@ -52,6 +54,14 @@ public class DefaultObjectHandler implements ObjectHandler {
       } catch (Exception e) {
         throw new RuntimeException("Failed to get value from future", e);
       }
+    }
+    int dotIndex = name.indexOf('.');
+    if (dotIndex != -1) {
+      if (name.equals(".")) {
+        return scope;
+      }
+      Object newScope = handleObject(scope, name.substring(0, dotIndex));
+      return handleObject(newScope, name.substring(dotIndex + 1));
     }
     Object value = null;
     if (scope instanceof Map) {
@@ -89,8 +99,8 @@ public class DefaultObjectHandler implements ObjectHandler {
             members.put(name, member);
           }
         } catch (NoSuchMethodException e1) {
-          String propertyname = name.substring(0,
-                  1).toUpperCase() + (name.length() > 1 ? name.substring(1) : "");
+          String propertyname = name.substring(0, 1).toUpperCase() +
+                  (name.length() > 1 ? name.substring(1) : "");
           try {
             synchronized (members) {
               member = getMethod("get" + propertyname, aClass);
@@ -153,6 +163,17 @@ public class DefaultObjectHandler implements ObjectHandler {
     } else if (object instanceof Iterable) {
       i = ((Iterable) object).iterator();
     } else {
+      if (object == null) return EMPTY.iterator();
+      if (object instanceof Boolean) {
+        if (!(Boolean)object) {
+          return EMPTY.iterator();
+        }
+      }
+      if (object instanceof String) {
+        if (object.toString().equals("")) {
+          return EMPTY.iterator();
+        }
+      }
       i = new SingleValueIterator(object);
     }
     return i;

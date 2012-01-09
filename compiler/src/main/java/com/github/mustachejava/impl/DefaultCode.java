@@ -12,8 +12,8 @@ import com.github.mustachejava.MustacheException;
  */
 public class DefaultCode implements Code {
   private StringBuilder sb = new StringBuilder();
-  private String appended;
-  private Code[] codes;
+  protected String appended;
+  protected Code[] codes;
 
   public DefaultCode() {}
   

@@ -55,7 +55,7 @@ public class DefaultCodeFactory implements CodeFactory {
 
   @Override
   public Code iterable(final String variable, List<Code> codes, String file, int start) {
-    return new DefaultCode() {
+    return new DefaultCode(codes.toArray(new Code[0])) {
       @Override
       public void execute(Writer writer, List<Object> scopes) {
         Object resolve = resolve(scopes, variable);
@@ -67,7 +67,19 @@ public class DefaultCodeFactory implements CodeFactory {
               iteratorScopes = new ArrayList<Object>(scopes);
               iteratorScopes.add(next);
             }
-            super.execute(writer, iteratorScopes);
+            if (codes != null) {
+              int length = codes.length;
+              for (int i1 = 0; i1 < length; i1++) {
+                codes[i1].execute(writer, iteratorScopes);
+              }
+            }
+          }
+        }
+        if (appended != null) {
+          try {
+            writer.write(appended);
+          } catch (IOException e) {
+            throw new MustacheException(e);
           }
         }
       }
@@ -90,18 +102,24 @@ public class DefaultCodeFactory implements CodeFactory {
   }
 
   @Override
-  public Code value(final String variable, boolean b, final int line) {
+  public Code value(final String variable, final boolean encoded, final int line) {
     return new DefaultCode() {
       @Override
       public void execute(Writer writer, List<Object> scopes) {
-        Object resolve = resolve(scopes, variable);
-        if (resolve != null) {
+        Object object = resolve(scopes, variable);
+        if (object != null) {
           try {
-            writer.write(resolve.toString());
+            String value = object.toString();
+            if (encoded) {
+              writer.write(encode(value));
+            } else {
+              writer.write(value);
+            }
           } catch (Exception e) {
             throw new MustacheException("Failed to get value for " + variable + " at line " + line);
           }
         }
+        super.execute(writer, scopes);
       }
     };
   }
