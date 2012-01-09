@@ -12,6 +12,7 @@
     <module>network</module>
     <module>jackson-support</module>
     <module>handlebar</module>
+    <module>compiler</module>
   </modules>
   <packaging>pom</packaging>
 
