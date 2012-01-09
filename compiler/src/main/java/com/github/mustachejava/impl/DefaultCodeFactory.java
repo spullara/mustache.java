@@ -38,7 +38,7 @@ public class DefaultCodeFactory implements CodeFactory {
   private String root;
 
   public DefaultCodeFactory() {
-    root = "/";
+    root = "";
   }
 
   public DefaultCodeFactory(String root) {
@@ -74,10 +74,7 @@ public class DefaultCodeFactory implements CodeFactory {
           if (resolve instanceof Function) {
             Function f = (Function) resolve;
             StringWriter sw = new StringWriter();
-            int length = codes.length;
-            for (int i = 0; i < length; i++) {
-              codes[i].identity(sw);
-            }
+            runIdentity(sw);
             Object newtemplate = f.apply(sw.toString());
             if (newtemplate != null) {
               String templateText = newtemplate.toString();

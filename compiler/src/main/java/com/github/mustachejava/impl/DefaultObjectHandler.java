@@ -124,11 +124,7 @@ public class DefaultObjectHandler implements ObjectHandler {
         Field field = (Field) member;
         value = field.get(scope);
         if (value == null) {
-          if (field.getType().isAssignableFrom(Iterable.class)) {
-            value = EMPTY;
-          } else {
-            value = NULL;
-          }
+          value = iterable(value, field.getType());
         }
       } else if (member instanceof Method) {
         Method method = (Method) member;
@@ -136,11 +132,7 @@ public class DefaultObjectHandler implements ObjectHandler {
           value = method.invoke(scope);
         }
         if (value == null) {
-          if (method.getReturnType().isAssignableFrom(Iterable.class)) {
-            value = EMPTY;
-          } else {
-            value = NULL;
-          }
+          value = iterable(value, method.getReturnType());
         }
       }
     } catch (Exception e) {
@@ -151,6 +143,15 @@ public class DefaultObjectHandler implements ObjectHandler {
       synchronized (members) {
         members.put(name, nothing);
       }
+    }
+    return value;
+  }
+
+  private Object iterable(Object value, Class<?> type) {
+    if (type.isAssignableFrom(Iterable.class)) {
+      value = EMPTY;
+    } else {
+      value = NULL;
     }
     return value;
   }
@@ -191,7 +192,7 @@ public class DefaultObjectHandler implements ObjectHandler {
       throw nsme;
     }
     if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
-      throw new NoSuchMethodException("Only public, protected and package methods allowed");
+      throw new NoSuchMethodException("Only public, protected and package members allowed");
     }
     member.setAccessible(true);
     return member;
@@ -209,7 +210,7 @@ public class DefaultObjectHandler implements ObjectHandler {
       throw nsfe;
     }
     if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
-      throw new NoSuchFieldException("Only public, protected and package fields allowed");
+      throw new NoSuchFieldException("Only public, protected and package members allowed");
     }
     member.setAccessible(true);
     return member;

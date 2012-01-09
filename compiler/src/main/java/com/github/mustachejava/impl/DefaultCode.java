@@ -49,16 +49,20 @@ public class DefaultCode implements Code {
       if (name != null) {
         tag(writer, type);
         if (codes != null) {
-          int length = codes.length;
-          for (int i = 0; i < length; i++) {
-            codes[i].identity(writer);
-          }
+          runIdentity(writer);
           tag(writer, "/");
         }
       }
       appendText(writer);
     } catch (IOException e) {
       throw new MustacheException(e);
+    }
+  }
+
+  protected void runIdentity(Writer writer) {
+    int length = codes.length;
+    for (int i = 0; i < length; i++) {
+      codes[i].identity(writer);
     }
   }
 
