@@ -62,6 +62,7 @@ public class SpecTest {
   private void run(JsonNode spec) {
     int fail = 0;
     int success = 0;
+    int whitespace = 0;
     Map<String, Object> functionMap = new HashMap<String, Object>() {{
       put("Interpolation", new Object() {
         Function lambda() {
@@ -211,6 +212,7 @@ public class SpecTest {
           if (writer.toString().equals(expected)) {
             System.out.println("!");
           } else {
+            whitespace++;
             System.out.println(", whitespace differences.");
           }
         } else {
@@ -228,7 +230,7 @@ public class SpecTest {
       if (failed) fail++;
       else success++;
     }
-    System.out.println("Success: " + success + " Fail: " + fail);
+    System.out.println("Success: " + success + " Whitespace: " + whitespace + " Fail: " + fail);
     assertFalse(fail > 0);
   }
 

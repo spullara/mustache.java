@@ -1,22 +1,14 @@
 package com.github.mustachejava.impl;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import com.google.common.base.Function;
 
 import com.github.mustachejava.Code;
 import com.github.mustachejava.CodeFactory;
@@ -32,9 +24,10 @@ public class DefaultCodeFactory implements CodeFactory {
 
   public static final Code EOF = new DefaultCode();
 
-  private MustacheCompiler mc = new MustacheCompiler(this);
-  private Map<String, Mustache> templateCache = new HashMap<String, Mustache>();
-  private ObjectHandler oh = new DefaultObjectHandler();
+  public final MustacheCompiler mc = new MustacheCompiler(this);
+  public final Map<String, Mustache> templateCache = new HashMap<String, Mustache>();
+  public final ObjectHandler oh = new DefaultObjectHandler();
+
   private String root;
 
   public DefaultCodeFactory() {
@@ -46,7 +39,8 @@ public class DefaultCodeFactory implements CodeFactory {
     this.root = root;
   }
 
-  private Object resolve(List<Object> scopes, String name) {
+  @Override
+  public Object resolve(List<Object> scopes, String name) {
     Object value = null;
     int size = scopes.size();
     for (int i = size - 1; i >= 0; i--) {
@@ -66,59 +60,12 @@ public class DefaultCodeFactory implements CodeFactory {
 
   @Override
   public Code iterable(final String variable, List<Code> codes, final String file, final int start, String sm, String em) {
-    return new DefaultCode(codes.toArray(new Code[0]), variable, "#", sm, em) {
-      @Override
-      public void execute(Writer writer, List<Object> scopes) {
-        Object resolve = resolve(scopes, variable);
-        if (resolve != null) {
-          if (resolve instanceof Function) {
-            Function f = (Function) resolve;
-            StringWriter sw = new StringWriter();
-            runIdentity(sw);
-            Object newtemplate = f.apply(sw.toString());
-            if (newtemplate != null) {
-              String templateText = newtemplate.toString();
-              Mustache mustache = templateCache.get(templateText);
-              if (mustache == null) {
-                mustache = mc.compile(new StringReader(templateText), file, sm, em);
-                templateCache.put(templateText, mustache);
-              }
-              mustache.execute(writer, scopes);
-            }
-          } else {
-            for (Iterator i = oh.iterate(resolve); i.hasNext(); ) {
-              Object next = i.next();
-              List<Object> iteratorScopes = scopes;
-              if (next != null) {
-                iteratorScopes = new ArrayList<Object>(scopes);
-                iteratorScopes.add(next);
-              }
-              runCodes(writer, iteratorScopes);
-            }
-          }
-        }
-        appendText(writer);
-      }
-    };
+    return new IterableCode(this, codes, variable, sm, em, file);
   }
 
   @Override
   public Code notIterable(final String variable, List<Code> codes, String file, int start, String sm, String em) {
-    return new DefaultCode(codes.toArray(new Code[0]), variable, "^", sm, em) {
-      @Override
-      public void execute(Writer writer, List<Object> scopes) {
-        Object resolve = resolve(scopes, variable);
-        if (resolve != null) {
-          Iterator i = oh.iterate(resolve);
-          if (!i.hasNext()) {
-            runCodes(writer, scopes);
-          }
-        } else {
-          runCodes(writer, scopes);
-        }
-        appendText(writer);
-      }
-    };
+    return new NotIterableCode(this, codes, variable, sm, em);
   }
 
   @Override
@@ -133,65 +80,12 @@ public class DefaultCodeFactory implements CodeFactory {
 
   @Override
   public Code value(final String variable, final boolean encoded, final int line, String sm, String em) {
-    return new DefaultCode(null, variable, "", sm, em) {
-      @Override
-      public void execute(Writer writer, List<Object> scopes) {
-        Object object = resolve(scopes, variable);
-        if (object != null) {
-          try {
-            String value;
-            if (object instanceof Function) {
-              Function f = (Function) object;
-              Object newtemplate = f.apply(null);
-              if (newtemplate != null) {
-                String templateText = newtemplate.toString();
-                Mustache mustache = templateCache.get(templateText);
-                if (mustache == null) {
-                  mustache = mc.compile(new StringReader(templateText), variable,
-                          MustacheCompiler.DEFAULT_SM, MustacheCompiler.DEFAULT_EM);
-                  templateCache.put(templateText, mustache);
-                }
-                StringWriter sw = new StringWriter();
-                mustache.execute(sw, scopes);
-                value = sw.toString();
-              } else {
-                value = "";
-              }              
-            } else {
-              value = object.toString();
-            }
-            if (encoded) {
-              writer.write(encode(value));
-            } else {
-              writer.write(value);
-            }
-          } catch (Exception e) {
-            throw new MustacheException("Failed to get value for " + variable + " at line " + line, e);
-          }
-        }
-        super.execute(writer, scopes);
-      }
-    };
+    return new ValueCode(this, variable, sm, em, encoded, line);
   }
 
   @Override
   public Code write(final String text, int line, String sm, String em) {
-    return new DefaultCode() {
-      @Override
-      public void identity(Writer writer) {
-        execute(writer, null);
-      }
-
-      @Override
-      public void execute(Writer writer, List<Object> scopes) {
-        try {
-          writer.write(text);
-        } catch (IOException e) {
-          throw new MustacheException();
-        }
-        appendText(writer);
-      }
-    };
+    return new WriteCode(text);
   }
 
   @Override
@@ -220,6 +114,7 @@ public class DefaultCodeFactory implements CodeFactory {
   // Override this in a super class if you don't want encoding or would like
   // to change the way encoding works. Also, if you use unexecute, make sure
   // also do the inverse in decode.
+  @Override
   public String encode(String value) {
     StringBuilder sb = new StringBuilder();
     int position = 0;
