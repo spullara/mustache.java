@@ -56,6 +56,7 @@ public class DefaultCode implements Code {
           tag(writer, "/");
         }
       }
+      appendText(writer);
     } catch (IOException e) {
       throw new MustacheException(e);
     }

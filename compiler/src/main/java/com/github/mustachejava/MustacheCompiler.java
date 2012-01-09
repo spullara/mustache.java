@@ -17,8 +17,8 @@ import com.github.mustachejava.impl.DefaultMustache;
  * Time: 3:52 PM
  */
 public class MustacheCompiler {
-  private static final String DEFAULT_SM = "{{";
-  private static final String DEFAULT_EM = "}}";
+  public static final String DEFAULT_SM = "{{";
+  public static final String DEFAULT_EM = "}}";
   private CodeFactory cf;
   private boolean specCompliance;
 
@@ -36,8 +36,12 @@ public class MustacheCompiler {
   }
 
   public Mustache compile(Reader reader, String file) {
-    Code[] codes = compile(reader, null, new AtomicInteger(0), file, DEFAULT_SM, DEFAULT_EM).toArray(new Code[0]);
-    return new DefaultMustache(codes, file, DEFAULT_SM, DEFAULT_EM);
+    return compile(reader, file, DEFAULT_SM, DEFAULT_EM);
+  }
+
+  public Mustache compile(Reader reader, String file, String sm, String em) {
+    Code[] codes = compile(reader, null, new AtomicInteger(0), file, sm, em).toArray(new Code[0]);
+    return new DefaultMustache(codes, file, sm, em);
   }
 
   public List<Code> compile(final Reader br, String tag, final AtomicInteger currentLine, String file, String sm, String em) throws MustacheException {

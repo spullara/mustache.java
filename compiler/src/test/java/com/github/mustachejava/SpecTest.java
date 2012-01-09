@@ -11,6 +11,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Function;
+
 import com.github.mustachejava.impl.DefaultCode;
 import com.github.mustachejava.impl.DefaultCodeFactory;
 import org.codehaus.jackson.JsonFactory;
@@ -60,6 +62,109 @@ public class SpecTest {
   private void run(JsonNode spec) {
     int fail = 0;
     int success = 0;
+    Map<String, Object> functionMap = new HashMap<String, Object>() {{
+      put("Interpolation", new Object() {
+        Function lambda() {
+          return new Function<String, String>() {
+            @Override
+            public String apply(String input) {
+              return "world";
+            }
+          };
+        }
+      });
+      put("Interpolation - Expansion", new Object() {
+        Function lambda() {
+          return new Function<String, String>() {
+            @Override
+            public String apply(String input) {
+              return "{{planet}}";
+            }
+          };
+        }
+      });
+      put("Interpolation - Alternate Delimiters", new Object() {
+        Function lambda() {
+          return new Function<String, String>() {
+            @Override
+            public String apply(String input) {
+              return "|planet| => {{planet}}";
+            }
+          };
+        }
+      });
+      put("Interpolation - Multiple Calls", new Object() {
+        int calls = 0;
+        Function lambda() {
+          return new Function<String, String>() {
+            @Override
+            public String apply(String input) {
+              return String.valueOf(++calls);
+            }
+          };
+        }
+      });
+      put("Escaping", new Object() {
+        Function lambda() {
+          return new Function<String, String>() {
+            @Override
+            public String apply(String input) {
+              return ">";
+            }
+          };
+        }
+      });
+      put("Section", new Object() {
+        Function lambda() {
+          return new Function<String, String>() {
+            @Override
+            public String apply(String input) {
+              return input.equals("{{x}}") ? "yes" : "no";
+            }
+          };
+        }
+      });
+      put("Section - Expansion", new Object() {
+        Function lambda() {
+          return new Function<String, String>() {
+            @Override
+            public String apply(String input) {
+              return input + "{{planet}}" + input;
+            }
+          };
+        }
+      });
+      put("Section - Alternate Delimiters", new Object() {
+        Function lambda() {
+          return new Function<String, String>() {
+            @Override
+            public String apply(String input) {
+              return input + "{{planet}} => |planet|" + input;
+            }
+          };
+        }
+      });
+      put("Section - Multiple Calls", new Object() {
+        Function lambda() {
+          return new Function<String, String>() {
+            @Override
+            public String apply(String input) {
+              return "__" + input + "__";
+            }
+          };
+        }
+      });
+      put("Inverted Section", new Object() {
+        Function lambda() {
+          return new Function<String, Object>() {
+            @Override
+            public Object apply(String input) {
+              return false;
+            }
+          };
+        }
+      });
+    }}; 
     for (final JsonNode test : spec.get("tests")) {
       boolean failed = false;      
       DefaultCodeFactory CF = new DefaultCodeFactory("/spec/specs") {
@@ -98,8 +203,8 @@ public class SpecTest {
       JsonNode data = test.get("data");
       try {
         Mustache compile = MC.compile(template, file);
-        StringWriter writer = new StringWriter();
-        compile.execute(writer, Arrays.asList((Object) new JsonMap(data)));
+        StringWriter writer = new StringWriter();        
+        compile.execute(writer, Arrays.asList((Object) new JsonMap(data), functionMap.get(file)));
         String expected = test.get("expected").getTextValue();
         if (writer.toString().replaceAll("\\s+", "").equals(expected.replaceAll("\\s+", ""))) {
           System.out.print(": success");
