@@ -1,5 +1,6 @@
 package com.github.mustachejava;
 
+import java.io.Reader;
 import java.util.List;
 
 /**
@@ -7,16 +8,19 @@ import java.util.List;
  */
 public interface CodeFactory {
   // Specified
-  Code iterable(Mustache m, String variable, List<Code> codes, String file, int start);
-  Code notIterable(Mustache m, String variable, List<Code> codes, String file, int start);
-  Code name(Mustache m, String variable, List<Code> codes, String file, int start);
-  Code partial(Mustache m, String variable, String file, int line);
-  Code value(Mustache m, String finalName, boolean b, int line);
+  Code iterable(String variable, List<Code> codes, String file, int start);
+  Code notIterable(String variable, List<Code> codes, String file, int start);
+  Code name(String variable, List<Code> codes, String file, int start);
+  Code partial(String variable, String file, int line);
+  Code value(String finalName, boolean b, int line);
   Code write(String text, int line);
 
   // Internal
   Code eof(int line);
 
   // Extension
-  Code extend(Mustache m, String variable, List<Code> codes, String file, int start);
+  Code extend(String variable, List<Code> codes, String file, int start);
+  
+  // Get readers
+  Reader getReader(String file);
 }

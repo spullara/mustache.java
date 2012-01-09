@@ -2,9 +2,12 @@ package com.github.mustachejava;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Writer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.github.mustachejava.impl.DefaultCode;
 
 /**
  * A pseudo interpreter / compiler. Instead of compiling to Java code, it compiles to a
@@ -21,7 +24,26 @@ public class MustacheCompiler {
     this.cf = cf;
   }
 
-  public List<Code> compile(final Mustache m, final Reader br, String tag, final AtomicInteger currentLine, String file) throws MustacheException {
+  public Mustache compile(String file) {
+    Reader reader = cf.getReader(file);
+    final Code[] codes = compile(reader, null, new AtomicInteger(0), file).toArray(new Code[0]);
+    return new Mustache() {
+      @Override
+      public void execute(Writer writer, List<Object> scopes) {
+        int length = codes.length;
+        for (int i = 0; i < length; i++) {
+          codes[i].execute(writer, scopes);
+        }
+      }
+
+      @Override
+      public void append(String text) {
+        throw new MustacheException("Unsupported");
+      }
+    };
+  }
+  
+  public List<Code> compile(final Reader br, String tag, final AtomicInteger currentLine, String file) throws MustacheException {
     final List<Code> list = new LinkedList<Code>();
 
     // Now we grab the mustache template
@@ -79,7 +101,7 @@ public class MustacheCompiler {
               case '$':
               case '=': {
                 int start = currentLine.get();
-                final List<Code> codes = compile(m, br, variable, currentLine, file);
+                final List<Code> codes = compile(br, variable, currentLine, file);
                 int lines = currentLine.get() - start;
                 if (!onlywhitespace || lines == 0) {
                   write(list, out, currentLine.intValue());
@@ -87,16 +109,16 @@ public class MustacheCompiler {
                 out = new StringBuilder();
                 switch (ch) {
                   case '#':
-                    list.add(cf.iterable(m, variable, codes, file, start));
+                    list.add(cf.iterable(variable, codes, file, start));
                     break;
                   case '^':
-                    list.add(cf.notIterable(m, variable, codes, file, start));
+                    list.add(cf.notIterable(variable, codes, file, start));
                     break;
                   case '<':
-                    list.add(cf.extend(m, variable, codes, file, start));
+                    list.add(cf.extend(variable, codes, file, start));
                     break;
                   case '$':
-                    list.add(cf.name(m, variable, codes, file, start));
+                    list.add(cf.name(variable, codes, file, start));
                     break;
                 }
                 iterable = lines != 0;
@@ -116,7 +138,7 @@ public class MustacheCompiler {
               }
               case '>': {
                 out = write(list, out, currentLine.intValue());
-                list.add(cf.partial(m, variable, file, currentLine.get()));
+                list.add(cf.partial(variable, file, currentLine.get()));
                 break;
               }
               case '{': {
@@ -132,13 +154,13 @@ public class MustacheCompiler {
                   }
                 }
                 final String finalName = name;
-                list.add(cf.value(m, finalName, false, currentLine.intValue()));
+                list.add(cf.value(finalName, false, currentLine.intValue()));
                 break;
               }
               case '&': {
                 // Not escaped
                 out = write(list, out, currentLine.intValue());
-                list.add(cf.value(m, variable, false, currentLine.intValue()));
+                list.add(cf.value(variable, false, currentLine.intValue()));
                 break;
               }
               case '%':
@@ -156,7 +178,7 @@ public class MustacheCompiler {
                 }
                 // Reference
                 out = write(list, out, currentLine.intValue());
-                list.add(cf.value(m, command.trim(), true, currentLine.intValue()));
+                list.add(cf.value(command.trim(), true, currentLine.intValue()));
                 break;
               }
             }
