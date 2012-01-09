@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.github.mustachejava.impl.DefaultCode;
-
 /**
  * A pseudo interpreter / compiler. Instead of compiling to Java code, it compiles to a
  * list of instructions to execute.
@@ -19,6 +17,11 @@ import com.github.mustachejava.impl.DefaultCode;
  */
 public class MustacheCompiler {
   private CodeFactory cf;
+  private boolean specCompliance;
+
+  public void setSpecCompliance(boolean specCompliance) {
+    this.specCompliance = specCompliance;
+  }
 
   public MustacheCompiler(CodeFactory cf) {
     this.cf = cf;
@@ -28,9 +31,9 @@ public class MustacheCompiler {
     Reader reader = cf.getReader(file);
     return compile(reader, file);
   }
-  
+
   public Mustache compile(Reader reader, String file) {
-    final Code[] codes = compile(reader, null, new AtomicInteger(0), file).toArray(new Code[0]);
+    final Code[] codes = compile(reader, null, new AtomicInteger(0), file, "{{", "}}").toArray(new Code[0]);
     return new Mustache() {
       @Override
       public void execute(Writer writer, List<Object> scopes) {
@@ -46,22 +49,18 @@ public class MustacheCompiler {
       }
     };
   }
-  
-  public List<Code> compile(final Reader br, String tag, final AtomicInteger currentLine, String file) throws MustacheException {
+
+  public List<Code> compile(final Reader br, String tag, final AtomicInteger currentLine, String file, String sm, String em) throws MustacheException {
     final List<Code> list = new LinkedList<Code>();
-
     // Now we grab the mustache template
-    String sm = "{{";
-    String em = "}}";
-
-    int c;
     boolean onlywhitespace = true;
     boolean iterable = currentLine.get() != 0;
     currentLine.compareAndSet(0, 1);
     StringBuilder out = new StringBuilder();
     try {
+      int c;
       while ((c = br.read()) != -1) {
-        if (c == '\r') {
+        if (!specCompliance && c == '\r') {
           continue;
         }
         // Increment the line
@@ -79,19 +78,21 @@ public class MustacheCompiler {
         // Check for a mustache start
         if (c == sm.charAt(0)) {
           br.mark(1);
-          if (br.read() == sm.charAt(1)) {
+          if (sm.length() == 1 || br.read() == sm.charAt(1)) {
             // Two mustaches, now capture command
             StringBuilder sb = new StringBuilder();
             while ((c = br.read()) != -1) {
               br.mark(1);
               if (c == em.charAt(0)) {
-                if (br.read() == em.charAt(1)) {
-                  // Matched end
-                  break;
-                } else {
-                  // Only one
-                  br.reset();
-                }
+                if (em.length() > 1) {
+                  if (br.read() == em.charAt(1)) {
+                    // Matched end
+                    break;
+                  } else {
+                    // Only one
+                    br.reset();
+                  }
+                } else break;
               }
               sb.append((char) c);
             }
@@ -102,10 +103,9 @@ public class MustacheCompiler {
               case '#':
               case '^':
               case '<':
-              case '$':
-              case '=': {
+              case '$': {
                 int start = currentLine.get();
-                final List<Code> codes = compile(br, variable, currentLine, file);
+                final List<Code> codes = compile(br, variable, currentLine, file, sm, em);
                 int lines = currentLine.get() - start;
                 if (!onlywhitespace || lines == 0) {
                   write(list, out, currentLine.intValue());
@@ -175,6 +175,17 @@ public class MustacheCompiler {
                 // Comment
                 out = write(list, out, currentLine.intValue());
                 break;
+              case '=':
+                // Change delimiters
+                out = write(list, out, currentLine.intValue());
+                String delimiters = command.replaceAll("\\s+", "");
+                int length = delimiters.length();
+                if (length > 6 || length / 2 * 2 != length) {
+                  throw new MustacheException("Invalid delimiter string");
+                }
+                sm = delimiters.substring(1, length / 2);
+                em = delimiters.substring(length / 2, length - 1);
+                break;
               default: {
                 if (c == -1) {
                   throw new MustacheException(
@@ -192,7 +203,7 @@ public class MustacheCompiler {
             br.reset();
           }
         }
-        onlywhitespace = (c == ' ' || c == '\t') && onlywhitespace;
+        onlywhitespace = onlywhitespace && (c == ' ' || c == '\t' || c == '\r');
         out.append((char) c);
       }
       write(list, out, currentLine.intValue());

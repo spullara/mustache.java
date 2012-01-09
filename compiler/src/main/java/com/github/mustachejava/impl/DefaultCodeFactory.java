@@ -88,17 +88,17 @@ public class DefaultCodeFactory implements CodeFactory {
 
   @Override
   public Code notIterable(String variable, List<Code> codes, String file, int start) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public Code name(String variable, List<Code> codes, String file, int start) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public Code partial(String variable, String file, int line) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -145,7 +145,7 @@ public class DefaultCodeFactory implements CodeFactory {
 
   @Override
   public Code extend(String variable, List<Code> codes, String file, int start) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    throw new UnsupportedOperationException();
   }
 
   @Override

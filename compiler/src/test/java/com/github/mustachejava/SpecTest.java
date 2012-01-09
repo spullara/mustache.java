@@ -22,6 +22,9 @@ import static junit.framework.Assert.assertFalse;
 public class SpecTest {
 
   private static final MustacheCompiler MC = new MustacheCompiler(new DefaultCodeFactory());
+  static {
+    MC.setSpecCompliance(true);
+  }
   private JsonFactory jf = new MappingJsonFactory();
 
   @Test
@@ -34,6 +37,26 @@ public class SpecTest {
     run(getSpec("/spec/specs/sections.json"));
   }
 
+  @Test
+  public void delimiters() throws IOException {
+    run(getSpec("/spec/specs/delimiters.json"));
+  }
+
+  @Test
+  public void inverted() throws IOException {
+    run(getSpec("/spec/specs/inverted.json"));
+  }
+
+  @Test
+  public void partials() throws IOException {
+    run(getSpec("/spec/specs/partials.json"));
+  }
+
+  @Test
+  public void lambdas() throws IOException {
+    run(getSpec("/spec/specs/~lambdas.json"));
+  }
+
   private void run(JsonNode spec) {
     boolean failed = false;
     for (final JsonNode test : spec.get("tests")) {
@@ -41,9 +64,9 @@ public class SpecTest {
       System.out.print("Running " + file + " - " + test.get("desc").getTextValue());
       StringReader template = new StringReader(test.get("template").getTextValue());
       JsonNode data = test.get("data");
-      Mustache compile = MC.compile(template, file);
-      StringWriter writer = new StringWriter();
       try {
+        Mustache compile = MC.compile(template, file);
+        StringWriter writer = new StringWriter();
         compile.execute(writer, Arrays.asList((Object) new JsonMap(data)));
         String expected = test.get("expected").getTextValue();
         if (writer.toString().equals(expected)) {
@@ -55,7 +78,8 @@ public class SpecTest {
           failed = true;
         }
       } catch (Exception e) {
-        System.out.println(": exception: " + e);
+        System.out.println(": exception");
+        e.printStackTrace();
         System.out.println(test);
         failed = true;
       }
