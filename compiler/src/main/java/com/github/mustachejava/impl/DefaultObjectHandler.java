@@ -101,7 +101,6 @@ public class DefaultObjectHandler implements ObjectHandler {
         throw new RuntimeException("Failed to get value from future", e);
       }
     }
-    MethodWrapper wrapper = null;
     if (scope instanceof Map) {
       Map map = (Map) scope;
       if (map.get(name) == null) {
@@ -162,7 +161,7 @@ public class DefaultObjectHandler implements ObjectHandler {
         }
       }
     }
-    return wrapper;
+    return member;
   }
 
   @Override

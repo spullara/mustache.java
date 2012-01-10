@@ -205,7 +205,7 @@ public class SpecTest {
       try {
         Mustache compile = MC.compile(template, file);
         StringWriter writer = new StringWriter();        
-        compile.execute(writer, functionMap.get(file), new JsonMap(data));
+        compile.execute(writer, new JsonMap(data), functionMap.get(file));
         String expected = test.get("expected").getTextValue();
         if (writer.toString().replaceAll("\\s+", "").equals(expected.replaceAll("\\s+", ""))) {
           System.out.print(": success");
