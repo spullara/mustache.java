@@ -55,9 +55,10 @@ public class DefaultCode implements Code {
       }
     }
     try {
-      return methodWrapper == null ? null : methodWrapper.call(scopes);
+      return methodWrapper.call(scopes);
     } catch (MethodGuardException e) {
       methodWrapper = null;
+      numScopes = -1;
       return resolve(name, scopes);
     }
   }
