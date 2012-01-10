@@ -62,7 +62,6 @@ public class IterableCode extends DefaultCode {
         }
       }
     }
-    writer = appendText(writer);
-    return writer;
+    return appendText(writer);
   }
 }

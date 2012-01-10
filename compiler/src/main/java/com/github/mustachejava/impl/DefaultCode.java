@@ -81,9 +81,7 @@ public class DefaultCode implements Code {
    */
   @Override
   public Writer execute(Writer writer, Object... scopes) {
-    writer = runCodes(writer, scopes);
-    writer = appendText(writer);
-    return writer;
+    return appendText(runCodes(writer, scopes));
   }
 
   @Override

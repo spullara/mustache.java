@@ -32,7 +32,6 @@ public class NotIterableCode extends DefaultCode {
     } else {
       writer = runCodes(writer, scopes);
     }
-    writer = appendText(writer);
-    return writer;
+    return appendText(writer);
   }
 }

@@ -86,8 +86,7 @@ public class DefaultCodeFactory implements CodeFactory {
         System.arraycopy(scopes, 0, newscopes, 0, scopes.length);
         newscopes[scopes.length] = scope;
         writer = partial.execute(writer, newscopes);
-        writer = appendText(writer);
-        return writer;
+        return appendText(writer);
       }
     };
   }
