@@ -1,4 +1,4 @@
-package com.github.mustachejava.impl;
+package com.github.mustachejava.util;
 
 /**
  * Created by IntelliJ IDEA.

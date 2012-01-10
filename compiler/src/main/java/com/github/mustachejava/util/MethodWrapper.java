@@ -1,4 +1,4 @@
-package com.github.mustachejava.impl;
+package com.github.mustachejava.util;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;

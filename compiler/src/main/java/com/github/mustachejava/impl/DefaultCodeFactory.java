@@ -7,12 +7,15 @@ import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
+
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import com.github.mustachejava.Code;
 import com.github.mustachejava.CodeFactory;
@@ -35,6 +38,8 @@ public class DefaultCodeFactory implements CodeFactory {
   private String resourceRoot;
   private File fileRoot;
 
+  private ListeningExecutorService les;
+  
   public DefaultCodeFactory() {
   }
 
@@ -73,22 +78,7 @@ public class DefaultCodeFactory implements CodeFactory {
     // Use the  name of the parent to get the name of the partial
     int index = file.lastIndexOf(".");
     final String extension = index == -1 ? "" : file.substring(index);
-    return new DefaultCode(oh, null, variable, ">", sm, em) {
-      private Mustache partial;
-
-      @Override
-      public Writer execute(Writer writer, Object... scopes) {
-        if (partial == null) {
-          partial = mc.compile(variable + extension);
-        }
-        Object scope = get(variable, scopes);
-        Object[] newscopes = new Object[scopes.length + 1];
-        System.arraycopy(scopes, 0, newscopes, 0, scopes.length);
-        newscopes[scopes.length] = scope;
-        writer = partial.execute(writer, newscopes);
-        return appendText(writer);
-      }
-    };
+    return new PartialCode(this, variable, sm, em, extension);
   }
 
   @Override
@@ -196,4 +186,15 @@ public class DefaultCodeFactory implements CodeFactory {
     return oh;
   }
 
+  public ListeningExecutorService getListeningExecutorService() {
+    return les;
+  }
+
+  public void setExecutorService(ExecutorService es) {
+    if (es instanceof ListeningExecutorService) {
+      les = (ListeningExecutorService) es;
+    } else {
+      les = MoreExecutors.listeningDecorator(es);
+    }
+  }
 }

@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -395,7 +397,7 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "items.txt"), sw.toString());
   }
 
-  public void testReadme2() throws MustacheException, IOException {
+  public void testReadmeSerial() throws MustacheException, IOException {
     MustacheCompiler c = init();
     Mustache m = c.compile("items2.html");
     StringWriter sw = new StringWriter();
@@ -403,17 +405,17 @@ public class InterpreterTest extends TestCase {
     m.execute(sw, new Context());
     long diff = System.currentTimeMillis() - start;
     assertEquals(getContents(root, "items.txt"), sw.toString());
-    assertTrue("Should be a little bit more than 1 second: " + diff, diff > 999 && diff < 2000);
+    assertTrue("Should be a little bit more than 4 seconds: " + diff, diff > 3999 && diff < 6000);
   }
 
-  public void testReadme3() throws MustacheException, IOException {
-    MustacheCompiler c = init();
-    Mustache m = c.compile("items3.html");
+  public void testReadmeParallel() throws MustacheException, IOException {
+    MustacheCompiler c = initParallel();
+    Mustache m = c.compile("items2.html");
     StringWriter sw = new StringWriter();
     long start = System.currentTimeMillis();
     m.execute(sw, new Context());
     long diff = System.currentTimeMillis() - start;
-    assertEquals(getContents(root, "items3.txt"), sw.toString());
+    assertEquals(getContents(root, "items.txt"), sw.toString());
     assertTrue("Should be a little bit more than 1 second: " + diff, diff > 999 && diff < 2000);
   }
 
@@ -443,22 +445,26 @@ public class InterpreterTest extends TestCase {
 
       String description;
 
-      Future<String> desc() throws InterruptedException {
-        final SettableFuture<String> result = SettableFuture.create();
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
+      Callable<String> desc() throws InterruptedException {
+        return new Callable<String>() {
           @Override
-          public void run() {
-            result.set(description);
+          public String call() throws Exception {
+            Thread.sleep(1000);
+            return description;
           }
-        }, 1000);
-        return result;
+        };
       }
     }
   }
 
   private MustacheCompiler init() {
     DefaultCodeFactory cf = new DefaultCodeFactory(root);
+    return new MustacheCompiler(cf);
+  }
+
+  private MustacheCompiler initParallel() {
+    DefaultCodeFactory cf = new DefaultCodeFactory(root);
+    cf.setExecutorService(Executors.newCachedThreadPool());
     return new MustacheCompiler(cf);
   }
 

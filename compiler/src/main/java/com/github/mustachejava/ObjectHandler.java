@@ -3,7 +3,7 @@ package com.github.mustachejava;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import com.github.mustachejava.impl.MethodWrapper;
+import com.github.mustachejava.util.MethodWrapper;
 
 /**
  * TODO: Edit this

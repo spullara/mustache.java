@@ -6,6 +6,8 @@ import java.io.Writer;
 import com.github.mustachejava.Code;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
+import com.github.mustachejava.util.MethodGuardException;
+import com.github.mustachejava.util.MethodWrapper;
 
 /**
  * Simplest possible code implementaion with some default shared behavior

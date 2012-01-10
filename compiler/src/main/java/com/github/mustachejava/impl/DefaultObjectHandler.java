@@ -14,6 +14,8 @@ import java.util.logging.Logger;
 
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.ObjectHandler;
+import com.github.mustachejava.util.MethodGuardException;
+import com.github.mustachejava.util.MethodWrapper;
 
 /**
  * Lookup objects using reflection and execute them the same way.
@@ -38,20 +40,13 @@ public class DefaultObjectHandler implements ObjectHandler {
   };
 
   private static final Method MAP_METHOD;
-  private static final Method FUTURE_METHOD;
-
   static {
     try {
       MAP_METHOD = Map.class.getMethod("get", Object.class);
-      FUTURE_METHOD = Future.class.getMethod("get");
     } catch (NoSuchMethodException e) {
       throw new AssertionError(e);
     }
   }
-
-  private static Logger logger = Logger.getLogger(Mustache.class.getName());
-
-  private static MethodWrapper nothing = new MethodWrapper(null, null);
 
   public MethodWrapper find(String name, Object... scopes) {
     MethodWrapper methodWrapper = null;
@@ -108,13 +103,6 @@ public class DefaultObjectHandler implements ObjectHandler {
 
   private MethodWrapper findWrapper(Class[] guard, Object scope, String name) {
     if (scope == null) return null;
-    if (scope instanceof Future) {
-      try {
-        scope = ((Future) scope).get();
-      } catch (Exception e) {
-        throw new RuntimeException("Failed to get value from future", e);
-      }
-    }
     if (scope instanceof Map) {
       Map map = (Map) scope;
       if (map.get(name) == null) {
