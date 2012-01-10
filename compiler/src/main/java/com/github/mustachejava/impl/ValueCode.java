@@ -25,7 +25,7 @@ public class ValueCode extends DefaultCode {
   private DefaultCodeFactory cf;
 
   public ValueCode(DefaultCodeFactory cf, String variable, String sm, String em, boolean encoded, int line) {
-    super(null, variable, "", sm, em);
+    super(cf.getObjectHandler(), null, variable, "", sm, em);
     this.cf = cf;
     this.variable = variable;
     this.encoded = encoded;
@@ -34,7 +34,7 @@ public class ValueCode extends DefaultCode {
 
   @Override
   public void execute(Writer writer, Object... scopes) {
-    Object object = cf.resolve(variable, scopes);
+    Object object = resolve(variable, scopes);
     if (object != null) {
       try {
         String value;

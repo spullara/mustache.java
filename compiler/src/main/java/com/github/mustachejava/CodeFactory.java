@@ -28,6 +28,6 @@ public interface CodeFactory {
   // to change the way encoding works. Also, if you use unexecute, make sure
   // also do the inverse in decode.
   String encode(String value);
-
-  Object resolve(String name, Object... scopes);
+  
+  ObjectHandler getObjectHandler();
 }

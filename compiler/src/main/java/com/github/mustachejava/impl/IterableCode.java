@@ -11,6 +11,7 @@ import com.google.common.base.Function;
 
 import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
+import com.github.mustachejava.ObjectHandler;
 
 /**
 * Created by IntelliJ IDEA.
@@ -26,7 +27,7 @@ public class IterableCode extends DefaultCode {
   private DefaultCodeFactory cf;
 
   public IterableCode(DefaultCodeFactory cf, List<Code> codes, String variable, String sm, String em, String file) {
-    super(codes.toArray(new Code[0]), variable, "#", sm, em);
+    super(cf.getObjectHandler(), codes.toArray(new Code[0]), variable, "#", sm, em);
     this.cf = cf;
     this.variable = variable;
     this.file = file;
@@ -34,7 +35,7 @@ public class IterableCode extends DefaultCode {
 
   @Override
   public void execute(Writer writer, Object... scopes) {
-    Object resolve = cf.resolve(variable, scopes);
+    Object resolve = resolve(variable, scopes);
     if (resolve != null) {
       if (resolve instanceof Function) {
         Function f = (Function) resolve;
@@ -51,7 +52,7 @@ public class IterableCode extends DefaultCode {
           mustache.execute(writer, scopes);
         }
       } else {
-        for (Iterator i = cf.oh.iterate(resolve); i.hasNext(); ) {
+        for (Iterator i = oh.iterate(resolve); i.hasNext(); ) {
           Object next = i.next();
           Object[] iteratorScopes = scopes;
           if (next != null) {

@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.github.mustachejava.Code;
 import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.ObjectHandler;
 
 /**
  * Simplest possible code implementaion with some default shared behavior
@@ -14,22 +15,46 @@ public class DefaultCode implements Code {
   private StringBuilder sb = new StringBuilder();
   protected String appended;
 
+  protected final ObjectHandler oh;
   protected final Code[] codes;
   protected final String name;
   protected final String type;
   protected final String sm;
   protected final String em;
 
+  // Callsite caching
+  protected MethodWrapper methodWrapper;
+
+  // TODO: Recursion protection. Need better guard logic. But still fast.
+  protected int numScopes = -1;
+
   public DefaultCode() {
-    this(null, null, null, null, null);
+    this(null, null, null, null, null, null);
   }
 
-  public DefaultCode(Code[] codes, String name, String type, String sm, String em) {
+  public DefaultCode(ObjectHandler oh, Code[] codes, String name, String type, String sm, String em) {
+    this.oh = oh;
     this.codes = codes;
     this.type = type;
     this.name = name;
     this.sm = sm;
     this.em = em;
+  }
+
+  public Object resolve(String name, Object... scopes) {
+    if (numScopes == -1) numScopes = scopes.length;
+    if (name.equals(".")) {
+      return scopes[scopes.length - 1];
+    }
+    if (scopes.length != numScopes || methodWrapper == null) {
+      methodWrapper = oh.find(name, scopes);
+    }
+    try {
+      return methodWrapper == null ? null : methodWrapper.call(scopes);
+    } catch (MethodGuardException e) {
+      methodWrapper = null;
+      return resolve(name, scopes);
+    }
   }
 
   /**

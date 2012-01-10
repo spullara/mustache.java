@@ -15,19 +15,17 @@ import com.github.mustachejava.Code;
 */
 public class NotIterableCode extends DefaultCode {
   private final String variable;
-  private DefaultCodeFactory cf;
 
   public NotIterableCode(DefaultCodeFactory cf, List<Code> codes, String variable, String sm, String em) {
-    super(codes.toArray(new Code[0]), variable, "^", sm, em);
-    this.cf = cf;
+    super(cf.getObjectHandler(), codes.toArray(new Code[0]), variable, "^", sm, em);
     this.variable = variable;
   }
 
   @Override
   public void execute(Writer writer, Object... scopes) {
-    Object resolve = cf.resolve(variable, scopes);
+    Object resolve = resolve(variable, scopes);
     if (resolve != null) {
-      Iterator i = cf.oh.iterate(resolve);
+      Iterator i = oh.iterate(resolve);
       if (!i.hasNext()) {
         runCodes(writer, scopes);
       }

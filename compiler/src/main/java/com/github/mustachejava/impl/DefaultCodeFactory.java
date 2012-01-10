@@ -40,19 +40,6 @@ public class DefaultCodeFactory implements CodeFactory {
   }
 
   @Override
-  public Object resolve(String name, Object... scopes) {
-    if (name.equals(".")) {
-      return scopes[scopes.length - 1];
-    }
-    MethodWrapper methodWrapper = oh.find(name, scopes);
-    try {
-      return methodWrapper == null ? null : methodWrapper.call(scopes);
-    } catch (MethodGuardException e) {
-      throw new MustacheException(e);
-    }
-  }
-
-  @Override
   public Code iterable(final String variable, List<Code> codes, final String file, final int start, String sm, String em) {
     return new IterableCode(this, codes, variable, sm, em, file);
   }
@@ -162,6 +149,11 @@ public class DefaultCodeFactory implements CodeFactory {
       sb.append(value, position, value.length());
       return sb.toString();
     }
+  }
+
+  @Override
+  public ObjectHandler getObjectHandler() {
+    return oh;
   }
 
 }

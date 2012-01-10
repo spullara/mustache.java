@@ -178,7 +178,7 @@ public class SpecTest {
 
         @Override
         public Code partial(final String variable, String file, int line, String sm, String em) {
-          return new DefaultCode(null, variable, ">", sm, em) {
+          return new DefaultCode(getObjectHandler(), null, variable, ">", sm, em) {
             @Override
             public void execute(Writer writer, Object... scopes) {
               JsonNode partialNode = partials.get(variable);
