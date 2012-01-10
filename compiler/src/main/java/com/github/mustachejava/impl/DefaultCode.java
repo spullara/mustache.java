@@ -27,6 +27,7 @@ public class DefaultCode implements Code {
 
   // TODO: Recursion protection. Need better guard logic. But still fast.
   protected int numScopes = -1;
+  protected boolean notfound = false;
 
   public DefaultCode() {
     this(null, null, null, null, null, null);
@@ -42,12 +43,17 @@ public class DefaultCode implements Code {
   }
 
   public Object resolve(String name, Object... scopes) {
+    if (notfound) return null;
     if (numScopes == -1) numScopes = scopes.length;
     if (name.equals(".")) {
       return scopes[scopes.length - 1];
     }
     if (scopes.length != numScopes || methodWrapper == null) {
       methodWrapper = oh.find(name, scopes);
+      if (methodWrapper == null) {
+        notfound = true;
+        return null;
+      }
     }
     try {
       return methodWrapper == null ? null : methodWrapper.call(scopes);

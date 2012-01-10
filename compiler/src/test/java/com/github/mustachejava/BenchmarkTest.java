@@ -9,6 +9,11 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.xml.transform.stream.StreamSource;
+
+import com.google.common.io.CharStreams;
+import com.google.common.io.InputSupplier;
+
 import com.github.mustachejava.impl.DefaultCodeFactory;
 import junit.framework.TestCase;
 
@@ -35,7 +40,10 @@ public class BenchmarkTest extends TestCase {
       {
         MustacheCompiler c = new MustacheCompiler(new DefaultCodeFactory());
         Mustache m = c.compile("complex.html");
-        complextest(m);
+        assertEquals(CharStreams.toString(
+                        new InputStreamReader(
+                                BenchmarkTest.class.getResourceAsStream("/complex.txt"))),
+                complextest(m).toString());
         long start = System.currentTimeMillis();
         int total = 0;
         while (true) {
@@ -50,7 +58,7 @@ public class BenchmarkTest extends TestCase {
 
   private StringWriter complextest(Mustache m) throws MustacheException, IOException {
     StringWriter sw = new StringWriter();
-    m.execute(sw, Arrays.asList((Object)new ComplexObject()));
+    m.execute(sw, new ComplexObject());
     return sw;
   }
 
