@@ -42,13 +42,17 @@ public class LatchedWriter extends Writer {
   public synchronized void write(char[] cbuf, int off, int len) throws IOException {
     checkException();
     if (latch.getCount() == 0) {
-      if (!isWritten) {
-        isWritten = true;
-        writer.append(buffer.getBuffer());
-      }
+      checkWrite();
       writer.write(cbuf, off, len);
     } else {
       buffer.write(cbuf, off, len);
+    }
+  }
+
+  private void checkWrite() throws IOException {
+    if (!isWritten) {
+      isWritten = true;
+      writer.append(buffer.getBuffer());
     }
   }
 
@@ -67,10 +71,7 @@ public class LatchedWriter extends Writer {
     try {
       latch.await();
       synchronized (this) {
-        if (!isWritten) {
-          isWritten = true;
-          writer.append(buffer.getBuffer());
-        }
+        checkWrite();
         writer.flush();
       }
     } catch (InterruptedException e) {

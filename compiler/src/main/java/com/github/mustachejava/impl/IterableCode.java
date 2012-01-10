@@ -44,30 +44,7 @@ public class IterableCode extends DefaultCode {
       if (resolve instanceof Function) {
         writer = handleFunction(writer, (Function) resolve, scopes);
       } else if (resolve instanceof Callable) {
-        final Callable callable = (Callable) resolve;
-        if (les == null) {
-          try {
-            writer = execute(writer, callable.call(), scopes);
-          } catch (Exception e) {
-            throw new MustacheException(e);
-          }
-        } else {
-          final Writer finalWriter = writer;
-          final LatchedWriter latchedWriter = new LatchedWriter(writer);
-          writer = latchedWriter;
-          les.execute(new Runnable() {
-            @Override
-            public void run() {
-              try {
-                Object call = callable.call();
-                execute(finalWriter, call, scopes);
-                latchedWriter.done();
-              } catch (Throwable e) {
-                latchedWriter.failed(e);
-              }
-            }
-          });
-        }
+        writer = handleCallable(writer, (Callable) resolve, scopes);
       } else {
         writer = execute(writer, resolve, scopes);
       }
@@ -75,10 +52,37 @@ public class IterableCode extends DefaultCode {
     return appendText(writer);
   }
 
-  protected Writer handleFunction(Writer writer, Function resolve, Object[] scopes) {
+  protected Writer handleCallable(Writer writer, final Callable callable, final Object[] scopes) {
+    if (les == null) {
+      try {
+        writer = execute(writer, callable.call(), scopes);
+      } catch (Exception e) {
+        throw new MustacheException(e);
+      }
+    } else {
+      final Writer finalWriter = writer;
+      final LatchedWriter latchedWriter = new LatchedWriter(writer);
+      writer = latchedWriter;
+      les.execute(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            Object call = callable.call();
+            execute(finalWriter, call, scopes);
+            latchedWriter.done();
+          } catch (Throwable e) {
+            latchedWriter.failed(e);
+          }
+        }
+      });
+    }
+    return writer;
+  }
+
+  protected Writer handleFunction(Writer writer, Function function, Object[] scopes) {
     StringWriter sw = new StringWriter();
     runIdentity(sw);
-    Object newtemplate = resolve.apply(sw.toString());
+    Object newtemplate = function.apply(sw.toString());
     if (newtemplate != null) {
       String templateText = newtemplate.toString();
       Mustache mustache = cf.templateCache.get(templateText);
