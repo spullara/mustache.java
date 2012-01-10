@@ -27,6 +27,7 @@ public class DefaultCode implements Code {
   // TODO: Recursion protection. Need better guard logic. But still fast.
   protected int numScopes = -1;
   protected boolean notfound = false;
+  protected boolean returnThis = false;
 
   public DefaultCode() {
     this(null, null, null, null, null, null);
@@ -39,14 +40,26 @@ public class DefaultCode implements Code {
     this.name = name;
     this.sm = sm;
     this.em = em;
+    if (".".equals(name)) {
+      returnThis = true;
+    }
   }
 
-  public Object resolve(String name, Object... scopes) {
+  /**
+   * Retrieve the first value in the stacks of scopes that matches
+   * the give name. The method wrapper is cached and guarded against
+   * the type or number of scopes changing. We should deepen the guard.
+   *
+   * @param name   The common name of the field or method
+   * @param scopes An array of scopes to interrogate from right to left.
+   * @return The value of the field or method
+   */
+  public Object get(String name, Object... scopes) {
     if (notfound) return null;
-    if (numScopes == -1) numScopes = scopes.length;
-    if (name.equals(".")) {
+    if (returnThis) {
       return scopes[scopes.length - 1];
     }
+    if (numScopes == -1) numScopes = scopes.length;
     if (scopes.length != numScopes || methodWrapper == null) {
       methodWrapper = oh.find(name, scopes);
       if (methodWrapper == null) {
@@ -59,14 +72,15 @@ public class DefaultCode implements Code {
     } catch (MethodGuardException e) {
       methodWrapper = null;
       numScopes = -1;
-      return resolve(name, scopes);
+      return get(name, scopes);
     }
   }
 
   /**
-   * Default append behavior
-   * @param writer
-   * @param scopes
+   * The default behavior is to run the codes and append the captured text.
+   *
+   * @param writer The writer to write the output to
+   * @param scopes The scopes to evaluate the embedded names against.
    */
   @Override
   public void execute(Writer writer, Object... scopes) {

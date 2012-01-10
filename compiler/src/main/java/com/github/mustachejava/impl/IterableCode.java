@@ -33,7 +33,7 @@ public class IterableCode extends DefaultCode {
 
   @Override
   public void execute(Writer writer, Object... scopes) {
-    Object resolve = resolve(variable, scopes);
+    Object resolve = get(variable, scopes);
     if (resolve != null) {
       if (resolve instanceof Function) {
         Function f = (Function) resolve;

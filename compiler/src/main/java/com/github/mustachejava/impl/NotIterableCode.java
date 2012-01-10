@@ -23,7 +23,7 @@ public class NotIterableCode extends DefaultCode {
 
   @Override
   public void execute(Writer writer, Object... scopes) {
-    Object resolve = resolve(variable, scopes);
+    Object resolve = get(variable, scopes);
     if (resolve != null) {
       Iterator i = oh.iterate(resolve);
       if (!i.hasNext()) {

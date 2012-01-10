@@ -33,7 +33,7 @@ public class ValueCode extends DefaultCode {
 
   @Override
   public void execute(Writer writer, Object... scopes) {
-    Object object = resolve(variable, scopes);
+    Object object = get(variable, scopes);
     if (object != null) {
       try {
         String value;
