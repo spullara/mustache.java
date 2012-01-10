@@ -1,9 +1,13 @@
 package com.github.mustachejava.impl;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
@@ -28,15 +32,25 @@ public class DefaultCodeFactory implements CodeFactory {
   public final Map<String, Mustache> templateCache = new HashMap<String, Mustache>();
   public final ObjectHandler oh = new DefaultObjectHandler();
 
-  private String root;
+  private String resourceRoot;
+  private File fileRoot;
 
   public DefaultCodeFactory() {
-    root = "";
   }
 
-  public DefaultCodeFactory(String root) {
-    if (!root.endsWith("/")) root += "/";
-    this.root = root;
+  public DefaultCodeFactory(String resourceRoot) {
+    if (!resourceRoot.endsWith("/")) resourceRoot += "/";
+    this.resourceRoot = resourceRoot;
+  }
+
+  public DefaultCodeFactory(File fileRoot) {
+    if (!fileRoot.exists()) {
+      throw new MustacheException(fileRoot + " does not exist");
+    }
+    if (!fileRoot.isDirectory()) {
+      throw new MustacheException(fileRoot + " is not a directory");
+    }
+    this.fileRoot = fileRoot;
   }
 
   @Override
@@ -55,8 +69,26 @@ public class DefaultCodeFactory implements CodeFactory {
   }
 
   @Override
-  public Code partial(String variable, String file, int line, String sm, String em) {
-    throw new UnsupportedOperationException();
+  public Code partial(final String variable, String file, int line, String sm, String em) {
+    // Use the  name of the parent to get the name of the partial
+    int index = file.lastIndexOf(".");
+    final String extension = index == -1 ? "" : file.substring(index);
+    return new DefaultCode(oh, null, variable, ">", sm, em) {
+      private Mustache partial;
+
+      @Override
+      public void execute(Writer writer, Object... scopes) {
+        if (partial == null) {
+          partial = mc.compile(variable + extension);
+        }
+        Object scope = get(variable, scopes);
+        Object[] newscopes = new Object[scopes.length + 1];
+        System.arraycopy(scopes, 0, newscopes, 0, scopes.length);
+        newscopes[scopes.length] = scope;
+        partial.execute(writer, newscopes);
+        appendText(writer);
+      }
+    };
   }
 
   @Override
@@ -80,11 +112,19 @@ public class DefaultCodeFactory implements CodeFactory {
   }
 
   @Override
-  public Reader getReader(String file) {
+  public Reader getReader(String resourceName) {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    InputStream is = ccl.getResourceAsStream(root + file);
+    InputStream is = ccl.getResourceAsStream((resourceRoot == null ? "" : resourceRoot) + resourceName);
     if (is == null) {
-      throw new MustacheException("Resource " + (root + file) + " not found");
+      File file = fileRoot == null ? new File(resourceName) : new File(fileRoot, resourceName);
+      if (file.exists() && file.isFile()) {
+        try {
+          return new BufferedReader(new FileReader(file));
+        } catch (FileNotFoundException e) {
+          throw new MustacheException("Found file, could not open: " + file, e);
+        }
+      }
+      throw new MustacheException("Template " + resourceName + " not found");
     } else {
       return new BufferedReader(new InputStreamReader(is, Charset.forName("utf-8")));
     }
