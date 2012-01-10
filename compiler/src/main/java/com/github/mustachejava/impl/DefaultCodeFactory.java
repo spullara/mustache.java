@@ -40,22 +40,16 @@ public class DefaultCodeFactory implements CodeFactory {
   }
 
   @Override
-  public Object resolve(List<Object> scopes, String name) {
-    Object value = null;
-    int size = scopes.size();
-    for (int i = size - 1; i >= 0; i--) {
-      Object scope = scopes.get(i);
-      Object o = oh.handleObject(scope, name);
-      if (o != null) {
-        if (o == ObjectHandler.NULL) {
-          value = null;
-        } else {
-          value = o;
-        }
-        break;
-      }
+  public Object resolve(String name, Object... scopes) {
+    if (name.equals(".")) {
+      return scopes[scopes.length - 1];
     }
-    return value;
+    MethodWrapper methodWrapper = oh.find(name, scopes);
+    try {
+      return methodWrapper == null ? null : methodWrapper.call(scopes);
+    } catch (MethodGuardException e) {
+      throw new MustacheException(e);
+    }
   }
 
   @Override

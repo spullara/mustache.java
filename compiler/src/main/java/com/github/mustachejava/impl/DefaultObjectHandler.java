@@ -4,13 +4,13 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.github.mustachejava.Mustache;
@@ -27,26 +27,72 @@ public class DefaultObjectHandler implements ObjectHandler {
 
   // Create a map if one doesn't already exist -- MapMaker.computerHashMap seems to be
   // very inefficient, had to improvise
-  protected static Map<Class, Map<String, AccessibleObject>> cache = new HashMap<Class, Map<String, AccessibleObject>>() {
-    public synchronized Map<String, AccessibleObject> get(Object c) {
-      Map<String, AccessibleObject> o = super.get(c);
+  protected static Map<Class, Map<String, MethodWrapper>> cache = new HashMap<Class, Map<String, MethodWrapper>>() {
+    public synchronized Map<String, MethodWrapper> get(Object c) {
+      Map<String, MethodWrapper> o = super.get(c);
       if (o == null) {
-        o = new HashMap<String, AccessibleObject>();
+        o = new HashMap<String, MethodWrapper>();
         put((Class) c, o);
       }
       return o;
     }
   };
 
+  private static final Method MAP_METHOD;
+  private static final Method FUTURE_METHOD;
+  static {
+    try {
+      MAP_METHOD = Map.class.getMethod("get", Object.class);
+      FUTURE_METHOD = Future.class.getMethod("get");
+    } catch (NoSuchMethodException e) {
+      throw new AssertionError(e);
+    }
+  }
+  
   private static Logger logger = Logger.getLogger(Mustache.class.getName());
 
-  private static class Nothing extends AccessibleObject {
+  private static MethodWrapper nothing = new MethodWrapper(null, null);
+
+  public MethodWrapper find(String name, Object... scopes) {
+    MethodWrapper methodWrapper = null;
+    int size = scopes.length;
+    NEXT:
+    for (int i = size - 1; i >= 0; i--) {
+      Object scope = scopes[i];
+      if (scope == null) continue;
+      List<MethodWrapper> methodWrappers = null;
+      int dotIndex;
+      String subname = name;
+      while ((dotIndex = subname.indexOf('.')) != -1) {
+        String lookup = subname.substring(0, dotIndex);
+        subname = subname.substring(dotIndex + 1);
+        methodWrapper = findWrapper(scope, lookup);
+        if (methodWrapper != null) {
+          if (methodWrappers == null) methodWrappers = new ArrayList<MethodWrapper>();
+          methodWrappers.add(methodWrapper);
+          try {
+            scope = methodWrapper.call(scope);
+          } catch (MethodGuardException e) {
+            throw new AssertionError(e);
+          }
+        } else {
+          continue NEXT;
+        }
+      }
+      MethodWrapper wrapper = findWrapper(scope, subname);
+      if (wrapper != null) {
+        methodWrapper = wrapper;
+        wrapper.setScope(i);
+        if (methodWrappers != null) {
+          wrapper.addWrappers(methodWrappers.toArray(new MethodWrapper[methodWrappers.size()]));
+        }
+        break;
+      }
+    }
+    return methodWrapper;
   }
-
-  private static Nothing nothing = new Nothing();
-
-  @Override
-  public Object handleObject(Object scope, String name) {
+  
+  private MethodWrapper findWrapper(Object scope, String name) {
     if (scope == null) return null;
     if (scope instanceof Future) {
       try {
@@ -55,23 +101,20 @@ public class DefaultObjectHandler implements ObjectHandler {
         throw new RuntimeException("Failed to get value from future", e);
       }
     }
-    int dotIndex = name.indexOf('.');
-    if (dotIndex != -1) {
-      if (name.equals(".")) {
-        return scope;
-      }
-      Object newScope = handleObject(scope, name.substring(0, dotIndex));
-      return handleObject(newScope, name.substring(dotIndex + 1));
-    }
-    Object value = null;
+    MethodWrapper wrapper = null;
     if (scope instanceof Map) {
-      return ((Map) scope).get(name);
+      Map map = (Map) scope;
+      if (map.get(name) == null) {
+        return null;
+      } else {
+        return new MethodWrapper(scope.getClass(), MAP_METHOD, name);
+      }
     }
     Class aClass = scope.getClass();
-    Map<String, AccessibleObject> members;
+    Map<String, MethodWrapper> members;
     // Don't overload methods in your contexts
     members = cache.get(aClass);
-    AccessibleObject member;
+    MethodWrapper member;
     synchronized (members) {
       member = members.get(name);
     }
@@ -119,41 +162,7 @@ public class DefaultObjectHandler implements ObjectHandler {
         }
       }
     }
-    try {
-      if (member instanceof Field) {
-        Field field = (Field) member;
-        value = field.get(scope);
-        if (value == null) {
-          value = iterable(value, field.getType());
-        }
-      } else if (member instanceof Method) {
-        Method method = (Method) member;
-        if (method.getParameterTypes().length == 0) {
-          value = method.invoke(scope);
-        }
-        if (value == null) {
-          value = iterable(value, method.getReturnType());
-        }
-      }
-    } catch (Exception e) {
-      // Might be nice for debugging but annoying in practice
-      logger.log(Level.WARNING, "Failed to get value for " + name, e);
-    }
-    if (member == null) {
-      synchronized (members) {
-        members.put(name, nothing);
-      }
-    }
-    return value;
-  }
-
-  private Object iterable(Object value, Class<?> type) {
-    if (type.isAssignableFrom(Iterable.class)) {
-      value = EMPTY;
-    } else {
-      value = NULL;
-    }
-    return value;
+    return wrapper;
   }
 
   @Override
@@ -180,7 +189,7 @@ public class DefaultObjectHandler implements ObjectHandler {
     return i;
   }
 
-  public static Method getMethod(String name, Class aClass, Class... params) throws NoSuchMethodException {
+  public static MethodWrapper getMethod(String name, Class aClass, Class... params) throws NoSuchMethodException {
     Method member;
     try {
       member = aClass.getDeclaredMethod(name, params);
@@ -195,10 +204,10 @@ public class DefaultObjectHandler implements ObjectHandler {
       throw new NoSuchMethodException("Only public, protected and package members allowed");
     }
     member.setAccessible(true);
-    return member;
+    return new MethodWrapper(aClass, member);
   }
 
-  public static Field getField(String name, Class aClass) throws NoSuchFieldException {
+  public static MethodWrapper getField(String name, Class aClass) throws NoSuchFieldException {
     Field member;
     try {
       member = aClass.getDeclaredField(name);
@@ -213,7 +222,7 @@ public class DefaultObjectHandler implements ObjectHandler {
       throw new NoSuchFieldException("Only public, protected and package members allowed");
     }
     member.setAccessible(true);
-    return member;
+    return new MethodWrapper(aClass, member);
   }
 
   protected static class SingleValueIterator implements Iterator {

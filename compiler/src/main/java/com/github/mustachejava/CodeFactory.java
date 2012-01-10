@@ -29,5 +29,5 @@ public interface CodeFactory {
   // also do the inverse in decode.
   String encode(String value);
 
-  Object resolve(List<Object> scopes, String name);
+  Object resolve(String name, Object... scopes);
 }

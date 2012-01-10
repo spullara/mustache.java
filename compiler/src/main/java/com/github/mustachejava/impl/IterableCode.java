@@ -33,8 +33,8 @@ public class IterableCode extends DefaultCode {
   }
 
   @Override
-  public void execute(Writer writer, List<Object> scopes) {
-    Object resolve = cf.resolve(scopes, variable);
+  public void execute(Writer writer, Object... scopes) {
+    Object resolve = cf.resolve(variable, scopes);
     if (resolve != null) {
       if (resolve instanceof Function) {
         Function f = (Function) resolve;
@@ -53,10 +53,11 @@ public class IterableCode extends DefaultCode {
       } else {
         for (Iterator i = cf.oh.iterate(resolve); i.hasNext(); ) {
           Object next = i.next();
-          List<Object> iteratorScopes = scopes;
+          Object[] iteratorScopes = scopes;
           if (next != null) {
-            iteratorScopes = new ArrayList<Object>(scopes);
-            iteratorScopes.add(next);
+            iteratorScopes = new Object[scopes.length + 1];
+            System.arraycopy(scopes, 0, iteratorScopes, 0, scopes.length);
+            iteratorScopes[scopes.length] = next;
           }
           runCodes(writer, iteratorScopes);
         }

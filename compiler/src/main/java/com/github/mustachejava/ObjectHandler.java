@@ -2,7 +2,8 @@ package com.github.mustachejava;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+
+import com.github.mustachejava.impl.MethodWrapper;
 
 /**
  * TODO: Edit this
@@ -20,6 +21,6 @@ public interface ObjectHandler {
     }
   };
 
-  Object handleObject(Object scope, String name);
+  MethodWrapper find(String name, Object... scopes);
   Iterator iterate(Object object);
 }

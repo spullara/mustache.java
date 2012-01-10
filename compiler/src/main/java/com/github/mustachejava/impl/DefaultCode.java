@@ -38,7 +38,7 @@ public class DefaultCode implements Code {
    * @param scopes
    */
   @Override
-  public void execute(Writer writer, List<Object> scopes) {
+  public void execute(Writer writer, Object... scopes) {
     runCodes(writer, scopes);
     appendText(writer);
   }
@@ -83,7 +83,7 @@ public class DefaultCode implements Code {
     }
   }
 
-  protected void runCodes(Writer writer, List<Object> scopes) {
+  protected void runCodes(Writer writer, Object... scopes) {
     if (codes != null) {
       int length = codes.length;
       for (int i = 0; i < length; i++) {

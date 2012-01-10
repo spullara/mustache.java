@@ -33,8 +33,8 @@ public class ValueCode extends DefaultCode {
   }
 
   @Override
-  public void execute(Writer writer, List<Object> scopes) {
-    Object object = cf.resolve(scopes, variable);
+  public void execute(Writer writer, Object... scopes) {
+    Object object = cf.resolve(variable, scopes);
     if (object != null) {
       try {
         String value;

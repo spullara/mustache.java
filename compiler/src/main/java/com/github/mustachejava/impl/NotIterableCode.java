@@ -24,8 +24,8 @@ public class NotIterableCode extends DefaultCode {
   }
 
   @Override
-  public void execute(Writer writer, List<Object> scopes) {
-    Object resolve = cf.resolve(scopes, variable);
+  public void execute(Writer writer, Object... scopes) {
+    Object resolve = cf.resolve(variable, scopes);
     if (resolve != null) {
       Iterator i = cf.oh.iterate(resolve);
       if (!i.hasNext()) {
