@@ -19,9 +19,9 @@ public class MethodWrapper {
   private final Method method;
   private final Field field;
   private final Object[] arguments;
-  private final Class guard;
+  private final Class[] guard;
 
-  public MethodWrapper(Class guard, AccessibleObject method, Object... arguments) {
+  public MethodWrapper(Class[] guard, AccessibleObject method, Object... arguments) {
     if (method instanceof Field) {
       this.method = null;
       this.field = (Field) method;
@@ -50,26 +50,37 @@ public class MethodWrapper {
 
   public Object call(Object... scopes) throws MethodGuardException {
     try {
+      guardCall(scopes);
       Object scope = scopes[this.scope];
-      if (guard.isInstance(scope)) {
-        // The value may be buried by . notation
-        if (wrappers != null) {
-          for (int i = 0; i < wrappers.length; i++) {
-            scope = wrappers[i].call(scope);
-          }
-        }
-        if (scope == null) return null;
-        if (method == null) {
-          return field.get(scope);
-        } else {
-          return method.invoke(scope, arguments);
+      // The value may be buried by . notation
+      if (wrappers != null) {
+        for (int i = 0; i < wrappers.length; i++) {
+          scope = wrappers[i].call(scope);
         }
       }
-      throw new MethodGuardException();
+      if (scope == null) return null;
+      if (method == null) {
+        return field.get(scope);
+      } else {
+        return method.invoke(scope, arguments);
+      }
     } catch (InvocationTargetException e) {
       throw new MustacheException("Failed to execute method: " + method, e.getTargetException());
     } catch (IllegalAccessException e) {
       throw new MustacheException("Failed to execute method: " + method, e);
+    }
+  }
+
+  private void guardCall(Object[] scopes) throws MethodGuardException {
+    int length = scopes.length;
+    if (guard.length != length) {
+      throw new MethodGuardException();
+    }
+    for (int j = 0; j < length; j++) {
+      Class guardClass = guard[j];
+      if (guardClass != null && !guardClass.isInstance(scopes[j])) {
+        throw new MethodGuardException();
+      }
     }
   }
 }

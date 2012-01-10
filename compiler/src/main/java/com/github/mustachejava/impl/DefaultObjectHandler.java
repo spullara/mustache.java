@@ -54,9 +54,16 @@ public class DefaultObjectHandler implements ObjectHandler {
 
   public MethodWrapper find(String name, Object... scopes) {
     MethodWrapper methodWrapper = null;
-    int size = scopes.length;
+    int length = scopes.length;
+    Class[] guard = new Class[length];
+    for (int i = 0; i < length; i++) {
+      Object scope = scopes[i];
+      if (scope != null) {
+        guard[i] = scope.getClass();
+      }
+    }
     NEXT:
-    for (int i = size - 1; i >= 0; i--) {
+    for (int i = length - 1; i >= 0; i--) {
       Object scope = scopes[i];
       if (scope == null) continue;
       List<MethodWrapper> methodWrappers = null;
@@ -65,7 +72,7 @@ public class DefaultObjectHandler implements ObjectHandler {
       while ((dotIndex = subname.indexOf('.')) != -1) {
         String lookup = subname.substring(0, dotIndex);
         subname = subname.substring(dotIndex + 1);
-        methodWrapper = findWrapper(scope, lookup);
+        methodWrapper = findWrapper(new Class[] { scope.getClass() }, scope, lookup);
         if (methodWrapper != null) {
           if (methodWrappers == null) methodWrappers = new ArrayList<MethodWrapper>();
           methodWrappers.add(methodWrapper);
@@ -77,8 +84,9 @@ public class DefaultObjectHandler implements ObjectHandler {
         } else {
           continue NEXT;
         }
+        if (scope == null) return null;
       }
-      MethodWrapper wrapper = findWrapper(scope, subname);
+      MethodWrapper wrapper = findWrapper(guard, scope, subname);
       if (wrapper != null) {
         methodWrapper = wrapper;
         wrapper.setScope(i);
@@ -91,7 +99,7 @@ public class DefaultObjectHandler implements ObjectHandler {
     return methodWrapper;
   }
   
-  private MethodWrapper findWrapper(Object scope, String name) {
+  private MethodWrapper findWrapper(Class[] guard, Object scope, String name) {
     if (scope == null) return null;
     if (scope instanceof Future) {
       try {
@@ -105,7 +113,7 @@ public class DefaultObjectHandler implements ObjectHandler {
       if (map.get(name) == null) {
         return null;
       } else {
-        return new MethodWrapper(scope.getClass(), MAP_METHOD, name);
+        return new MethodWrapper(guard, MAP_METHOD, name);
       }
     }
     Class aClass = scope.getClass();
@@ -119,7 +127,7 @@ public class DefaultObjectHandler implements ObjectHandler {
     if (member == nothing) return null;
     if (member == null) {
       try {
-        member = getField(name, aClass);
+        member = getField(guard, name, aClass);
         synchronized (members) {
           members.put(name, member);
         }
@@ -130,13 +138,13 @@ public class DefaultObjectHandler implements ObjectHandler {
     if (member == null) {
       try {
         synchronized (members) {
-          member = getMethod(name, aClass);
+          member = getMethod(guard, name, aClass);
           members.put(name, member);
         }
       } catch (NoSuchMethodException e) {
         try {
           synchronized (members) {
-            member = getMethod(name, aClass, List.class);
+            member = getMethod(guard, name, aClass, List.class);
             members.put(name, member);
           }
         } catch (NoSuchMethodException e1) {
@@ -144,13 +152,13 @@ public class DefaultObjectHandler implements ObjectHandler {
                   (name.length() > 1 ? name.substring(1) : "");
           try {
             synchronized (members) {
-              member = getMethod("get" + propertyname, aClass);
+              member = getMethod(guard, "get" + propertyname, aClass);
               members.put(name, member);
             }
           } catch (NoSuchMethodException e2) {
             try {
               synchronized (members) {
-                member = getMethod("is" + propertyname, aClass);
+                member = getMethod(guard, "is" + propertyname, aClass);
                 members.put(name, member);
               }
             } catch (NoSuchMethodException e3) {
@@ -187,14 +195,14 @@ public class DefaultObjectHandler implements ObjectHandler {
     return i;
   }
 
-  public static MethodWrapper getMethod(String name, Class aClass, Class... params) throws NoSuchMethodException {
+  public static MethodWrapper getMethod(Class[] guard, String name, Class aClass, Class... params) throws NoSuchMethodException {
     Method member;
     try {
       member = aClass.getDeclaredMethod(name, params);
     } catch (NoSuchMethodException nsme) {
       Class superclass = aClass.getSuperclass();
       if (superclass != Object.class) {
-        return getMethod(name, superclass, params);
+        return getMethod(guard, name, superclass, params);
       }
       throw nsme;
     }
@@ -202,17 +210,17 @@ public class DefaultObjectHandler implements ObjectHandler {
       throw new NoSuchMethodException("Only public, protected and package members allowed");
     }
     member.setAccessible(true);
-    return new MethodWrapper(aClass, member);
+    return new MethodWrapper(guard, member);
   }
 
-  public static MethodWrapper getField(String name, Class aClass) throws NoSuchFieldException {
+  public static MethodWrapper getField(Class[] guard, String name, Class aClass) throws NoSuchFieldException {
     Field member;
     try {
       member = aClass.getDeclaredField(name);
     } catch (NoSuchFieldException nsfe) {
       Class superclass = aClass.getSuperclass();
       if (superclass != Object.class) {
-        return getField(name, superclass);
+        return getField(guard, name, superclass);
       }
       throw nsfe;
     }
@@ -220,7 +228,7 @@ public class DefaultObjectHandler implements ObjectHandler {
       throw new NoSuchFieldException("Only public, protected and package members allowed");
     }
     member.setAccessible(true);
-    return new MethodWrapper(aClass, member);
+    return new MethodWrapper(guard, member);
   }
 
   protected static class SingleValueIterator implements Iterator {

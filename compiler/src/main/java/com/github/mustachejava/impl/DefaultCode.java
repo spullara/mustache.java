@@ -25,7 +25,6 @@ public class DefaultCode implements Code {
   protected MethodWrapper methodWrapper;
 
   // TODO: Recursion protection. Need better guard logic. But still fast.
-  protected int numScopes = -1;
   protected boolean notfound = false;
   protected boolean returnThis = false;
 
@@ -59,8 +58,7 @@ public class DefaultCode implements Code {
     if (returnThis) {
       return scopes[scopes.length - 1];
     }
-    if (numScopes == -1) numScopes = scopes.length;
-    if (scopes.length != numScopes || methodWrapper == null) {
+    if (methodWrapper == null) {
       methodWrapper = oh.find(name, scopes);
       if (methodWrapper == null) {
         notfound = true;
@@ -71,7 +69,6 @@ public class DefaultCode implements Code {
       return methodWrapper.call(scopes);
     } catch (MethodGuardException e) {
       methodWrapper = null;
-      numScopes = -1;
       return get(name, scopes);
     }
   }
