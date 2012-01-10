@@ -6,21 +6,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.google.common.base.Function;
-import com.google.common.util.concurrent.SettableFuture;
 
 import com.github.mustachejava.impl.DefaultCodeFactory;
 import junit.framework.TestCase;
@@ -107,14 +99,21 @@ public class InterpreterTest extends TestCase {
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      String getName() { return "Chris"; }
-      int getValue() { return 10000; }
+      String getName() {
+        return "Chris";
+      }
+
+      int getValue() {
+        return 10000;
+      }
 
       int taxed_value() {
         return (int) (this.getValue() - (this.getValue() * 0.4));
       }
 
-      boolean isIn_ca() { return true; }
+      boolean isIn_ca() {
+        return true;
+      }
     });
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
@@ -144,7 +143,7 @@ public class InterpreterTest extends TestCase {
     m.execute(sw, scope);
     assertEquals(getContents(root, "template_partial.txt"), sw.toString());
   }
-  
+
   public void testComplex() throws MustacheException, IOException {
     MustacheCompiler c = init();
     Mustache m = c.compile("complex.html");
@@ -153,7 +152,23 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "complex.txt"), sw.toString());
   }
 
-  private static class ComplexObject {
+  public void testComplexParallel() throws MustacheException, IOException {
+    MustacheCompiler c = initParallel();
+    Mustache m = c.compile("complex.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new ParallelComplexObject());
+    assertEquals(getContents(root, "complex.txt"), sw.toString());
+  }
+
+  public void testSerialCallable() throws MustacheException, IOException {
+    MustacheCompiler c = init();
+    Mustache m = c.compile("complex.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new ParallelComplexObject());
+    assertEquals(getContents(root, "complex.txt"), sw.toString());
+  }
+
+  public static class ComplexObject {
     String header = "Colors";
     List<Color> item = Arrays.asList(
             new Color("red", true, "#Red"),
@@ -173,11 +188,50 @@ public class InterpreterTest extends TestCase {
       boolean link() {
         return !current;
       }
+
       Color(String name, boolean current, String url) {
         this.name = name;
         this.current = current;
         this.url = url;
       }
+
+      String name;
+      boolean current;
+      String url;
+    }
+  }
+
+  public static class ParallelComplexObject {
+    String header = "Colors";
+    Callable<List<Color>> item = new Callable<List<Color>>() {
+      @Override
+      public List<Color> call() throws Exception {
+        return Arrays.asList(
+                new Color("red", true, "#Red"),
+                new Color("green", false, "#Green"),
+                new Color("blue", false, "#Blue"));
+      }
+    };
+
+    boolean list() {
+      return true;
+    }
+
+    boolean empty() {
+      return false;
+    }
+
+    private static class Color {
+      boolean link() {
+        return !current;
+      }
+
+      Color(String name, boolean current, String url) {
+        this.name = name;
+        this.current = current;
+        this.url = url;
+      }
+
       String name;
       boolean current;
       String url;
@@ -247,7 +301,8 @@ public class InterpreterTest extends TestCase {
   static class Context {
     List<Item> items() {
       return Arrays.asList(
-              new Item("Item 1", "$19.99", Arrays.asList(new Feature("New!"), new Feature("Awesome!"))),
+              new Item("Item 1", "$19.99",
+                      Arrays.asList(new Feature("New!"), new Feature("Awesome!"))),
               new Item("Item 2", "$29.99", Arrays.asList(new Feature("Old."), new Feature("Ugly.")))
       );
     }
@@ -294,7 +349,8 @@ public class InterpreterTest extends TestCase {
   }
 
   protected String getContents(File root, String file) throws IOException {
-    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(root, file)),"UTF-8"));
+    BufferedReader br = new BufferedReader(
+            new InputStreamReader(new FileInputStream(new File(root, file)), "UTF-8"));
     StringWriter capture = new StringWriter();
     char[] buffer = new char[8192];
     int read;

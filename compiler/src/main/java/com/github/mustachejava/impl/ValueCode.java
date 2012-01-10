@@ -43,7 +43,7 @@ public class ValueCode extends DefaultCode {
         } else if (object instanceof Callable) {
           return handleCallable(writer, (Callable) object, scopes);
         } else {
-          execute(writer, object.toString(), scopes);
+          execute(writer, object.toString());
         }
       } catch (Exception e) {
         throw new MustacheException("Failed to get value for " + variable + " at line " + line, e);
@@ -54,7 +54,7 @@ public class ValueCode extends DefaultCode {
 
   protected Writer handleCallable(Writer writer, final Callable callable, final Object[] scopes) throws Exception {
     if (les == null) {
-      execute(writer, callable.call().toString(), scopes);
+      execute(writer, callable.call().toString());
       return super.execute(writer, scopes);
     } else {
       final LatchedWriter latchedWriter = new LatchedWriter(writer);
@@ -64,7 +64,7 @@ public class ValueCode extends DefaultCode {
         public void run() {
           try {
             Object call = callable.call();
-            execute(finalWriter, call == null ? null : call.toString(), scopes);
+            execute(finalWriter, call == null ? null : call.toString());
             latchedWriter.done();
           } catch (Throwable e) {
             latchedWriter.failed(e);
@@ -92,10 +92,10 @@ public class ValueCode extends DefaultCode {
     } else {
       value = "";
     }
-    execute(writer, value, scopes);
+    execute(writer, value);
   }
 
-  protected void execute(Writer writer, String value, Object... scopes) throws IOException {
+  protected void execute(Writer writer, String value) throws IOException {
     if (encoded) {
       writer.write(cf.encode(value));
     } else {
