@@ -32,7 +32,7 @@ public class ValueCode extends DefaultCode {
   }
 
   @Override
-  public void execute(Writer writer, Object... scopes) {
+  public Writer execute(Writer writer, Object... scopes) {
     Object object = get(variable, scopes);
     if (object != null) {
       try {
@@ -49,7 +49,7 @@ public class ValueCode extends DefaultCode {
               cf.templateCache.put(templateText, mustache);
             }
             StringWriter sw = new StringWriter();
-            mustache.execute(sw, scopes);
+            writer = mustache.execute(sw, scopes);
             value = sw.toString();
           } else {
             value = "";
@@ -66,6 +66,6 @@ public class ValueCode extends DefaultCode {
         throw new MustacheException("Failed to get value for " + variable + " at line " + line, e);
       }
     }
-    super.execute(writer, scopes);
+    return super.execute(writer, scopes);
   }
 }

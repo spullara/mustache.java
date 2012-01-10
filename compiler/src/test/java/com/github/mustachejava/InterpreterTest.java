@@ -304,62 +304,6 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simple2.txt"), sw.toString());
   }
 
-  public void testEscaped() throws MustacheException, IOException {
-    MustacheBuilder c = init();
-    Mustache m = c.parseFile("escaped.html");
-    StringWriter sw = new StringWriter();
-    FutureWriter writer = new FutureWriter(sw);
-    m.execute(writer, new Scope(new Object() {
-      String title = "Bear > Shark";
-      String entities = "&quot;";
-    }));
-    writer.flush();
-    assertEquals(getContents(root, "escaped.txt"), sw.toString());
-  }
-
-  public void testUnescaped() throws MustacheException, IOException {
-    MustacheBuilder c = new MustacheBuilder(root);
-    Mustache m = c.parseFile("unescaped.html");
-    StringWriter sw = new StringWriter();
-    FutureWriter writer = new FutureWriter(sw);
-    m.execute(writer, new Scope(new Object() {
-      String title() {
-        return "Bear > Shark";
-      }
-    }));
-    writer.flush();
-    assertEquals(getContents(root, "unescaped.txt"), sw.toString());
-  }
-
-  public void testInverted() throws MustacheException, IOException {
-    MustacheBuilder c = init();
-    Mustache m = c.parseFile("inverted_section.html");
-    StringWriter sw = new StringWriter();
-    FutureWriter writer = new FutureWriter(sw);
-    m.execute(writer, new Scope(new Object() {
-      String name() {
-        return "Bear > Shark";
-      }
-
-      ArrayList repo = new ArrayList();
-    }));
-    writer.flush();
-    assertEquals(getContents(root, "inverted_section.txt"), sw.toString());
-  }
-
-  public void testComments() throws MustacheException, IOException {
-    MustacheBuilder c = init();
-    Mustache m = c.parseFile("comments.html");
-    StringWriter sw = new StringWriter();
-    FutureWriter writer = new FutureWriter(sw);
-    m.execute(writer, new Scope(new Object() {
-      String title() {
-        return "A Comedy of Errors";
-      }
-    }));
-    writer.flush();
-    assertEquals(getContents(root, "comments.txt"), sw.toString());
-  }
   */
   public void testPartial() throws MustacheException, IOException {
     MustacheCompiler c = init();
@@ -373,74 +317,47 @@ public class InterpreterTest extends TestCase {
     m.execute(sw, scope);
     assertEquals(getContents(root, "template_partial.txt"), sw.toString());
   }
-  /*
-  public static class PartialChanged extends Mustache {
-    static AtomicBoolean executed = new AtomicBoolean(false);
-    protected Mustache compilePartial(String name) throws MustacheException {
-      executed.set(true);
-      return super.compilePartial(name);
-    }
-  }
-
-  public void testPartialOverride() throws MustacheException, IOException {
-    MustacheBuilder c = init();
-    c.setSuperclass(PartialChanged.class.getName());
-    Mustache m = c.parseFile("template_partial.html");
-    StringWriter sw = new StringWriter();
-    FutureWriter writer = new FutureWriter(sw);
-    Scope scope = new Scope();
-    scope.put("title", "Welcome");
-    scope.put("template_partial_2", new Object() {
-      String again = "Goodbye";
-    });
-    m.execute(writer, scope);
-    writer.flush();
-    assertEquals(getContents(root, "template_partial.txt"), sw.toString());
-    assertTrue(PartialChanged.executed.get());
-  }
-
+  
   public void testComplex() throws MustacheException, IOException {
-    Scope scope = new Scope(new Object() {
-      String header = "Colors";
-      List item = Arrays.asList(
-              new Object() {
-                String name = "red";
-                boolean current = true;
-                String url = "#Red";
-              },
-              new Object() {
-                String name = "green";
-                boolean current = false;
-                String url = "#Green";
-              },
-              new Object() {
-                String name = "blue";
-                boolean current = false;
-                String url = "#Blue";
-              }
-      );
-
-      boolean link(Scope s) {
-        return !((Boolean) s.get("current"));
-      }
-
-      boolean list(Scope s) {
-        return ((List) s.get("item")).size() != 0;
-      }
-
-      boolean empty(Scope s) {
-        return ((List) s.get("item")).size() == 0;
-      }
-    });
-    MustacheBuilder c = new MustacheBuilder(root);
-    Mustache m = c.parseFile("complex.html");
+    MustacheCompiler c = init();
+    Mustache m = c.compile("complex.html");
     StringWriter sw = new StringWriter();
-    FutureWriter writer = new FutureWriter(sw);
-    m.execute(writer, scope);
-    writer.flush();
+    m.execute(sw, new ComplexObject());
     assertEquals(getContents(root, "complex.txt"), sw.toString());
   }
 
+  private static class ComplexObject {
+    String header = "Colors";
+    List<Color> item = Arrays.asList(
+            new Color("red", true, "#Red"),
+            new Color("green", false, "#Green"),
+            new Color("blue", false, "#Blue")
+    );
+
+    boolean list() {
+      return item.size() != 0;
+    }
+
+    boolean empty() {
+      return item.size() == 0;
+    }
+
+    private static class Color {
+      boolean link() {
+        return !current;
+      }
+      Color(String name, boolean current, String url) {
+        this.name = name;
+        this.current = current;
+        this.url = url;
+      }
+      String name;
+      boolean current;
+      String url;
+    }
+  }
+
+  /*
   @SuppressWarnings("serial")
   public void testCurrentElementInArray() throws IOException, MustacheException {
 
@@ -467,40 +384,34 @@ public class InterpreterTest extends TestCase {
       assertEquals("\n\n", sw.toString());
 
   }
-
+  */
   public void testReadme() throws MustacheException, IOException {
-    MustacheBuilder c = init();
-    Mustache m = c.parseFile("items.html");
+    MustacheCompiler c = init();
+    Mustache m = c.compile("items.html");
     StringWriter sw = new StringWriter();
-    FutureWriter writer = new FutureWriter(sw);
     long start = System.currentTimeMillis();
-    m.execute(writer, new Scope(new Context()));
-    writer.flush();
+    m.execute(sw, new Context());
     long diff = System.currentTimeMillis() - start;
     assertEquals(getContents(root, "items.txt"), sw.toString());
   }
 
   public void testReadme2() throws MustacheException, IOException {
-    MustacheBuilder c = init();
-    Mustache m = c.parseFile("items2.html");
+    MustacheCompiler c = init();
+    Mustache m = c.compile("items2.html");
     StringWriter sw = new StringWriter();
-    FutureWriter writer = new FutureWriter(sw);
     long start = System.currentTimeMillis();
-    m.execute(writer, new Scope(new Context()));
-    writer.flush();
+    m.execute(sw, new Context());
     long diff = System.currentTimeMillis() - start;
     assertEquals(getContents(root, "items.txt"), sw.toString());
     assertTrue("Should be a little bit more than 1 second: " + diff, diff > 999 && diff < 2000);
   }
 
   public void testReadme3() throws MustacheException, IOException {
-    MustacheBuilder c = init();
-    Mustache m = c.parseFile("items3.html");
+    MustacheCompiler c = init();
+    Mustache m = c.compile("items3.html");
     StringWriter sw = new StringWriter();
-    FutureWriter writer = new FutureWriter(sw);
     long start = System.currentTimeMillis();
-    m.execute(writer, new Scope(new Context()));
-    writer.flush();
+    m.execute(sw, new Context());
     long diff = System.currentTimeMillis() - start;
     assertEquals(getContents(root, "items3.txt"), sw.toString());
     assertTrue("Should be a little bit more than 1 second: " + diff, diff > 999 && diff < 2000);
@@ -545,7 +456,7 @@ public class InterpreterTest extends TestCase {
       }
     }
   }
-    */
+
   private MustacheCompiler init() {
     DefaultCodeFactory cf = new DefaultCodeFactory(root);
     return new MustacheCompiler(cf);

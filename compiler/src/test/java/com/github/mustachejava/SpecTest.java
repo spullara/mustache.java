@@ -178,7 +178,7 @@ public class SpecTest {
         public Code partial(final String variable, String file, int line, String sm, String em) {
           return new DefaultCode(getObjectHandler(), null, variable, ">", sm, em) {
             @Override
-            public void execute(Writer writer, Object... scopes) {
+            public Writer execute(Writer writer, Object... scopes) {
               JsonNode partialNode = partials.get(variable);
               if (partialNode != null && !partialNode.isNull()) {
                 String partialName = partialNode.asText();
@@ -187,9 +187,9 @@ public class SpecTest {
                   partial = MC.compile(new StringReader(partialName), variable);
                   partialMap.put(partialName, partial);
                 }
-                partial.execute(writer, scopes);
+                writer = partial.execute(writer, scopes);
               }
-              appendText(writer);
+              return appendText(writer);
             }
           };
         }

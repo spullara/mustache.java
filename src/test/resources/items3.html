@@ -1,10 +1,10 @@
 {{#items}}
 Name: {{name}}
 Price: {{price}}
-{{?features}}
+{{#hasfeatures}}
 Features:
 {{#features}}
   Feature: {{desc}}
 {{/features}}
-{{/features}}
+{{/hasfeatures}}
 {{/items}}

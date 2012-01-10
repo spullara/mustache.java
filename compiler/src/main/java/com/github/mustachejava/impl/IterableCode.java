@@ -32,7 +32,7 @@ public class IterableCode extends DefaultCode {
   }
 
   @Override
-  public void execute(Writer writer, Object... scopes) {
+  public Writer execute(Writer writer, Object... scopes) {
     Object resolve = get(variable, scopes);
     if (resolve != null) {
       if (resolve instanceof Function) {
@@ -47,7 +47,7 @@ public class IterableCode extends DefaultCode {
             mustache = cf.mc.compile(new StringReader(templateText), file, sm, em);
             cf.templateCache.put(templateText, mustache);
           }
-          mustache.execute(writer, scopes);
+          writer = mustache.execute(writer, scopes);
         }
       } else {
         for (Iterator i = oh.iterate(resolve); i.hasNext(); ) {
@@ -58,10 +58,11 @@ public class IterableCode extends DefaultCode {
             System.arraycopy(scopes, 0, iteratorScopes, 0, scopes.length);
             iteratorScopes[scopes.length] = next;
           }
-          runCodes(writer, iteratorScopes);
+          writer = runCodes(writer, iteratorScopes);
         }
       }
     }
-    appendText(writer);
+    writer = appendText(writer);
+    return writer;
   }
 }

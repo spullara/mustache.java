@@ -22,16 +22,17 @@ public class NotIterableCode extends DefaultCode {
   }
 
   @Override
-  public void execute(Writer writer, Object... scopes) {
+  public Writer execute(Writer writer, Object... scopes) {
     Object resolve = get(variable, scopes);
     if (resolve != null) {
       Iterator i = oh.iterate(resolve);
       if (!i.hasNext()) {
-        runCodes(writer, scopes);
+        writer = runCodes(writer, scopes);
       }
     } else {
-      runCodes(writer, scopes);
+      writer = runCodes(writer, scopes);
     }
-    appendText(writer);
+    writer = appendText(writer);
+    return writer;
   }
 }

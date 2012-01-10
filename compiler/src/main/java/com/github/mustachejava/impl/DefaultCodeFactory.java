@@ -77,7 +77,7 @@ public class DefaultCodeFactory implements CodeFactory {
       private Mustache partial;
 
       @Override
-      public void execute(Writer writer, Object... scopes) {
+      public Writer execute(Writer writer, Object... scopes) {
         if (partial == null) {
           partial = mc.compile(variable + extension);
         }
@@ -85,8 +85,9 @@ public class DefaultCodeFactory implements CodeFactory {
         Object[] newscopes = new Object[scopes.length + 1];
         System.arraycopy(scopes, 0, newscopes, 0, scopes.length);
         newscopes[scopes.length] = scope;
-        partial.execute(writer, newscopes);
-        appendText(writer);
+        writer = partial.execute(writer, newscopes);
+        writer = appendText(writer);
+        return writer;
       }
     };
   }

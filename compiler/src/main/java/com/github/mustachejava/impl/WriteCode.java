@@ -25,12 +25,12 @@ public class WriteCode extends DefaultCode {
   }
 
   @Override
-  public void execute(Writer writer, Object... scopes) {
+  public Writer execute(Writer writer, Object... scopes) {
     try {
       writer.write(text);
     } catch (IOException e) {
       throw new MustacheException();
     }
-    appendText(writer);
+    return appendText(writer);
   }
 }

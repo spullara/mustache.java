@@ -80,9 +80,10 @@ public class DefaultCode implements Code {
    * @param scopes The scopes to evaluate the embedded names against.
    */
   @Override
-  public void execute(Writer writer, Object... scopes) {
-    runCodes(writer, scopes);
-    appendText(writer);
+  public Writer execute(Writer writer, Object... scopes) {
+    writer = runCodes(writer, scopes);
+    writer = appendText(writer);
+    return writer;
   }
 
   @Override
@@ -115,7 +116,7 @@ public class DefaultCode implements Code {
     writer.write(em);
   }
 
-  protected void appendText(Writer writer) {
+  protected Writer appendText(Writer writer) {
     if (appended != null) {
       try {
         writer.write(appended);
@@ -123,15 +124,17 @@ public class DefaultCode implements Code {
         throw new MustacheException(e);
       }
     }
+    return writer;
   }
 
-  protected void runCodes(Writer writer, Object... scopes) {
+  protected Writer runCodes(Writer writer, Object... scopes) {
     if (codes != null) {
       int length = codes.length;
       for (int i = 0; i < length; i++) {
-        codes[i].execute(writer, scopes);
+        writer = codes[i].execute(writer, scopes);
       }
     }
+    return writer;
   }
 
   @Override
