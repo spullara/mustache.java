@@ -87,7 +87,6 @@ public class LatchedWriter extends Writer {
     writer.close();
   }
 
-
   public synchronized void failed(Throwable e) {
     this.e = e;
   }

@@ -15,12 +15,8 @@ import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.util.LatchedWriter;
 
 /**
-* Created by IntelliJ IDEA.
-* User: spullara
-* Date: 1/9/12
-* Time: 2:58 PM
-* To change this template use File | Settings | File Templates.
-*/
+ * Output a value
+ */
 public class ValueCode extends DefaultCode {
   private final String variable;
   private final boolean encoded;
@@ -42,50 +38,12 @@ public class ValueCode extends DefaultCode {
     final Object object = get(variable, scopes);
     if (object != null) {
       try {
-        String value;
         if (object instanceof Function) {
-          Function f = (Function) object;
-          Object newtemplate = f.apply(null);
-          if (newtemplate != null) {
-            String templateText = newtemplate.toString();
-            Mustache mustache = cf.templateCache.get(templateText);
-            if (mustache == null) {
-              mustache = cf.mc.compile(new StringReader(templateText), variable,
-                      MustacheCompiler.DEFAULT_SM, MustacheCompiler.DEFAULT_EM);
-              cf.templateCache.put(templateText, mustache);
-            }
-            StringWriter sw = new StringWriter();
-            writer = mustache.execute(sw, scopes);
-            value = sw.toString();
-          } else {
-            value = "";
-          }
-          execute(writer, value, scopes);
+          handleFunction(writer, (Function) object, scopes);
+        } else if (object instanceof Callable) {
+          return handleCallable(writer, (Callable) object, scopes);
         } else {
-          if (object instanceof Callable) {
-            final Callable callable = (Callable) object;
-            if (les == null) {
-              execute(writer, callable.call().toString(), scopes);
-            } else {
-              final LatchedWriter latchedWriter = new LatchedWriter(writer);
-              final Writer finalWriter = writer;
-              les.execute(new Runnable() {
-                @Override
-                public void run() {
-                  try {
-                    Object call = callable.call();
-                    execute(finalWriter, call == null ? null : call.toString(), scopes);
-                    latchedWriter.done();
-                  } catch (Throwable e) {
-                    latchedWriter.failed(e);
-                  }
-                }
-              });
-              return super.execute(latchedWriter, scopes);
-            }
-          } else {
-            execute(writer, object.toString(), scopes);
-          }
+          execute(writer, object.toString(), scopes);
         }
       } catch (Exception e) {
         throw new MustacheException("Failed to get value for " + variable + " at line " + line, e);
@@ -94,7 +52,50 @@ public class ValueCode extends DefaultCode {
     return super.execute(writer, scopes);
   }
 
-  private void execute(Writer writer, String value, Object... scopes) throws IOException {
+  protected Writer handleCallable(Writer writer, final Callable callable, final Object[] scopes) throws Exception {
+    if (les == null) {
+      execute(writer, callable.call().toString(), scopes);
+      return super.execute(writer, scopes);
+    } else {
+      final LatchedWriter latchedWriter = new LatchedWriter(writer);
+      final Writer finalWriter = writer;
+      les.execute(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            Object call = callable.call();
+            execute(finalWriter, call == null ? null : call.toString(), scopes);
+            latchedWriter.done();
+          } catch (Throwable e) {
+            latchedWriter.failed(e);
+          }
+        }
+      });
+      return super.execute(latchedWriter, scopes);
+    }
+  }
+
+  protected void handleFunction(Writer writer, Function function, Object[] scopes) throws IOException {
+    String value;
+    Object newtemplate = function.apply(null);
+    if (newtemplate != null) {
+      String templateText = newtemplate.toString();
+      Mustache mustache = cf.templateCache.get(templateText);
+      if (mustache == null) {
+        mustache = cf.mc.compile(new StringReader(templateText), variable,
+                MustacheCompiler.DEFAULT_SM, MustacheCompiler.DEFAULT_EM);
+        cf.templateCache.put(templateText, mustache);
+      }
+      StringWriter sw = new StringWriter();
+      mustache.execute(sw, scopes);
+      value = sw.toString();
+    } else {
+      value = "";
+    }
+    execute(writer, value, scopes);
+  }
+
+  protected void execute(Writer writer, String value, Object... scopes) throws IOException {
     if (encoded) {
       writer.write(cf.encode(value));
     } else {
