@@ -1,11 +1,11 @@
 package com.sampullara.mustache;
 
-import org.junit.Test;
-
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.Writer;
+
+import org.junit.Test;
 
 /**
  * Make sure this compiles

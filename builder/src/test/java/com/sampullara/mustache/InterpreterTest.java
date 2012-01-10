@@ -1,12 +1,5 @@
 package com.sampullara.mustache;
 
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.SettableFuture;
-import com.sampullara.util.FutureWriter;
-import com.sampullara.util.TemplateFunction;
-import junit.framework.TestCase;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,6 +15,13 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.google.common.base.Function;
+import com.google.common.util.concurrent.SettableFuture;
+
+import com.sampullara.util.FutureWriter;
+import com.sampullara.util.TemplateFunction;
+import junit.framework.TestCase;
 
 /**
  * Tests for the compiler.

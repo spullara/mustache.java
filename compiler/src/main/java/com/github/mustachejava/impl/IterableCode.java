@@ -3,7 +3,6 @@ package com.github.mustachejava.impl;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -11,7 +10,6 @@ import com.google.common.base.Function;
 
 import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
-import com.github.mustachejava.ObjectHandler;
 
 /**
 * Created by IntelliJ IDEA.

@@ -1,11 +1,11 @@
 package com.sampullara.util.http;
 
-import org.eclipse.jetty.client.HttpClient;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.Future;
+
+import org.eclipse.jetty.client.HttpClient;
 
 /**
  * Base class for doing an HTTP request

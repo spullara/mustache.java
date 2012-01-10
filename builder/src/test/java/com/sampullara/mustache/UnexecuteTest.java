@@ -1,22 +1,21 @@
 package com.sampullara.mustache;
 
-import com.google.common.base.Function;
-
-import com.sampullara.util.FutureWriter;
-import com.sampullara.util.TemplateFunction;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
+
+import com.google.common.base.Function;
+
+import com.sampullara.util.FutureWriter;
+import com.sampullara.util.TemplateFunction;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;
 

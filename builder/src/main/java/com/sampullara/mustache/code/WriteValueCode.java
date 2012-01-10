@@ -1,18 +1,16 @@
 package com.sampullara.mustache.code;
 
+import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.sampullara.mustache.Code;
 import com.sampullara.mustache.Mustache;
 import com.sampullara.mustache.MustacheException;
 import com.sampullara.mustache.MustacheTrace;
 import com.sampullara.mustache.Scope;
 import com.sampullara.util.FutureWriter;
-
-import java.io.IOException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.sampullara.mustache.Mustache.truncate;
 

@@ -3,7 +3,6 @@ package com.github.mustachejava.impl;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.List;
 
 import com.google.common.base.Function;
 

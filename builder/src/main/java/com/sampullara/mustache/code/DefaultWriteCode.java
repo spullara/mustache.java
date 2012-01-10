@@ -1,12 +1,12 @@
 package com.sampullara.mustache.code;
 
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.sampullara.mustache.Code;
 import com.sampullara.mustache.MustacheException;
 import com.sampullara.mustache.Scope;
 import com.sampullara.util.FutureWriter;
-
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
 * Writes a string.

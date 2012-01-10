@@ -1,11 +1,11 @@
 package com.sampullara.mustache.code;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.sampullara.mustache.Code;
 import com.sampullara.mustache.MustacheException;
 import com.sampullara.mustache.Scope;
 import com.sampullara.util.FutureWriter;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
 * Represents the end of file.

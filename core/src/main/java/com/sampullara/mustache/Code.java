@@ -1,8 +1,8 @@
 package com.sampullara.mustache;
 
-import com.sampullara.util.FutureWriter;
-
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.sampullara.util.FutureWriter;
 
 /**
  * Codes for mustache.

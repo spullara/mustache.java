@@ -1,14 +1,15 @@
 package com.sampullara.util.http;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.concurrent.Future;
+
 import com.google.common.util.concurrent.SettableFuture;
+
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.MappingJsonFactory;
 import org.eclipse.jetty.client.ContentExchange;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.concurrent.Future;
 
 /**
  * Retrieve JSON data from a data source without blocking a thread.

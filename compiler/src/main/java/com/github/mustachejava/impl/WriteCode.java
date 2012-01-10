@@ -2,7 +2,6 @@ package com.github.mustachejava.impl;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.List;
 
 import com.github.mustachejava.MustacheException;
 

@@ -1,6 +1,5 @@
 package com.github.mustachejava.impl;
 
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;

@@ -1,7 +1,6 @@
 package com.github.mustachejava;
 
 import java.io.Writer;
-import java.util.List;
 
 /**
  * Code objects that are executed in order to evaluate the template

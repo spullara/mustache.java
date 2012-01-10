@@ -1,9 +1,9 @@
 package com.sampullara.mustache.code;
 
+import java.util.List;
+
 import com.sampullara.mustache.Code;
 import com.sampullara.mustache.Mustache;
-
-import java.util.List;
 
 /**
  * Implementation strategy:

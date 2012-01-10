@@ -1,18 +1,13 @@
 package com.github.mustachejava;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.xml.transform.stream.StreamSource;
-
 import com.google.common.io.CharStreams;
-import com.google.common.io.InputSupplier;
 
 import com.github.mustachejava.impl.DefaultCodeFactory;
 import junit.framework.TestCase;
