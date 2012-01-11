@@ -1,5 +1,6 @@
 package com.github.mustachejava.reflect;
 
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -20,7 +21,7 @@ import com.github.mustachejava.util.Wrapper;
  */
 public class ReflectionObjectHandler implements ObjectHandler {
 
-  private static final Method MAP_METHOD;
+  protected static final Method MAP_METHOD;
   static {
     try {
       MAP_METHOD = Map.class.getMethod("get", Object.class);
@@ -44,7 +45,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
       while ((dotIndex = subname.indexOf('.')) != -1) {
         String lookup = subname.substring(0, dotIndex);
         subname = subname.substring(dotIndex + 1);
-        wrapper = findWrapper(new Class[]{scope.getClass()}, scope, lookup);
+        wrapper = findWrapper(0, null, new Class[] { scope.getClass() }, scope, lookup);
         if (wrapper != null) {
           if (wrappers == null) wrappers = new ArrayList<Wrapper>();
           wrappers.add(wrapper);
@@ -58,12 +59,9 @@ public class ReflectionObjectHandler implements ObjectHandler {
         }
         if (scope == null) return null;
       }
-      ReflectionWrapper foundWrapper = findWrapper(guard, scope, subname);
+      Wrapper[] foundWrappers = wrappers == null ? null : wrappers.toArray(new Wrapper[wrappers.size()]);
+      Wrapper foundWrapper = findWrapper(i, foundWrappers, guard, scope, subname);
       if (foundWrapper != null) {
-        foundWrapper.setScope(i);
-        if (wrappers != null) {
-          foundWrapper.addWrappers(wrappers.toArray(new Wrapper[wrappers.size()]));
-        }
         wrapper = foundWrapper;
         break;
       }
@@ -76,7 +74,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return object;
   }
 
-  private Class[] createGuard(Object... scopes) {
+  protected Class[] createGuard(Object... scopes) {
     int length = scopes.length;
     Class[] guard = new Class[length];
     for (int i = 0; i < length; i++) {
@@ -88,39 +86,38 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return guard;
   }
 
-  private ReflectionWrapper findWrapper(Class[] guard, Object scope, String name) {
+  protected Wrapper findWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, Object scope, String name) {
     if (scope == null) return null;
     if (scope instanceof Map) {
       Map map = (Map) scope;
       if (map.get(name) == null) {
         return null;
       } else {
-        return new ReflectionWrapper(guard, MAP_METHOD, name);
+        return createWrapper(scopeIndex, wrappers, guard, MAP_METHOD, name);
       }
     }
     Class aClass = scope.getClass();
-    Map<String, Wrapper> members;
     // Don't overload methods in your contexts
-    ReflectionWrapper member = null;
+    Wrapper member = null;
     try {
-      member = getField(guard, name, aClass);
+      member = getField(scopeIndex, wrappers, guard, name, aClass);
     } catch (NoSuchFieldException e) {
       // Not set
     }
     if (member == null) {
       try {
-        member = getMethod(guard, name, aClass);
+        member = getMethod(scopeIndex, wrappers, guard, name, aClass);
       } catch (NoSuchMethodException e) {
         try {
-          member = getMethod(guard, name, aClass, List.class);
+          member = getMethod(scopeIndex, wrappers, guard, name, aClass, List.class);
         } catch (NoSuchMethodException e1) {
           String propertyname = name.substring(0, 1).toUpperCase() +
                   (name.length() > 1 ? name.substring(1) : "");
           try {
-            member = getMethod(guard, "get" + propertyname, aClass);
+            member = getMethod(scopeIndex, wrappers, guard, "get" + propertyname, aClass);
           } catch (NoSuchMethodException e2) {
             try {
-              member = getMethod(guard, "is" + propertyname, aClass);
+              member = getMethod(scopeIndex, wrappers, guard, "is" + propertyname, aClass);
             } catch (NoSuchMethodException e3) {
               // Nothing to be done
             }
@@ -131,14 +128,14 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return member;
   }
 
-  public static ReflectionWrapper getMethod(Class[] guard, String name, Class aClass, Class... params) throws NoSuchMethodException {
+  protected Wrapper getMethod(int scopeIndex, Wrapper[] wrappers, Class[] guard, String name, Class aClass, Class... params) throws NoSuchMethodException {
     Method member;
     try {
       member = aClass.getDeclaredMethod(name, params);
     } catch (NoSuchMethodException nsme) {
       Class superclass = aClass.getSuperclass();
       if (superclass != Object.class) {
-        return getMethod(guard, name, superclass, params);
+        return getMethod(scopeIndex, wrappers, guard, name, superclass, params);
       }
       throw nsme;
     }
@@ -146,17 +143,17 @@ public class ReflectionObjectHandler implements ObjectHandler {
       throw new NoSuchMethodException("Only public, protected and package members allowed");
     }
     member.setAccessible(true);
-    return new ReflectionWrapper(guard, member);
+    return createWrapper(scopeIndex, wrappers, guard, member);
   }
 
-  public static ReflectionWrapper getField(Class[] guard, String name, Class aClass) throws NoSuchFieldException {
+  protected Wrapper getField(int scopeIndex, Wrapper[] wrappers, Class[] guard, String name, Class aClass) throws NoSuchFieldException {
     Field member;
     try {
       member = aClass.getDeclaredField(name);
     } catch (NoSuchFieldException nsfe) {
       Class superclass = aClass.getSuperclass();
       if (superclass != Object.class) {
-        return getField(guard, name, superclass);
+        return getField(scopeIndex, wrappers, guard, name, superclass);
       }
       throw nsfe;
     }
@@ -164,7 +161,11 @@ public class ReflectionObjectHandler implements ObjectHandler {
       throw new NoSuchFieldException("Only public, protected and package members allowed");
     }
     member.setAccessible(true);
-    return new ReflectionWrapper(guard, member);
+    return createWrapper(scopeIndex, wrappers, guard, member);
+  }
+
+  protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, AccessibleObject member, Object... arguments) {
+    return new ReflectionWrapper(scopeIndex, wrappers, guard, member, arguments);
   }
 
 }

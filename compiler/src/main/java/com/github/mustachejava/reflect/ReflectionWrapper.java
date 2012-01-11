@@ -14,16 +14,17 @@ import com.github.mustachejava.util.Wrapper;
  */
 public class ReflectionWrapper implements Wrapper {
   // Context
-  private int scope;
-  private Wrapper[] wrappers;
+  protected int scopeIndex;
+  protected Wrapper[] wrappers;
 
   // Dispatch
-  private final Method method;
-  private final Field field;
-  private final Object[] arguments;
-  private final Class[] guard;
+  protected final Method method;
+  protected final Field field;
+  protected final Object[] arguments;
+  protected final Class[] guard;
 
-  public ReflectionWrapper(Class[] guard, AccessibleObject method, Object... arguments) {
+  public ReflectionWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, AccessibleObject method, Object... arguments) {
+    this.wrappers = wrappers;
     if (method instanceof Field) {
       this.method = null;
       this.field = (Field) method;
@@ -33,10 +34,7 @@ public class ReflectionWrapper implements Wrapper {
     }
     this.arguments = arguments;
     this.guard = guard;
-  }
-
-  public void setScope(int scope) {
-    this.scope = scope;
+    this.scopeIndex = scopeIndex;
   }
 
   public void addWrappers(Wrapper[] addedWrappers) {
@@ -54,7 +52,7 @@ public class ReflectionWrapper implements Wrapper {
   public Object call(Object... scopes) throws GuardException {
     try {
       guardCall(scopes);
-      Object scope = scopes[this.scope];
+      Object scope = scopes[this.scopeIndex];
       // The value may be buried by . notation
       if (wrappers != null) {
         for (int i = 0; i < wrappers.length; i++) {
