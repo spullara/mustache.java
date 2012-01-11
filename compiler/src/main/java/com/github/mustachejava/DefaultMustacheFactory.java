@@ -23,7 +23,7 @@ import com.github.mustachejava.codes.NotIterableCode;
 import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.codes.ValueCode;
 import com.github.mustachejava.codes.WriteCode;
-import com.github.mustachejava.util.ReflectionObjectHandler;
+import com.github.mustachejava.reflect.ReflectionObjectHandler;
 
 /**
  * Simplest possible code factory

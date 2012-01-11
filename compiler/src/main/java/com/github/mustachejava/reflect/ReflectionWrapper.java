@@ -1,4 +1,4 @@
-package com.github.mustachejava.util;
+package com.github.mustachejava.reflect;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
@@ -6,14 +6,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.util.GuardException;
+import com.github.mustachejava.util.Wrapper;
 
 /**
  * Used for evaluating values at a callsite
  */
-public class MethodWrapper {
+public class ReflectionWrapper implements Wrapper {
   // Context
   private int scope;
-  private MethodWrapper[] wrappers;
+  private Wrapper[] wrappers;
 
   // Dispatch
   private final Method method;
@@ -21,7 +23,7 @@ public class MethodWrapper {
   private final Object[] arguments;
   private final Class[] guard;
 
-  public MethodWrapper(Class[] guard, AccessibleObject method, Object... arguments) {
+  public ReflectionWrapper(Class[] guard, AccessibleObject method, Object... arguments) {
     if (method instanceof Field) {
       this.method = null;
       this.field = (Field) method;
@@ -37,18 +39,19 @@ public class MethodWrapper {
     this.scope = scope;
   }
 
-  public void addWrappers(MethodWrapper[] wrappers) {
+  public void addWrappers(Wrapper[] addedWrappers) {
     if (this.wrappers == null) {
-      this.wrappers = wrappers;
+      this.wrappers = addedWrappers;
     } else {
-      MethodWrapper[] methodWrappers = new MethodWrapper[this.wrappers.length + wrappers.length];
-      System.arraycopy(this.wrappers, 0, methodWrappers, 0, this.wrappers.length);
-      System.arraycopy(wrappers, 0, methodWrappers, this.wrappers.length, wrappers.length);
-      this.wrappers = methodWrappers;
+      Wrapper[] newWrappers = new Wrapper[this.wrappers.length + addedWrappers.length];
+      System.arraycopy(wrappers, 0, newWrappers, 0, wrappers.length);
+      System.arraycopy(newWrappers, 0, newWrappers, wrappers.length, newWrappers.length);
+      wrappers = newWrappers;
     }
   }
 
-  public Object call(Object... scopes) throws MethodGuardException {
+  @Override
+  public Object call(Object... scopes) throws GuardException {
     try {
       guardCall(scopes);
       Object scope = scopes[this.scope];
@@ -71,15 +74,15 @@ public class MethodWrapper {
     }
   }
 
-  private void guardCall(Object[] scopes) throws MethodGuardException {
+  private void guardCall(Object[] scopes) throws GuardException {
     int length = scopes.length;
     if (guard.length != length) {
-      throw new MethodGuardException();
+      throw new GuardException();
     }
     for (int j = 0; j < length; j++) {
       Class guardClass = guard[j];
       if (guardClass != null && !guardClass.isInstance(scopes[j])) {
-        throw new MethodGuardException();
+        throw new GuardException();
       }
     }
   }

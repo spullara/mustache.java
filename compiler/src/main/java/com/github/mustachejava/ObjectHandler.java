@@ -1,9 +1,6 @@
 package com.github.mustachejava;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import com.github.mustachejava.util.MethodWrapper;
+import com.github.mustachejava.util.Wrapper;
 
 /**
  * TODO: Edit this
@@ -14,7 +11,7 @@ import com.github.mustachejava.util.MethodWrapper;
  */
 public interface ObjectHandler {
   // Find methods to call
-  MethodWrapper find(String name, Object... scopes);
+  Wrapper find(String name, Object... scopes);
 
   // Coerce results to Java native iterables, functions, callables
   Object coerce(Object object);

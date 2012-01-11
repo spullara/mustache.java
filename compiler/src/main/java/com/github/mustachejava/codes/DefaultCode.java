@@ -9,8 +9,8 @@ import java.util.NoSuchElementException;
 import com.github.mustachejava.Code;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
-import com.github.mustachejava.util.MethodGuardException;
-import com.github.mustachejava.util.MethodWrapper;
+import com.github.mustachejava.util.GuardException;
+import com.github.mustachejava.util.Wrapper;
 
 /**
  * Simplest possible code implementaion with some default shared behavior
@@ -27,7 +27,7 @@ public class DefaultCode implements Code {
   protected final String em;
 
   // Callsite caching
-  protected MethodWrapper methodWrapper;
+  protected Wrapper wrapper;
 
   // TODO: Recursion protection. Need better guard logic. But still fast.
   protected boolean notfound = false;
@@ -67,17 +67,17 @@ public class DefaultCode implements Code {
     if (returnThis) {
       return scopes[scopes.length - 1];
     }
-    if (methodWrapper == null) {
-      methodWrapper = oh.find(name, scopes);
-      if (methodWrapper == null) {
+    if (wrapper == null) {
+      wrapper = oh.find(name, scopes);
+      if (wrapper == null) {
         notfound = true;
         return null;
       }
     }
     try {
-      return oh.coerce(methodWrapper.call(scopes));
-    } catch (MethodGuardException e) {
-      methodWrapper = null;
+      return oh.coerce(wrapper.call(scopes));
+    } catch (GuardException e) {
+      wrapper = null;
       return get(name, scopes);
     }
   }

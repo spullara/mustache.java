@@ -1,21 +1,15 @@
-package com.github.mustachejava.util;
+package com.github.mustachejava.reflect;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.concurrent.Future;
-import java.util.logging.Logger;
 
-import com.github.mustachejava.Mustache;
 import com.github.mustachejava.ObjectHandler;
-import com.github.mustachejava.util.MethodGuardException;
-import com.github.mustachejava.util.MethodWrapper;
+import com.github.mustachejava.util.GuardException;
+import com.github.mustachejava.util.Wrapper;
 
 /**
  * Lookup objects using reflection and execute them the same way.
@@ -36,27 +30,27 @@ public class ReflectionObjectHandler implements ObjectHandler {
   }
 
   @Override
-  public MethodWrapper find(String name, Object... scopes) {
-    MethodWrapper methodWrapper = null;
+  public Wrapper find(String name, Object... scopes) {
+    Wrapper wrapper = null;
     int length = scopes.length;
     Class[] guard = createGuard(scopes);
     NEXT:
     for (int i = length - 1; i >= 0; i--) {
       Object scope = scopes[i];
       if (scope == null) continue;
-      List<MethodWrapper> methodWrappers = null;
+      List<Wrapper> wrappers = null;
       int dotIndex;
       String subname = name;
       while ((dotIndex = subname.indexOf('.')) != -1) {
         String lookup = subname.substring(0, dotIndex);
         subname = subname.substring(dotIndex + 1);
-        methodWrapper = findWrapper(new Class[]{scope.getClass()}, scope, lookup);
-        if (methodWrapper != null) {
-          if (methodWrappers == null) methodWrappers = new ArrayList<MethodWrapper>();
-          methodWrappers.add(methodWrapper);
+        wrapper = findWrapper(new Class[]{scope.getClass()}, scope, lookup);
+        if (wrapper != null) {
+          if (wrappers == null) wrappers = new ArrayList<Wrapper>();
+          wrappers.add(wrapper);
           try {
-            scope = methodWrapper.call(scope);
-          } catch (MethodGuardException e) {
+            scope = wrapper.call(scope);
+          } catch (GuardException e) {
             throw new AssertionError(e);
           }
         } else {
@@ -64,17 +58,17 @@ public class ReflectionObjectHandler implements ObjectHandler {
         }
         if (scope == null) return null;
       }
-      MethodWrapper wrapper = findWrapper(guard, scope, subname);
-      if (wrapper != null) {
-        methodWrapper = wrapper;
-        wrapper.setScope(i);
-        if (methodWrappers != null) {
-          wrapper.addWrappers(methodWrappers.toArray(new MethodWrapper[methodWrappers.size()]));
+      ReflectionWrapper foundWrapper = findWrapper(guard, scope, subname);
+      if (foundWrapper != null) {
+        foundWrapper.setScope(i);
+        if (wrappers != null) {
+          foundWrapper.addWrappers(wrappers.toArray(new Wrapper[wrappers.size()]));
         }
+        wrapper = foundWrapper;
         break;
       }
     }
-    return methodWrapper;
+    return wrapper;
   }
 
   @Override
@@ -94,20 +88,20 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return guard;
   }
 
-  private MethodWrapper findWrapper(Class[] guard, Object scope, String name) {
+  private ReflectionWrapper findWrapper(Class[] guard, Object scope, String name) {
     if (scope == null) return null;
     if (scope instanceof Map) {
       Map map = (Map) scope;
       if (map.get(name) == null) {
         return null;
       } else {
-        return new MethodWrapper(guard, MAP_METHOD, name);
+        return new ReflectionWrapper(guard, MAP_METHOD, name);
       }
     }
     Class aClass = scope.getClass();
-    Map<String, MethodWrapper> members;
+    Map<String, Wrapper> members;
     // Don't overload methods in your contexts
-    MethodWrapper member = null;
+    ReflectionWrapper member = null;
     try {
       member = getField(guard, name, aClass);
     } catch (NoSuchFieldException e) {
@@ -137,7 +131,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return member;
   }
 
-  public static MethodWrapper getMethod(Class[] guard, String name, Class aClass, Class... params) throws NoSuchMethodException {
+  public static ReflectionWrapper getMethod(Class[] guard, String name, Class aClass, Class... params) throws NoSuchMethodException {
     Method member;
     try {
       member = aClass.getDeclaredMethod(name, params);
@@ -152,10 +146,10 @@ public class ReflectionObjectHandler implements ObjectHandler {
       throw new NoSuchMethodException("Only public, protected and package members allowed");
     }
     member.setAccessible(true);
-    return new MethodWrapper(guard, member);
+    return new ReflectionWrapper(guard, member);
   }
 
-  public static MethodWrapper getField(Class[] guard, String name, Class aClass) throws NoSuchFieldException {
+  public static ReflectionWrapper getField(Class[] guard, String name, Class aClass) throws NoSuchFieldException {
     Field member;
     try {
       member = aClass.getDeclaredField(name);
@@ -170,7 +164,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
       throw new NoSuchFieldException("Only public, protected and package members allowed");
     }
     member.setAccessible(true);
-    return new MethodWrapper(guard, member);
+    return new ReflectionWrapper(guard, member);
   }
 
 }
