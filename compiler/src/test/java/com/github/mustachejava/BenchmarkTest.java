@@ -8,7 +8,6 @@ import java.util.concurrent.Executors;
 
 import com.google.common.io.CharStreams;
 
-import com.github.mustachejava.impl.DefaultMustacheFactory;
 import junit.framework.TestCase;
 
 /**

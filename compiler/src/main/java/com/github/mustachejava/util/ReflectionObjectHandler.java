@@ -1,4 +1,4 @@
-package com.github.mustachejava.impl;
+package com.github.mustachejava.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -26,19 +26,6 @@ import com.github.mustachejava.util.MethodWrapper;
  */
 public class ReflectionObjectHandler implements ObjectHandler {
 
-  // Create a map if one doesn't already exist -- MapMaker.computerHashMap seems to be
-  // very inefficient, had to improvise
-  protected static Map<Class, Map<String, MethodWrapper>> cache = new HashMap<Class, Map<String, MethodWrapper>>() {
-    public synchronized Map<String, MethodWrapper> get(Object c) {
-      Map<String, MethodWrapper> o = super.get(c);
-      if (o == null) {
-        o = new HashMap<String, MethodWrapper>();
-        put((Class) c, o);
-      }
-      return o;
-    }
-  };
-
   private static final Method MAP_METHOD;
   static {
     try {
@@ -48,6 +35,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
     }
   }
 
+  @Override
   public MethodWrapper find(String name, Object... scopes) {
     MethodWrapper methodWrapper = null;
     int length = scopes.length;

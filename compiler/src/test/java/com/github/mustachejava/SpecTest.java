@@ -11,8 +11,7 @@ import java.util.Map;
 
 import com.google.common.base.Function;
 
-import com.github.mustachejava.impl.DefaultCode;
-import com.github.mustachejava.impl.DefaultMustacheFactory;
+import com.github.mustachejava.codes.DefaultCode;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.MappingJsonFactory;
@@ -170,9 +169,6 @@ public class SpecTest {
         Map<String, Mustache> partialMap = new HashMap<String, Mustache>();
         JsonNode partials = test.get("partials");
         MustacheParser MC = new MustacheParser(this);
-        {
-          MC.setSpecCompliance(true);
-        }
 
         @Override
         public Code partial(final String variable, String file, int line, String sm, String em) {
@@ -195,7 +191,6 @@ public class SpecTest {
         }
       };
       MustacheParser MC = new MustacheParser(CF);
-      MC.setSpecCompliance(true);
       String file = test.get("name").getTextValue();
       System.out.print("Running " + file + " - " + test.get("desc").getTextValue());
       StringReader template = new StringReader(test.get("template").getTextValue());

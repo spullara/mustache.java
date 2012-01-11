@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.github.mustachejava.impl.DefaultMustache;
+import com.github.mustachejava.codes.DefaultMustache;
 
 /**
  * A pseudo interpreter / compiler. Instead of compiling to Java code, it compiles to a
@@ -20,11 +20,6 @@ public class MustacheParser {
   public static final String DEFAULT_SM = "{{";
   public static final String DEFAULT_EM = "}}";
   private MustacheFactory cf;
-  private boolean specCompliance;
-
-  public void setSpecCompliance(boolean specCompliance) {
-    this.specCompliance = specCompliance;
-  }
 
   public MustacheParser(MustacheFactory cf) {
     this.cf = cf;
@@ -54,7 +49,7 @@ public class MustacheParser {
     try {
       int c;
       while ((c = br.read()) != -1) {
-        if (!specCompliance && c == '\r') {
+        if (c == '\r') {
           continue;
         }
         // Increment the line

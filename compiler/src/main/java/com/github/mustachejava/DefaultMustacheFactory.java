@@ -1,4 +1,4 @@
-package com.github.mustachejava.impl;
+package com.github.mustachejava;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,12 +17,13 @@ import com.google.common.collect.MapMaker;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
-import com.github.mustachejava.Code;
-import com.github.mustachejava.MustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheParser;
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.ObjectHandler;
+import com.github.mustachejava.codes.DefaultCode;
+import com.github.mustachejava.codes.IterableCode;
+import com.github.mustachejava.codes.NotIterableCode;
+import com.github.mustachejava.codes.PartialCode;
+import com.github.mustachejava.codes.ValueCode;
+import com.github.mustachejava.codes.WriteCode;
+import com.github.mustachejava.util.ReflectionObjectHandler;
 
 /**
  * Simplest possible code factory

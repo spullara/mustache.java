@@ -1,4 +1,4 @@
-package com.github.mustachejava.impl;
+package com.github.mustachejava.codes;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -14,6 +14,7 @@ import com.google.common.base.Function;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
 import com.github.mustachejava.Code;
+import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.util.LatchedWriter;

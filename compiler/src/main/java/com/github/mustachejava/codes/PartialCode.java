@@ -1,10 +1,11 @@
-package com.github.mustachejava.impl;
+package com.github.mustachejava.codes;
 
 import java.io.Writer;
 import java.util.concurrent.Callable;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
 
+import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.util.LatchedWriter;

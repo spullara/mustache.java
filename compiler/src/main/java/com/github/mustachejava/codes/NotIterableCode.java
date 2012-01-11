@@ -1,10 +1,11 @@
-package com.github.mustachejava.impl;
+package com.github.mustachejava.codes;
 
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
 
 import com.github.mustachejava.Code;
+import com.github.mustachejava.DefaultMustacheFactory;
 
 /**
 * Created by IntelliJ IDEA.

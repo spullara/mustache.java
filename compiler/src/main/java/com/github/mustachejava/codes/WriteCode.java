@@ -1,4 +1,4 @@
-package com.github.mustachejava.impl;
+package com.github.mustachejava.codes;
 
 import java.io.IOException;
 import java.io.Writer;

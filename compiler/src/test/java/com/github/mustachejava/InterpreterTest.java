@@ -14,7 +14,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
-import com.github.mustachejava.impl.DefaultMustacheFactory;
 import junit.framework.TestCase;
 
 /**
