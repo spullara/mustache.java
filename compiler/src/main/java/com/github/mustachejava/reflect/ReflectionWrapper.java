@@ -37,17 +37,6 @@ public class ReflectionWrapper implements Wrapper {
     this.scopeIndex = scopeIndex;
   }
 
-  public void addWrappers(Wrapper[] addedWrappers) {
-    if (this.wrappers == null) {
-      this.wrappers = addedWrappers;
-    } else {
-      Wrapper[] newWrappers = new Wrapper[this.wrappers.length + addedWrappers.length];
-      System.arraycopy(wrappers, 0, newWrappers, 0, wrappers.length);
-      System.arraycopy(newWrappers, 0, newWrappers, wrappers.length, newWrappers.length);
-      wrappers = newWrappers;
-    }
-  }
-
   @Override
   public Object call(Object... scopes) throws GuardException {
     try {
@@ -72,7 +61,7 @@ public class ReflectionWrapper implements Wrapper {
     }
   }
 
-  private void guardCall(Object[] scopes) throws GuardException {
+  protected void guardCall(Object[] scopes) throws GuardException {
     int length = scopes.length;
     if (guard.length != length) {
       throw new GuardException();

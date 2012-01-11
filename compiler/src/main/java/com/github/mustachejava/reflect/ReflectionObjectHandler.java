@@ -134,7 +134,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
       member = aClass.getDeclaredMethod(name, params);
     } catch (NoSuchMethodException nsme) {
       Class superclass = aClass.getSuperclass();
-      if (superclass != Object.class) {
+      if (superclass != null && superclass != Object.class) {
         return getMethod(scopeIndex, wrappers, guard, name, superclass, params);
       }
       throw nsme;
@@ -152,7 +152,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
       member = aClass.getDeclaredField(name);
     } catch (NoSuchFieldException nsfe) {
       Class superclass = aClass.getSuperclass();
-      if (superclass != Object.class) {
+      if (superclass != null && superclass != Object.class) {
         return getField(scopeIndex, wrappers, guard, name, superclass);
       }
       throw nsfe;

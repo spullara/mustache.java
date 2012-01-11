@@ -49,6 +49,10 @@ public class DefaultCode implements Code {
     }
   }
 
+  public Code[] getCodes() {
+    return codes;
+  }
+
   /**
    * Retrieve the first value in the stacks of scopes that matches
    * the give name. The method wrapper is cached and guarded against

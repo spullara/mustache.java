@@ -18,6 +18,8 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import com.github.mustachejava.codes.DefaultCode;
+import com.github.mustachejava.codes.ExtendCode;
+import com.github.mustachejava.codes.ExtendNameCode;
 import com.github.mustachejava.codes.IterableCode;
 import com.github.mustachejava.codes.NotIterableCode;
 import com.github.mustachejava.codes.PartialCode;
@@ -71,15 +73,12 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   @Override
   public Code name(String variable, List<Code> codes, String file, int start, String sm, String em) {
-    throw new UnsupportedOperationException();
+    return new ExtendNameCode(this, codes.toArray(new Code[0]), variable, sm, em);
   }
 
   @Override
   public Code partial(final String variable, String file, int line, String sm, String em) {
-    // Use the  name of the parent to get the name of the partial
-    int index = file.lastIndexOf(".");
-    final String extension = index == -1 ? "" : file.substring(index);
-    return new PartialCode(this, variable, sm, em, extension);
+    return new PartialCode(this, variable, file, sm, em);
   }
 
   @Override
@@ -99,7 +98,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   @Override
   public Code extend(String variable, List<Code> codes, String file, int start, String sm, String em) {
-    throw new UnsupportedOperationException();
+    return new ExtendCode(this, codes.toArray(new Code[0]), variable, file, sm, em);
   }
 
   @Override
