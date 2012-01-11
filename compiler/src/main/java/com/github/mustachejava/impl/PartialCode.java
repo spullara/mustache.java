@@ -20,10 +20,10 @@ public class PartialCode extends DefaultCode {
   private Mustache partial;
   private final String variable;
   private final String extension;
-  private DefaultCodeFactory cf;
+  private DefaultMustacheFactory cf;
   private final ListeningExecutorService les;
 
-  public PartialCode(DefaultCodeFactory cf, String variable, String sm, String em, String extension) {
+  public PartialCode(DefaultMustacheFactory cf, String variable, String sm, String em, String extension) {
     super(cf.getObjectHandler(), null, variable, ">", sm, em);
     this.cf = cf;
     this.variable = variable;

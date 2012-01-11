@@ -8,10 +8,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
@@ -20,37 +18,37 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import com.github.mustachejava.Code;
-import com.github.mustachejava.CodeFactory;
+import com.github.mustachejava.MustacheFactory;
 import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheCompiler;
+import com.github.mustachejava.MustacheParser;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
 
 /**
  * Simplest possible code factory
  */
-public class DefaultCodeFactory implements CodeFactory {
+public class DefaultMustacheFactory implements MustacheFactory {
 
   private static final Code EOF = new DefaultCode();
 
-  private final MustacheCompiler mc = new MustacheCompiler(this);
+  private final MustacheParser mc = new MustacheParser(this);
   private final Map<String, Mustache> templateCache = new MapMaker().weakKeys().makeMap();
-  private final ObjectHandler oh = new DefaultObjectHandler();
+  private final ObjectHandler oh = new ReflectionObjectHandler();
 
   private String resourceRoot;
   private File fileRoot;
 
   private ListeningExecutorService les;
   
-  public DefaultCodeFactory() {
+  public DefaultMustacheFactory() {
   }
 
-  public DefaultCodeFactory(String resourceRoot) {
+  public DefaultMustacheFactory(String resourceRoot) {
     if (!resourceRoot.endsWith("/")) resourceRoot += "/";
     this.resourceRoot = resourceRoot;
   }
 
-  public DefaultCodeFactory(File fileRoot) {
+  public DefaultMustacheFactory(File fileRoot) {
     if (!fileRoot.exists()) {
       throw new MustacheException(fileRoot + " does not exist");
     }

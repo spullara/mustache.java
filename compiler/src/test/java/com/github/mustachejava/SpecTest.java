@@ -12,7 +12,7 @@ import java.util.Map;
 import com.google.common.base.Function;
 
 import com.github.mustachejava.impl.DefaultCode;
-import com.github.mustachejava.impl.DefaultCodeFactory;
+import com.github.mustachejava.impl.DefaultMustacheFactory;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.MappingJsonFactory;
@@ -166,10 +166,10 @@ public class SpecTest {
     }}; 
     for (final JsonNode test : spec.get("tests")) {
       boolean failed = false;      
-      DefaultCodeFactory CF = new DefaultCodeFactory("/spec/specs") {
+      DefaultMustacheFactory CF = new DefaultMustacheFactory("/spec/specs") {
         Map<String, Mustache> partialMap = new HashMap<String, Mustache>();
         JsonNode partials = test.get("partials");
-        MustacheCompiler MC = new MustacheCompiler(this);
+        MustacheParser MC = new MustacheParser(this);
         {
           MC.setSpecCompliance(true);
         }
@@ -194,7 +194,7 @@ public class SpecTest {
           };
         }
       };
-      MustacheCompiler MC = new MustacheCompiler(CF);
+      MustacheParser MC = new MustacheParser(CF);
       MC.setSpecCompliance(true);
       String file = test.get("name").getTextValue();
       System.out.print("Running " + file + " - " + test.get("desc").getTextValue());

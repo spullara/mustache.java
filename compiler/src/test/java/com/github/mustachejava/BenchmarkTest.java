@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 
 import com.google.common.io.CharStreams;
 
-import com.github.mustachejava.impl.DefaultCodeFactory;
+import com.github.mustachejava.impl.DefaultMustacheFactory;
 import junit.framework.TestCase;
 
 /**
@@ -32,7 +32,7 @@ public class BenchmarkTest extends TestCase {
     System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 3; i++) {
       {
-        DefaultCodeFactory cf = new DefaultCodeFactory();
+        DefaultMustacheFactory cf = new DefaultMustacheFactory();
         Mustache m = cf.compile("complex.html");
         assertEquals(CharStreams.toString(
                         new InputStreamReader(
@@ -54,7 +54,7 @@ public class BenchmarkTest extends TestCase {
     System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 3; i++) {
       {
-        DefaultCodeFactory cf = new DefaultCodeFactory();
+        DefaultMustacheFactory cf = new DefaultMustacheFactory();
         cf.setExecutorService(Executors.newCachedThreadPool());
         Mustache m = cf.compile("complex.html");
         assertEquals(CharStreams.toString(

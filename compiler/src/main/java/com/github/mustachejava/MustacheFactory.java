@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Factory for creating codes
  */
-public interface CodeFactory {
+public interface MustacheFactory {
   // Specified
   Code iterable(String variable, List<Code> codes, String file, int start, String sm, String em);
   Code notIterable(String variable, List<Code> codes, String file, int start, String sm, String em);

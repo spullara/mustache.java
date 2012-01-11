@@ -16,17 +16,17 @@ import com.github.mustachejava.impl.DefaultMustache;
  * Date: 5/14/11
  * Time: 3:52 PM
  */
-public class MustacheCompiler {
+public class MustacheParser {
   public static final String DEFAULT_SM = "{{";
   public static final String DEFAULT_EM = "}}";
-  private CodeFactory cf;
+  private MustacheFactory cf;
   private boolean specCompliance;
 
   public void setSpecCompliance(boolean specCompliance) {
     this.specCompliance = specCompliance;
   }
 
-  public MustacheCompiler(CodeFactory cf) {
+  public MustacheParser(MustacheFactory cf) {
     this.cf = cf;
   }
 

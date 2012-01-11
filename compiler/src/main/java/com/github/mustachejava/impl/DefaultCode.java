@@ -2,6 +2,9 @@ package com.github.mustachejava.impl;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import com.github.mustachejava.Code;
 import com.github.mustachejava.MustacheException;
@@ -51,6 +54,10 @@ public class DefaultCode implements Code {
    * the give name. The method wrapper is cached and guarded against
    * the type or number of scopes changing. We should deepen the guard.
    *
+   * Methods will be found using the object handler, called here with
+   * another lookup on a guard failure and finally coerced to a final
+   * value based on the ObjectHandler you provide.
+   *
    * @param name   The common name of the field or method
    * @param scopes An array of scopes to interrogate from right to left.
    * @return The value of the field or method
@@ -68,7 +75,7 @@ public class DefaultCode implements Code {
       }
     }
     try {
-      return methodWrapper.call(scopes);
+      return oh.coerce(methodWrapper.call(scopes));
     } catch (MethodGuardException e) {
       methodWrapper = null;
       return get(name, scopes);
@@ -142,4 +149,58 @@ public class DefaultCode implements Code {
     sb.append(text);
     appended = sb.toString();
   }
+
+  public static ArrayList EMPTY = new ArrayList(0);
+
+  protected Iterator iterate(Object object) {
+    Iterator i;
+    if (object instanceof Iterator) {
+      return (Iterator) object;
+    } else if (object instanceof Iterable) {
+      i = ((Iterable) object).iterator();
+    } else {
+      if (object == null) return EMPTY.iterator();
+      if (object instanceof Boolean) {
+        if (!(Boolean) object) {
+          return EMPTY.iterator();
+        }
+      }
+      if (object instanceof String) {
+        if (object.toString().equals("")) {
+          return EMPTY.iterator();
+        }
+      }
+      i = new SingleValueIterator(object);
+    }
+    return i;
+  }
+
+  protected static class SingleValueIterator implements Iterator {
+    private boolean done;
+    private Object value;
+
+    public SingleValueIterator(Object value) {
+      this.value = value;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return !done;
+    }
+
+    @Override
+    public Object next() {
+      if (!done) {
+        done = true;
+        return value;
+      }
+      throw new NoSuchElementException();
+    }
+
+    @Override
+    public void remove() {
+      done = true;
+    }
+  }
+
 }

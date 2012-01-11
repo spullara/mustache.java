@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import com.github.mustachejava.Code;
-import com.github.mustachejava.CodeFactory;
+import com.github.mustachejava.MustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 
@@ -12,7 +12,7 @@ import com.github.mustachejava.MustacheException;
 * Default Mustache
 */
 public class DefaultMustache extends DefaultCode implements Mustache {
-  public DefaultMustache(CodeFactory cf, Code[] codes, String name, String sm, String em) {
+  public DefaultMustache(MustacheFactory cf, Code[] codes, String name, String sm, String em) {
     super(cf.getObjectHandler(), codes, name, null, sm, em);
   }
 

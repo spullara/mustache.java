@@ -13,14 +13,9 @@ import com.github.mustachejava.util.MethodWrapper;
  * Time: 2:59 PM
  */
 public interface ObjectHandler {
-  public static ArrayList EMPTY = new ArrayList(0);
-  public static Object NULL = new Object() {
-    @Override
-    public String toString() {
-      return "";
-    }
-  };
-
+  // Find methods to call
   MethodWrapper find(String name, Object... scopes);
-  Iterator iterate(Object object);
+
+  // Coerce results to Java native iterables, functions, callables
+  Object coerce(Object object);
 }

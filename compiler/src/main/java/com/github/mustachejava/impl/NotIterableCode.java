@@ -16,7 +16,7 @@ import com.github.mustachejava.Code;
 public class NotIterableCode extends DefaultCode {
   private final String variable;
 
-  public NotIterableCode(DefaultCodeFactory cf, List<Code> codes, String variable, String sm, String em) {
+  public NotIterableCode(DefaultMustacheFactory cf, List<Code> codes, String variable, String sm, String em) {
     super(cf.getObjectHandler(), codes.toArray(new Code[0]), variable, "^", sm, em);
     this.variable = variable;
   }
@@ -25,7 +25,7 @@ public class NotIterableCode extends DefaultCode {
   public Writer execute(Writer writer, Object... scopes) {
     Object resolve = get(variable, scopes);
     if (resolve != null) {
-      Iterator i = oh.iterate(resolve);
+      Iterator i = iterate(resolve);
       if (!i.hasNext()) {
         writer = runCodes(writer, scopes);
       }

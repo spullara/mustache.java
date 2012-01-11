@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -30,10 +29,10 @@ public class IterableCode extends DefaultCode {
 
   private final String variable;
   private final String file;
-  private DefaultCodeFactory cf;
+  private DefaultMustacheFactory cf;
   private ListeningExecutorService les;
 
-  public IterableCode(DefaultCodeFactory cf, List<Code> codes, String variable, String sm, String em, String file) {
+  public IterableCode(DefaultMustacheFactory cf, List<Code> codes, String variable, String sm, String em, String file) {
     super(cf.getObjectHandler(), codes.toArray(new Code[0]), variable, "#", sm, em);
     this.cf = cf;
     this.variable = variable;
@@ -104,7 +103,7 @@ public class IterableCode extends DefaultCode {
   }
 
   protected Writer execute(Writer writer, Object resolve, Object[] scopes) {
-    for (Iterator i = oh.iterate(resolve); i.hasNext(); ) {
+    for (Iterator i = iterate(resolve); i.hasNext(); ) {
       Object next = i.next();
       Object[] iteratorScopes = scopes;
       if (next != null) {

@@ -24,7 +24,7 @@ import com.github.mustachejava.util.MethodWrapper;
  * Date: 7/24/11
  * Time: 3:02 PM
  */
-public class DefaultObjectHandler implements ObjectHandler {
+public class ReflectionObjectHandler implements ObjectHandler {
 
   // Create a map if one doesn't already exist -- MapMaker.computerHashMap seems to be
   // very inefficient, had to improvise
@@ -89,6 +89,11 @@ public class DefaultObjectHandler implements ObjectHandler {
     return methodWrapper;
   }
 
+  @Override
+  public Object coerce(Object object) {
+    return object;
+  }
+
   private Class[] createGuard(Object... scopes) {
     int length = scopes.length;
     Class[] guard = new Class[length];
@@ -144,30 +149,6 @@ public class DefaultObjectHandler implements ObjectHandler {
     return member;
   }
 
-  @Override
-  public Iterator iterate(Object object) {
-    Iterator i;
-    if (object instanceof Iterator) {
-      return (Iterator) object;
-    } else if (object instanceof Iterable) {
-      i = ((Iterable) object).iterator();
-    } else {
-      if (object == null) return EMPTY.iterator();
-      if (object instanceof Boolean) {
-        if (!(Boolean) object) {
-          return EMPTY.iterator();
-        }
-      }
-      if (object instanceof String) {
-        if (object.toString().equals("")) {
-          return EMPTY.iterator();
-        }
-      }
-      i = new SingleValueIterator(object);
-    }
-    return i;
-  }
-
   public static MethodWrapper getMethod(Class[] guard, String name, Class aClass, Class... params) throws NoSuchMethodException {
     Method member;
     try {
@@ -202,34 +183,6 @@ public class DefaultObjectHandler implements ObjectHandler {
     }
     member.setAccessible(true);
     return new MethodWrapper(guard, member);
-  }
-
-  protected static class SingleValueIterator implements Iterator {
-    private boolean done;
-    private Object value;
-
-    public SingleValueIterator(Object value) {
-      this.value = value;
-    }
-
-    @Override
-    public boolean hasNext() {
-      return !done;
-    }
-
-    @Override
-    public Object next() {
-      if (!done) {
-        done = true;
-        return value;
-      }
-      throw new NoSuchElementException();
-    }
-
-    @Override
-    public void remove() {
-      done = true;
-    }
   }
 
 }

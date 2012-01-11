@@ -10,7 +10,7 @@ import com.google.common.base.Function;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
 import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheCompiler;
+import com.github.mustachejava.MustacheParser;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.util.LatchedWriter;
 
@@ -21,10 +21,10 @@ public class ValueCode extends DefaultCode {
   private final String variable;
   private final boolean encoded;
   private final int line;
-  private DefaultCodeFactory cf;
+  private DefaultMustacheFactory cf;
   private ListeningExecutorService les;
 
-  public ValueCode(DefaultCodeFactory cf, String variable, String sm, String em, boolean encoded, int line) {
+  public ValueCode(DefaultMustacheFactory cf, String variable, String sm, String em, boolean encoded, int line) {
     super(cf.getObjectHandler(), null, variable, "", sm, em);
     this.cf = cf;
     this.variable = variable;
@@ -83,7 +83,7 @@ public class ValueCode extends DefaultCode {
       Mustache mustache = cf.getTemplate(templateText);
       if (mustache == null) {
         mustache = cf.compile(new StringReader(templateText), variable,
-                MustacheCompiler.DEFAULT_SM, MustacheCompiler.DEFAULT_EM);
+                MustacheParser.DEFAULT_SM, MustacheParser.DEFAULT_EM);
         cf.putTemplate(templateText, mustache);
       }
       StringWriter sw = new StringWriter();
