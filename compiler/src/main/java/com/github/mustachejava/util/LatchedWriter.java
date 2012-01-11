@@ -1,7 +1,6 @@
 package com.github.mustachejava.util;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.concurrent.CountDownLatch;
 
@@ -15,7 +14,7 @@ public class LatchedWriter extends Writer {
   private final CountDownLatch latch = new CountDownLatch(1);
 
   // A buffer that holds writes until the latch is unlatched
-  private final StringWriter buffer = new StringWriter();
+  private final StringBuilder buffer = new StringBuilder();
 
   // The underlying writer
   private final Writer writer;
@@ -45,14 +44,14 @@ public class LatchedWriter extends Writer {
       checkWrite();
       writer.write(cbuf, off, len);
     } else {
-      buffer.write(cbuf, off, len);
+      buffer.append(cbuf, off, len);
     }
   }
 
   private void checkWrite() throws IOException {
     if (!isWritten) {
       isWritten = true;
-      writer.append(buffer.getBuffer());
+      writer.append(buffer);
     }
   }
 
@@ -70,6 +69,7 @@ public class LatchedWriter extends Writer {
     checkException();
     try {
       latch.await();
+      checkException();
       synchronized (this) {
         checkWrite();
         writer.flush();
@@ -90,5 +90,6 @@ public class LatchedWriter extends Writer {
 
   public synchronized void failed(Throwable e) {
     this.e = e;
+    done();
   }
 }

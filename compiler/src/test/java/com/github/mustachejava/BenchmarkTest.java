@@ -70,6 +70,25 @@ public class BenchmarkTest extends TestCase {
         System.out.println("Parallel: " + total/TIME);
       }
     }
+    System.out.println("complex.html evaluations per millisecond:");
+    for (int i = 0; i < 3; i++) {
+      {
+        MustacheFactory cf = new DefaultMustacheFactory();
+        Mustache m = cf.compile("complex.html");
+        assertEquals(CharStreams.toString(
+                new InputStreamReader(
+                        BenchmarkTest.class.getResourceAsStream("/complex.txt"))),
+                complextest(m, new InterpreterTest.ParallelComplexObject()).toString());
+        long start = System.currentTimeMillis();
+        int total = 0;
+        while (true) {
+          complextest(m, new InterpreterTest.ParallelComplexObject());
+          total++;
+          if (System.currentTimeMillis() - start > TIME) break;
+        }
+        System.out.println("Serial with callable: " + total/TIME);
+      }
+    }
   }
 
   private StringWriter complextest(Mustache m, Object complexObject) throws MustacheException, IOException {
