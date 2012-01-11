@@ -70,6 +70,9 @@ public class BenchmarkTest extends TestCase {
         System.out.println("Parallel: " + total/TIME);
       }
     }
+  }
+
+  public void testParallelComplexNoExecutor() throws MustacheException, IOException {
     System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 3; i++) {
       {

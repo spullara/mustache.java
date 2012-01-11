@@ -26,7 +26,7 @@ public class LatchedWriter extends Writer {
   private boolean isClosed;
 
   // This is set when the latch holder fails
-  private Throwable e;
+  private volatile Throwable e;
 
   public LatchedWriter(Writer writer) {
     this.writer = writer;
@@ -35,6 +35,12 @@ public class LatchedWriter extends Writer {
   // Call this when your processing is complete
   public synchronized void done() {
     latch.countDown();
+  }
+
+  // If you fail to complete, put an exception here
+  public void failed(Throwable e) {
+    this.e = e;
+    done();
   }
 
   @Override
@@ -82,14 +88,9 @@ public class LatchedWriter extends Writer {
   @Override
   public synchronized void close() throws IOException {
     checkException();
-    if (isClosed) throw new IOException("Alread closed");
-    isClosed = true;
+    if (isClosed) throw new IOException("Alread closed"); else isClosed = true;
     flush();
     writer.close();
   }
 
-  public synchronized void failed(Throwable e) {
-    this.e = e;
-    done();
-  }
 }
