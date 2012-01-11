@@ -11,9 +11,11 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.MapMaker;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
@@ -29,11 +31,11 @@ import com.github.mustachejava.ObjectHandler;
  */
 public class DefaultCodeFactory implements CodeFactory {
 
-  public static final Code EOF = new DefaultCode();
+  private static final Code EOF = new DefaultCode();
 
-  public final MustacheCompiler mc = new MustacheCompiler(this);
-  public final Map<String, Mustache> templateCache = new HashMap<String, Mustache>();
-  public final ObjectHandler oh = new DefaultObjectHandler();
+  private final MustacheCompiler mc = new MustacheCompiler(this);
+  private final Map<String, Mustache> templateCache = new MapMaker().weakKeys().makeMap();
+  private final ObjectHandler oh = new DefaultObjectHandler();
 
   private String resourceRoot;
   private File fileRoot;
@@ -196,5 +198,21 @@ public class DefaultCodeFactory implements CodeFactory {
     } else {
       les = MoreExecutors.listeningDecorator(es);
     }
+  }
+  
+  public Mustache getTemplate(String templateText) {
+    return templateCache.get(templateText);
+  }
+  
+  public void putTemplate(String templateText, Mustache mustache) {
+    templateCache.put(templateText, mustache);
+  }
+  
+  public Mustache compile(String name) {
+    return mc.compile(name);
+  }
+  
+  public Mustache compile(Reader reader, String file, String sm, String em) {
+    return mc.compile(reader, file, sm, em);
   }
 }

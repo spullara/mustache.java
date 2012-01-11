@@ -3,9 +3,13 @@ package com.github.mustachejava.impl;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -79,16 +83,20 @@ public class IterableCode extends DefaultCode {
     return writer;
   }
 
+  // Store the templateText locally so it won't fall out of the weak cache until this is gone
+  private Set<String> templates = Collections.synchronizedSet(new HashSet<String>());
+  
   protected Writer handleFunction(Writer writer, Function function, Object[] scopes) {
     StringWriter sw = new StringWriter();
     runIdentity(sw);
     Object newtemplate = function.apply(sw.toString());
     if (newtemplate != null) {
       String templateText = newtemplate.toString();
-      Mustache mustache = cf.templateCache.get(templateText);
+      Mustache mustache = cf.getTemplate(templateText);
       if (mustache == null) {
-        mustache = cf.mc.compile(new StringReader(templateText), file, sm, em);
-        cf.templateCache.put(templateText, mustache);
+        mustache = cf.compile(new StringReader(templateText), file, sm, em);
+        templates.add(templateText);
+        cf.putTemplate(templateText, mustache);
       }
       writer = mustache.execute(writer, scopes);
     }

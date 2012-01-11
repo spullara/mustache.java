@@ -24,7 +24,7 @@ public class PartialCode extends DefaultCode {
   private final ListeningExecutorService les;
 
   public PartialCode(DefaultCodeFactory cf, String variable, String sm, String em, String extension) {
-    super(cf.oh, null, variable, ">", sm, em);
+    super(cf.getObjectHandler(), null, variable, ">", sm, em);
     this.cf = cf;
     this.variable = variable;
     this.extension = extension;
@@ -34,7 +34,7 @@ public class PartialCode extends DefaultCode {
   @Override
   public Writer execute(Writer writer, final Object... scopes) {
     if (partial == null) {
-      partial = cf.mc.compile(variable + extension);
+      partial = cf.compile(variable + extension);
     }
     Object object = get(variable, scopes);
     if (object instanceof Callable) {

@@ -80,11 +80,11 @@ public class ValueCode extends DefaultCode {
     Object newtemplate = function.apply(null);
     if (newtemplate != null) {
       String templateText = newtemplate.toString();
-      Mustache mustache = cf.templateCache.get(templateText);
+      Mustache mustache = cf.getTemplate(templateText);
       if (mustache == null) {
-        mustache = cf.mc.compile(new StringReader(templateText), variable,
+        mustache = cf.compile(new StringReader(templateText), variable,
                 MustacheCompiler.DEFAULT_SM, MustacheCompiler.DEFAULT_EM);
-        cf.templateCache.put(templateText, mustache);
+        cf.putTemplate(templateText, mustache);
       }
       StringWriter sw = new StringWriter();
       mustache.execute(sw, scopes);
