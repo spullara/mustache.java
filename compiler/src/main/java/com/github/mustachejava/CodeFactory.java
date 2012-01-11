@@ -18,7 +18,7 @@ public interface CodeFactory {
   // Internal
   Code eof(int line);
 
-  // Extension
+  // TODO: Extension
   Code extend(String variable, List<Code> codes, String file, int start, String sm, String em);
   
   // Get readers
@@ -28,6 +28,11 @@ public interface CodeFactory {
   // to change the way encoding works. Also, if you use unexecute, make sure
   // also do the inverse in decode.
   String encode(String value);
-  
+
+  // Find objects
   ObjectHandler getObjectHandler();
+
+  // Create mustaches
+  Mustache compile(String name);
+  Mustache compile(Reader reader, String name, String sm, String em);
 }

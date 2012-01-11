@@ -28,7 +28,7 @@ public class InterpreterTest extends TestCase {
   private File root;
 
   public void testSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheCompiler c = init();
+    CodeFactory c = init();
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -46,7 +46,7 @@ public class InterpreterTest extends TestCase {
 
   public void testBrokenSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
     try {
-      MustacheCompiler c = init();
+      CodeFactory c = init();
       Mustache m = c.compile("brokensimple.html");
       StringWriter sw = new StringWriter();
       m.execute(sw, new Object() {
@@ -66,7 +66,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testSecurity() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheCompiler c = init();
+    CodeFactory c = init();
     Mustache m = c.compile("security.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -86,7 +86,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testIdentitySimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheCompiler c = init();
+    CodeFactory c = init();
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
     m.identity(sw);
@@ -95,7 +95,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testProperties() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheCompiler c = init();
+    CodeFactory c = init();
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -119,7 +119,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testSimpleWithMap() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheCompiler c = init();
+    CodeFactory c = init();
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new HashMap<String, Object>() {{
@@ -132,7 +132,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testPartial() throws MustacheException, IOException {
-    MustacheCompiler c = init();
+    CodeFactory c = init();
     Mustache m = c.compile("template_partial.html");
     StringWriter sw = new StringWriter();
     Map scope = new HashMap();
@@ -145,7 +145,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testComplex() throws MustacheException, IOException {
-    MustacheCompiler c = init();
+    CodeFactory c = init();
     Mustache m = c.compile("complex.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new ComplexObject());
@@ -153,7 +153,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testComplexParallel() throws MustacheException, IOException {
-    MustacheCompiler c = initParallel();
+    CodeFactory c = initParallel();
     Mustache m = c.compile("complex.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new ParallelComplexObject());
@@ -161,7 +161,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testSerialCallable() throws MustacheException, IOException {
-    MustacheCompiler c = init();
+    CodeFactory c = init();
     Mustache m = c.compile("complex.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new ParallelComplexObject());
@@ -267,7 +267,7 @@ public class InterpreterTest extends TestCase {
   }
   */
   public void testReadme() throws MustacheException, IOException {
-    MustacheCompiler c = init();
+    CodeFactory c = init();
     Mustache m = c.compile("items.html");
     StringWriter sw = new StringWriter();
     long start = System.currentTimeMillis();
@@ -277,7 +277,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testReadmeSerial() throws MustacheException, IOException {
-    MustacheCompiler c = init();
+    CodeFactory c = init();
     Mustache m = c.compile("items2.html");
     StringWriter sw = new StringWriter();
     long start = System.currentTimeMillis();
@@ -288,7 +288,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testReadmeParallel() throws MustacheException, IOException {
-    MustacheCompiler c = initParallel();
+    CodeFactory c = initParallel();
     Mustache m = c.compile("items2.html");
     StringWriter sw = new StringWriter();
     long start = System.currentTimeMillis();
@@ -337,15 +337,15 @@ public class InterpreterTest extends TestCase {
     }
   }
 
-  private MustacheCompiler init() {
+  private CodeFactory init() {
     DefaultCodeFactory cf = new DefaultCodeFactory(root);
-    return new MustacheCompiler(cf);
+    return cf;
   }
 
-  private MustacheCompiler initParallel() {
+  private DefaultCodeFactory initParallel() {
     DefaultCodeFactory cf = new DefaultCodeFactory(root);
     cf.setExecutorService(Executors.newCachedThreadPool());
-    return new MustacheCompiler(cf);
+    return cf;
   }
 
   protected String getContents(File root, String file) throws IOException {

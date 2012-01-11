@@ -32,8 +32,8 @@ public class BenchmarkTest extends TestCase {
     System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 3; i++) {
       {
-        MustacheCompiler c = new MustacheCompiler(new DefaultCodeFactory());
-        Mustache m = c.compile("complex.html");
+        DefaultCodeFactory cf = new DefaultCodeFactory();
+        Mustache m = cf.compile("complex.html");
         assertEquals(CharStreams.toString(
                         new InputStreamReader(
                                 BenchmarkTest.class.getResourceAsStream("/complex.txt"))),
@@ -56,8 +56,7 @@ public class BenchmarkTest extends TestCase {
       {
         DefaultCodeFactory cf = new DefaultCodeFactory();
         cf.setExecutorService(Executors.newCachedThreadPool());
-        MustacheCompiler c = new MustacheCompiler(cf);
-        Mustache m = c.compile("complex.html");
+        Mustache m = cf.compile("complex.html");
         assertEquals(CharStreams.toString(
                 new InputStreamReader(
                         BenchmarkTest.class.getResourceAsStream("/complex.txt"))),
