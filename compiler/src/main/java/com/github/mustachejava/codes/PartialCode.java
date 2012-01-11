@@ -38,13 +38,16 @@ public class PartialCode extends DefaultCode {
   }
   
   public PartialCode(DefaultMustacheFactory cf, String variable, String file, String sm, String em) {
-    this(cf, null, variable, file, ">", sm, em);
+    this(cf, null, ">", variable, file, sm, em);
   }
 
   @Override
   public Writer execute(Writer writer, final Object... scopes) {
     if (partial == null) {
       partial = cf.compile(variable + extension);
+      if (partial == null) {
+        throw new MustacheException("Failed to compile partial: " + variable);
+      }
     }
     return partialExecute(writer, scopes);
   }
