@@ -1,15 +1,6 @@
 package com.github.mustachejava.indy;
 
-import java.io.PrintWriter;
-import java.lang.invoke.CallSite;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.lang.invoke.MutableCallSite;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.util.UUID;
-
+import com.github.mustachejava.ObjectHandler;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -21,6 +12,16 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.util.TraceClassVisitor;
+
+import java.io.PrintWriter;
+import java.lang.invoke.CallSite;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.invoke.MutableCallSite;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.util.UUID;
 
 /**
  * Utility class for Indy development.
@@ -74,9 +75,9 @@ public class IndyUtil {
 
   public static CallSite bootstrap(MethodHandles.Lookup caller, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException {
     MethodHandle lookupHandle = MethodHandles.lookup().findStatic(IndyUtil.class, "lookup",
-            MethodType.methodType(Object.class, MutableCallSite.class, String.class, Scope.class));
+            MethodType.methodType(Object.class, MutableCallSite.class, String.class, Object[].class));
     MutableCallSite callSite = new MutableCallSite(
-            MethodType.methodType(Object.class, String.class, Scope.class));
+            MethodType.methodType(Object.class, String.class, Object[].class));
     callSite.setTarget(lookupHandle.bindTo(callSite));
     return callSite;
   }
@@ -85,10 +86,10 @@ public class IndyUtil {
     return null;
   }
 
-  public static Object lookup(MutableCallSite callSite, String name, Scope scope) throws Throwable {
+  public static Object lookup(MutableCallSite callSite, String name, Object[] scope) throws Throwable {
     // Here we do the lookup all the way down to the method
     // and generate code to find the the object at runtime in the scope
-    Scope originalScope = scope;
+    Object[] originalScope = scope;
 
     // Find the target field or method
     AccessibleObject ao = null;
@@ -108,7 +109,7 @@ public class IndyUtil {
     }
     if (ao == null || ao == DefaultObjectHandler.NOTHING) {
       MethodHandle returnNull = MethodHandles.constant(Object.class, null);
-      MethodHandle newTarget = MethodHandles.dropArguments(returnNull, 0, String.class, Scope.class);
+      MethodHandle newTarget = MethodHandles.dropArguments(returnNull, 0, String.class, Object[].class);
       callSite.setTarget(newTarget);
       return null;
     }

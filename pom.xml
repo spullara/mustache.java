@@ -13,6 +13,7 @@
     <module>jackson-support</module>
     <module>handlebar</module>
     <module>compiler</module>
+    <module>indy</module>
   </modules>
   <packaging>pom</packaging>
 
