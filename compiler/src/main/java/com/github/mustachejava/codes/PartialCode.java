@@ -2,6 +2,7 @@ package com.github.mustachejava.codes;
 
 import java.io.Writer;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
 
@@ -22,14 +23,14 @@ public class PartialCode extends DefaultCode {
   private final String variable;
   private final String extension;
   private DefaultMustacheFactory cf;
-  private final ListeningExecutorService les;
+  private final ExecutorService les;
 
   public PartialCode(DefaultMustacheFactory cf, String variable, String sm, String em, String extension) {
     super(cf.getObjectHandler(), null, variable, ">", sm, em);
     this.cf = cf;
     this.variable = variable;
     this.extension = extension;
-    les = cf.getListeningExecutorService();
+    les = cf.getExecutorService();
   }
 
   @Override

@@ -5,6 +5,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -23,7 +24,7 @@ public class ValueCode extends DefaultCode {
   private final boolean encoded;
   private final int line;
   private DefaultMustacheFactory cf;
-  private ListeningExecutorService les;
+  private ExecutorService les;
 
   public ValueCode(DefaultMustacheFactory cf, String variable, String sm, String em, boolean encoded, int line) {
     super(cf.getObjectHandler(), null, variable, "", sm, em);
@@ -31,7 +32,7 @@ public class ValueCode extends DefaultCode {
     this.variable = variable;
     this.encoded = encoded;
     this.line = line;
-    les = cf.getListeningExecutorService();
+    les = cf.getExecutorService();
   }
 
   @Override

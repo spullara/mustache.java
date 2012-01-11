@@ -3,11 +3,8 @@ package com.github.mustachejava;
 import com.github.mustachejava.util.Wrapper;
 
 /**
- * TODO: Edit this
- * <p/>
- * User: sam
- * Date: 7/24/11
- * Time: 2:59 PM
+ * The ObjectHandler is responsible for creating wrappers to find values
+ * in scopes at runtime and to coerce those results to the appropriate Java types
  */
 public interface ObjectHandler {
   // Find methods to call

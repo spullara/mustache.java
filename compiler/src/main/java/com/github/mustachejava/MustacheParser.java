@@ -85,7 +85,7 @@ public class MustacheParser {
               }
               sb.append((char) c);
             }
-            final String command = sb.toString();
+            final String command = cf.translate(sb.toString());
             final char ch = command.charAt(0);
             final String variable = command.substring(1).trim();
             switch (ch) {

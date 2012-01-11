@@ -187,7 +187,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
     return oh;
   }
 
-  public ListeningExecutorService getListeningExecutorService() {
+  public ExecutorService getExecutorService() {
     return les;
   }
 
@@ -213,5 +213,10 @@ public class DefaultMustacheFactory implements MustacheFactory {
   
   public Mustache compile(Reader reader, String file, String sm, String em) {
     return mc.compile(reader, file, sm, em);
+  }
+
+  @Override
+  public String translate(String from) {
+    return from;
   }
 }
