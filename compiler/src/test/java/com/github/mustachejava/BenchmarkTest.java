@@ -49,7 +49,8 @@ public class BenchmarkTest extends TestCase {
     }
   }
 
-  public void testParallelComplex() throws MustacheException, IOException {
+  public void
+  testParallelComplex() throws MustacheException, IOException {
     System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 3; i++) {
       {
@@ -96,7 +97,7 @@ public class BenchmarkTest extends TestCase {
 
   private StringWriter complextest(Mustache m, Object complexObject) throws MustacheException, IOException {
     StringWriter sw = new StringWriter();
-    m.execute(sw, complexObject);
+    m.execute(sw, complexObject).close();
     return sw;
   }
 

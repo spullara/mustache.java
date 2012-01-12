@@ -73,22 +73,27 @@ public class LatchedWriter extends Writer {
   @Override
   public void flush() throws IOException {
     checkException();
-    try {
-      latch.await();
+    if (latch.getCount() == 0) {
       checkException();
       synchronized (this) {
         checkWrite();
         writer.flush();
       }
-    } catch (InterruptedException e) {
-      throw new IOException("Interrupted while waiting to complete", e);
     }
   }
 
   @Override
-  public synchronized void close() throws IOException {
+  public void close() throws IOException {
     checkException();
-    if (isClosed) throw new IOException("Alread closed"); else isClosed = true;
+    synchronized (this) {
+      if (isClosed) throw new IOException("Alread closed");
+      else isClosed = true;
+    }
+    try {
+      latch.await();
+    } catch (InterruptedException e1) {
+      throw new IOException("Interrupted while waiting for completion", e1);
+    }
     flush();
     writer.close();
   }

@@ -491,7 +491,7 @@ public class Mustache {
       return EMPTY;
     }
     final Scope scope = new Scope(s);
-    scope.put(name, true);
+    scope.put(name, false);
     return new Iterable<Scope>() {
 
       @Override

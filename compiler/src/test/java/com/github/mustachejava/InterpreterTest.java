@@ -155,7 +155,7 @@ public class InterpreterTest extends TestCase {
     MustacheFactory c = initParallel();
     Mustache m = c.compile("complex.html");
     StringWriter sw = new StringWriter();
-    m.execute(sw, new ParallelComplexObject());
+    m.execute(sw, new ParallelComplexObject()).close();
     assertEquals(getContents(root, "complex.txt"), sw.toString());
   }
 
@@ -291,7 +291,7 @@ public class InterpreterTest extends TestCase {
     Mustache m = c.compile("items2.html");
     StringWriter sw = new StringWriter();
     long start = System.currentTimeMillis();
-    m.execute(sw, new Context());
+    m.execute(sw, new Context()).close();
     long diff = System.currentTimeMillis() - start;
     assertEquals(getContents(root, "items.txt"), sw.toString());
     assertTrue("Should be a little bit more than 1 second: " + diff, diff > 999 && diff < 2000);
