@@ -107,7 +107,7 @@ public class IterableCode extends DefaultCode implements Iteration {
     return oh.iterate(this, writer, resolve, scopes);
   }
 
-  public Writer next(Writer writer, Object next, Object[] scopes) {
+  public Writer next(Writer writer, Object next, Object... scopes) {
     Object[] iteratorScopes = addScope(next, scopes);
     writer = runCodes(writer, iteratorScopes);
     return writer;

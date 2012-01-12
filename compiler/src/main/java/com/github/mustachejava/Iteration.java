@@ -7,5 +7,5 @@ import java.io.Writer;
  * method in an ObjectHandler to change the types recognized by mustache.java as iterable.
  */
 public interface Iteration {
-  Writer next(Writer writer, Object next, Object[] scopes);
+  Writer next(Writer writer, Object next, Object... scopes);
 }
