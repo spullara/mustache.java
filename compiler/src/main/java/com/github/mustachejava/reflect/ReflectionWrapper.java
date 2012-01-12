@@ -23,7 +23,7 @@ public class ReflectionWrapper implements Wrapper {
   protected final Object[] arguments;
   protected final Class[] guard;
 
-  public ReflectionWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, AccessibleObject method, Object... arguments) {
+  public ReflectionWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, AccessibleObject method, Object[] arguments) {
     this.wrappers = wrappers;
     if (method instanceof Field) {
       this.method = null;
@@ -38,14 +38,14 @@ public class ReflectionWrapper implements Wrapper {
   }
 
   @Override
-  public Object call(Object... scopes) throws GuardException {
+  public Object call(Object[] scopes) throws GuardException {
     try {
       guardCall(scopes);
       Object scope = scopes[this.scopeIndex];
       // The value may be buried by . notation
       if (wrappers != null) {
         for (int i = 0; i < wrappers.length; i++) {
-          scope = wrappers[i].call(scope);
+          scope = wrappers[i].call(new Object[] { scope });
         }
       }
       if (scope == null) return null;

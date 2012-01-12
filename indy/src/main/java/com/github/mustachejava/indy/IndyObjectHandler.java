@@ -14,7 +14,7 @@ import com.github.mustachejava.util.Wrapper;
 public class IndyObjectHandler extends ReflectionObjectHandler {
 
   @Override
-  public Wrapper find(String name, Object... scopes) {
+  public Wrapper find(String name, Object[] scopes) {
     ReflectionWrapper wrapper = (ReflectionWrapper) find(name, scopes);
     return wrapper;
   }
@@ -25,7 +25,7 @@ public class IndyObjectHandler extends ReflectionObjectHandler {
   }
 
   @Override
-  protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, AccessibleObject member, Object... arguments) {
+  protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, AccessibleObject member, Object[] arguments) {
     return super.createWrapper(scopeIndex, wrappers, guard, member, arguments);
   }
 }

@@ -76,7 +76,7 @@ public class JsonInterpreterTest extends TestCase {
           es.submit(new Runnable() {
             @Override
             public void run() {
-              parse.execute(new NullWriter(), parent);
+              parse.execute(new NullWriter(), new Object[] { parent });
               runs.incrementAndGet();
               semaphore.release();
             }

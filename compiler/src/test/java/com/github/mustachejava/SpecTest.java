@@ -174,7 +174,7 @@ public class SpecTest {
         public Code partial(final String variable, String file, int line, String sm, String em) {
           return new DefaultCode(getObjectHandler(), null, variable, ">", sm, em) {
             @Override
-            public Writer execute(Writer writer, Object... scopes) {
+            public Writer execute(Writer writer, Object[] scopes) {
               JsonNode partialNode = partials.get(variable);
               if (partialNode != null && !partialNode.isNull()) {
                 String partialName = partialNode.asText();
@@ -198,7 +198,7 @@ public class SpecTest {
       try {
         Mustache compile = MC.compile(template, file);
         StringWriter writer = new StringWriter();        
-        compile.execute(writer, new JsonMap(data), functionMap.get(file));
+        compile.execute(writer, new Object[] { new JsonMap(data), functionMap.get(file) });
         String expected = test.get("expected").getTextValue();
         if (writer.toString().replaceAll("\\s+", "").equals(expected.replaceAll("\\s+", ""))) {
           System.out.print(": success");

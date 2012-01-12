@@ -21,11 +21,11 @@ public class WriteCode extends DefaultCode {
 
   @Override
   public void identity(Writer writer) {
-    execute(writer);
+    execute(writer, null);
   }
 
   @Override
-  public Writer execute(Writer writer, Object... scopes) {
+  public Writer execute(Writer writer, Object[] scopes) {
     try {
       writer.write(text);
     } catch (IOException e) {

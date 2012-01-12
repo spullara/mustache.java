@@ -48,7 +48,7 @@ public class ExtendCode extends PartialCode {
   }
 
   @Override
-  public Writer execute(Writer writer, Object... scopes) throws MustacheException {
+  public Writer execute(Writer writer, Object[] scopes) throws MustacheException {
     if (partial == null) {
       Map<String, ExtendNameCode> replaceMap = new HashMap<String, ExtendNameCode>();
       for (Code code : codes) {

@@ -36,7 +36,7 @@ public class ValueCode extends DefaultCode {
   }
 
   @Override
-  public Writer execute(Writer writer, final Object... scopes) {
+  public Writer execute(Writer writer, final Object[] scopes) {
     final Object object = get(variable, scopes);
     if (object != null) {
       try {

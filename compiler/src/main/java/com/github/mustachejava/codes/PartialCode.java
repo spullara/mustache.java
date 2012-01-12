@@ -42,7 +42,7 @@ public class PartialCode extends DefaultCode {
   }
 
   @Override
-  public Writer execute(Writer writer, final Object... scopes) {
+  public Writer execute(Writer writer, final Object[] scopes) {
     if (partial == null) {
       partial = cf.compile(variable + extension);
       if (partial == null) {

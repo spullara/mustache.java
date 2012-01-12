@@ -42,7 +42,7 @@ public class IterableCode extends DefaultCode implements Iteration {
   }
 
   @Override
-  public Writer execute(Writer writer, final Object... scopes) {
+  public Writer execute(Writer writer, final Object[] scopes) {
     Object resolve = get(variable, scopes);
     if (resolve != null) {
       if (resolve instanceof Function) {

@@ -66,7 +66,7 @@ public class DefaultCode implements Code {
    * @param scopes An array of scopes to interrogate from right to left.
    * @return The value of the field or method
    */
-  public Object get(String name, Object... scopes) {
+  public Object get(String name, Object[] scopes) {
     if (notfound) return null;
     if (returnThis) {
       return scopes[scopes.length - 1];
@@ -86,6 +86,11 @@ public class DefaultCode implements Code {
     }
   }
 
+  @Override
+  public Writer execute(Writer writer, Object scope) {
+    return execute(writer, new Object[] { scope });
+  }
+
   /**
    * The default behavior is to run the codes and append the captured text.
    *
@@ -93,7 +98,7 @@ public class DefaultCode implements Code {
    * @param scopes The scopes to evaluate the embedded names against.
    */
   @Override
-  public Writer execute(Writer writer, Object... scopes) {
+  public Writer execute(Writer writer, Object[] scopes) {
     return appendText(runCodes(writer, scopes));
   }
 
@@ -138,7 +143,7 @@ public class DefaultCode implements Code {
     return writer;
   }
 
-  protected Writer runCodes(Writer writer, Object... scopes) {
+  protected Writer runCodes(Writer writer, Object[] scopes) {
     if (codes != null) {
       int length = codes.length;
       for (int i = 0; i < length; i++) {

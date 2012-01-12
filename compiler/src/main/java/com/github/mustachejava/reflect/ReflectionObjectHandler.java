@@ -35,7 +35,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
   }
 
   @Override
-  public Wrapper find(String name, Object... scopes) {
+  public Wrapper find(String name, Object[] scopes) {
     Wrapper wrapper = null;
     int length = scopes.length;
     Class[] guard = createGuard(scopes);
@@ -54,7 +54,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
           if (wrappers == null) wrappers = new ArrayList<Wrapper>();
           wrappers.add(wrapper);
           try {
-            scope = wrapper.call(scope);
+            scope = wrapper.call(new Object[] { scope });
           } catch (GuardException e) {
             throw new AssertionError(e);
           }
@@ -79,7 +79,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return object;
   }
 
-  protected Class[] createGuard(Object... scopes) {
+  protected Class[] createGuard(Object[] scopes) {
     int length = scopes.length;
     Class[] guard = new Class[length];
     for (int i = 0; i < length; i++) {
@@ -98,7 +98,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
       if (map.get(name) == null) {
         return null;
       } else {
-        return createWrapper(scopeIndex, wrappers, guard, MAP_METHOD, name);
+        return createWrapper(scopeIndex, wrappers, guard, MAP_METHOD, new Object[] { name });
       }
     }
     Class aClass = scope.getClass();
@@ -148,7 +148,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
       throw new NoSuchMethodException("Only public, protected and package members allowed");
     }
     member.setAccessible(true);
-    return createWrapper(scopeIndex, wrappers, guard, member);
+    return createWrapper(scopeIndex, wrappers, guard, member, null);
   }
 
   protected Wrapper getField(int scopeIndex, Wrapper[] wrappers, Class[] guard, String name, Class aClass) throws NoSuchFieldException {
@@ -166,15 +166,15 @@ public class ReflectionObjectHandler implements ObjectHandler {
       throw new NoSuchFieldException("Only public, protected and package members allowed");
     }
     member.setAccessible(true);
-    return createWrapper(scopeIndex, wrappers, guard, member);
+    return createWrapper(scopeIndex, wrappers, guard, member, null);
   }
 
-  protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, AccessibleObject member, Object... arguments) {
+  protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, AccessibleObject member, Object[] arguments) {
     return new ReflectionWrapper(scopeIndex, wrappers, guard, member, arguments);
   }
 
   @Override
-  public Writer falsey(Iteration iteration, Writer writer, Object object, Object... scopes) {
+  public Writer falsey(Iteration iteration, Writer writer, Object object, Object[] scopes) {
     if (object != null) {
       if (object instanceof Iterator) {
         Iterator iterator = (Iterator) object;
@@ -208,28 +208,28 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return iteration.next(writer, object, scopes);
   }
 
-  public Writer iterate(Iteration iteration, Writer writer, Object object, Object... scopes) {
+  public Writer iterate(Iteration iteration, Writer writer, Object object, Object[] scopes) {
     if (object == null) return writer;
     if (object instanceof Iterator) {
       Iterator iterator = (Iterator) object;
       while (iterator.hasNext()) {
-        writer = iteration.next(writer, iterator.next(), scopes);
+        writer = iteration.next(writer, coerce(iterator.next()), scopes);
       }
     } else if (object instanceof Object[]) {
       Object[] array = (Object[]) object;
       int length = array.length;
       for (int i = 0; i < length; i++) {
-        writer = iteration.next(writer, array[i], scopes);
+        writer = iteration.next(writer, coerce(array[i]), scopes);
       }
     } else if (object instanceof List) {
       List list = (List) object;
       int length = list.size();
       for (int i = 0; i < length; i++) {
-        writer = iteration.next(writer, list.get(i), scopes);
+        writer = iteration.next(writer, coerce(list.get(i)), scopes);
       }
     } else if (object instanceof Iterable) {
       for (Object next : ((Iterable) object)) {
-        writer = iteration.next(writer, next, scopes);
+        writer = iteration.next(writer, coerce(next), scopes);
       }
     } else {
       if (object instanceof Boolean) {

@@ -9,7 +9,7 @@ import com.github.mustachejava.util.Wrapper;
 public class IndyWrapper implements Wrapper {
 
   @Override
-  public Object call(Object... scopes) throws GuardException {
+  public Object call(Object[] scopes) throws GuardException {
     return null;
   }
 }

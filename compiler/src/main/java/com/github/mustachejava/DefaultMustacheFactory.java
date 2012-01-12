@@ -38,7 +38,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   private final MustacheParser mc = new MustacheParser(this);
   private final Map<String, Mustache> templateCache = new MapMaker().weakKeys().makeMap();
-  private final ObjectHandler oh = new ReflectionObjectHandler();
+  private ObjectHandler oh = new ReflectionObjectHandler();
 
   private String resourceRoot;
   private File fileRoot;
@@ -185,6 +185,10 @@ public class DefaultMustacheFactory implements MustacheFactory {
   @Override
   public ObjectHandler getObjectHandler() {
     return oh;
+  }
+
+  public void setObjectHandler(ObjectHandler oh) {
+    this.oh = oh;
   }
 
   public ExecutorService getExecutorService() {
