@@ -27,7 +27,7 @@ public class NotIterableCode extends DefaultCode {
     Object resolve = get(variable, scopes);
     if (resolve != null) {
       Iterator i = iterate(resolve);
-      if (!i.hasNext()) {
+      if (i != null && !i.hasNext()) {
         writer = runCodes(writer, scopes);
       }
     } else {

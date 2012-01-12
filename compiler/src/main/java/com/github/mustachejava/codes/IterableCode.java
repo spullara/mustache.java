@@ -12,7 +12,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import com.google.common.base.Function;
-import com.google.common.util.concurrent.ListeningExecutorService;
 
 import com.github.mustachejava.Code;
 import com.github.mustachejava.DefaultMustacheFactory;
@@ -105,16 +104,22 @@ public class IterableCode extends DefaultCode {
   }
 
   protected Writer execute(Writer writer, Object resolve, Object[] scopes) {
-    for (Iterator i = iterate(resolve); i.hasNext(); ) {
-      Object next = i.next();
-      Object[] iteratorScopes = scopes;
-      if (next != null) {
-        iteratorScopes = new Object[scopes.length + 1];
-        System.arraycopy(scopes, 0, iteratorScopes, 0, scopes.length);
-        iteratorScopes[scopes.length] = next;
+    if (resolve == null) return null;
+    Iterator iterate = iterate(resolve);
+    if (iterate == null) {
+      writer = iteration(writer, resolve, scopes);
+    } else {
+      while (iterate.hasNext()) {
+        writer = iteration(writer, iterate.next(), scopes);
       }
-      writer = runCodes(writer, iteratorScopes);
     }
     return writer;
   }
+
+  private Writer iteration(Writer writer, Object next, Object[] scopes) {
+    Object[] iteratorScopes = addScope(next, scopes);
+    writer = runCodes(writer, iteratorScopes);
+    return writer;
+  }
+
 }

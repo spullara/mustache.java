@@ -83,9 +83,7 @@ public class PartialCode extends DefaultCode {
   }
 
   protected Writer execute(Writer writer, Object scope, Object[] scopes) {
-    Object[] newscopes = new Object[scopes.length + 1];
-    System.arraycopy(scopes, 0, newscopes, 0, scopes.length);
-    newscopes[scopes.length] = scope;
+    Object[] newscopes = addScope(scope, scopes);
     return appendText(partial.execute(writer, newscopes));
   }
 }

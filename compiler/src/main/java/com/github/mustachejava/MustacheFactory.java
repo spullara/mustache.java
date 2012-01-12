@@ -1,6 +1,7 @@
 package com.github.mustachejava;
 
 import java.io.Reader;
+import java.io.Writer;
 import java.util.List;
 
 /**
@@ -27,7 +28,7 @@ public interface MustacheFactory {
   // Override this in a super class if you don't want encoding or would like
   // to change the way encoding works. Also, if you use unexecute, make sure
   // also do the inverse in decode.
-  String encode(String value);
+  void encode(String value, Writer writer);
 
   // Find objects
   ObjectHandler getObjectHandler();

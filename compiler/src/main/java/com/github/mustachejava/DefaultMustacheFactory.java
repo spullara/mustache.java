@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +44,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
   private File fileRoot;
 
   private ListeningExecutorService les;
-  
+
   public DefaultMustacheFactory() {
   }
 
@@ -104,7 +106,8 @@ public class DefaultMustacheFactory implements MustacheFactory {
   @Override
   public Reader getReader(String resourceName) {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    InputStream is = ccl.getResourceAsStream((resourceRoot == null ? "" : resourceRoot) + resourceName);
+    InputStream is = ccl.getResourceAsStream(
+            (resourceRoot == null ? "" : resourceRoot) + resourceName);
     if (is == null) {
       File file = fileRoot == null ? new File(resourceName) : new File(fileRoot, resourceName);
       if (file.exists() && file.isFile()) {
@@ -126,58 +129,56 @@ public class DefaultMustacheFactory implements MustacheFactory {
   // to change the way encoding works. Also, if you use unexecute, make sure
   // also do the inverse in decode.
   @Override
-  public String encode(String value) {
-    StringBuilder sb = new StringBuilder();
-    int position = 0;
-    int length = value.length();
-    for (int i = 0; i < length; i++) {
-      char c = value.charAt(i);
-      switch (c) {
-        case '&':
-          if (!escapedPattern.matcher(value.substring(i, length)).find()) {
-            sb.append(value, position, i);
-            position = i + 1;
-            sb.append("&amp;");
-          } else {
-            if (position != 0) {
-              sb.append(value, position, i);
+  public void encode(String value, Writer writer) {
+    try {
+      int position = 0;
+      int length = value.length();
+      for (int i = 0; i < length; i++) {
+        char c = value.charAt(i);
+        switch (c) {
+          case '&':
+            if (!escapedPattern.matcher(value.substring(i, length)).find()) {
+              writer.append(value, position, i);
               position = i + 1;
-              sb.append("&");
+              writer.append("&amp;");
+            } else {
+              if (position != 0) {
+                writer.append(value, position, i);
+                position = i + 1;
+                writer.append("&");
+              }
             }
-          }
-          break;
-        case '\\':
-          sb.append(value, position, i);
-          position = i + 1;
-          sb.append("\\\\");
-          break;
-        case '"':
-          sb.append(value, position, i);
-          position = i + 1;
-          sb.append("&quot;");
-          break;
-        case '<':
-          sb.append(value, position, i);
-          position = i + 1;
-          sb.append("&lt;");
-          break;
-        case '>':
-          sb.append(value, position, i);
-          position = i + 1;
-          sb.append("&gt;");
-          break;
-        case '\n':
-          sb.append(value, position, i);
-          position = i + 1;
-          sb.append("&#10;");
-          break;
+            break;
+          case '\\':
+            writer.append(value, position, i);
+            position = i + 1;
+            writer.append("\\\\");
+            break;
+          case '"':
+            writer.append(value, position, i);
+            position = i + 1;
+            writer.append("&quot;");
+            break;
+          case '<':
+            writer.append(value, position, i);
+            position = i + 1;
+            writer.append("&lt;");
+            break;
+          case '>':
+            writer.append(value, position, i);
+            position = i + 1;
+            writer.append("&gt;");
+            break;
+          case '\n':
+            writer.append(value, position, i);
+            position = i + 1;
+            writer.append("&#10;");
+            break;
+        }
       }
-    }
-    if (position == 0) {
-      return value;
-    } else {
-      sb.append(value, position, value.length());
-      return sb.toString();
+      writer.append(value, position, value.length());
+    } catch (IOException e) {
+      throw new MustacheException("Failed to encode value: " + value);
     }
   }
 
@@ -197,19 +198,19 @@ public class DefaultMustacheFactory implements MustacheFactory {
       les = MoreExecutors.listeningDecorator(es);
     }
   }
-  
+
   public Mustache getTemplate(String templateText) {
     return templateCache.get(templateText);
   }
-  
+
   public void putTemplate(String templateText, Mustache mustache) {
     templateCache.put(templateText, mustache);
   }
-  
+
   public Mustache compile(String name) {
     return mc.compile(name);
   }
-  
+
   public Mustache compile(Reader reader, String file, String sm, String em) {
     return mc.compile(reader, file, sm, em);
   }

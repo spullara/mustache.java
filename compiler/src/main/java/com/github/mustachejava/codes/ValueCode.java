@@ -99,7 +99,7 @@ public class ValueCode extends DefaultCode {
 
   protected void execute(Writer writer, String value) throws IOException {
     if (encoded) {
-      writer.write(cf.encode(value));
+      cf.encode(value, writer);
     } else {
       writer.write(value);
     }

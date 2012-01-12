@@ -154,57 +154,66 @@ public class DefaultCode implements Code {
     appended = sb.toString();
   }
 
-  public static ArrayList EMPTY = new ArrayList(0);
+  public static Iterator EMPTY = new ArrayList(0).iterator();
 
   protected Iterator iterate(Object object) {
-    Iterator i;
+    Iterator i = null;
     if (object instanceof Iterator) {
       return (Iterator) object;
     } else if (object instanceof Iterable) {
       i = ((Iterable) object).iterator();
     } else {
-      if (object == null) return EMPTY.iterator();
+      if (object == null) return EMPTY;
       if (object instanceof Boolean) {
         if (!(Boolean) object) {
-          return EMPTY.iterator();
+          return EMPTY;
         }
       }
       if (object instanceof String) {
         if (object.toString().equals("")) {
-          return EMPTY.iterator();
+          return EMPTY;
         }
       }
-      i = new SingleValueIterator(object);
+      // If it is a single value, return null
+      // and we will run a single iteration
+      // using it as a scope. More efficient then
+      // creating a SingleValueIterator
     }
     return i;
   }
 
-  protected static class SingleValueIterator implements Iterator {
-    private boolean done;
-    private Object value;
+  /**
+   * Allocating new scopes is currently the only place where we are activtely allocating
+   * memory within the templating system. It is possible that recycling these might lend
+   * some additional benefit or using the same one in each thread. The only time this
+   * grows is when there are recursive calls to the same scope. In most non-degenerate cases
+   * we won't encounter that. Also, since we are copying the results across these boundaries
+   * we don't have to worry about threads.
+   */
 
-    public SingleValueIterator(Object value) {
-      this.value = value;
-    }
+  private ThreadLocal<Object[]> localScopes = new ThreadLocal<Object[]>();
 
-    @Override
-    public boolean hasNext() {
-      return !done;
-    }
-
-    @Override
-    public Object next() {
-      if (!done) {
-        done = true;
-        return value;
+  protected Object[] addScope(Object next, Object[] scopes) {
+    Object[] iteratorScopes = scopes;
+    if (next != null) {
+      iteratorScopes = localScopes.get();
+      if (iteratorScopes == null) {
+        iteratorScopes = new Object[scopes.length + 1];
+        localScopes.set(iteratorScopes);
+      } else {
+        if (iteratorScopes.length < scopes.length + 1) {
+          // Need to expand the scopes holder
+          iteratorScopes = new Object[scopes.length + 1];
+          localScopes.set(iteratorScopes);
+        }
       }
-      throw new NoSuchElementException();
+      int srcPos = iteratorScopes.length - scopes.length - 1;
+      System.arraycopy(scopes, 0, iteratorScopes, srcPos, scopes.length);
+      for (;srcPos > 0; srcPos--) {
+        iteratorScopes[srcPos - 1] = null;
+      }
+      iteratorScopes[iteratorScopes.length - 1] = next;
     }
-
-    @Override
-    public void remove() {
-      done = true;
-    }
+    return iteratorScopes;
   }
-
 }
