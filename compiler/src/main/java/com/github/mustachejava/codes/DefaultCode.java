@@ -154,34 +154,6 @@ public class DefaultCode implements Code {
     appended = sb.toString();
   }
 
-  public static Iterator EMPTY = new ArrayList(0).iterator();
-
-  protected Iterator iterate(Object object) {
-    Iterator i = null;
-    if (object instanceof Iterator) {
-      return (Iterator) object;
-    } else if (object instanceof Iterable) {
-      i = ((Iterable) object).iterator();
-    } else {
-      if (object == null) return EMPTY;
-      if (object instanceof Boolean) {
-        if (!(Boolean) object) {
-          return EMPTY;
-        }
-      }
-      if (object instanceof String) {
-        if (object.toString().equals("")) {
-          return EMPTY;
-        }
-      }
-      // If it is a single value, return null
-      // and we will run a single iteration
-      // using it as a scope. More efficient then
-      // creating a SingleValueIterator
-    }
-    return i;
-  }
-
   /**
    * Allocating new scopes is currently the only place where we are activtely allocating
    * memory within the templating system. It is possible that recycling these might lend

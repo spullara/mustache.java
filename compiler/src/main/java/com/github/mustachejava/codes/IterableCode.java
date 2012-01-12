@@ -5,7 +5,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -15,6 +14,7 @@ import com.google.common.base.Function;
 
 import com.github.mustachejava.Code;
 import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Iteration;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.util.LatchedWriter;
@@ -26,7 +26,7 @@ import com.github.mustachejava.util.LatchedWriter;
 * Time: 2:57 PM
 * To change this template use File | Settings | File Templates.
 */
-public class IterableCode extends DefaultCode {
+public class IterableCode extends DefaultCode implements Iteration {
 
   private final String variable;
   private final String file;
@@ -104,19 +104,10 @@ public class IterableCode extends DefaultCode {
   }
 
   protected Writer execute(Writer writer, Object resolve, Object[] scopes) {
-    if (resolve == null) return null;
-    Iterator iterate = iterate(resolve);
-    if (iterate == null) {
-      writer = iteration(writer, resolve, scopes);
-    } else {
-      while (iterate.hasNext()) {
-        writer = iteration(writer, iterate.next(), scopes);
-      }
-    }
-    return writer;
+    return oh.iterate(this, writer, resolve, scopes);
   }
 
-  private Writer iteration(Writer writer, Object next, Object[] scopes) {
+  public Writer next(Writer writer, Object next, Object[] scopes) {
     Object[] iteratorScopes = addScope(next, scopes);
     writer = runCodes(writer, iteratorScopes);
     return writer;

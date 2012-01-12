@@ -1,5 +1,7 @@
 package com.github.mustachejava;
 
+import java.io.Writer;
+
 import com.github.mustachejava.util.Wrapper;
 
 /**
@@ -12,4 +14,10 @@ public interface ObjectHandler {
 
   // Coerce results to Java native iterables, functions, callables
   Object coerce(Object object);
+
+  // Iterate over a result object
+  Writer iterate(Iteration iteration, Writer writer, Object object, Object... scopes);
+
+  // Only call next if the object should be considered falsey
+  Writer falsey(Iteration iteration, Writer writer, Object object, Object... scopes);
 }

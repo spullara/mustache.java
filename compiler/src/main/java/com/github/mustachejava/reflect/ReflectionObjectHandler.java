@@ -1,13 +1,16 @@
 package com.github.mustachejava.reflect;
 
+import java.io.Writer;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.github.mustachejava.Iteration;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
@@ -22,6 +25,7 @@ import com.github.mustachejava.util.Wrapper;
 public class ReflectionObjectHandler implements ObjectHandler {
 
   protected static final Method MAP_METHOD;
+
   static {
     try {
       MAP_METHOD = Map.class.getMethod("get", Object.class);
@@ -45,7 +49,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
       while ((dotIndex = subname.indexOf('.')) != -1) {
         String lookup = subname.substring(0, dotIndex);
         subname = subname.substring(dotIndex + 1);
-        wrapper = findWrapper(0, null, new Class[] { scope.getClass() }, scope, lookup);
+        wrapper = findWrapper(0, null, new Class[]{scope.getClass()}, scope, lookup);
         if (wrapper != null) {
           if (wrappers == null) wrappers = new ArrayList<Wrapper>();
           wrappers.add(wrapper);
@@ -59,7 +63,8 @@ public class ReflectionObjectHandler implements ObjectHandler {
         }
         if (scope == null) return null;
       }
-      Wrapper[] foundWrappers = wrappers == null ? null : wrappers.toArray(new Wrapper[wrappers.size()]);
+      Wrapper[] foundWrappers = wrappers == null ? null : wrappers.toArray(
+              new Wrapper[wrappers.size()]);
       Wrapper foundWrapper = findWrapper(i, foundWrappers, guard, scope, subname);
       if (foundWrapper != null) {
         wrapper = foundWrapper;
@@ -166,6 +171,80 @@ public class ReflectionObjectHandler implements ObjectHandler {
 
   protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, AccessibleObject member, Object... arguments) {
     return new ReflectionWrapper(scopeIndex, wrappers, guard, member, arguments);
+  }
+
+  @Override
+  public Writer falsey(Iteration iteration, Writer writer, Object object, Object... scopes) {
+    if (object != null) {
+      if (object instanceof Iterator) {
+        Iterator iterator = (Iterator) object;
+        if (iterator.hasNext()) return writer;
+      } else if (object instanceof Object[]) {
+        Object[] array = (Object[]) object;
+        int length = array.length;
+        if (length > 0) return writer;
+      } else if (object instanceof List) {
+        List list = (List) object;
+        int length = list.size();
+        if (length > 0) return writer;
+      } else if (object instanceof Iterable) {
+        Iterable iterable = (Iterable) object;
+        if (iterable.iterator().hasNext()) return writer;
+      } else {
+        if (object instanceof Boolean) {
+          if ((Boolean) object) {
+            return writer;
+          }
+        } else if (object instanceof String) {
+          if (!object.toString().equals("")) {
+            return writer;
+          }
+        } else {
+          // All other objects are truthy
+          return writer;
+        }
+      }
+    }
+    return iteration.next(writer, object, scopes);
+  }
+
+  public Writer iterate(Iteration iteration, Writer writer, Object object, Object... scopes) {
+    if (object == null) return writer;
+    if (object instanceof Iterator) {
+      Iterator iterator = (Iterator) object;
+      while (iterator.hasNext()) {
+        writer = iteration.next(writer, iterator.next(), scopes);
+      }
+    } else if (object instanceof Object[]) {
+      Object[] array = (Object[]) object;
+      int length = array.length;
+      for (int i = 0; i < length; i++) {
+        writer = iteration.next(writer, array[i], scopes);
+      }
+    } else if (object instanceof List) {
+      List list = (List) object;
+      int length = list.size();
+      for (int i = 0; i < length; i++) {
+        writer = iteration.next(writer, list.get(i), scopes);
+      }
+    } else if (object instanceof Iterable) {
+      for (Object next : ((Iterable) object)) {
+        writer = iteration.next(writer, next, scopes);
+      }
+    } else {
+      if (object instanceof Boolean) {
+        if (!(Boolean) object) {
+          return writer;
+        }
+      }
+      if (object instanceof String) {
+        if (object.toString().equals("")) {
+          return writer;
+        }
+      }
+      writer = iteration.next(writer, object, scopes);
+    }
+    return writer;
   }
 
 }
