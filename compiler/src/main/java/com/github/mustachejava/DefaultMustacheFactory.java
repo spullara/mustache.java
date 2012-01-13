@@ -12,6 +12,7 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
@@ -37,7 +38,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
   private static final Code EOF = new DefaultCode();
 
   private final MustacheParser mc = new MustacheParser(this);
-  private final Map<String, Mustache> templateCache = new MapMaker().weakKeys().makeMap();
+  private final Map<String, Mustache> templateCache = new ConcurrentHashMap<String, Mustache>();
   private ObjectHandler oh = new ReflectionObjectHandler();
 
   private String resourceRoot;

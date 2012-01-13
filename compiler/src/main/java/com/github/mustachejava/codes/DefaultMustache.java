@@ -1,11 +1,9 @@
 package com.github.mustachejava.codes;
 
-import java.io.IOException;
 import java.io.Writer;
 
 import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.MustacheFactory;
 
 /**
