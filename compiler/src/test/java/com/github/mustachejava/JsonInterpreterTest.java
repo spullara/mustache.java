@@ -108,7 +108,7 @@ public class JsonInterpreterTest extends TestCase {
   }
 
   private Mustache getMustache() {
-    MustacheFactory mb = new DefaultMustacheFactory(root);
+    DefaultMustacheFactory mb = new DefaultMustacheFactory(root);
     final Mustache parse = mb.compile("timeline.mustache");
     mb.compile("timeline.mustache");
     return parse;

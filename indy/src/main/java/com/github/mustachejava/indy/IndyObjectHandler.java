@@ -5,13 +5,17 @@ import java.lang.reflect.AccessibleObject;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.reflect.ReflectionWrapper;
+import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
+import com.sun.org.apache.xml.internal.security.utils.I18n;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
+
+import static com.github.mustachejava.indy.IndyUtil.BOOTSTRAP_METHOD;
 
 /**
  * Creates custom classes instead of using reflection for handling objects. Leverages
@@ -20,63 +24,43 @@ import org.objectweb.asm.commons.Method;
  */
 public class IndyObjectHandler extends ReflectionObjectHandler implements Opcodes {
 
+  private static final Method CALL_METHOD = Method.getMethod("Object call(Object[])");
+  private static final Type[] GUARD_EXCEPTION = new Type[]{Type.getType(GuardException.class)};
+
   @Override
   public Wrapper find(String name, Object[] scopes) {
-    ReflectionWrapper wrapper = (ReflectionWrapper) find(name, scopes);
     try {
-      // Create a new wrapper per wrapper that is implemented with Indy
+      String bootstrap = IndyUtil.getUUID("com.github.mustachejava.indy", "Bootstrap");
+      Class<?> aClass = IndyUtil.defineClass(bootstrap, createClass(name, bootstrap, "java.lang.Object"));
+      return (Wrapper) aClass.newInstance();
     } catch (Exception e) {
-      throw new MustacheException("Failed to generate class", e);
+      throw new MustacheException(e);
     }
-    return wrapper;
   }
 
-  @Override
-  public Object coerce(Object object) {
-    return super.coerce(object);
-  }
-
-  @Override
-  protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, AccessibleObject member, Object[] arguments) {
-    return super.createWrapper(scopeIndex, wrappers, guard, member, arguments);
-  }
-
-  public static byte[] createClass(String className, String superClassName) throws Exception {
+  public static byte[] createClass(String name, String className, String superClassName) throws Exception {
     className = className.replace(".", "/");
     superClassName = superClassName.replace(".", "/");
 
     ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
     MethodVisitor mv;
 
-    cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, className,
-            null, superClassName, null);
+    cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, className, null, superClassName, new String[] { "com/github/mustachejava/util/Wrapper"});
 
     cw.visitSource(className + ".java", null);
 
     {
-      mv = cw.visitMethod(ACC_PUBLIC, "<init>",
-              "(Lcom/sampullara/mustache/Mustache;Ljava/lang/String;ZI)V", null, null);
-      mv.visitCode();
-      mv.visitVarInsn(ALOAD, 0);
-      mv.visitVarInsn(ALOAD, 1);
-      mv.visitVarInsn(ALOAD, 2);
-      mv.visitVarInsn(ILOAD, 3);
-      mv.visitVarInsn(ILOAD, 4);
-      mv.visitMethodInsn(INVOKESPECIAL, superClassName, "<init>",
-              "(Lcom/sampullara/mustache/Mustache;Ljava/lang/String;ZI)V");
-      mv.visitInsn(RETURN);
-      mv.visitMaxs(5, 5);
-      mv.visitEnd();
+      Method noargConstructor = Method.getMethod("void <init> ()");
+      GeneratorAdapter ga = new GeneratorAdapter(ACC_PUBLIC, noargConstructor, null, null, cw);
+      ga.loadThis();
+      ga.invokeConstructor(Type.getType(Object.class), noargConstructor);
+      ga.returnValue();
+      ga.endMethod();
     }
     {
-      GeneratorAdapter ga = new GeneratorAdapter(ACC_PROTECTED,
-              Method.getMethod("Object getValue(com.sampullara.mustache.Scope)"), null, null, cw);
-      ga.loadThis();
-      ga.getField(Type.getType(className), "name", Type.getType(String.class));
+      GeneratorAdapter ga = new GeneratorAdapter(ACC_PUBLIC, CALL_METHOD, null, GUARD_EXCEPTION, cw);
       ga.loadArg(0);
-      ga.invokeDynamic("getValue",
-              "(Ljava/lang/String;Lcom/sampullara/mustache/Scope;)Ljava/lang/Object;",
-              IndyUtil.BOOTSTRAP_METHOD);
+      ga.invokeDynamic("call", "([Ljava/lang/Object;)Ljava/lang/Object;", BOOTSTRAP_METHOD, name);
       ga.returnValue();
       ga.endMethod();
     }
