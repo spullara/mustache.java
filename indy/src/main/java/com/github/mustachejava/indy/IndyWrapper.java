@@ -112,7 +112,11 @@ public abstract class IndyWrapper extends ReflectionWrapper implements Opcodes {
     Method method = iw.getMethod();
     if (method == null) {
       Field field = iw.getField();
-      callSite.setTarget(MethodHandles.lookup().unreflectGetter(field));
+      MethodHandle unreflect = MethodHandles.lookup().unreflectGetter(field);
+      unreflect = MethodHandles.dropArguments(unreflect, 0, IndyWrapper.class);
+      unreflect = MethodHandles.explicitCastArguments(unreflect,
+              MethodType.methodType(Object.class, IndyWrapper.class, Object.class));
+      callSite.setTarget(unreflect);
       return field.get(scope);
     } else {
       MethodHandle unreflect = MethodHandles.lookup().unreflect(method);
@@ -122,7 +126,8 @@ public abstract class IndyWrapper extends ReflectionWrapper implements Opcodes {
           unreflect = MethodHandles.insertArguments(unreflect, i + 2, iw.getArguments()[i]);
         }
       }
-      unreflect = MethodHandles.explicitCastArguments(unreflect, MethodType.methodType(Object.class, IndyWrapper.class, Object.class));
+      unreflect = MethodHandles.explicitCastArguments(unreflect,
+              MethodType.methodType(Object.class, IndyWrapper.class, Object.class));
       callSite.setTarget(unreflect);
       return method.invoke(scope, iw.getArguments());
     }
