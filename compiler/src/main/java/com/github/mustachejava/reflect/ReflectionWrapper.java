@@ -37,17 +37,15 @@ public class ReflectionWrapper implements Wrapper {
     this.scopeIndex = scopeIndex;
   }
 
+  public ReflectionWrapper(ReflectionWrapper rw) {
+    this(rw.scopeIndex, rw.wrappers, rw.guard, rw.method == null ? rw.field : rw.method, rw.arguments);
+  }
+
   @Override
   public Object call(Object[] scopes) throws GuardException {
     try {
       guardCall(scopes);
-      Object scope = scopes[this.scopeIndex];
-      // The value may be buried by . notation
-      if (wrappers != null) {
-        for (int i = 0; i < wrappers.length; i++) {
-          scope = wrappers[i].call(new Object[] { scope });
-        }
-      }
+      Object scope = unwrap(scopes);
       if (scope == null) return null;
       if (method == null) {
         return field.get(scope);
@@ -61,6 +59,17 @@ public class ReflectionWrapper implements Wrapper {
     }
   }
 
+  protected Object unwrap(Object[] scopes) throws GuardException {
+    Object scope = scopes[this.scopeIndex];
+    // The value may be buried by . notation
+    if (wrappers != null) {
+      for (int i = 0; i < wrappers.length; i++) {
+        scope = wrappers[i].call(new Object[] { scope });
+      }
+    }
+    return scope;
+  }
+
   protected void guardCall(Object[] scopes) throws GuardException {
     int length = scopes.length;
     if (guard.length != length) {
@@ -72,5 +81,17 @@ public class ReflectionWrapper implements Wrapper {
         throw new GuardException();
       }
     }
+  }
+
+  public Method getMethod() {
+    return method;
+  }
+
+  public Field getField() {
+    return field;
+  }
+
+  public Object[] getArguments() {
+    return arguments;
   }
 }
