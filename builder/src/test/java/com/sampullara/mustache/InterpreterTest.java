@@ -565,6 +565,9 @@ public class InterpreterTest extends TestCase {
 
       String name, price;
       List<Feature> features;
+      boolean hasfeatures() {
+        return features != null && features.size() > 0;
+      }
     }
 
     static class Feature {
