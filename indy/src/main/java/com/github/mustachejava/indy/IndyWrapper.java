@@ -43,7 +43,7 @@ public abstract class IndyWrapper extends ReflectionWrapper implements Opcodes {
     return callSite;
   }
 
-  private IndyWrapper(ReflectionWrapper rw) {
+  protected IndyWrapper(ReflectionWrapper rw) {
     super(rw);
   }
 
