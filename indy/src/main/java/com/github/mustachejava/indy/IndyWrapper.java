@@ -58,7 +58,15 @@ public abstract class IndyWrapper extends ReflectionWrapper implements Opcodes {
   public abstract Object indy(Object scope);
 
   public static IndyWrapper create(ReflectionWrapper rw) {
-    String className = encodeClassName("com.github.mustachejava.indy", "Wrapper");
+    String name;
+    Method method = rw.getMethod();
+    if (method == null) {
+      Field field = rw.getField();
+      name = "W_" + field.getDeclaringClass().getSimpleName() + "_" + field.getName();
+    } else {
+      name = "W_" + method.getDeclaringClass().getSimpleName() + "_" + method.getName();
+    }
+    String className = encodeClassName("com.github.mustachejava.indy", name);
     try {
       ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
 

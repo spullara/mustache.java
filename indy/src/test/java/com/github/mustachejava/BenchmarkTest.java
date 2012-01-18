@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 
 import com.google.common.io.CharStreams;
 
+import com.github.mustachejava.indy.IndyObjectHandler;
 import junit.framework.TestCase;
 
 /**
@@ -31,7 +32,7 @@ public class BenchmarkTest extends TestCase {
     System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 3; i++) {
       {
-        DefaultMustacheFactory cf = new DefaultMustacheFactory();
+        DefaultMustacheFactory cf = init();
         Mustache m = cf.compile("complex.html");
         assertEquals(CharStreams.toString(
                         new InputStreamReader(
@@ -54,7 +55,7 @@ public class BenchmarkTest extends TestCase {
     System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 3; i++) {
       {
-        DefaultMustacheFactory cf = new DefaultMustacheFactory();
+        DefaultMustacheFactory cf = init();
         cf.setExecutorService(Executors.newCachedThreadPool());
         Mustache m = cf.compile("complex.html");
         assertEquals(CharStreams.toString(
@@ -77,7 +78,7 @@ public class BenchmarkTest extends TestCase {
     System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 3; i++) {
       {
-        MustacheFactory cf = new DefaultMustacheFactory();
+        MustacheFactory cf = init();
         Mustache m = cf.compile("complex.html");
         assertEquals(CharStreams.toString(
                 new InputStreamReader(
@@ -93,6 +94,12 @@ public class BenchmarkTest extends TestCase {
         System.out.println("Serial with callable: " + total/TIME);
       }
     }
+  }
+
+  private DefaultMustacheFactory init() {
+    DefaultMustacheFactory factory = new DefaultMustacheFactory();
+    factory.setObjectHandler(new IndyObjectHandler());
+    return factory;
   }
 
   private StringWriter complextest(Mustache m, Object complexObject) throws MustacheException, IOException {
