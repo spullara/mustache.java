@@ -1,7 +1,8 @@
 package com.sampullara.mustache;
 
 import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.sampullara.util.FutureWriter;
 import com.sampullara.util.TemplateFunction;
 
@@ -329,8 +330,13 @@ public class Mustache {
 
   // Mustache template function cache size. For i18n should be > #i18n stanzas * languages
   private static final int SIZE = Integer.getInteger("mustache.cachesize", 100000);
-  private static Map<String, Mustache> templateFunctionCache = new MapMaker().maximumSize(SIZE).makeMap();
+  private static Map<String, Mustache> templateFunctionCache = buildTemplateFunctionCache();
 
+  private static Map<String, Mustache> buildTemplateFunctionCache() {
+    Cache<String,Mustache> cache = CacheBuilder.newBuilder().maximumSize(SIZE).build();
+	  return cache.asMap();
+  }
+  
   /**
    * Explicit function iteration.
    * 
