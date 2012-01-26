@@ -11,6 +11,35 @@
 
   <artifactId>compiler-indy</artifactId>
 
+  <name>compiler-indy</name>
+  <description>Implementation of mustache.js for Java</description>
+  <url>http://github.com/spullara/mustache.java</url>
+
+  <licenses>
+    <license>
+      <name>Apache License 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git://github.com/spullara/mustache.java.git</connection>
+    <url>http://github.com/spullara/mustache.java</url>
+  </scm>
+
+  <developers>
+    <developer>
+      <name>Sam Pullara</name>
+      <email>sam@sampullara.com</email>
+      <url>http://www.javarants.com</url>
+    </developer>
+  </developers>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
