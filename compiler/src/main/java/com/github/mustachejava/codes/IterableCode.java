@@ -1,22 +1,17 @@
 package com.github.mustachejava.codes;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
+import com.github.mustachejava.*;
+import com.github.mustachejava.TemplateFunction;
 import com.google.common.base.Function;
 
-import com.github.mustachejava.Code;
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Iteration;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.util.LatchedWriter;
 
 /**
@@ -83,22 +78,26 @@ public class IterableCode extends DefaultCode implements Iteration {
     return writer;
   }
 
-  // Store the templateText locally so it won't fall out of the weak cache until this is gone
-  private Set<String> templates = Collections.synchronizedSet(new HashSet<String>());
-  
   protected Writer handleFunction(Writer writer, Function function, Object[] scopes) {
     StringWriter sw = new StringWriter();
     runIdentity(sw);
     Object newtemplate = function.apply(sw.toString());
     if (newtemplate != null) {
-      String templateText = newtemplate.toString();
-      Mustache mustache = cf.getTemplate(templateText);
-      if (mustache == null) {
-        mustache = cf.compile(new StringReader(templateText), file, sm, em);
-        templates.add(templateText);
-        cf.putTemplate(templateText, mustache);
+      if (function instanceof TemplateFunction) {
+        String templateText = newtemplate.toString();
+        Mustache mustache = cf.getTemplate(templateText);
+        if (mustache == null) {
+          mustache = cf.compile(new StringReader(templateText), file, sm, em);
+          cf.putTemplate(templateText, mustache);
+        }
+        writer = mustache.execute(writer, scopes);
+      } else {
+        try {
+          writer.write(newtemplate.toString());
+        } catch (IOException e) {
+          throw new MustacheException("Failed to write function result", e);
+        }
       }
-      writer = mustache.execute(writer, scopes);
     }
     return writer;
   }

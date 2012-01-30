@@ -73,7 +73,7 @@ public class SpecTest {
       });
       put("Interpolation - Expansion", new Object() {
         Function lambda() {
-          return new Function<String, String>() {
+          return new TemplateFunction() {
             @Override
             public String apply(String input) {
               return "{{planet}}";
@@ -83,7 +83,7 @@ public class SpecTest {
       });
       put("Interpolation - Alternate Delimiters", new Object() {
         Function lambda() {
-          return new Function<String, String>() {
+          return new TemplateFunction() {
             @Override
             public String apply(String input) {
               return "|planet| => {{planet}}";
@@ -124,7 +124,7 @@ public class SpecTest {
       });
       put("Section - Expansion", new Object() {
         Function lambda() {
-          return new Function<String, String>() {
+          return new TemplateFunction() {
             @Override
             public String apply(String input) {
               return input + "{{planet}}" + input;
@@ -134,7 +134,7 @@ public class SpecTest {
       });
       put("Section - Alternate Delimiters", new Object() {
         Function lambda() {
-          return new Function<String, String>() {
+          return new TemplateFunction() {
             @Override
             public String apply(String input) {
               return input + "{{planet}} => |planet|" + input;
