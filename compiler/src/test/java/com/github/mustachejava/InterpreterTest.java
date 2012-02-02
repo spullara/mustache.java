@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,7 +15,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
+import com.github.mustachejava.util.CapturingMustacheFactory;
 import junit.framework.TestCase;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.map.MappingJsonFactory;
 
 /**
  * Tests for the compiler.
@@ -27,7 +31,7 @@ public class InterpreterTest extends TestCase {
   private File root;
 
   public void testSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheFactory c = init();
+    MustacheFactory c = new CapturingMustacheFactory(root);
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -144,10 +148,18 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testComplex() throws MustacheException, IOException {
-    MustacheFactory c = init();
+    CapturingMustacheFactory c = new CapturingMustacheFactory(root);
+    MappingJsonFactory jf = new MappingJsonFactory();
+    PrintWriter pw = new PrintWriter(System.out);
+    final JsonGenerator jg = jf.createJsonGenerator(pw);
+    jg.writeStartObject();
+    c.setCaptured(new JsonCapturer(jg));
     Mustache m = c.compile("complex.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new ComplexObject());
+    jg.writeEndObject();
+    jg.flush();
+    pw.flush();
     assertEquals(getContents(root, "complex.txt"), sw.toString());
   }
 

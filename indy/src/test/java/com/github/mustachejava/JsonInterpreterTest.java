@@ -28,7 +28,7 @@ import org.codehaus.jackson.map.MappingJsonFactory;
  * Time: 10:23:54 AM
  */
 public class JsonInterpreterTest extends TestCase {
-  private static final int TIME = 2;
+  private static final int TIME = 10;
 
   private File root;
 
