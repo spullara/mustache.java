@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 
 import com.github.mustachejava.util.CapturingMustacheFactory;
 import junit.framework.TestCase;
+import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.MappingJsonFactory;
 
@@ -31,7 +32,7 @@ public class InterpreterTest extends TestCase {
   private File root;
 
   public void testSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheFactory c = new CapturingMustacheFactory(root);
+    MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -148,18 +149,15 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testComplex() throws MustacheException, IOException {
-    CapturingMustacheFactory c = new CapturingMustacheFactory(root);
-    MappingJsonFactory jf = new MappingJsonFactory();
     PrintWriter pw = new PrintWriter(System.out);
-    final JsonGenerator jg = jf.createJsonGenerator(pw);
+    JsonGenerator jg = new MappingJsonFactory().createJsonGenerator(pw);
     jg.writeStartObject();
-    c.setCaptured(new JsonCapturer(jg));
+    CapturingMustacheFactory c = new CapturingMustacheFactory(new JsonCapturer(jg), root);
     Mustache m = c.compile("complex.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new ComplexObject());
     jg.writeEndObject();
     jg.flush();
-    pw.flush();
     assertEquals(getContents(root, "complex.txt"), sw.toString());
   }
 

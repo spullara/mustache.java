@@ -15,7 +15,7 @@ import com.github.mustachejava.codes.ValueCode;
  */
 public class CapturingMustacheFactory extends DefaultMustacheFactory {
 
-  private Captured captured;
+  private final Captured captured;
 
   public interface Captured {
     void value(String name, String value);
@@ -29,11 +29,17 @@ public class CapturingMustacheFactory extends DefaultMustacheFactory {
     void objectEnd();
   }
 
-  public CapturingMustacheFactory(File root) {
+  public CapturingMustacheFactory(Captured captured, File root) {
     super(root);
+    this.captured = captured;
   }
 
-  public void setCaptured(Captured captured) {
+  public CapturingMustacheFactory(Captured captured, String root) {
+    super(root);
+    this.captured = captured;
+  }
+
+  public CapturingMustacheFactory(Captured captured) {
     this.captured = captured;
   }
 
