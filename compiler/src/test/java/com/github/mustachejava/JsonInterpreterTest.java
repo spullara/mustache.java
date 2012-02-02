@@ -31,7 +31,7 @@ public class JsonInterpreterTest extends TestCase {
 
   private File root;
 
-  public Object toObject(final JsonNode node) {
+  public static Object toObject(final JsonNode node) {
     if (node.isArray()) {
       return new ArrayList() {{
         for (JsonNode jsonNodes : node) {

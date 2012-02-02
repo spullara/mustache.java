@@ -19,6 +19,7 @@ import com.github.mustachejava.util.CapturingMustacheFactory;
 import junit.framework.TestCase;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.MappingJsonFactory;
 
 /**
@@ -149,8 +150,9 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testComplex() throws MustacheException, IOException {
-    PrintWriter pw = new PrintWriter(System.out);
-    JsonGenerator jg = new MappingJsonFactory().createJsonGenerator(pw);
+    StringWriter json = new StringWriter();
+    MappingJsonFactory jf = new MappingJsonFactory();
+    JsonGenerator jg = jf.createJsonGenerator(json);
     jg.writeStartObject();
     CapturingMustacheFactory c = new CapturingMustacheFactory(new JsonCapturer(jg), root);
     Mustache m = c.compile("complex.html");
@@ -158,6 +160,12 @@ public class InterpreterTest extends TestCase {
     m.execute(sw, new ComplexObject());
     jg.writeEndObject();
     jg.flush();
+    assertEquals(getContents(root, "complex.txt"), sw.toString());
+    JsonNode jsonNode = jf.createJsonParser(json.toString()).readValueAsTree();
+    Object o = JsonInterpreterTest.toObject(jsonNode);
+    sw = new StringWriter();
+    m = init().compile("complex.html");
+    m.execute(sw, o);
     assertEquals(getContents(root, "complex.txt"), sw.toString());
   }
 
