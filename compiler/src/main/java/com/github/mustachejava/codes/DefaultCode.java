@@ -5,6 +5,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.logging.Logger;
 
 import com.github.mustachejava.Code;
 import com.github.mustachejava.MustacheException;
@@ -28,6 +29,10 @@ public class DefaultCode implements Code {
 
   // Callsite caching
   protected Wrapper wrapper;
+
+  // Debug callsites
+  private static boolean debug = Boolean.getBoolean("mustache.debug");
+  protected Logger logger = Logger.getLogger("mustache");
 
   // TODO: Recursion protection. Need better guard logic. But still fast.
   protected boolean notfound = false;
@@ -75,6 +80,19 @@ public class DefaultCode implements Code {
       wrapper = oh.find(name, scopes);
       if (wrapper == null) {
         notfound = true;
+        if (debug) {
+          // Ugly but generally not interesting
+          if (!(this instanceof PartialCode)) {
+            StringBuilder sb = new StringBuilder("Failed to find: ");
+            sb.append(name).append(" in");
+            for (Object scope : scopes) {
+              if (scope != null) {
+                sb.append(" ").append(scope.getClass().getSimpleName());
+              }
+            }
+            logger.warning(sb.toString());
+          }
+        }
         return null;
       }
     }

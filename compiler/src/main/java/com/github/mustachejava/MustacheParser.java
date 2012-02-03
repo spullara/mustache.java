@@ -27,6 +27,9 @@ public class MustacheParser {
 
   public Mustache compile(String file) {
     Reader reader = cf.getReader(file);
+    if (reader == null) {
+      throw new MustacheException("Failed to find: " + file);
+    }
     return compile(reader, file);
   }
 
@@ -40,6 +43,9 @@ public class MustacheParser {
   }
 
   public List<Code> compile(final Reader br, String tag, final AtomicInteger currentLine, String file, String sm, String em) throws MustacheException {
+    if (br == null) {
+      throw new MustacheException("Reader is null");
+    }
     final List<Code> list = new LinkedList<Code>();
     // Now we grab the mustache template
     boolean onlywhitespace = true;
