@@ -1,5 +1,6 @@
 package com.github.mustachejava;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.LinkedList;
@@ -42,9 +43,15 @@ public class MustacheParser {
     return new DefaultMustache(cf, codes, file, sm, em);
   }
 
-  public List<Code> compile(final Reader br, String tag, final AtomicInteger currentLine, String file, String sm, String em) throws MustacheException {
-    if (br == null) {
+  public List<Code> compile(final Reader reader, String tag, final AtomicInteger currentLine, String file, String sm, String em) throws MustacheException {
+    if (reader == null) {
       throw new MustacheException("Reader is null");
+    }
+    Reader br;
+    if (reader.markSupported()) {
+      br = reader;
+    } else {
+      br = new BufferedReader(reader);
     }
     final List<Code> list = new LinkedList<Code>();
     // Now we grab the mustache template
