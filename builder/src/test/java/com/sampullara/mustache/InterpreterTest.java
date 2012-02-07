@@ -10,6 +10,7 @@ import junit.framework.TestCase;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
@@ -36,6 +37,26 @@ public class InterpreterTest extends TestCase {
   public void testSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheBuilder c = new MustacheBuilder(root);
     Mustache m = c.parseFile("simple.html");
+    StringWriter sw = new StringWriter();
+    FutureWriter writer = new FutureWriter(sw);
+    m.execute(writer, new Scope(new Object() {
+      String name = "Chris";
+      int value = 10000;
+
+      int taxed_value() {
+        return (int) (this.value - (this.value * 0.4));
+      }
+      boolean in_ca = true;
+    }));
+    writer.flush();
+    assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
+  public void testSimpleMarkUnsupported() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheBuilder c = new MustacheBuilder(root);
+    FileReader reader = new FileReader(new File(root, "simple.html"));
+    assertFalse(reader.markSupported());
+    Mustache m = c.build(reader, "simple.html");
     StringWriter sw = new StringWriter();
     FutureWriter writer = new FutureWriter(sw);
     m.execute(writer, new Scope(new Object() {

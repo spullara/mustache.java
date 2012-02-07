@@ -79,7 +79,7 @@ public class MustacheBuilder implements MustacheJava {
     return build(new StringReader(template), path);
   }
 
-  public Mustache build(final Reader br, String path) throws MustacheException {
+  public Mustache build(Reader reader, String path) throws MustacheException {
     Mustache mustache;
     try {
       mustache = superclass == null ? new Mustache() : superclass.newInstance();
@@ -88,7 +88,7 @@ public class MustacheBuilder implements MustacheJava {
     }
     mustache.setMustacheJava(this);
     mustache.setName(path);
-    mustache.setCompiled(compile(mustache, br, null, new AtomicInteger(0), path));
+    mustache.setCompiled(compile(mustache, reader, null, new AtomicInteger(0), path));
     return mustache;
   }
 
@@ -96,7 +96,13 @@ public class MustacheBuilder implements MustacheJava {
     return build(mc.getReader(path), path);
   }
 
-  protected List<Code> compile(final Mustache m, final Reader br, String tag, final AtomicInteger currentLine, String file) throws MustacheException {
+  protected List<Code> compile(final Mustache m, final Reader reader, String tag, final AtomicInteger currentLine, String file) throws MustacheException {
+    Reader br;
+    if (reader.markSupported()) {
+      br = reader;
+    } else {
+      br = new BufferedReader(reader);
+    }
     final List<Code> list = new LinkedList<Code>();
 
     // Now we grab the mustache template
