@@ -76,14 +76,7 @@ public abstract class SubCode implements Code {
 
   private void execute(FutureWriter writer, Iterable<Scope> iterable, Scope subScope) throws MustacheException {
     if (iterable instanceof FunctionIterator && ((FunctionIterator) iterable).isTemplateFunction()) {
-      int length = codes.length;
-      for (int i = 0; i < length; i++) {
-        Code code = codes[i];
-        if (Mustache.debug) {
-          Mustache.line.set(code.getLine());
-        }
-        code.identity(writer);
-      }
+      identityCode(writer);
     } else {
       executeCodes(writer, subScope);
     }
@@ -96,17 +89,21 @@ public abstract class SubCode implements Code {
   public void identity(FutureWriter fw) throws MustacheException {
     try {
       fw.append("{{").append(marker).append(variable).append("}}");
-      int length = codes.length;
-      for (int i = 0; i < length; i++) {
-        Code code = codes[i];
-        if (Mustache.debug) {
-          Mustache.line.set(code.getLine());
-        }
-        code.identity(fw);
-      }
+      identityCode(fw);
       fw.append("{{/").append(variable).append("}}");
     } catch (IOException e) {
       throw new MustacheException("Failed to write", e);
+    }
+  }
+
+  private void identityCode(FutureWriter fw) throws MustacheException {
+    int length = codes.length;
+    for (int i = 0; i < length; i++) {
+      Code code = codes[i];
+      if (Mustache.debug) {
+        Mustache.line.set(code.getLine());
+      }
+      code.identity(fw);
     }
   }
 }
