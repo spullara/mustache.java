@@ -21,7 +21,7 @@ public class ExtendCode extends PartialCode {
 
   private MustacheFactory mf;
 
-  public ExtendCode(DefaultMustacheFactory mf, Code[] codes, String name, String file, String sm, String em) throws MustacheException {
+  public ExtendCode(DefaultMustacheFactory mf, Mustache codes, String name, String file, String sm, String em) throws MustacheException {
     super(mf, codes, "<", name, file, sm, em);
     this.mf = mf;
   }
@@ -51,7 +51,7 @@ public class ExtendCode extends PartialCode {
   public Writer execute(Writer writer, Object[] scopes) throws MustacheException {
     if (partial == null) {
       Map<String, ExtendNameCode> replaceMap = new HashMap<String, ExtendNameCode>();
-      for (Code code : codes) {
+      for (Code code : getCodes()) {
         if (code instanceof ExtendNameCode) {
           // put name codes in the map
           ExtendNameCode erc = (ExtendNameCode) code;

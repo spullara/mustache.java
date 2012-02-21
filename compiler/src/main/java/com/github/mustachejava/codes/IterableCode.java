@@ -28,8 +28,8 @@ public class IterableCode extends DefaultCode implements Iteration {
   private DefaultMustacheFactory cf;
   private ExecutorService les;
 
-  public IterableCode(DefaultMustacheFactory cf, List<Code> codes, String variable, String sm, String em, String file) {
-    super(cf.getObjectHandler(), codes.toArray(new Code[0]), variable, "#", sm, em);
+  public IterableCode(DefaultMustacheFactory cf, Mustache mustache, String variable, String sm, String em, String file) {
+    super(cf.getObjectHandler(), mustache, variable, "#", sm, em);
     this.cf = cf;
     this.variable = variable;
     this.file = file;

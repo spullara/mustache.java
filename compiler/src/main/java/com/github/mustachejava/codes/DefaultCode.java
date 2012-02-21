@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
 import com.github.mustachejava.Code;
+import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.util.GuardException;
@@ -21,8 +22,8 @@ public class DefaultCode implements Code {
   protected String appended;
 
   protected final ObjectHandler oh;
-  protected final Code[] codes;
   protected final String name;
+  protected final Mustache mustache;
   protected final String type;
   protected final String sm;
   protected final String em;
@@ -42,9 +43,9 @@ public class DefaultCode implements Code {
     this(null, null, null, null, null, null);
   }
 
-  public DefaultCode(ObjectHandler oh, Code[] codes, String name, String type, String sm, String em) {
+  public DefaultCode(ObjectHandler oh, Mustache mustache, String name, String type, String sm, String em) {
     this.oh = oh;
-    this.codes = codes;
+    this.mustache = mustache;
     this.type = type;
     this.name = name;
     this.sm = sm;
@@ -55,7 +56,7 @@ public class DefaultCode implements Code {
   }
 
   public Code[] getCodes() {
-    return codes;
+    return mustache == null ? null : mustache.getCodes();
   }
 
   /**
@@ -125,7 +126,7 @@ public class DefaultCode implements Code {
     try {
       if (name != null) {
         tag(writer, type);
-        if (codes != null) {
+        if (getCodes() != null) {
           runIdentity(writer);
           tag(writer, "/");
         }
@@ -137,9 +138,9 @@ public class DefaultCode implements Code {
   }
 
   protected void runIdentity(Writer writer) {
-    int length = codes.length;
+    int length = getCodes().length;
     for (int i = 0; i < length; i++) {
-      codes[i].identity(writer);
+      getCodes()[i].identity(writer);
     }
   }
 
@@ -162,6 +163,7 @@ public class DefaultCode implements Code {
   }
 
   protected Writer runCodes(Writer writer, Object[] scopes) {
+    Code[] codes = getCodes();
     if (codes != null) {
       int length = codes.length;
       for (int i = 0; i < length; i++) {

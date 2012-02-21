@@ -172,21 +172,26 @@ public class SpecTest {
         MustacheParser MC = new MustacheParser(this);
 
         @Override
-        public Code partial(final String variable, String file, int line, String sm, String em) {
-          return new DefaultCode(getObjectHandler(), null, variable, ">", sm, em) {
+        public MustacheVisitor createMustacheVisitor() {
+          return new DefaultMustacheVisitor(this) {
             @Override
-            public Writer execute(Writer writer, Object[] scopes) {
-              JsonNode partialNode = partials.get(variable);
-              if (partialNode != null && !partialNode.isNull()) {
-                String partialName = partialNode.asText();
-                Mustache partial = partialMap.get(partialName);
-                if (partial == null) {
-                  partial = MC.compile(new StringReader(partialName), variable);
-                  partialMap.put(partialName, partial);
+            public void partial(final String variable, String file, int line, String sm, String em) {
+              list.add(new DefaultCode(getObjectHandler(), null, variable, ">", sm, em) {
+                @Override
+                public Writer execute(Writer writer, Object[] scopes) {
+                  JsonNode partialNode = partials.get(variable);
+                  if (partialNode != null && !partialNode.isNull()) {
+                    String partialName = partialNode.asText();
+                    Mustache partial = partialMap.get(partialName);
+                    if (partial == null) {
+                      partial = MC.compile(new StringReader(partialName), variable);
+                      partialMap.put(partialName, partial);
+                    }
+                    writer = partial.execute(writer, scopes);
+                  }
+                  return appendText(writer);
                 }
-                writer = partial.execute(writer, scopes);
-              }
-              return appendText(writer);
+              });
             }
           };
         }

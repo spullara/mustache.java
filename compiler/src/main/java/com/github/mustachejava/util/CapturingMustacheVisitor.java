@@ -6,6 +6,8 @@ import java.util.List;
 
 import com.github.mustachejava.Code;
 import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.DefaultMustacheVisitor;
+import com.github.mustachejava.Mustache;
 import com.github.mustachejava.codes.IterableCode;
 import com.github.mustachejava.codes.NotIterableCode;
 import com.github.mustachejava.codes.ValueCode;
@@ -13,7 +15,7 @@ import com.github.mustachejava.codes.ValueCode;
 /**
  * Grab a map of values returned from calls
  */
-public class CapturingMustacheFactory extends DefaultMustacheFactory {
+public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
 
   private final Captured captured;
 
@@ -29,23 +31,14 @@ public class CapturingMustacheFactory extends DefaultMustacheFactory {
     void objectEnd();
   }
 
-  public CapturingMustacheFactory(Captured captured, File root) {
-    super(root);
-    this.captured = captured;
-  }
-
-  public CapturingMustacheFactory(Captured captured, String root) {
-    super(root);
-    this.captured = captured;
-  }
-
-  public CapturingMustacheFactory(Captured captured) {
+  public CapturingMustacheVisitor(DefaultMustacheFactory cf, Captured captured) {
+    super(cf);
     this.captured = captured;
   }
 
   @Override
-  public Code value(String variable, boolean encoded, int line, String sm, String em) {
-    return new ValueCode(this, variable, sm, em, encoded, line) {
+  public void value(String variable, boolean encoded, int line, String sm, String em) {
+    list.add(new ValueCode(cf, variable, sm, em, encoded, line) {
       @Override
       public Object get(String name, Object[] scopes) {
         Object o = super.get(name, scopes);
@@ -54,12 +47,12 @@ public class CapturingMustacheFactory extends DefaultMustacheFactory {
         }
         return o;
       }
-    };
+    });
   }
 
   @Override
-  public Code iterable(String variable, List<Code> codes, String file, int start, String sm, String em) {
-    return new IterableCode(this, codes, variable, sm, em, file) {
+  public void iterable(String variable, Mustache mustache, String file, int start, String sm, String em) {
+    list.add(new IterableCode(cf, mustache, variable, sm, em, file) {
 
       @Override
       public Writer execute(Writer writer, Object[] scopes) {
@@ -82,12 +75,12 @@ public class CapturingMustacheFactory extends DefaultMustacheFactory {
         captured.arrayStart(name);
         return o;
       }
-    };
+    });
   }
 
   @Override
-  public Code notIterable(String variable, List<Code> codes, String file, int start, String sm, String em) {
-    return new NotIterableCode(this, codes, variable, sm, em) {
+  public void notIterable(String variable, Mustache mustache, String file, int start, String sm, String em) {
+    list.add(new NotIterableCode(cf, mustache, variable, sm, em) {
       String name;
       Object value;
       boolean called;
@@ -114,6 +107,6 @@ public class CapturingMustacheFactory extends DefaultMustacheFactory {
         }
         return execute;
       }
-    };
+    });
   }
 }

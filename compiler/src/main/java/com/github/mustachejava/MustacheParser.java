@@ -3,7 +3,6 @@ package com.github.mustachejava;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,11 +38,10 @@ public class MustacheParser {
   }
 
   public Mustache compile(Reader reader, String file, String sm, String em) {
-    Code[] codes = compile(reader, null, new AtomicInteger(0), file, sm, em).toArray(new Code[0]);
-    return new DefaultMustache(cf, codes, file, sm, em);
+    return compile(reader, null, new AtomicInteger(0), file, sm, em);
   }
 
-  public List<Code> compile(final Reader reader, String tag, final AtomicInteger currentLine, String file, String sm, String em) throws MustacheException {
+  public Mustache compile(final Reader reader, String tag, final AtomicInteger currentLine, String file, String sm, String em) throws MustacheException {
     if (reader == null) {
       throw new MustacheException("Reader is null");
     }
@@ -53,7 +51,7 @@ public class MustacheParser {
     } else {
       br = new BufferedReader(reader);
     }
-    final List<Code> list = new LinkedList<Code>();
+    MustacheVisitor mv = cf.createMustacheVisitor();
     // Now we grab the mustache template
     boolean onlywhitespace = true;
     boolean iterable = currentLine.get() != 0;
@@ -71,7 +69,7 @@ public class MustacheParser {
           if (!iterable || (iterable && !onlywhitespace)) {
             out.append("\n");
           }
-          out = write(list, out, currentLine.intValue());
+          out = write(mv, out, currentLine.intValue());
 
           iterable = false;
           onlywhitespace = true;
@@ -107,24 +105,24 @@ public class MustacheParser {
               case '<':
               case '$': {
                 int start = currentLine.get();
-                final List<Code> codes = compile(br, variable, currentLine, file, sm, em);
+                final Mustache mustache = compile(br, variable, currentLine, file, sm, em);
                 int lines = currentLine.get() - start;
                 if (!onlywhitespace || lines == 0) {
-                  write(list, out, currentLine.intValue());
+                  write(mv, out, currentLine.intValue());
                 }
                 out = new StringBuilder();
                 switch (ch) {
                   case '#':
-                    list.add(cf.iterable(variable, codes, file, start, sm, em));
+                    mv.iterable(variable, mustache, file, start, sm, em);
                     break;
                   case '^':
-                    list.add(cf.notIterable(variable, codes, file, start, sm, em));
+                    mv.notIterable(variable, mustache, file, start, sm, em);
                     break;
                   case '<':
-                    list.add(cf.extend(variable, codes, file, start, sm, em));
+                    mv.extend(variable, mustache, file, start, sm, em);
                     break;
                   case '$':
-                    list.add(cf.name(variable, codes, file, start, sm, em));
+                    mv.name(variable, mustache, file, start, sm, em);
                     break;
                 }
                 iterable = lines != 0;
@@ -133,22 +131,22 @@ public class MustacheParser {
               case '/': {
                 // Tag end
                 if (!onlywhitespace) {
-                  write(list, out, currentLine.intValue());
+                  write(mv, out, currentLine.intValue());
                 }
                 if (!variable.equals(tag)) {
                   throw new MustacheException(
                           "Mismatched start/end tags: " + tag + " != " + variable + " in " + file + ":" + currentLine);
                 }
 
-                return list;
+                return mv.mustache(file, sm, em);
               }
               case '>': {
-                out = write(list, out, currentLine.intValue());
-                list.add(cf.partial(variable, file, currentLine.get(), sm, em));
+                out = write(mv, out, currentLine.intValue());
+                mv.partial(variable, file, currentLine.get(), sm, em);
                 break;
               }
               case '{': {
-                out = write(list, out, currentLine.intValue());
+                out = write(mv, out, currentLine.intValue());
                 // Not escaped
                 String name = variable;
                 if (em.charAt(1) != '}') {
@@ -160,26 +158,26 @@ public class MustacheParser {
                   }
                 }
                 final String finalName = name;
-                list.add(cf.value(finalName, false, currentLine.intValue(), sm, em));
+                mv.value(finalName, false, currentLine.intValue(), sm, em);
                 break;
               }
               case '&': {
                 // Not escaped
-                out = write(list, out, currentLine.intValue());
-                list.add(cf.value(variable, false, currentLine.intValue(), sm, em));
+                out = write(mv, out, currentLine.intValue());
+                mv.value(variable, false, currentLine.intValue(), sm, em);
                 break;
               }
               case '%':
                 // Pragmas
-                out = write(list, out, currentLine.intValue());
+                out = write(mv, out, currentLine.intValue());
                 break;
               case '!':
                 // Comment
-                out = write(list, out, currentLine.intValue());
+                out = write(mv, out, currentLine.intValue());
                 break;
               case '=':
                 // Change delimiters
-                out = write(list, out, currentLine.intValue());
+                out = write(mv, out, currentLine.intValue());
                 String delimiters = command.replaceAll("\\s+", "");
                 int length = delimiters.length();
                 if (length > 6 || length / 2 * 2 != length) {
@@ -194,8 +192,8 @@ public class MustacheParser {
                           "Improperly closed variable in " + file + ":" + currentLine);
                 }
                 // Reference
-                out = write(list, out, currentLine.intValue());
-                list.add(cf.value(command.trim(), true, currentLine.intValue(), sm, em));
+                out = write(mv, out, currentLine.intValue());
+                mv.value(command.trim(), true, currentLine.intValue(), sm, em);
                 break;
               }
             }
@@ -208,29 +206,21 @@ public class MustacheParser {
         onlywhitespace = onlywhitespace && (c == ' ' || c == '\t' || c == '\r');
         out.append((char) c);
       }
-      write(list, out, currentLine.intValue());
+      write(mv, out, currentLine.intValue());
       br.close();
     } catch (IOException e) {
       throw new MustacheException("Failed to read", e);
     }
-    list.add(cf.eof(currentLine.intValue()));
-    return list;
+    mv.eof(currentLine.intValue());
+    return mv.mustache(file, sm, em);
   }
 
   /**
    * Ignore empty strings and append to the previous code if it was also a write.
    */
-  private StringBuilder write(List<Code> list, StringBuilder out, int line) {
+  private StringBuilder write(MustacheVisitor mv, StringBuilder out, int line) {
     String text = out.toString();
-    if (text.length() > 0) {
-      int size = list.size();
-      if (size > 0) {
-        Code code = list.get(size - 1);
-        code.append(text);
-      } else {
-        list.add(cf.write(text, line, null, null));
-      }
-    }
+    mv.write(text, line, null, null);
     return new StringBuilder();
   }
 

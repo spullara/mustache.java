@@ -27,8 +27,8 @@ public class PartialCode extends DefaultCode {
   private DefaultMustacheFactory cf;
   private final ExecutorService les;
 
-  protected PartialCode(DefaultMustacheFactory cf, Code[] codes, String type, String variable, String file, String sm, String em) {
-    super(cf.getObjectHandler(), codes, variable, type, sm, em);
+  protected PartialCode(DefaultMustacheFactory cf, Mustache mustache, String type, String variable, String file, String sm, String em) {
+    super(cf.getObjectHandler(), mustache, variable, type, sm, em);
     this.cf = cf;
     this.variable = variable;
     // Use the  name of the parent to get the name of the partial

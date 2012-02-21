@@ -34,8 +34,6 @@ import com.github.mustachejava.reflect.ReflectionObjectHandler;
  */
 public class DefaultMustacheFactory implements MustacheFactory {
 
-  private static final Code EOF = new DefaultCode();
-
   private final MustacheParser mc = new MustacheParser(this);
   private final Map<String, Mustache> templateCache = new ConcurrentHashMap<String, Mustache>();
   private ObjectHandler oh = new ReflectionObjectHandler();
@@ -64,43 +62,8 @@ public class DefaultMustacheFactory implements MustacheFactory {
   }
 
   @Override
-  public Code iterable(final String variable, List<Code> codes, final String file, final int start, String sm, String em) {
-    return new IterableCode(this, codes, variable, sm, em, file);
-  }
-
-  @Override
-  public Code notIterable(final String variable, List<Code> codes, String file, int start, String sm, String em) {
-    return new NotIterableCode(this, codes, variable, sm, em);
-  }
-
-  @Override
-  public Code name(String variable, List<Code> codes, String file, int start, String sm, String em) {
-    return new ExtendNameCode(this, codes.toArray(new Code[0]), variable, sm, em);
-  }
-
-  @Override
-  public Code partial(final String variable, String file, int line, String sm, String em) {
-    return new PartialCode(this, variable, file, sm, em);
-  }
-
-  @Override
-  public Code value(final String variable, final boolean encoded, final int line, String sm, String em) {
-    return new ValueCode(this, variable, sm, em, encoded, line);
-  }
-
-  @Override
-  public Code write(final String text, int line, String sm, String em) {
-    return new WriteCode(text);
-  }
-
-  @Override
-  public Code eof(int line) {
-    return EOF;
-  }
-
-  @Override
-  public Code extend(String variable, List<Code> codes, String file, int start, String sm, String em) {
-    return new ExtendCode(this, codes.toArray(new Code[0]), variable, file, sm, em);
+  public MustacheVisitor createMustacheVisitor() {
+    return new DefaultMustacheVisitor(this);
   }
 
   @Override
