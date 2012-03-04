@@ -1,17 +1,12 @@
 package com.github.mustachejava;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -65,8 +60,8 @@ public class ExtensionTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    File file = new File("src/test/resources");
-    root = new File(file, "sub.html").exists() ? file : new File("../src/test/resources");
+    File file = new File("compiler/src/test/resources");
+    root = new File(file, "sub.html").exists() ? file : new File("src/test/resources");
   }
 
 

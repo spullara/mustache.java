@@ -1,14 +1,10 @@
 package com.github.mustachejava.codes;
 
+import com.github.mustachejava.*;
+
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.github.mustachejava.Code;
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.MustacheFactory;
 
 /**
  * Extending a template.
@@ -26,25 +22,27 @@ public class ExtendCode extends PartialCode {
     this.mf = mf;
   }
 
-  private void replaceCode(Code[] supercodes, Map<String, ExtendNameCode> replaceMap) {
+  private Code[] replaceCode(Code[] supercodes, Map<String, ExtendNameCode> replaceMap) {
+    Code[] newcodes = supercodes.clone();
     for (int i = 0; i < supercodes.length; i++) {
       Code code = supercodes[i];
       if (code instanceof ExtendNameCode) {
         ExtendNameCode enc = (ExtendNameCode) code;
         ExtendNameCode extendReplaceCode = replaceMap.get(enc.getName());
         if (extendReplaceCode != null) {
-          supercodes[i] = extendReplaceCode;
+          newcodes[i] = extendReplaceCode;
           extendReplaceCode.appended = enc.appended;
         } else {
-          replaceCode(enc.getCodes(), replaceMap);
+          enc.setCodes(replaceCode(enc.getCodes(), replaceMap));
         }
       } else {
         Code[] codes = code.getCodes();
         if (codes != null) {
-          replaceCode(codes, replaceMap);
+          code.setCodes(replaceCode(codes, replaceMap));
         }
       }
     }
+    return newcodes;
   }
 
   @Override
@@ -67,7 +65,7 @@ public class ExtendCode extends PartialCode {
       partial = mf.compile(name + extension);
       Code[] supercodes = partial.getCodes();
       // recursively replace named sections with replacements
-      replaceCode(supercodes, replaceMap);
+      partial.setCodes(replaceCode(supercodes, replaceMap));
     }
     return partialExecute(writer, scopes);
   }

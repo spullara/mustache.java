@@ -11,4 +11,5 @@ public interface Code {
   void identity(Writer writer);
   void append(String text);
   public Code[] getCodes();
+  public void setCodes(Code[] codes);
 }

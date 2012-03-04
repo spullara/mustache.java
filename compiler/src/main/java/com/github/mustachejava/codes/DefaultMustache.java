@@ -1,10 +1,10 @@
 package com.github.mustachejava.codes;
 
-import java.io.Writer;
-
 import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+
+import java.io.Writer;
 
 /**
 * Default Mustache
@@ -20,6 +20,11 @@ public class DefaultMustache extends DefaultCode implements Mustache {
   @Override
   public Code[] getCodes() {
     return codes;
+  }
+
+  @Override
+  public void setCodes(Code[] newcodes) {
+    codes = newcodes;
   }
 
   @Override

@@ -1,4 +1,4 @@
-package com.github.mustachejava;
+package com.github.mustachejavabenchmarks;
 
 import java.io.IOException;
 import java.util.HashSet;

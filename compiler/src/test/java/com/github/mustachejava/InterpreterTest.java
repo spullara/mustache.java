@@ -1,5 +1,7 @@
 package com.github.mustachejava;
 
+import com.github.mustachejavabenchmarks.JsonCapturer;
+import com.github.mustachejavabenchmarks.JsonInterpreterTest;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
 import junit.framework.TestCase;
 import org.codehaus.jackson.JsonGenerator;

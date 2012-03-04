@@ -1,18 +1,15 @@
 package com.github.mustachejava.codes;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.logging.Logger;
-
 import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.logging.Logger;
 
 /**
  * Simplest possible code implementaion with some default shared behavior
@@ -57,6 +54,10 @@ public class DefaultCode implements Code {
 
   public Code[] getCodes() {
     return mustache == null ? null : mustache.getCodes();
+  }
+  
+  public void setCodes(Code[] newcodes) {
+    mustache.setCodes(newcodes);
   }
 
   /**

@@ -1,4 +1,4 @@
-package com.github.mustachejava;
+package com.github.mustachejavabenchmarks;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.concurrent.Executors;
 
+import com.github.mustachejava.*;
 import com.google.common.io.CharStreams;
 
 import junit.framework.TestCase;

@@ -1,4 +1,4 @@
-package com.github.mustachejava;
+package com.github.mustachejavabenchmarks;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +15,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheException;
 import junit.framework.TestCase;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.MappingJsonFactory;
