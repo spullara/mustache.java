@@ -1,22 +1,11 @@
 package com.sampullara.mustache;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.MustacheFactory;
 import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
-import com.sampullara.mustache.json.JsonObjectHandler;
-import com.sampullara.util.FutureWriter;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
@@ -25,6 +14,15 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Run a local server and merge .js and .html files using mustache.
@@ -51,6 +49,29 @@ public class Handlebar {
     mimeTypes.put("css" , "text/css");
   }
 
+  public static Object toObject(final JsonNode node) {
+    if (node.isArray()) {
+      return new ArrayList() {{
+        for (JsonNode jsonNodes : node) {
+          add(toObject(jsonNodes));
+        }
+      }};
+    } else if (node.isObject()) {
+      return new HashMap() {{
+        for (Iterator<Map.Entry<String, JsonNode>> i = node.getFields(); i.hasNext(); ) {
+          Map.Entry<String, JsonNode> next = i.next();
+          Object o = toObject(next.getValue());
+          put(next.getKey(), o);
+        }
+      }};
+    } else if (node.isNull()) {
+      return null;
+    } else {
+      return node.asText();
+    }
+  }
+
+
   public static void main(String[] args) throws Exception {
     try {
       Args.parse(Handlebar.class, args);
@@ -58,8 +79,7 @@ public class Handlebar {
       Args.usage(Handlebar.class);
       System.exit(1);
     }
-    Scope.setDefaultObjectHandler(new JsonObjectHandler());
-    final MustacheBuilder mc = new MustacheBuilder(new File("."));
+    final MustacheFactory mc = new DefaultMustacheFactory(new File("."));
     final JsonFactory jf = new MappingJsonFactory();
     Handler handler = new AbstractHandler() {
       public void handle(String s, Request r, HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
@@ -73,8 +93,7 @@ public class Handlebar {
           // Handle like a template
           String filename = pathInfo.endsWith("/") ? pathInfo + "index.html" : pathInfo.substring(1);
           try {
-            Mustache mustache = mc.parseFile(filename);
-            FutureWriter fw = new FutureWriter(res.getWriter());
+            Mustache mustache = mc.compile(filename);
             File file = new File(mocks, base + ".json");
             res.setStatus(HttpServletResponse.SC_OK);
             Map parameters = new HashMap<Object, Object>(req.getParameterMap()) {
@@ -96,11 +115,10 @@ public class Handlebar {
               JsonParser parser = jf.createJsonParser(br);
               JsonNode json = parser.readValueAsTree();
               br.close();
-              mustache.execute(fw, new Scope(json, new Scope(parameters)));
+              mustache.execute(res.getWriter(), new Object[] { toObject(json), parameters });
             } else {
-              mustache.execute(fw, new Scope(parameters));
+              mustache.execute(res.getWriter(), parameters);
             }
-            fw.flush();
             r.setHandled(true);
           } catch (MustacheException e) {
             e.printStackTrace(res.getWriter());
