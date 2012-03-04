@@ -3,10 +3,7 @@ package com.github.mustachejava;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import com.github.mustachejava.codes.DefaultMustache;
 
 /**
  * A pseudo interpreter / compiler. Instead of compiling to Java code, it compiles to a
@@ -104,25 +101,25 @@ public class MustacheParser {
               case '^':
               case '<':
               case '$': {
-                int start = currentLine.get();
+                int line = currentLine.get();
                 final Mustache mustache = compile(br, variable, currentLine, file, sm, em);
-                int lines = currentLine.get() - start;
+                int lines = currentLine.get() - line;
                 if (!onlywhitespace || lines == 0) {
                   write(mv, out, currentLine.intValue());
                 }
                 out = new StringBuilder();
                 switch (ch) {
                   case '#':
-                    mv.iterable(variable, mustache, file, start, sm, em);
+                    mv.iterable(variable, mustache, file, line, sm, em);
                     break;
                   case '^':
-                    mv.notIterable(variable, mustache, file, start, sm, em);
+                    mv.notIterable(variable, mustache, file, line, sm, em);
                     break;
                   case '<':
-                    mv.extend(variable, mustache, file, start, sm, em);
+                    mv.extend(variable, mustache, file, line, sm, em);
                     break;
                   case '$':
-                    mv.name(variable, mustache, file, start, sm, em);
+                    mv.name(variable, mustache, file, line, sm, em);
                     break;
                 }
                 iterable = lines != 0;
