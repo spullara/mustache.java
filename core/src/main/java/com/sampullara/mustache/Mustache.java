@@ -418,7 +418,9 @@ public class Mustache {
       event = MustacheTrace.addEvent("compile partial: " + name, "");
     }
     Mustache mustache;
-    mustache = mj.parseFile(name + "." + getPartialExtension());
+    String partialExtension = getPartialExtension();
+    String partialName = "".equals(partialExtension) ? name : name + "." + partialExtension;
+    mustache = mj.parseFile(partialName);
     mustache.setMustacheJava(mj);
     if (trace) {
       event.end();
