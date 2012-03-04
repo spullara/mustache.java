@@ -1,21 +1,15 @@
 package com.github.mustachejava;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import com.google.common.base.Function;
-
-import com.github.mustachejava.codes.DefaultCode;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.MappingJsonFactory;
 import org.junit.Test;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import static junit.framework.Assert.assertFalse;
 
@@ -165,34 +159,15 @@ public class SpecTest {
     }}; 
     for (final JsonNode test : spec.get("tests")) {
       boolean failed = false;
-      DefaultMustacheFactory CF = new DefaultMustacheFactory("/spec/specs") {
+      final DefaultMustacheFactory CF = new DefaultMustacheFactory("/spec/specs") {
         MustacheParser MC = new MustacheParser(this);
         Map<String, Mustache> partialMap = new HashMap<String, Mustache>();
         JsonNode partials = test.get("partials");
 
         @Override
-        public MustacheVisitor createMustacheVisitor() {
-          return new DefaultMustacheVisitor(this) {
-            @Override
-            public void partial(final String variable, String file, int line, String sm, String em) {
-              new DefaultCode(getObjectHandler(), null, variable, ">", sm, em) {
-                @Override
-                public Writer execute(Writer writer, Object[] scopes) {
-                  JsonNode partialNode = partials.get(variable);
-                  if (partialNode != null && !partialNode.isNull()) {
-                    String partialName = partialNode.asText();
-                    Mustache partial = partialMap.get(partialName);
-                    if (partial == null) {
-                      partial = MC.compile(new StringReader(partialName), variable);
-                      partialMap.put(partialName, partial);
-                    }
-                    writer = partial.execute(writer, scopes);
-                  }
-                  return appendText(writer);
-                }
-              };
-            }
-          };
+        public Reader getReader(String resourceName) {
+          JsonNode partial = test.get("partials").get(resourceName);
+          return new StringReader(partial == null ? "" : partial.getTextValue());
         }
       };
       MustacheParser MC = new MustacheParser(CF);

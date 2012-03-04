@@ -1,17 +1,9 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.codes.*;
+
 import java.util.LinkedList;
 import java.util.List;
-
-import com.github.mustachejava.codes.DefaultCode;
-import com.github.mustachejava.codes.DefaultMustache;
-import com.github.mustachejava.codes.ExtendCode;
-import com.github.mustachejava.codes.ExtendNameCode;
-import com.github.mustachejava.codes.IterableCode;
-import com.github.mustachejava.codes.NotIterableCode;
-import com.github.mustachejava.codes.PartialCode;
-import com.github.mustachejava.codes.ValueCode;
-import com.github.mustachejava.codes.WriteCode;
 
 /**
  * The default implementation that builds up Code lists
@@ -48,7 +40,7 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
 
   @Override
   public void partial(final String variable, String file, int line, String sm, String em) {
-    list.add(new PartialCode(cf, variable, file, sm, em));
+    list.add(new PartialCode(cf, variable, file, "{", "}"));
   }
 
   @Override
