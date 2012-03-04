@@ -2,7 +2,7 @@
   <parent>
     <groupId>com.github.spullara.mustache.java</groupId>
     <artifactId>mustache.java</artifactId>
-    <version>0.6.3-SNAPSHOT</version>
+    <version>0.6.3</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -27,12 +27,12 @@
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>builder</artifactId>
-      <version>0.6.3-SNAPSHOT</version>
+      <version>0.6.3</version>
     </dependency>
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>jackson-support</artifactId>
-      <version>0.6.3-SNAPSHOT</version>
+      <version>0.6.3</version>
     </dependency>
 
     <!-- Jetty -->
