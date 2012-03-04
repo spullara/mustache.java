@@ -1,15 +1,5 @@
 package com.github.mustachejava.indy;
 
-import java.lang.invoke.CallSite;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.lang.invoke.MutableCallSite;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.UUID;
-
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.reflect.ReflectionWrapper;
 import com.github.mustachejava.util.GuardException;
@@ -18,6 +8,12 @@ import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
+
+import java.lang.invoke.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.UUID;
 
 /**
  * Creates wrappers using ASM and Invokedynamic.
@@ -33,6 +29,17 @@ public abstract class IndyWrapper extends ReflectionWrapper implements Opcodes {
   private static final String METHOD_SIGNATURE =
           "(Lcom/github/mustachejava/indy/IndyWrapper;Ljava/lang/Object;)Ljava/lang/Object;";
 
+  /**
+   * This bootstrap method simply points to the lookup method so we can see what is on the stack at runtime
+   * since we need the parameters in order to make a decision.
+   *
+   * @param caller
+   * @param name
+   * @param type
+   * @return
+   * @throws NoSuchMethodException
+   * @throws IllegalAccessException
+   */
   public static CallSite bootstrap(MethodHandles.Lookup caller, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException {
     MutableCallSite callSite = new MutableCallSite(MethodType.methodType(Object.class, IndyWrapper.class, Object.class));
     MethodHandle lookup = caller.findStatic(IndyWrapper.class, "lookup",
@@ -116,6 +123,16 @@ public abstract class IndyWrapper extends ReflectionWrapper implements Opcodes {
     return indyCL.defineClass(name, b);
   }
 
+  /**
+   * This bootstrap method does the actual work of tracking down the CallSite at runtime.
+   *
+   * @param callSite
+   * @param iw
+   * @param scope
+   * @return
+   * @throws IllegalAccessException
+   * @throws InvocationTargetException
+   */
   public static Object lookup(MutableCallSite callSite, IndyWrapper iw, Object scope) throws IllegalAccessException, InvocationTargetException {
     Method method = iw.getMethod();
     if (method == null) {

@@ -160,10 +160,6 @@ public class SpecTest {
     for (final JsonNode test : spec.get("tests")) {
       boolean failed = false;
       final DefaultMustacheFactory CF = new DefaultMustacheFactory("/spec/specs") {
-        MustacheParser MC = new MustacheParser(this);
-        Map<String, Mustache> partialMap = new HashMap<String, Mustache>();
-        JsonNode partials = test.get("partials");
-
         @Override
         public Reader getReader(String resourceName) {
           JsonNode partial = test.get("partials").get(resourceName);
