@@ -1,15 +1,14 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.indy.IndyObjectHandler;
+import com.google.common.io.CharStreams;
+import junit.framework.TestCase;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.concurrent.Executors;
-
-import com.google.common.io.CharStreams;
-
-import com.github.mustachejava.indy.IndyObjectHandler;
-import junit.framework.TestCase;
 
 /**
  * Compare compilation with interpreter.
@@ -108,4 +107,12 @@ public class BenchmarkTest extends TestCase {
     return sw;
   }
 
+  public static void main(String[] args) throws Exception {
+    BenchmarkTest benchmarkTest = new BenchmarkTest();
+    benchmarkTest.setUp();
+    benchmarkTest.testComplex();
+    benchmarkTest.testParallelComplex();
+    benchmarkTest.testParallelComplexNoExecutor();
+    System.exit(0);
+  }
 }

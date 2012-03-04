@@ -79,24 +79,7 @@ public class DefaultCode implements Code {
       return scopes[scopes.length - 1];
     }
     if (wrapper == null) {
-      wrapper = oh.find(name, scopes);
-      if (wrapper == null) {
-        notfound = true;
-        if (debug) {
-          // Ugly but generally not interesting
-          if (!(this instanceof PartialCode)) {
-            StringBuilder sb = new StringBuilder("Failed to find: ");
-            sb.append(name).append(" in");
-            for (Object scope : scopes) {
-              if (scope != null) {
-                sb.append(" ").append(scope.getClass().getSimpleName());
-              }
-            }
-            logger.warning(sb.toString());
-          }
-        }
-        return null;
-      }
+      if (getWrapper(name, scopes)) return null;
     }
     try {
       return oh.coerce(wrapper.call(scopes));
@@ -104,6 +87,28 @@ public class DefaultCode implements Code {
       wrapper = null;
       return get(name, scopes);
     }
+  }
+
+  private boolean getWrapper(String name, Object[] scopes) {
+    wrapper = oh.find(name, scopes);
+    if (wrapper == null) {
+      notfound = true;
+      if (debug) {
+        // Ugly but generally not interesting
+        if (!(this instanceof PartialCode)) {
+          StringBuilder sb = new StringBuilder("Failed to find: ");
+          sb.append(name).append(" in");
+          for (Object scope : scopes) {
+            if (scope != null) {
+              sb.append(" ").append(scope.getClass().getSimpleName());
+            }
+          }
+          logger.warning(sb.toString());
+        }
+      }
+      return true;
+    }
+    return false;
   }
 
   @Override
