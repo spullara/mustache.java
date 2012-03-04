@@ -1,7 +1,6 @@
 package com.sampullara.mustache;
 
 import java.io.BufferedReader;
-import java.io.Reader;
 
 /**
  * This gives you the ability to override the default behavior

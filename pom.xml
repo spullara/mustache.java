@@ -12,6 +12,8 @@
     <module>network</module>
     <module>jackson-support</module>
     <module>handlebar</module>
+    <module>compiler</module>
+    <module>indy</module>
   </modules>
   <packaging>pom</packaging>
 
@@ -70,7 +72,7 @@
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
-     <plugin>
+<!--      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
         <executions>

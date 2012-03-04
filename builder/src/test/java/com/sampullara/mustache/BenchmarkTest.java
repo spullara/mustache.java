@@ -113,7 +113,7 @@ public class BenchmarkTest extends TestCase {
               writer.write(color.name);
               writer.write("</strong></li>\n");
             }
-            if (co.link(ctx)) {
+            if (color.link()) {
               writer.write("      <li><a href=\"");
               writer.write(color.url);
               writer.write(">");
@@ -132,17 +132,17 @@ public class BenchmarkTest extends TestCase {
           writer.write(co.header);
           writer.write("</h1>\n");
           Scope s = new Scope(co);
-          if (co.list(s)) {
+          if (co.list()) {
             writer.write("  <ul>\n");
             for (BenchmarkTest.ComplexObject.Color color : co.item) {
               item.execute(writer, new Scope(color));
             }
             writer.write("  </ul>\n");
           }
-          if (co.empty(s)) {
+          if (co.empty()) {
             writer.write("  <p>The list is empty.</p>\n");
           }
-          if (!co.empty(s)) {
+          if (!co.empty()) {
             writer.write("  <p>The list is not empty.</p>\n");
           }
         } catch (IOException e) {
@@ -169,19 +169,18 @@ public class BenchmarkTest extends TestCase {
             new Color("blue", false, "#Blue")
     );
 
-    boolean link(Scope s) {
-      return !((Boolean) s.get("current"));
+    boolean list() {
+      return item.size() != 0;
     }
 
-    boolean list(Scope s) {
-      return ((List) s.get("item")).size() != 0;
-    }
-
-    boolean empty(Scope s) {
-      return ((List) s.get("item")).size() == 0;
+    boolean empty() {
+      return item.size() == 0;
     }
 
     private static class Color {
+      boolean link() {
+        return !current;
+      }
       Color(String name, boolean current, String url) {
         this.name = name;
         this.current = current;

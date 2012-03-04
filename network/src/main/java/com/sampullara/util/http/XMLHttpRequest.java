@@ -1,17 +1,18 @@
 package com.sampullara.util.http;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.concurrent.Future;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import com.google.common.util.concurrent.SettableFuture;
+
 import org.eclipse.jetty.client.ContentExchange;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.concurrent.Future;
 
 /**
  * Retrieve and parse XML document from an HTTP source.

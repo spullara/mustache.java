@@ -1,17 +1,18 @@
 package com.sampullara.mustache.code;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+
 import com.sampullara.mustache.Code;
 import com.sampullara.mustache.Mustache;
 import com.sampullara.mustache.MustacheException;
 import com.sampullara.mustache.Scope;
 import com.sampullara.util.FutureWriter;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
 * This handles explicit functions.

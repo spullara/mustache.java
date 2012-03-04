@@ -1,8 +1,8 @@
 package com.sampullara.util;
 
-import com.google.common.util.concurrent.AbstractFuture;
-
 import java.util.concurrent.Callable;
+
+import com.google.common.util.concurrent.AbstractFuture;
 
 /**
  * I know you want this done later, but I might as well do it right now.

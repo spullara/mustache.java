@@ -1,0 +1,3 @@
+[submodule "compiler/src/test/resources/spec"]
+	path = compiler/src/test/resources/spec
+	url = https://github.com/mustache/spec.git

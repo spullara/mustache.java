@@ -1,10 +1,5 @@
 package com.sampullara.mustache;
 
-import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
-import com.sampullara.util.FutureWriter;
-import com.sampullara.util.TemplateFunction;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -18,8 +13,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.google.common.base.Function;
+import com.google.common.collect.MapMaker;
+
+import com.sampullara.util.FutureWriter;
+import com.sampullara.util.TemplateFunction;
 
 import static com.google.common.collect.Iterables.limit;
 import static com.google.common.collect.Iterables.transform;
@@ -493,7 +493,7 @@ public class Mustache {
       return EMPTY;
     }
     final Scope scope = new Scope(s);
-    scope.put(name, true);
+    scope.put(name, false);
     return new Iterable<Scope>() {
 
       @Override
