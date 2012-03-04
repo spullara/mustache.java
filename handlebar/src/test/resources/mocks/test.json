@@ -1,0 +1,14 @@
+{
+  "title": "This is the title",
+  "header": "The table header",
+  "rows": [
+    {
+      "name": "Name 1",
+      "data": "Data 1"
+    },
+    {
+      "name": "Name 2",
+      "data": "Data 2"
+    }
+  ]
+}
