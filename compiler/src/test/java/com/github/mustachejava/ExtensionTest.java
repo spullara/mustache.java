@@ -27,6 +27,18 @@ public class ExtensionTest {
   }
 
   @Test
+  public void testSubInPartial() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("partialsub.html");
+    StringWriter sw = new StringWriter();
+    Map scope = new HashMap();
+    scope.put("name", "Sam");
+    scope.put("randomid", "asdlkfj");
+    m.execute(sw, scope);
+    assertEquals(getContents(root, "sub.txt"), sw.toString());
+  }
+
+  @Test
   public void testFollow() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("follownomenu.html");
