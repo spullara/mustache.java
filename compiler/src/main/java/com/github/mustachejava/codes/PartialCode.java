@@ -42,14 +42,29 @@ public class PartialCode extends DefaultCode {
   }
 
   @Override
+  public Code[] getCodes() {
+    ensure();
+    return partial.getCodes();
+  }
+
+  @Override
+  public void setCodes(Code[] newcodes) {
+    partial.setCodes(newcodes);
+  }
+
+  @Override
   public Writer execute(Writer writer, final Object[] scopes) {
+    ensure();
+    return partialExecute(writer, scopes);
+  }
+
+  private void ensure() {
     if (partial == null) {
       partial = cf.compile(variable + extension);
       if (partial == null) {
         throw new MustacheException("Failed to compile partial: " + variable);
       }
     }
-    return partialExecute(writer, scopes);
   }
 
   protected Writer partialExecute(Writer writer, final Object[] scopes) {

@@ -22,7 +22,7 @@ public class ExtendCode extends PartialCode {
     this.mf = mf;
   }
 
-  private Code[] replaceCode(Code[] supercodes, Map<String, ExtendNameCode> replaceMap) {
+  private Code[] replaceCodes(Code[] supercodes, Map<String, ExtendNameCode> replaceMap) {
     Code[] newcodes = supercodes.clone();
     for (int i = 0; i < supercodes.length; i++) {
       Code code = supercodes[i];
@@ -33,12 +33,12 @@ public class ExtendCode extends PartialCode {
           newcodes[i] = extendReplaceCode;
           extendReplaceCode.appended = enc.appended;
         } else {
-          enc.setCodes(replaceCode(enc.getCodes(), replaceMap));
+          enc.setCodes(replaceCodes(enc.getCodes(), replaceMap));
         }
       } else {
         Code[] codes = code.getCodes();
         if (codes != null) {
-          code.setCodes(replaceCode(codes, replaceMap));
+          code.setCodes(replaceCodes(codes, replaceMap));
         }
       }
     }
@@ -46,10 +46,21 @@ public class ExtendCode extends PartialCode {
   }
 
   @Override
+  public Code[] getCodes() {
+    ensure();
+    return super.getCodes();
+  }
+
+  @Override
   public Writer execute(Writer writer, Object[] scopes) throws MustacheException {
+    ensure();
+    return partialExecute(writer, scopes);
+  }
+
+  private void ensure() {
     if (partial == null) {
       Map<String, ExtendNameCode> replaceMap = new HashMap<String, ExtendNameCode>();
-      for (Code code : getCodes()) {
+      for (Code code : mustache.getCodes()) {
         if (code instanceof ExtendNameCode) {
           // put name codes in the map
           ExtendNameCode erc = (ExtendNameCode) code;
@@ -65,9 +76,8 @@ public class ExtendCode extends PartialCode {
       partial = mf.compile(name + extension);
       Code[] supercodes = partial.getCodes();
       // recursively replace named sections with replacements
-      partial.setCodes(replaceCode(supercodes, replaceMap));
+      partial.setCodes(replaceCodes(supercodes, replaceMap));
     }
-    return partialExecute(writer, scopes);
   }
 
 }
