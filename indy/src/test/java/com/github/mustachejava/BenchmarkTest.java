@@ -86,7 +86,9 @@ public class BenchmarkTest extends TestCase {
 
   private DefaultMustacheFactory init() {
     DefaultMustacheFactory factory = new DefaultMustacheFactory();
-    factory.setObjectHandler(new IndyObjectHandler());
+    if (indy) {
+      factory.setObjectHandler(new IndyObjectHandler());
+    }
     return factory;
   }
 
@@ -96,12 +98,22 @@ public class BenchmarkTest extends TestCase {
     return sw;
   }
 
+  private boolean indy = true;
+
   public static void main(String[] args) throws Exception {
     BenchmarkTest benchmarkTest = new BenchmarkTest();
     benchmarkTest.setUp();
+    System.out.println("Indy");
     benchmarkTest.testComplex();
-    benchmarkTest.testParallelComplex();
-    benchmarkTest.testParallelComplexNoExecutor();
+    benchmarkTest.indy = false;
+    System.out.println("Reflection");
+    benchmarkTest.testComplex();
+    benchmarkTest.indy = true;
+    System.out.println("Indy");
+    benchmarkTest.testComplex();
+    benchmarkTest.indy = false;
+    System.out.println("Reflection");
+    benchmarkTest.testComplex();
     System.exit(0);
   }
 }
