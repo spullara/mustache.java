@@ -6,6 +6,7 @@ import java.io.Writer;
 import java.util.concurrent.Executors;
 
 import com.github.mustachejava.indy.IndyObjectHandler;
+import com.github.mustachejava.mh.MHObjectHandler;
 import junit.framework.TestCase;
 
 /**
@@ -99,21 +100,26 @@ public class BenchmarkTest extends TestCase {
   }
 
   private boolean indy = true;
-
   public static void main(String[] args) throws Exception {
     BenchmarkTest benchmarkTest = new BenchmarkTest();
     benchmarkTest.setUp();
-    System.out.println("Indy");
-    benchmarkTest.testComplex();
-    benchmarkTest.indy = false;
-    System.out.println("Reflection");
-    benchmarkTest.testComplex();
+
     benchmarkTest.indy = true;
     System.out.println("Indy");
     benchmarkTest.testComplex();
+
     benchmarkTest.indy = false;
     System.out.println("Reflection");
     benchmarkTest.testComplex();
+
+    benchmarkTest.indy = true;
+    System.out.println("Indy");
+    benchmarkTest.testComplex();
+
+    benchmarkTest.indy = false;
+    System.out.println("Reflection");
+    benchmarkTest.testComplex();
+
     System.exit(0);
   }
 }

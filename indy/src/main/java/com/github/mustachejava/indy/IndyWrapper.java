@@ -5,6 +5,7 @@ import com.github.mustachejava.reflect.ReflectionWrapper;
 import com.github.mustachejava.util.GuardException;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Handle;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -54,15 +55,11 @@ public abstract class IndyWrapper extends ReflectionWrapper implements Opcodes {
     super(rw);
   }
 
-  @Override
-  public Object call(Object[] scopes) throws GuardException {
-    guardCall(scopes);
-    Object scope = unwrap(scopes);
-    if (scope == null) return null;
-    return indy(scope);
-  }
-
-  public abstract Object indy(Object scope);
+  public abstract Object call(Object[] scopes) throws GuardException; // {
+//    guardCall(scopes);
+//    Object scope = unwrap(scopes);
+//    if (scope == null) return null;
+//    return indy(scope);
 
   public static IndyWrapper create(ReflectionWrapper rw) {
     String name;
@@ -92,10 +89,26 @@ public abstract class IndyWrapper extends ReflectionWrapper implements Opcodes {
         ga.endMethod();
       }
       {
-        GeneratorAdapter ga = new GeneratorAdapter(ACC_PROTECTED,
-                org.objectweb.asm.commons.Method.getMethod("Object indy(Object)"), null, null, cw);
-        ga.loadThis();
-        ga.loadArg(0);
+        GeneratorAdapter ga = new GeneratorAdapter(ACC_PUBLIC,
+                org.objectweb.asm.commons.Method.getMethod("Object call(Object[])"), null,
+                new Type[] { Type.getType(GuardException.class)}, cw);
+        ga.visitVarInsn(ALOAD, 0);
+        ga.visitVarInsn(ALOAD, 1);
+        ga.invokeVirtual(Type.getType(IndyWrapper.class),
+                org.objectweb.asm.commons.Method.getMethod("void guardCall(Object[])"));
+        ga.visitVarInsn(ALOAD, 0);
+        ga.visitVarInsn(ALOAD, 1);
+        ga.invokeVirtual(Type.getType(IndyWrapper.class),
+                org.objectweb.asm.commons.Method.getMethod("Object unwrap(Object[])"));
+        ga.visitVarInsn(ASTORE, 2);
+        ga.visitVarInsn(ALOAD, 2);
+        Label l0 = new Label();
+        ga.ifNonNull(l0);
+        ga.visitInsn(ACONST_NULL);
+        ga.returnValue();
+        ga.visitLabel(l0);
+        ga.visitVarInsn(ALOAD, 0);
+        ga.visitVarInsn(ALOAD, 2);
         ga.invokeDynamic("bootstrap", METHOD_SIGNATURE, BOOTSTRAP_METHOD);
         ga.returnValue();
         ga.endMethod();
