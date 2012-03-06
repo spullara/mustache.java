@@ -1,11 +1,16 @@
-import java.lang.invoke.*;
-import java.lang.reflect.*;
+import com.github.mustachejava.indy.IndyWrapper;
+import com.github.mustachejava.reflect.ReflectionObjectHandler;
+import com.github.mustachejava.reflect.ReflectionWrapper;
+import com.github.mustachejava.util.Wrapper;
 
 public class IndyDemo {
   public static void main(String[] args) throws Throwable {
+    IndyDemo indyDemo = new IndyDemo();
+    REFLECTED = new ReflectionObjectHandler().find("someMethod", new Object[] { indyDemo });
+    INDY = IndyWrapper.create((ReflectionWrapper) REFLECTED);
     for (int i = 0; i < 10; i++) {
-      timeReflection();
-      timeIndy();
+      timeReflection(indyDemo);
+      timeIndy(indyDemo);
     }
   }
 
@@ -18,42 +23,30 @@ public class IndyDemo {
     }
   }
 
-  public static void timeReflection() throws Throwable {
+  public static void timeReflection(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
+    Object[] scopes = {indyDemo};
     for (int i = 0; i < 100000000; i++) {
-      REFLECTED.invoke(null, strings[i % 100]);
+      REFLECTED.call(scopes);
     }
     System.out.println("reflected: " + (System.currentTimeMillis() - start));
   }
 
-  public static void timeIndy() throws Throwable {
+  public static void timeIndy(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
+    Object[] scopes = {indyDemo};
     for (int i = 0; i < 100000000; i++) {
-      HANDLE.invokeExact(strings[i % 100]);
+      INDY.call(scopes);
     }
     System.out.println("indy: " + (System.currentTimeMillis() - start));
   }
 
-  private static final Method REFLECTED;
-  private static final MethodHandle HANDLE;
+  private static Wrapper REFLECTED;
+  private static Wrapper INDY;
 
-  static {
-    Method method = null;
-    try {
-      method = IndyDemo.class.getMethod("someMethod", String.class);
-    } catch (Exception e) {}
-    REFLECTED = method;
+  private int length = 0;
 
-    MethodHandle handle = null;
-    try {
-      handle = MethodHandles.lookup().unreflect(REFLECTED);
-    } catch (Exception e) {}
-    HANDLE = handle;
-  }
-
-  public static int length = 0;
-
-  public static void someMethod(String a) {
-    length = a.length();
+  public int someMethod() {
+    return length++;
   }
 }
