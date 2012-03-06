@@ -54,7 +54,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
           if (wrappers == null) wrappers = new ArrayList<Wrapper>();
           wrappers.add(wrapper);
           try {
-            scope = wrapper.call(new Object[] { scope });
+            scope = wrapper.call(new Object[]{scope});
           } catch (GuardException e) {
             throw new AssertionError(e);
           }
@@ -98,7 +98,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
       if (map.get(name) == null) {
         return null;
       } else {
-        return createWrapper(scopeIndex, wrappers, guard, MAP_METHOD, new Object[] { name });
+        return createWrapper(scopeIndex, wrappers, guard, MAP_METHOD, new Object[]{name});
       }
     }
     Class aClass = scope.getClass();
@@ -176,13 +176,14 @@ public class ReflectionObjectHandler implements ObjectHandler {
   @Override
   public Writer falsey(Iteration iteration, Writer writer, Object object, Object[] scopes) {
     if (object != null) {
-      if (object instanceof Iterator) {
-        Iterator iterator = (Iterator) object;
-        if (iterator.hasNext()) return writer;
-      } else if (object instanceof Object[]) {
-        Object[] array = (Object[]) object;
-        int length = array.length;
-        if (length > 0) return writer;
+      if (object instanceof Boolean) {
+        if ((Boolean) object) {
+          return writer;
+        }
+      } else if (object instanceof String) {
+        if (!object.toString().equals("")) {
+          return writer;
+        }
       } else if (object instanceof List) {
         List list = (List) object;
         int length = list.size();
@@ -190,19 +191,16 @@ public class ReflectionObjectHandler implements ObjectHandler {
       } else if (object instanceof Iterable) {
         Iterable iterable = (Iterable) object;
         if (iterable.iterator().hasNext()) return writer;
+      } else if (object instanceof Iterator) {
+        Iterator iterator = (Iterator) object;
+        if (iterator.hasNext()) return writer;
+      } else if (object instanceof Object[]) {
+        Object[] array = (Object[]) object;
+        int length = array.length;
+        if (length > 0) return writer;
       } else {
-        if (object instanceof Boolean) {
-          if ((Boolean) object) {
-            return writer;
-          }
-        } else if (object instanceof String) {
-          if (!object.toString().equals("")) {
-            return writer;
-          }
-        } else {
-          // All other objects are truthy
-          return writer;
-        }
+        // All other objects are truthy
+        return writer;
       }
     }
     return iteration.next(writer, object, scopes);
@@ -210,38 +208,31 @@ public class ReflectionObjectHandler implements ObjectHandler {
 
   public Writer iterate(Iteration iteration, Writer writer, Object object, Object[] scopes) {
     if (object == null) return writer;
-    if (object instanceof Iterator) {
+    if (object instanceof Boolean) {
+      if (!(Boolean) object) {
+        return writer;
+      }
+    }
+    if (object instanceof String) {
+      if (object.toString().equals("")) {
+        return writer;
+      }
+    }
+    if (object instanceof Iterable) {
+      for (Object next : ((Iterable) object)) {
+        writer = iteration.next(writer, coerce(next), scopes);
+      }
+    } else if (object instanceof Iterator) {
       Iterator iterator = (Iterator) object;
       while (iterator.hasNext()) {
         writer = iteration.next(writer, coerce(iterator.next()), scopes);
       }
     } else if (object instanceof Object[]) {
       Object[] array = (Object[]) object;
-      int length = array.length;
-      for (int i = 0; i < length; i++) {
-        writer = iteration.next(writer, coerce(array[i]), scopes);
-      }
-    } else if (object instanceof List) {
-      List list = (List) object;
-      int length = list.size();
-      for (int i = 0; i < length; i++) {
-        writer = iteration.next(writer, coerce(list.get(i)), scopes);
-      }
-    } else if (object instanceof Iterable) {
-      for (Object next : ((Iterable) object)) {
-        writer = iteration.next(writer, coerce(next), scopes);
+      for (Object o : array) {
+        writer = iteration.next(writer, coerce(o), scopes);
       }
     } else {
-      if (object instanceof Boolean) {
-        if (!(Boolean) object) {
-          return writer;
-        }
-      }
-      if (object instanceof String) {
-        if (object.toString().equals("")) {
-          return writer;
-        }
-      }
       writer = iteration.next(writer, object, scopes);
     }
     return writer;

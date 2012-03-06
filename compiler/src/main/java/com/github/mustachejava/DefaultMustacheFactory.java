@@ -101,48 +101,40 @@ public class DefaultMustacheFactory implements MustacheFactory {
         switch (c) {
           case '&':
             if (!escapedPattern.matcher(value.substring(i, length)).find()) {
-              writer.append(value, position, i);
-              position = i + 1;
-              writer.append("&amp;");
+              position = append(value, writer, position, i, "&amp;");
             } else {
               if (position != 0) {
-                writer.append(value, position, i);
-                position = i + 1;
-                writer.append("&");
+                position = append(value, writer, position, i, "&");
               }
             }
             break;
           case '\\':
-            writer.append(value, position, i);
-            position = i + 1;
-            writer.append("\\\\");
+            position = append(value, writer, position, i, "\\\\");
             break;
           case '"':
-            writer.append(value, position, i);
-            position = i + 1;
-            writer.append("&quot;");
+            position = append(value, writer, position, i, "&quot;");
             break;
           case '<':
-            writer.append(value, position, i);
-            position = i + 1;
-            writer.append("&lt;");
+            position = append(value, writer, position, i, "&lt;");
             break;
           case '>':
-            writer.append(value, position, i);
-            position = i + 1;
-            writer.append("&gt;");
+            position = append(value, writer, position, i, "&gt;");
             break;
           case '\n':
-            writer.append(value, position, i);
-            position = i + 1;
-            writer.append("&#10;");
+            position = append(value, writer, position, i, "&#10;");
             break;
         }
       }
-      writer.append(value, position, value.length());
+      writer.append(value, position, length);
     } catch (IOException e) {
       throw new MustacheException("Failed to encode value: " + value);
     }
+  }
+
+  private int append(String value, Writer writer, int position, int i, String replace) throws IOException {
+    writer.append(value, position, i);
+    writer.append(replace);
+    return i + 1;
   }
 
   @Override

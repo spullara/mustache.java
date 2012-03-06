@@ -171,9 +171,8 @@ public class DefaultCode implements Code {
   protected Writer runCodes(Writer writer, Object[] scopes) {
     Code[] codes = getCodes();
     if (codes != null) {
-      int length = codes.length;
-      for (int i = 0; i < length; i++) {
-        writer = codes[i].execute(writer, scopes);
+      for (Code code : codes) {
+        writer = code.execute(writer, scopes);
       }
     }
     return writer;
@@ -193,23 +192,11 @@ public class DefaultCode implements Code {
    * we won't encounter that. Also, since we are copying the results across these boundaries
    * we don't have to worry about threads.
    */
-
-  private ThreadLocal<Object[]> localScopes = new ThreadLocal<Object[]>();
-
   protected Object[] addScope(Object next, Object[] scopes) {
     Object[] iteratorScopes = scopes;
     if (next != null) {
-      iteratorScopes = localScopes.get();
-      if (iteratorScopes == null) {
-        iteratorScopes = new Object[scopes.length + 1];
-        localScopes.set(iteratorScopes);
-      } else {
-        if (iteratorScopes.length < scopes.length + 1) {
-          // Need to expand the scopes holder
-          iteratorScopes = new Object[scopes.length + 1];
-          localScopes.set(iteratorScopes);
-        }
-      }
+      // Need to expand the scopes holder
+      iteratorScopes = new Object[scopes.length + 1];
       int srcPos = iteratorScopes.length - scopes.length - 1;
       System.arraycopy(scopes, 0, iteratorScopes, srcPos, scopes.length);
       for (;srcPos > 0; srcPos--) {
