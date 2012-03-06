@@ -4,22 +4,19 @@ import java.io.Writer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
-import com.google.common.util.concurrent.ListeningExecutorService;
-
 import com.github.mustachejava.Code;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.util.LatchedWriter;
 
 /**
-* Created by IntelliJ IDEA.
-* User: spullara
-* Date: 1/10/12
-* Time: 2:21 PM
-* To change this template use File | Settings | File Templates.
-*/
+ * Created by IntelliJ IDEA.
+ * User: spullara
+ * Date: 1/10/12
+ * Time: 2:21 PM
+ * To change this template use File | Settings | File Templates.
+ */
 public class PartialCode extends DefaultCode {
   protected Mustache partial;
   private final String variable;
@@ -36,14 +33,13 @@ public class PartialCode extends DefaultCode {
     extension = index == -1 ? "" : file.substring(index);
     les = cf.getExecutorService();
   }
-  
+
   public PartialCode(DefaultMustacheFactory cf, String variable, String file, String sm, String em) {
     this(cf, null, ">", variable, file, sm, em);
   }
 
   @Override
   public Code[] getCodes() {
-    ensure();
     return partial.getCodes();
   }
 
@@ -54,17 +50,16 @@ public class PartialCode extends DefaultCode {
 
   @Override
   public Writer execute(Writer writer, final Object[] scopes) {
-    ensure();
     return partialExecute(writer, scopes);
   }
 
-  private void ensure() {
+  @Override
+  public void init() {
+    partial = cf.compile(variable + extension);
     if (partial == null) {
-      partial = cf.compile(variable + extension);
-      if (partial == null) {
-        throw new MustacheException("Failed to compile partial: " + variable);
-      }
+      throw new MustacheException("Failed to compile partial: " + variable);
     }
+    partial.init();
   }
 
   protected Writer partialExecute(Writer writer, final Object[] scopes) {

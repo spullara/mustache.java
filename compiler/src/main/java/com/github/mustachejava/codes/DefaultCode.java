@@ -55,7 +55,17 @@ public class DefaultCode implements Code {
   public Code[] getCodes() {
     return mustache == null ? null : mustache.getCodes();
   }
-  
+
+  @Override
+  public void init() {
+    Code[] codes = getCodes();
+    if (codes != null) {
+      for (Code code : codes) {
+        code.init();
+      }
+    }
+  }
+
   public void setCodes(Code[] newcodes) {
     mustache.setCodes(newcodes);
   }

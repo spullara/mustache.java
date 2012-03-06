@@ -10,6 +10,7 @@ public interface Code {
   Writer execute(Writer writer, Object[] scopes);
   void identity(Writer writer);
   void append(String text);
-  public Code[] getCodes();
-  public void setCodes(Code[] codes);
+  Code[] getCodes();
+  void setCodes(Code[] codes);
+  void init();
 }

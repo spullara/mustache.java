@@ -1,10 +1,14 @@
 package com.github.mustachejava.codes;
 
-import com.github.mustachejava.*;
-
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.github.mustachejava.Code;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.MustacheFactory;
 
 /**
  * Extending a template.
@@ -46,38 +50,31 @@ public class ExtendCode extends PartialCode {
   }
 
   @Override
-  public Code[] getCodes() {
-    ensure();
-    return super.getCodes();
-  }
-
-  @Override
   public Writer execute(Writer writer, Object[] scopes) throws MustacheException {
-    ensure();
     return partialExecute(writer, scopes);
   }
 
-  private void ensure() {
-    if (partial == null) {
-      Map<String, ExtendNameCode> replaceMap = new HashMap<String, ExtendNameCode>();
-      for (Code code : mustache.getCodes()) {
-        if (code instanceof ExtendNameCode) {
-          // put name codes in the map
-          ExtendNameCode erc = (ExtendNameCode) code;
-          replaceMap.put(erc.getName(), erc);
-        } else if (code instanceof WriteCode) {
-          // ignore text
-        } else {
-          // fail on everything else
-          throw new IllegalArgumentException(
-                  "Illegal code in extend section: " + code.getClass().getName());
-        }
+  @Override
+  public void init() {
+    Map<String, ExtendNameCode> replaceMap = new HashMap<String, ExtendNameCode>();
+    for (Code code : mustache.getCodes()) {
+      if (code instanceof ExtendNameCode) {
+        // put name codes in the map
+        ExtendNameCode erc = (ExtendNameCode) code;
+        replaceMap.put(erc.getName(), erc);
+      } else if (code instanceof WriteCode) {
+        // ignore text
+      } else {
+        // fail on everything else
+        throw new IllegalArgumentException(
+                "Illegal code in extend section: " + code.getClass().getName());
       }
-      partial = mf.compile(name + extension);
-      Code[] supercodes = partial.getCodes();
-      // recursively replace named sections with replacements
-      partial.setCodes(replaceCodes(supercodes, replaceMap));
     }
+    partial = mf.compile(name + extension);
+    Code[] supercodes = partial.getCodes();
+    // recursively replace named sections with replacements
+    partial.setCodes(replaceCodes(supercodes, replaceMap));
+    partial.init();
   }
 
 }

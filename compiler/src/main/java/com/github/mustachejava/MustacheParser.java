@@ -6,8 +6,8 @@ import java.io.Reader;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * A pseudo interpreter / compiler. Instead of compiling to Java code, it compiles to a
- * list of instructions to execute.
+ * The parser generates callbacks into the MustacheFactory to build them.
+ *
  * <p/>
  * User: sam
  * Date: 5/14/11
