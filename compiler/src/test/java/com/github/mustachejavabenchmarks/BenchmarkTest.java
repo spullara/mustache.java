@@ -1,14 +1,17 @@
 package com.github.mustachejavabenchmarks;
 
-import com.github.mustachejava.*;
-import com.google.common.io.CharStreams;
-import junit.framework.TestCase;
-
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
+import java.io.Writer;
 import java.util.concurrent.Executors;
+
+import com.github.mustachejava.ComplexObject;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.MustacheFactory;
+import com.github.mustachejava.ParallelComplexObject;
+import junit.framework.TestCase;
 
 /**
  * Compare compilation with interpreter.
@@ -33,10 +36,7 @@ public class BenchmarkTest extends TestCase {
       {
         DefaultMustacheFactory cf = new DefaultMustacheFactory();
         Mustache m = cf.compile("complex.html");
-        assertEquals(CharStreams.toString(
-                        new InputStreamReader(
-                                BenchmarkTest.class.getResourceAsStream("/complex.txt"))),
-                complextest(m, new ComplexObject()).toString());
+        complextest(m, new ComplexObject()).toString();
         long start = System.currentTimeMillis();
         int total = 0;
         while (true) {
@@ -44,7 +44,7 @@ public class BenchmarkTest extends TestCase {
           total++;
           if (System.currentTimeMillis() - start > TIME) break;
         }
-        System.out.println("Serial: " + total/TIME);
+        System.out.println("Serial: " + total / TIME);
       }
     }
   }
@@ -57,10 +57,7 @@ public class BenchmarkTest extends TestCase {
         DefaultMustacheFactory cf = new DefaultMustacheFactory();
         cf.setExecutorService(Executors.newCachedThreadPool());
         Mustache m = cf.compile("complex.html");
-        assertEquals(CharStreams.toString(
-                new InputStreamReader(
-                        BenchmarkTest.class.getResourceAsStream("/complex.txt"))),
-                complextest(m, new ParallelComplexObject()).toString());
+        complextest(m, new ParallelComplexObject()).toString();
         long start = System.currentTimeMillis();
         int total = 0;
         while (true) {
@@ -68,7 +65,7 @@ public class BenchmarkTest extends TestCase {
           total++;
           if (System.currentTimeMillis() - start > TIME) break;
         }
-        System.out.println("Parallel: " + total/TIME);
+        System.out.println("Parallel: " + total / TIME);
       }
     }
   }
@@ -79,10 +76,7 @@ public class BenchmarkTest extends TestCase {
       {
         MustacheFactory cf = new DefaultMustacheFactory();
         Mustache m = cf.compile("complex.html");
-        assertEquals(CharStreams.toString(
-                new InputStreamReader(
-                        BenchmarkTest.class.getResourceAsStream("/complex.txt"))),
-                complextest(m, new ParallelComplexObject()).toString());
+        complextest(m, new ParallelComplexObject()).toString();
         long start = System.currentTimeMillis();
         int total = 0;
         while (true) {
@@ -90,13 +84,13 @@ public class BenchmarkTest extends TestCase {
           total++;
           if (System.currentTimeMillis() - start > TIME) break;
         }
-        System.out.println("Serial with callable: " + total/TIME);
+        System.out.println("Serial with callable: " + total / TIME);
       }
     }
   }
 
-  private StringWriter complextest(Mustache m, Object complexObject) throws MustacheException, IOException {
-    StringWriter sw = new StringWriter();
+  private Writer complextest(Mustache m, Object complexObject) throws MustacheException, IOException {
+    Writer sw = new NullWriter();
     m.execute(sw, complexObject).close();
     return sw;
   }
@@ -109,5 +103,5 @@ public class BenchmarkTest extends TestCase {
     benchmarkTest.testParallelComplexNoExecutor();
     System.exit(0);
   }
-  
+
 }

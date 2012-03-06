@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -163,51 +162,6 @@ public class JsonInterpreterTest extends TestCase {
         }
         System.out.println("StringWriter Serial: " + total / TIME + "/s");
       }
-    }
-  }
-
-  static class NullWriter extends Writer {
-    @Override
-    public void write(int c) throws IOException {
-    }
-
-    @Override
-    public void write(char[] cbuf) throws IOException {
-    }
-
-    @Override
-    public void write(String str) throws IOException {
-    }
-
-    @Override
-    public void write(String str, int off, int len) throws IOException {
-    }
-
-    @Override
-    public Writer append(CharSequence csq) throws IOException {
-      return this;
-    }
-
-    @Override
-    public Writer append(CharSequence csq, int start, int end) throws IOException {
-      return this;
-    }
-
-    @Override
-    public Writer append(char c) throws IOException {
-      return this;
-    }
-
-    @Override
-    public void write(char[] cbuf, int off, int len) throws IOException {
-    }
-
-    @Override
-    public void flush() throws IOException {
-    }
-
-    @Override
-    public void close() throws IOException {
     }
   }
 
