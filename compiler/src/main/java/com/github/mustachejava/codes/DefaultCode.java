@@ -1,15 +1,15 @@
 package com.github.mustachejava.codes;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.logging.Logger;
+
 import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.util.logging.Logger;
 
 /**
  * Simplest possible code implementaion with some default shared behavior
@@ -61,13 +61,10 @@ public class DefaultCode implements Code {
 
   @Override
   public synchronized void init() {
-    if (!inited) {
-      inited = true;
-      Code[] codes = getCodes();
-      if (codes != null) {
-        for (Code code : codes) {
-          code.init();
-        }
+    Code[] codes = getCodes();
+    if (codes != null) {
+      for (Code code : codes) {
+        code.init();
       }
     }
   }
@@ -80,7 +77,7 @@ public class DefaultCode implements Code {
    * Retrieve the first value in the stacks of scopes that matches
    * the give name. The method wrapper is cached and guarded against
    * the type or number of scopes changing. We should deepen the guard.
-   *
+   * <p/>
    * Methods will be found using the object handler, called here with
    * another lookup on a guard failure and finally coerced to a final
    * value based on the ObjectHandler you provide.
@@ -129,7 +126,7 @@ public class DefaultCode implements Code {
 
   @Override
   public Writer execute(Writer writer, Object scope) {
-    return execute(writer, new Object[] { scope });
+    return execute(writer, new Object[]{scope});
   }
 
   /**
@@ -215,7 +212,7 @@ public class DefaultCode implements Code {
       iteratorScopes = new Object[scopes.length + 1];
       int srcPos = iteratorScopes.length - scopes.length - 1;
       System.arraycopy(scopes, 0, iteratorScopes, srcPos, scopes.length);
-      for (;srcPos > 0; srcPos--) {
+      for (; srcPos > 0; srcPos--) {
         iteratorScopes[srcPos - 1] = null;
       }
       iteratorScopes[iteratorScopes.length - 1] = next;

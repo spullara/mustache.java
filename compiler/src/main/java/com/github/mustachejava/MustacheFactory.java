@@ -23,7 +23,7 @@ public interface MustacheFactory {
 
   // Create mustaches
   Mustache compile(String name);
-  Mustache compile(Reader reader, String name, String sm, String em);
+  Mustache compile(Reader reader, String name);
 
   // Translate one command to another for extensions
   String translate(String from);

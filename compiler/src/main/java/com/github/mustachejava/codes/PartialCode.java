@@ -48,12 +48,9 @@ public class PartialCode extends DefaultCode {
 
   @Override
   public synchronized void init() {
-    if (!inited) {
-      inited = true;
-      partial = cf.compile(variable + extension);
-      if (partial == null) {
-        throw new MustacheException("Failed to compile partial: " + variable);
-      }
+    partial = cf.compile(variable + extension);
+    if (partial == null) {
+      throw new MustacheException("Failed to compile partial: " + variable);
     }
   }
 

@@ -166,14 +166,13 @@ public class SpecTest {
           return new StringReader(partial == null ? "" : partial.getTextValue());
         }
       };
-      MustacheParser MC = new MustacheParser(CF);
       String file = test.get("name").getTextValue();
       System.out.print("Running " + file + " - " + test.get("desc").getTextValue());
       StringReader template = new StringReader(test.get("template").getTextValue());
       JsonNode data = test.get("data");
       try {
-        Mustache compile = MC.compile(template, file);
-        StringWriter writer = new StringWriter();        
+        Mustache compile = CF.compile(template, file);
+        StringWriter writer = new StringWriter();
         compile.execute(writer, new Object[] { new JsonMap(data), functionMap.get(file) });
         String expected = test.get("expected").getTextValue();
         if (writer.toString().replaceAll("\\s+", "").equals(expected.replaceAll("\\s+", ""))) {

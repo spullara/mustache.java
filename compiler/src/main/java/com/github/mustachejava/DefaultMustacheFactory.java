@@ -36,6 +36,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   private final MustacheParser mc = new MustacheParser(this);
   private final Map<String, Mustache> templateCache = new ConcurrentHashMap<String, Mustache>();
+  private final Map<String, Mustache> mustacheCache = new ConcurrentHashMap<String, Mustache>();
   private ObjectHandler oh = new ReflectionObjectHandler();
 
   private String resourceRoot;
@@ -166,12 +167,27 @@ public class DefaultMustacheFactory implements MustacheFactory {
     templateCache.put(templateText, mustache);
   }
 
-  public Mustache compile(String name) {
-    return mc.compile(name);
+  @Override
+  public synchronized Mustache compile(String name) {
+    Mustache mustache = mustacheCache.get(name);
+    if (mustache == null) {
+      mustache = mc.compile(name);
+      mustacheCache.put(name, mustache);
+      mustache.init();
+    }
+    return mustache;
   }
 
+  @Override
+  public Mustache compile(Reader reader, String name) {
+    return compile(reader, name, "{{", "}}");
+  }
+
+  // Template functions need this to comply with the specification
   public Mustache compile(Reader reader, String file, String sm, String em) {
-    return mc.compile(reader, file, sm, em);
+    Mustache compile = mc.compile(reader, file, sm, em);
+    compile.init();
+    return compile;
   }
 
   @Override

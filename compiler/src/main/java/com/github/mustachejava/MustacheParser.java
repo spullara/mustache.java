@@ -18,11 +18,11 @@ public class MustacheParser {
   public static final String DEFAULT_EM = "}}";
   private MustacheFactory cf;
 
-  public MustacheParser(MustacheFactory cf) {
+  protected MustacheParser(MustacheFactory cf) {
     this.cf = cf;
   }
 
-  public Mustache compile(String file) {
+  protected Mustache compile(String file) {
     Reader reader = cf.getReader(file);
     if (reader == null) {
       throw new MustacheException("Failed to find: " + file);
@@ -30,15 +30,15 @@ public class MustacheParser {
     return compile(reader, file);
   }
 
-  public Mustache compile(Reader reader, String file) {
+  protected Mustache compile(Reader reader, String file) {
     return compile(reader, file, DEFAULT_SM, DEFAULT_EM);
   }
 
-  public Mustache compile(Reader reader, String file, String sm, String em) {
+  protected Mustache compile(Reader reader, String file, String sm, String em) {
     return compile(reader, null, new AtomicInteger(0), file, sm, em);
   }
 
-  public Mustache compile(final Reader reader, String tag, final AtomicInteger currentLine, String file, String sm, String em) throws MustacheException {
+  protected Mustache compile(final Reader reader, String tag, final AtomicInteger currentLine, String file, String sm, String em) throws MustacheException {
     if (reader == null) {
       throw new MustacheException("Reader is null");
     }
@@ -210,7 +210,6 @@ public class MustacheParser {
     }
     mv.eof(currentLine.intValue());
     Mustache mustache = mv.mustache(file, sm, em);
-    mustache.init();
     return mustache;
   }
 
