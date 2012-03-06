@@ -10,13 +10,6 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.util.LatchedWriter;
 
-/**
- * Created by IntelliJ IDEA.
- * User: spullara
- * Date: 1/10/12
- * Time: 2:21 PM
- * To change this template use File | Settings | File Templates.
- */
 public class PartialCode extends DefaultCode {
   protected Mustache partial;
   private final String variable;
@@ -54,12 +47,14 @@ public class PartialCode extends DefaultCode {
   }
 
   @Override
-  public void init() {
-    partial = cf.compile(variable + extension);
-    if (partial == null) {
-      throw new MustacheException("Failed to compile partial: " + variable);
+  public synchronized void init() {
+    if (!inited) {
+      inited = true;
+      partial = cf.compile(variable + extension);
+      if (partial == null) {
+        throw new MustacheException("Failed to compile partial: " + variable);
+      }
     }
-    partial.init();
   }
 
   protected Writer partialExecute(Writer writer, final Object[] scopes) {

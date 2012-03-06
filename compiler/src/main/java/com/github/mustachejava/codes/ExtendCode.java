@@ -55,26 +55,29 @@ public class ExtendCode extends PartialCode {
   }
 
   @Override
-  public void init() {
-    Map<String, ExtendNameCode> replaceMap = new HashMap<String, ExtendNameCode>();
-    for (Code code : mustache.getCodes()) {
-      if (code instanceof ExtendNameCode) {
-        // put name codes in the map
-        ExtendNameCode erc = (ExtendNameCode) code;
-        replaceMap.put(erc.getName(), erc);
-      } else if (code instanceof WriteCode) {
-        // ignore text
-      } else {
-        // fail on everything else
-        throw new IllegalArgumentException(
-                "Illegal code in extend section: " + code.getClass().getName());
+  public synchronized void init() {
+    if (!inited) {
+      inited = true;
+      Map<String, ExtendNameCode> replaceMap = new HashMap<String, ExtendNameCode>();
+      for (Code code : mustache.getCodes()) {
+        if (code instanceof ExtendNameCode) {
+          // put name codes in the map
+          ExtendNameCode erc = (ExtendNameCode) code;
+          replaceMap.put(erc.getName(), erc);
+        } else if (code instanceof WriteCode) {
+          // ignore text
+        } else {
+          // fail on everything else
+          throw new IllegalArgumentException(
+                  "Illegal code in extend section: " + code.getClass().getName());
+        }
       }
+      partial = mf.compile(name + extension);
+      Code[] supercodes = partial.getCodes();
+      // recursively replace named sections with replacements
+      partial.setCodes(replaceCodes(supercodes, replaceMap));
+      partial.init();
     }
-    partial = mf.compile(name + extension);
-    Code[] supercodes = partial.getCodes();
-    // recursively replace named sections with replacements
-    partial.setCodes(replaceCodes(supercodes, replaceMap));
-    partial.init();
   }
 
 }

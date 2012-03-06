@@ -209,7 +209,9 @@ public class MustacheParser {
       throw new MustacheException("Failed to read", e);
     }
     mv.eof(currentLine.intValue());
-    return mv.mustache(file, sm, em);
+    Mustache mustache = mv.mustache(file, sm, em);
+    mustache.init();
+    return mustache;
   }
 
   /**

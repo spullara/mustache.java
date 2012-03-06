@@ -28,6 +28,9 @@ public class DefaultCode implements Code {
   // Callsite caching
   protected Wrapper wrapper;
 
+  // Initialization
+  protected boolean inited;
+
   // Debug callsites
   private static boolean debug = Boolean.getBoolean("mustache.debug");
   protected Logger logger = Logger.getLogger("mustache");
@@ -57,11 +60,14 @@ public class DefaultCode implements Code {
   }
 
   @Override
-  public void init() {
-    Code[] codes = getCodes();
-    if (codes != null) {
-      for (Code code : codes) {
-        code.init();
+  public synchronized void init() {
+    if (!inited) {
+      inited = true;
+      Code[] codes = getCodes();
+      if (codes != null) {
+        for (Code code : codes) {
+          code.init();
+        }
       }
     }
   }
