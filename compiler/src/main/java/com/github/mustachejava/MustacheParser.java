@@ -6,8 +6,9 @@ import java.io.Reader;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * The parser generates callbacks into the MustacheFactory to build them.
- *
+ * The parser generates callbacks into the MustacheFactory to build them. Do not use these
+ * directly as you must manage the Mustache object lifecycle as well.
+ * <p/>
  * <p/>
  * User: sam
  * Date: 5/14/11
@@ -22,7 +23,7 @@ public class MustacheParser {
     this.cf = cf;
   }
 
-  protected Mustache compile(String file) {
+  public Mustache compile(String file) {
     Reader reader = cf.getReader(file);
     if (reader == null) {
       throw new MustacheException("Failed to find: " + file);
@@ -30,11 +31,11 @@ public class MustacheParser {
     return compile(reader, file);
   }
 
-  protected Mustache compile(Reader reader, String file) {
+  public Mustache compile(Reader reader, String file) {
     return compile(reader, file, DEFAULT_SM, DEFAULT_EM);
   }
 
-  protected Mustache compile(Reader reader, String file, String sm, String em) {
+  public Mustache compile(Reader reader, String file, String sm, String em) {
     return compile(reader, null, new AtomicInteger(0), file, sm, em);
   }
 
@@ -209,8 +210,7 @@ public class MustacheParser {
       throw new MustacheException("Failed to read", e);
     }
     mv.eof(currentLine.intValue());
-    Mustache mustache = mv.mustache(file, sm, em);
-    return mustache;
+    return mv.mustache(file, sm, em);
   }
 
   /**
