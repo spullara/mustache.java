@@ -10,6 +10,7 @@
     <module>handlebar</module>
     <module>compiler</module>
     <module>indy</module>
+    <module>example</module>
   </modules>
   <packaging>pom</packaging>
 
