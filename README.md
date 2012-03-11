@@ -14,7 +14,7 @@ Request for contributions:
 Documentation:
 
 - Biggest difference between mustache.js and mustache.java is optional concurrent evaluation
-- Passes all of the `mustache` specification modulo whitespace differences
+- Passes all of the `mustache` [specification tests](https://github.com/mustache/spec) modulo whitespace differences
 - Data is provided via non-private fields, methods or maps
 - Any `Iterable` can be used for list-like behaviors
 - Returning a `Callable` allows for concurrent evaluation if an `ExecutorService` is configured
@@ -120,50 +120,50 @@ thread if you have provided an `ExecutorService` when you created your `Mustache
 This enables scheduled tasks, streaming behavior and asynchronous i/o. Check out the `example` module in order
 to see a complete end-to-end example:
 
-  package mustachejava;
+    package mustachejava;
 
-  import com.github.mustachejava.DefaultMustacheFactory;
-  import com.github.mustachejava.Mustache;
-  import com.github.mustachejava.MustacheFactory;
+    import com.github.mustachejava.DefaultMustacheFactory;
+    import com.github.mustachejava.Mustache;
+    import com.github.mustachejava.MustacheFactory;
 
-  import java.io.IOException;
-  import java.io.PrintWriter;
-  import java.io.Writer;
-  import java.util.Arrays;
-  import java.util.List;
+    import java.io.IOException;
+    import java.io.PrintWriter;
+    import java.io.Writer;
+    import java.util.Arrays;
+    import java.util.List;
 
-  public class Example {
+    public class Example {
 
-    List<Item> items() {
-      return Arrays.asList(
-              new Item("Item 1", "$19.99", Arrays.asList(new Feature("New!"), new Feature("Awesome!"))),
-              new Item("Item 2", "$29.99", Arrays.asList(new Feature("Old."), new Feature("Ugly.")))
-      );
-    }
-
-    static class Item {
-      Item(String name, String price, List<Feature> features) {
-        this.name = name;
-        this.price = price;
-        this.features = features;
+      List<Item> items() {
+        return Arrays.asList(
+                new Item("Item 1", "$19.99", Arrays.asList(new Feature("New!"), new Feature("Awesome!"))),
+                new Item("Item 2", "$29.99", Arrays.asList(new Feature("Old."), new Feature("Ugly.")))
+        );
       }
 
-      String name, price;
-      List<Feature> features;
-    }
+      static class Item {
+        Item(String name, String price, List<Feature> features) {
+          this.name = name;
+          this.price = price;
+          this.features = features;
+        }
 
-    static class Feature {
-      Feature(String description) {
-        this.description = description;
+        String name, price;
+        List<Feature> features;
       }
 
-      String description;
-    }
+      static class Feature {
+        Feature(String description) {
+          this.description = description;
+        }
 
-    public static void main(String[] args) throws IOException {
-      MustacheFactory mf = new DefaultMustacheFactory();
-      Mustache mustache = mf.compile("template.mustache");
-      mustache.execute(new PrintWriter(System.out), new Example()).flush();
+        String description;
+      }
+
+      public static void main(String[] args) throws IOException {
+        MustacheFactory mf = new DefaultMustacheFactory();
+        Mustache mustache = mf.compile("template.mustache");
+        mustache.execute(new PrintWriter(System.out), new Example()).flush();
+      }
     }
-  }
 
