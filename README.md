@@ -6,6 +6,7 @@ Mustache.java
 There is a Google Group for support and questions: <http://groups.google.com/group/mustachejava>
 
 Request for contributions:
+
 - Real world benchmarks that matter - currently benchmarking based on Twitter templates
 - Bug reports / fixes
 - API feedback
