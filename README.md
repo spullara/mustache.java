@@ -8,6 +8,7 @@ There is a Google Group for support and questions: <http://groups.google.com/gro
 Request for contributions:
 
 - Real world benchmarks that matter - currently benchmarking based on Twitter templates
+- Documentation
 - Bug reports / fixes
 - API feedback
 - Optimizations
@@ -16,7 +17,7 @@ Documentation:
 
 - Biggest difference between mustache.js and mustache.java is optional concurrent evaluation
 - Passes all of the `mustache` [specification tests](https://github.com/mustache/spec) modulo whitespace differences
-- Data is provided via non-private fields, methods or maps
+- Data is provided by objects in an array of scopes and are accessed via non-private fields, methods or maps
 - Any `Iterable` can be used for list-like behaviors
 - Returning a `Callable` allows for concurrent evaluation if an `ExecutorService` is configured
 - Template inheritance is supported by this implementation, see <https://github.com/mustache/spec/issues/38>
@@ -32,7 +33,7 @@ Performance:
 
 - See the `com.github.mustachejavabenchmarks` package in the `compiler` module
 - Compiles 4000+ timeline.html templates per second per core
-- Renders 5000+ of 50 tweet timelines per second per core on 2011 Macbook Pro / MacPro hardware (fast)
+- Renders 5000+ of 50 tweet timelines per second per core on 2011 Macbook Pro / MacPro hardware
 
 Maven dependency information:
 
