@@ -1,15 +1,15 @@
 package com.github.mustachejava.codes;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.logging.Logger;
-
 import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.logging.Logger;
 
 /**
  * Simplest possible code implementaion with some default shared behavior
@@ -197,6 +197,8 @@ public class DefaultCode implements Code {
     appended = sb.toString();
   }
 
+  private ThreadLocal<Object[]> localScopes = new ThreadLocal<Object[]>();
+
   /**
    * Allocating new scopes is currently the only place where we are activtely allocating
    * memory within the templating system. It is possible that recycling these might lend
@@ -209,7 +211,17 @@ public class DefaultCode implements Code {
     Object[] iteratorScopes = scopes;
     if (next != null) {
       // Need to expand the scopes holder
-      iteratorScopes = new Object[scopes.length + 1];
+      iteratorScopes = localScopes.get();
+      if (iteratorScopes == null) {
+        iteratorScopes = new Object[scopes.length + 1];
+        localScopes.set(iteratorScopes);
+      } else {
+        if (iteratorScopes.length < scopes.length + 1) {
+          // Need to expand the scopes holder
+          iteratorScopes = new Object[scopes.length + 1];
+          localScopes.set(iteratorScopes);
+        }
+      }
       int srcPos = iteratorScopes.length - scopes.length - 1;
       System.arraycopy(scopes, 0, iteratorScopes, srcPos, scopes.length);
       for (; srcPos > 0; srcPos--) {
