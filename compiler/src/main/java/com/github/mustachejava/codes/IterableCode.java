@@ -1,18 +1,19 @@
 package com.github.mustachejava.codes;
 
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Iteration;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.TemplateFunction;
+import com.github.mustachejava.util.LatchedWriter;
+import com.google.common.base.Function;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-
-import com.github.mustachejava.*;
-import com.github.mustachejava.TemplateFunction;
-import com.google.common.base.Function;
-
-import com.github.mustachejava.util.LatchedWriter;
 
 /**
 * Created by IntelliJ IDEA.
@@ -60,12 +61,15 @@ public class IterableCode extends DefaultCode implements Iteration {
       final Writer finalWriter = writer;
       final LatchedWriter latchedWriter = new LatchedWriter(writer);
       writer = latchedWriter;
+      // Scopes must not cross thread boundaries as they
+      // are thread locally reused
+      final Object[] newScopes = scopes.clone();
       les.execute(new Runnable() {
         @Override
         public void run() {
           try {
             Object call = callable.call();
-            execute(finalWriter, call, scopes);
+            execute(finalWriter, call, newScopes);
             latchedWriter.done();
           } catch (Throwable e) {
             latchedWriter.failed(e);

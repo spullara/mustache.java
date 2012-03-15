@@ -1,13 +1,13 @@
 package com.github.mustachejava.reflect;
 
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.util.GuardException;
+import com.github.mustachejava.util.Wrapper;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.util.GuardException;
-import com.github.mustachejava.util.Wrapper;
 
 /**
  * Used for evaluating values at a callsite
@@ -60,7 +60,7 @@ public class ReflectionWrapper implements Wrapper {
   }
 
   protected Object unwrap(Object[] scopes) throws GuardException {
-    Object scope = scopes[this.scopeIndex];
+    Object scope = scopes[scopeIndex];
     // The value may be buried by . notation
     if (wrappers != null) {
       for (int i = 0; i < wrappers.length; i++) {
