@@ -209,7 +209,7 @@ public class MustacheParser {
     } catch (IOException e) {
       throw new MustacheException("Failed to read", e);
     }
-    mv.eof(file, currentLine.get());
+    mv.eof(new TemplateContext(sm, em, file, currentLine.get()));
     return mv.mustache(new TemplateContext(sm, em, file, 0));
   }
 

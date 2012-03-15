@@ -4,6 +4,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Iteration;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.TemplateFunction;
 import com.github.mustachejava.util.LatchedWriter;
 import com.google.common.base.Function;

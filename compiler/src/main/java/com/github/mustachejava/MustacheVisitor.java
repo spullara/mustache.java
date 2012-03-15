@@ -15,7 +15,7 @@ public interface MustacheVisitor {
   void write(TemplateContext templateContext, String text);
 
   // Internal
-  void eof(String file, int line);
+  void eof(TemplateContext templateContext);
 
   // Extension
   void extend(TemplateContext templateContext, String variable, Mustache mustache);

@@ -63,7 +63,7 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
   }
 
   @Override
-  public void eof(String file, int line) {
+  public void eof(TemplateContext templateContext) {
     list.add(EOF);
   }
 
