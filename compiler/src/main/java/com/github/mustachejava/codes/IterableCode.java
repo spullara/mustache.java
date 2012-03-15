@@ -24,15 +24,13 @@ import com.github.mustachejava.util.LatchedWriter;
 public class IterableCode extends DefaultCode implements Iteration {
 
   private final String variable;
-  private final String file;
   private DefaultMustacheFactory cf;
   private ExecutorService les;
 
-  public IterableCode(DefaultMustacheFactory cf, Mustache mustache, String variable, String sm, String em, String file) {
-    super(cf.getObjectHandler(), mustache, variable, "#", sm, em);
+  public IterableCode(TemplateContext tc, DefaultMustacheFactory cf, Mustache mustache, String variable) {
+    super(tc, cf.getObjectHandler(), mustache, variable, "#");
     this.cf = cf;
     this.variable = variable;
-    this.file = file;
     les = cf.getExecutorService();
   }
 
@@ -87,7 +85,7 @@ public class IterableCode extends DefaultCode implements Iteration {
         String templateText = newtemplate.toString();
         Mustache mustache = cf.getTemplate(templateText);
         if (mustache == null) {
-          mustache = cf.compile(new StringReader(templateText), file, sm, em);
+          mustache = cf.compile(new StringReader(templateText), tc.file(), tc.startChars(), tc.endChars());
           cf.putTemplate(templateText, mustache);
         }
         writer = mustache.execute(writer, scopes);

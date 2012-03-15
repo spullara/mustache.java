@@ -8,6 +8,7 @@ import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
+import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
@@ -20,10 +21,9 @@ public class DefaultCode implements Code {
 
   protected final ObjectHandler oh;
   protected final String name;
+  protected TemplateContext tc;
   protected final Mustache mustache;
   protected final String type;
-  protected final String sm;
-  protected final String em;
 
   // Callsite caching
   protected Wrapper wrapper;
@@ -40,16 +40,15 @@ public class DefaultCode implements Code {
   protected boolean returnThis = false;
 
   public DefaultCode() {
-    this(null, null, null, null, null, null);
+    this(null, null, null, null, null);
   }
 
-  public DefaultCode(ObjectHandler oh, Mustache mustache, String name, String type, String sm, String em) {
+  public DefaultCode(TemplateContext tc, ObjectHandler oh, Mustache mustache, String name, String type) {
     this.oh = oh;
     this.mustache = mustache;
     this.type = type;
     this.name = name;
-    this.sm = sm;
-    this.em = em;
+    this.tc = tc;
     if (".".equals(name)) {
       returnThis = true;
     }
@@ -110,7 +109,7 @@ public class DefaultCode implements Code {
         // Ugly but generally not interesting
         if (!(this instanceof PartialCode)) {
           StringBuilder sb = new StringBuilder("Failed to find: ");
-          sb.append(name).append(" in");
+          sb.append(name).append(" (").append(tc.file()).append(":").append(tc.line()).append(") ").append("in");
           for (Object scope : scopes) {
             if (scope != null) {
               sb.append(" ").append(scope.getClass().getSimpleName());
@@ -164,10 +163,10 @@ public class DefaultCode implements Code {
   }
 
   private void tag(Writer writer, String tag) throws IOException {
-    writer.write(sm);
+    writer.write(tc.startChars());
     writer.write(tag);
     writer.write(name);
-    writer.write(em);
+    writer.write(tc.endChars());
   }
 
   protected Writer appendText(Writer writer) {

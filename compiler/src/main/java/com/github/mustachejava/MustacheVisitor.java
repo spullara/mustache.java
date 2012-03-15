@@ -5,19 +5,19 @@ package com.github.mustachejava;
  */
 public interface MustacheVisitor {
   // Mustache
-  Mustache mustache(String file, String sm, String em);
+  Mustache mustache(TemplateContext templateContext);
 
   // Specified
-  void iterable(String variable, Mustache mustache, String file, int line, String sm, String em);
-  void notIterable(String variable, Mustache mustache, String file, int line, String sm, String em);
-  void partial(String variable, String file, int line, String sm, String em);
-  void value(String finalName, boolean b, int line, String sm, String em);
-  void write(String text, int line, String sm, String em);
+  void iterable(TemplateContext templateContext, String variable, Mustache mustache);
+  void notIterable(TemplateContext templateContext, String variable, Mustache mustache);
+  void partial(TemplateContext templateContext, String variable);
+  void value(TemplateContext templateContext, String variable, boolean encoded);
+  void write(TemplateContext templateContext, String text);
 
   // Internal
-  void eof(int line);
+  void eof(String file, int line);
 
   // Extension
-  void extend(String variable, Mustache mustache, String file, int line, String sm, String em);
-  void name(String variable, Mustache mustache, String file, int line, String sm, String em);
+  void extend(TemplateContext templateContext, String variable, Mustache mustache);
+  void name(TemplateContext templateContext, String variable, Mustache mustache);
 }

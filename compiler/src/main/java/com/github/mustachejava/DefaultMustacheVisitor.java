@@ -19,37 +19,38 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
   }
 
   @Override
-  public Mustache mustache(String file, String sm, String em) {
-    return new DefaultMustache(cf, list.toArray(new Code[list.size()]), file, sm, em);
+  public Mustache mustache(TemplateContext templateContext) {
+    return new DefaultMustache(templateContext, cf, list.toArray(new Code[list.size()]), templateContext.file());
   }
 
   @Override
-  public void iterable(final String variable, Mustache mustache, final String file, final int start, String sm, String em) {
-    list.add(new IterableCode(cf, mustache, variable, sm, em, file));
+  public void iterable(TemplateContext templateContext, String variable, Mustache mustache) {
+    list.add(new IterableCode(templateContext, cf, mustache, variable));
   }
 
   @Override
-  public void notIterable(final String variable, Mustache mustache, String file, int start, String sm, String em) {
-    list.add(new NotIterableCode(cf, mustache, variable, sm, em));
+  public void notIterable(TemplateContext templateContext, String variable, Mustache mustache) {
+    list.add(new NotIterableCode(templateContext, cf, mustache, variable));
   }
 
   @Override
-  public void name(String variable, Mustache mustache, String file, int start, String sm, String em) {
-    list.add(new ExtendNameCode(cf, mustache, variable, sm, em));
+  public void name(TemplateContext templateContext, String variable, Mustache mustache) {
+    list.add(new ExtendNameCode(templateContext, cf, mustache, variable));
   }
 
   @Override
-  public void partial(final String variable, String file, int line, String sm, String em) {
-    list.add(new PartialCode(cf, variable, file, "{", "}"));
+  public void partial(TemplateContext templateContext, final String variable) {
+    TemplateContext partialTC = new TemplateContext("{{", "}}", templateContext.file(), templateContext.line());
+    list.add(new PartialCode(partialTC, cf, variable));
   }
 
   @Override
-  public void value(final String variable, final boolean encoded, final int line, String sm, String em) {
-    list.add(new ValueCode(cf, variable, sm, em, encoded, line));
+  public void value(TemplateContext templateContext, final String variable, boolean encoded) {
+    list.add(new ValueCode(templateContext, cf, variable, encoded));
   }
 
   @Override
-  public void write(final String text, int line, String sm, String em) {
+  public void write(TemplateContext templateContext, final String text) {
     if (text.length() > 0) {
       int size = list.size();
       if (size > 0) {
@@ -62,13 +63,13 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
   }
 
   @Override
-  public void eof(int line) {
+  public void eof(String file, int line) {
     list.add(EOF);
   }
 
   @Override
-  public void extend(String variable, Mustache mustache, String file, int start, String sm, String em) {
-    list.add(new ExtendCode(cf, mustache, variable, file, sm, em));
+  public void extend(TemplateContext templateContext, String variable, Mustache mustache) {
+    list.add(new ExtendCode(templateContext, cf, mustache, variable));
   }
 
 }

@@ -141,7 +141,7 @@ public class JsonInterpreterTest extends TestCase {
     }
     System.out.println((System.currentTimeMillis() - start));
 
-    System.out.println("timeline.html evaluations per millisecond:");
+    System.out.println("timeline.html evaluations:");
     for (int i = 0; i < 2; i++) {
       {
         start = System.currentTimeMillis();

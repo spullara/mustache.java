@@ -66,7 +66,7 @@ public class MustacheParser {
           if (!iterable || (iterable && !onlywhitespace)) {
             out.append("\n");
           }
-          out = write(mv, out, currentLine.intValue());
+          out = write(mv, out, file, currentLine.intValue());
 
           iterable = false;
           onlywhitespace = true;
@@ -105,21 +105,21 @@ public class MustacheParser {
                 final Mustache mustache = compile(br, variable, currentLine, file, sm, em);
                 int lines = currentLine.get() - line;
                 if (!onlywhitespace || lines == 0) {
-                  write(mv, out, currentLine.intValue());
+                  write(mv, out, file, currentLine.intValue());
                 }
                 out = new StringBuilder();
                 switch (ch) {
                   case '#':
-                    mv.iterable(variable, mustache, file, line, sm, em);
+                    mv.iterable(new TemplateContext(sm, em, file, line), variable, mustache);
                     break;
                   case '^':
-                    mv.notIterable(variable, mustache, file, line, sm, em);
+                    mv.notIterable(new TemplateContext(sm, em, file, line), variable, mustache);
                     break;
                   case '<':
-                    mv.extend(variable, mustache, file, line, sm, em);
+                    mv.extend(new TemplateContext(sm, em, file, line), variable, mustache);
                     break;
                   case '$':
-                    mv.name(variable, mustache, file, line, sm, em);
+                    mv.name(new TemplateContext(sm, em, file, line), variable, mustache);
                     break;
                 }
                 iterable = lines != 0;
@@ -128,22 +128,22 @@ public class MustacheParser {
               case '/': {
                 // Tag end
                 if (!onlywhitespace) {
-                  write(mv, out, currentLine.intValue());
+                  write(mv, out, file, currentLine.intValue());
                 }
                 if (!variable.equals(tag)) {
                   throw new MustacheException(
                           "Mismatched start/end tags: " + tag + " != " + variable + " in " + file + ":" + currentLine);
                 }
 
-                return mv.mustache(file, sm, em);
+                return mv.mustache(new TemplateContext(sm, em, file, 0));
               }
               case '>': {
-                out = write(mv, out, currentLine.intValue());
-                mv.partial(variable, file, currentLine.get(), sm, em);
+                out = write(mv, out, file, currentLine.intValue());
+                mv.partial(new TemplateContext(sm, em, file, currentLine.get()), variable);
                 break;
               }
               case '{': {
-                out = write(mv, out, currentLine.intValue());
+                out = write(mv, out, file, currentLine.intValue());
                 // Not escaped
                 String name = variable;
                 if (em.charAt(1) != '}') {
@@ -155,26 +155,26 @@ public class MustacheParser {
                   }
                 }
                 final String finalName = name;
-                mv.value(finalName, false, currentLine.intValue(), sm, em);
+                mv.value(new TemplateContext(sm, em, file, currentLine.get()), finalName, false);
                 break;
               }
               case '&': {
                 // Not escaped
-                out = write(mv, out, currentLine.intValue());
-                mv.value(variable, false, currentLine.intValue(), sm, em);
+                out = write(mv, out, file, currentLine.intValue());
+                mv.value(new TemplateContext(sm, em, file, currentLine.get()), variable, false);
                 break;
               }
               case '%':
                 // Pragmas
-                out = write(mv, out, currentLine.intValue());
+                out = write(mv, out, file, currentLine.intValue());
                 break;
               case '!':
                 // Comment
-                out = write(mv, out, currentLine.intValue());
+                out = write(mv, out, file, currentLine.intValue());
                 break;
               case '=':
                 // Change delimiters
-                out = write(mv, out, currentLine.intValue());
+                out = write(mv, out, file, currentLine.intValue());
                 String delimiters = command.replaceAll("\\s+", "");
                 int length = delimiters.length();
                 if (length > 6 || length / 2 * 2 != length) {
@@ -189,8 +189,8 @@ public class MustacheParser {
                           "Improperly closed variable in " + file + ":" + currentLine);
                 }
                 // Reference
-                out = write(mv, out, currentLine.intValue());
-                mv.value(command.trim(), true, currentLine.intValue(), sm, em);
+                out = write(mv, out, file, currentLine.intValue());
+                mv.value(new TemplateContext(sm, em, file, currentLine.get()), command.trim(), true);
                 break;
               }
             }
@@ -203,22 +203,21 @@ public class MustacheParser {
         onlywhitespace = onlywhitespace && (c == ' ' || c == '\t' || c == '\r');
         out.append((char) c);
       }
-      write(mv, out, currentLine.intValue());
+      write(mv, out, file, currentLine.intValue());
       br.close();
     } catch (IOException e) {
       throw new MustacheException("Failed to read", e);
     }
-    mv.eof(currentLine.intValue());
-    Mustache mustache = mv.mustache(file, sm, em);
-    return mustache;
+    mv.eof(file, currentLine.get());
+    return mv.mustache(new TemplateContext(sm, em, file, 0));
   }
 
   /**
    * Ignore empty strings and append to the previous code if it was also a write.
    */
-  private StringBuilder write(MustacheVisitor mv, StringBuilder out, int line) {
+  private StringBuilder write(MustacheVisitor mv, StringBuilder out, String file, int line) {
     String text = out.toString();
-    mv.write(text, line, null, null);
+    mv.write(new TemplateContext(null, null, file, line), text);
     return new StringBuilder();
   }
 

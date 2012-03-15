@@ -1,13 +1,11 @@
 package com.github.mustachejava.codes;
 
 import java.io.Writer;
-import java.util.Iterator;
-import java.util.List;
 
-import com.github.mustachejava.Code;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Iteration;
 import com.github.mustachejava.Mustache;
+import com.github.mustachejava.TemplateContext;
 
 /**
 * Created by IntelliJ IDEA.
@@ -19,8 +17,8 @@ import com.github.mustachejava.Mustache;
 public class NotIterableCode extends DefaultCode implements Iteration {
   private final String variable;
 
-  public NotIterableCode(DefaultMustacheFactory cf, Mustache mustache, String variable, String sm, String em) {
-    super(cf.getObjectHandler(), mustache, variable, "^", sm, em);
+  public NotIterableCode(TemplateContext templateContext, DefaultMustacheFactory cf, Mustache mustache, String variable) {
+    super(templateContext, cf.getObjectHandler(), mustache, variable, "^");
     this.variable = variable;
   }
 

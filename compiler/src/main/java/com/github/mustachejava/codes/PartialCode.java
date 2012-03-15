@@ -8,6 +8,7 @@ import com.github.mustachejava.Code;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.LatchedWriter;
 
 public class PartialCode extends DefaultCode {
@@ -17,18 +18,18 @@ public class PartialCode extends DefaultCode {
   private DefaultMustacheFactory cf;
   private final ExecutorService les;
 
-  protected PartialCode(DefaultMustacheFactory cf, Mustache mustache, String type, String variable, String file, String sm, String em) {
-    super(cf.getObjectHandler(), mustache, variable, type, sm, em);
+  protected PartialCode(TemplateContext tc, DefaultMustacheFactory cf, Mustache mustache, String type, String variable) {
+    super(tc, cf.getObjectHandler(), mustache, variable, type);
     this.cf = cf;
     this.variable = variable;
     // Use the  name of the parent to get the name of the partial
-    int index = file.lastIndexOf(".");
-    extension = index == -1 ? "" : file.substring(index);
+    int index = tc.file().lastIndexOf(".");
+    extension = index == -1 ? "" : tc.file().substring(index);
     les = cf.getExecutorService();
   }
 
-  public PartialCode(DefaultMustacheFactory cf, String variable, String file, String sm, String em) {
-    this(cf, null, ">", variable, file, sm, em);
+  public PartialCode(TemplateContext tc, DefaultMustacheFactory cf, String variable) {
+    this(tc, cf, null, ">", variable);
   }
 
   @Override
