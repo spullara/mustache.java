@@ -15,7 +15,8 @@ class ObjectHandlerTest {
     mf.setObjectHandler(new TwitterObjectHandler)
     mf.setExecutorService(pool)
     val m = mf.compile(
-      new StringReader("{{#list}}{{optionalHello}}, {{futureWorld}}!\n{{/list}}"),
+      new StringReader("{{#list}}{{optionalHello}}, {{futureWorld}}!" +
+              "{{#test}}?{{/test}}{{^test}}!{{/test}}\n{{/list}}"),
       "helloworld"
     )
     val sw = new StringWriter
@@ -25,15 +26,17 @@ class ObjectHandlerTest {
         val futureWorld = futurePool {
           "world"
         }
+        val test = true
       }, new {
         val optionalHello = Some("Goodbye")
         val futureWorld = futurePool {
           "thanks for all the fish"
         }
+        val test = false
       })
     })
     // You must use close if you use concurrent latched writers
     writer.close()
-    Assert.assertEquals("Hello, world!\nGoodbye, thanks for all the fish!\n", sw.toString)
+    Assert.assertEquals("Hello, world!?\nGoodbye, thanks for all the fish!!\n", sw.toString)
   }
 }
