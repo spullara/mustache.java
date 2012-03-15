@@ -1,0 +1,39 @@
+package com.twitter.mustache
+
+import com.twitter.util.FuturePool
+import java.util.concurrent.Executors
+import com.github.mustachejava.DefaultMustacheFactory
+import java.io.{StringWriter, StringReader}
+import org.junit.{Assert, Test}
+
+class ObjectHandlerTest {
+  @Test
+  def testHandler() {
+    val pool = Executors.newCachedThreadPool()
+    val futurePool = FuturePool(pool)
+    val mf = new DefaultMustacheFactory()
+    mf.setObjectHandler(new TwitterObjectHandler)
+    mf.setExecutorService(pool)
+    val m = mf.compile(
+      new StringReader("{{#list}}{{optionalHello}}, {{futureWorld}}!\n{{/list}}"),
+      "helloworld"
+    )
+    val sw = new StringWriter
+    val writer = m.execute(sw, new {
+      val list = Seq(new {
+        val optionalHello = Some("Hello")
+        val futureWorld = futurePool {
+          "world"
+        }
+      }, new {
+        val optionalHello = Some("Goodbye")
+        val futureWorld = futurePool {
+          "thanks for all the fish"
+        }
+      })
+    })
+    // You must use close if you use concurrent latched writers
+    writer.close()
+    Assert.assertEquals("Hello, world!\nGoodbye, thanks for all the fish!\n", sw.toString)
+  }
+}
