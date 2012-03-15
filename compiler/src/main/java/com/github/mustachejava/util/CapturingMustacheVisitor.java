@@ -1,13 +1,11 @@
 package com.github.mustachejava.util;
 
-import java.io.File;
 import java.io.Writer;
-import java.util.List;
 
-import com.github.mustachejava.Code;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.DefaultMustacheVisitor;
 import com.github.mustachejava.Mustache;
+import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.codes.IterableCode;
 import com.github.mustachejava.codes.NotIterableCode;
 import com.github.mustachejava.codes.ValueCode;
@@ -37,8 +35,8 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
   }
 
   @Override
-  public void value(String variable, boolean encoded, int line, String sm, String em) {
-    list.add(new ValueCode(cf, variable, sm, em, encoded, line) {
+  public void value(TemplateContext tc, String variable, boolean encoded) {
+    list.add(new ValueCode(tc, cf, variable, encoded) {
       @Override
       public Object get(String name, Object[] scopes) {
         Object o = super.get(name, scopes);
@@ -51,8 +49,8 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
   }
 
   @Override
-  public void iterable(String variable, Mustache mustache, String file, int start, String sm, String em) {
-    list.add(new IterableCode(cf, mustache, variable, sm, em, file) {
+  public void iterable(TemplateContext tc, String variable, Mustache mustache) {
+    list.add(new IterableCode(tc, cf, mustache, variable) {
 
       @Override
       public Writer execute(Writer writer, Object[] scopes) {
@@ -79,8 +77,8 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
   }
 
   @Override
-  public void notIterable(String variable, Mustache mustache, String file, int start, String sm, String em) {
-    list.add(new NotIterableCode(cf, mustache, variable, sm, em) {
+  public void notIterable(TemplateContext tc, String variable, Mustache mustache) {
+    list.add(new NotIterableCode(tc, cf, mustache, variable) {
       String name;
       Object value;
       boolean called;

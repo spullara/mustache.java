@@ -3,6 +3,7 @@ package com.github.mustachejava.codes;
 import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+import com.github.mustachejava.TemplateContext;
 
 import java.io.Writer;
 
@@ -12,8 +13,8 @@ import java.io.Writer;
 public class DefaultMustache extends DefaultCode implements Mustache {
   private Code[] codes;
 
-  public DefaultMustache(MustacheFactory cf, Code[] codes, String name, String sm, String em) {
-    super(cf.getObjectHandler(), null, name, null, sm, em);
+  public DefaultMustache(TemplateContext tc, MustacheFactory cf, Code[] codes, String name) {
+    super(tc, cf.getObjectHandler(), null, name, null);
     this.codes = codes;
   }
 

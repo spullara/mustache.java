@@ -1,25 +1,21 @@
 package com.github.mustachejavabenchmarks;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import junit.framework.TestCase;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.MappingJsonFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Tests for the compiler.
@@ -29,7 +25,7 @@ import org.codehaus.jackson.map.MappingJsonFactory;
  * Time: 10:23:54 AM
  */
 public class JsonInterpreterTest extends TestCase {
-  private static final int TIME = 10;
+  private static final int TIME = 2;
 
   private File root;
 
@@ -60,6 +56,22 @@ public class JsonInterpreterTest extends TestCase {
     final Object parent = getScope();
 
     singlethreaded(parse, parent);
+  }
+
+  public void testCompiler() throws MustacheException, IOException, InterruptedException {
+    for (int i = 0; i < 3; i++) {
+      {
+        long start = System.currentTimeMillis();
+        int total = 0;
+        while (true) {
+          DefaultMustacheFactory mb = new DefaultMustacheFactory(root);
+          final Mustache parse = mb.compile("timeline.mustache");
+          total++;
+          if (System.currentTimeMillis() - start > TIME * 1000) break;
+        }
+        System.out.println("Compilations: " + total / TIME + "/s");
+      }
+    }
   }
 
   public void testMultithreaded() throws IOException, InterruptedException {
@@ -111,9 +123,7 @@ public class JsonInterpreterTest extends TestCase {
 
   private Mustache getMustache() {
     DefaultMustacheFactory mb = new DefaultMustacheFactory(root);
-    final Mustache parse = mb.compile("timeline.mustache");
-    mb.compile("timeline.mustache");
-    return parse;
+    return mb.compile("timeline.mustache");
   }
 
   private void singlethreaded(Mustache parse, Object parent) {
@@ -122,6 +132,7 @@ public class JsonInterpreterTest extends TestCase {
     start = System.currentTimeMillis();
     StringWriter writer = new StringWriter();
     parse.execute(writer, parent);
+    writer.flush();
 
     start = System.currentTimeMillis();
     for (int i = 0; i < 500; i++) {
@@ -141,7 +152,7 @@ public class JsonInterpreterTest extends TestCase {
     }
     System.out.println((System.currentTimeMillis() - start));
 
-    System.out.println("timeline.html evaluations per millisecond:");
+    System.out.println("timeline.html evaluations:");
     for (int i = 0; i < 2; i++) {
       {
         start = System.currentTimeMillis();

@@ -1,17 +1,12 @@
 package com.github.mustachejavabenchmarks;
 
+import com.github.mustachejava.*;
+import junit.framework.TestCase;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.concurrent.Executors;
-
-import com.github.mustachejava.ComplexObject;
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.MustacheFactory;
-import com.github.mustachejava.ParallelComplexObject;
-import junit.framework.TestCase;
 
 /**
  * Compare compilation with interpreter.
@@ -28,6 +23,23 @@ public class BenchmarkTest extends TestCase {
     super.setUp();
     File file = new File("src/test/resources");
     root = new File(file, "simple.html").exists() ? file : new File("../src/test/resources");
+  }
+
+  public void testCompiler() {
+    System.out.println("complex.html compilations per second:");
+    for (int i = 0; i < 3; i++) {
+      {
+        long start = System.currentTimeMillis();
+        int total = 0;
+        while (true) {
+          DefaultMustacheFactory cf = new DefaultMustacheFactory();
+          Mustache m = cf.compile("complex.html");
+          total++;
+          if (System.currentTimeMillis() - start > TIME) break;
+        }
+        System.out.println("Result: " + total * 1000 / TIME);
+      }
+    }
   }
 
   public void testComplex() throws MustacheException, IOException {

@@ -9,6 +9,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.MustacheFactory;
+import com.github.mustachejava.TemplateContext;
 
 /**
  * Extending a template.
@@ -21,8 +22,8 @@ public class ExtendCode extends PartialCode {
 
   private MustacheFactory mf;
 
-  public ExtendCode(DefaultMustacheFactory mf, Mustache codes, String name, String file, String sm, String em) throws MustacheException {
-    super(mf, codes, "<", name, file, sm, em);
+  public ExtendCode(TemplateContext tc, DefaultMustacheFactory mf, Mustache codes, String name) throws MustacheException {
+    super(tc, mf, codes, "<", name);
     this.mf = mf;
   }
 

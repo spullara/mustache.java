@@ -14,6 +14,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheParser;
 import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.LatchedWriter;
 
 /**
@@ -22,16 +23,14 @@ import com.github.mustachejava.util.LatchedWriter;
 public class ValueCode extends DefaultCode {
   private final String variable;
   private final boolean encoded;
-  private final int line;
-  private DefaultMustacheFactory cf;
+  private final DefaultMustacheFactory cf;
   private ExecutorService les;
 
-  public ValueCode(DefaultMustacheFactory cf, String variable, String sm, String em, boolean encoded, int line) {
-    super(cf.getObjectHandler(), null, variable, "", sm, em);
+  public ValueCode(TemplateContext tc, DefaultMustacheFactory cf, String variable, boolean encoded) {
+    super(tc, cf.getObjectHandler(), null, variable, "");
     this.cf = cf;
     this.variable = variable;
     this.encoded = encoded;
-    this.line = line;
     les = cf.getExecutorService();
   }
 
@@ -48,7 +47,7 @@ public class ValueCode extends DefaultCode {
           execute(writer, object.toString());
         }
       } catch (Exception e) {
-        throw new MustacheException("Failed to get value for " + variable + " at line " + line, e);
+        throw new MustacheException("Failed to get value for " + variable + " at line " + tc.file() + ":" + tc.line(), e);
       }
     }
     return super.execute(writer, scopes);

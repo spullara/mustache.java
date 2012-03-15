@@ -9,9 +9,9 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>compiler-indy</artifactId>
+  <artifactId>indy</artifactId>
 
-  <name>compiler-indy</name>
+  <name>indy</name>
   <description>Implementation of mustache.js for Java</description>
   <url>http://github.com/spullara/mustache.java</url>
 
