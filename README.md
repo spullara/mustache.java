@@ -35,7 +35,16 @@ Performance:
 - Compiles 4000+ timeline.html templates per second per core
 - Renders 5000+ of 50 tweet timelines per second per core on 2011 Macbook Pro / MacPro hardware
 
-Maven dependency information:
+Maven dependency information (SNAPSHOTs are in the Sonatype repository, releases will appear
+in the main Maven repository soon after release):
+
+
+    <repositories>
+      <repository>
+        <id>Sonatype Snapshots</id>
+        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      </repository>
+    </repositories>
 
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
