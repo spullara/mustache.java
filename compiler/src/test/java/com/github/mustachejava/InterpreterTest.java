@@ -44,6 +44,36 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
+  public void testNestedLatches() throws IOException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("latchedtest.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      Callable<Object> nest = new Callable<Object>() {
+        @Override
+        public Object call() throws Exception {
+          Thread.sleep(300);
+          return "How";
+        }
+      };
+      Callable<Object> nested = new Callable<Object>() {
+        @Override
+        public Object call() throws Exception {
+          Thread.sleep(200);
+          return "are";
+        }
+      };
+      Callable<Object> nestest = new Callable<Object>() {
+        @Override
+        public Object call() throws Exception {
+          Thread.sleep(100);
+          return "you?";
+        }
+      };
+    });
+    assertEquals(getContents(root, "latchedtest.txt"), sw.toString());
+  }
+
   public void testBrokenSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
     try {
       MustacheFactory c = init();
