@@ -9,7 +9,6 @@
   <modules>
     <module>compiler</module>
     <module>handlebar</module>
-    <module>example</module>
   </modules>
   <packaging>pom</packaging>
 
