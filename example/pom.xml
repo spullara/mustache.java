@@ -4,13 +4,13 @@
 
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>example</artifactId>
-  <version>0.7.0</version>
+  <version>0.7.1-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>compiler</artifactId>
-      <version>0.7.0</version>
+      <version>0.7.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
