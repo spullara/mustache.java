@@ -9,6 +9,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.MappingJsonFactory;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +64,16 @@ public class InterpreterTest extends TestCase {
     } catch (Exception e) {
       // success
     }
+  }
+
+  public void testIsNotEmpty() throws IOException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("isempty.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      List people = Arrays.asList("Test");
+    });
+    assertEquals(getContents(root, "isempty.txt"), sw.toString());
   }
 
   public void testSecurity() throws MustacheException, IOException, ExecutionException, InterruptedException {
