@@ -10,8 +10,8 @@ import java.lang.reflect.{Method, Field}
 class TwitterObjectHandler extends ReflectionObjectHandler {
 
   // Allow any method or field
-  protected override def checkMethod(member: Method) {}
-  protected override def checkField(member: Field) {}
+  override def checkMethod(member: Method) {}
+  override def checkField(member: Field) {}
 
   override def find(name: String, scopes: Array[ AnyRef ]) = {
     val wrapper = super.find(name, scopes)
