@@ -144,11 +144,15 @@ public class ReflectionObjectHandler implements ObjectHandler {
       }
       throw nsme;
     }
+    checkMethod(member);
+    member.setAccessible(true);
+    return createWrapper(scopeIndex, wrappers, guard, member, null);
+  }
+
+  protected void checkMethod(Method member) throws NoSuchMethodException {
     if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
       throw new NoSuchMethodException("Only public, protected and package members allowed");
     }
-    member.setAccessible(true);
-    return createWrapper(scopeIndex, wrappers, guard, member, null);
   }
 
   protected Wrapper getField(int scopeIndex, Wrapper[] wrappers, Class[] guard, String name, Class aClass) throws NoSuchFieldException {
@@ -162,11 +166,15 @@ public class ReflectionObjectHandler implements ObjectHandler {
       }
       throw nsfe;
     }
+    checkField(member);
+    member.setAccessible(true);
+    return createWrapper(scopeIndex, wrappers, guard, member, null);
+  }
+
+  protected void checkField(Field member) throws NoSuchFieldException {
     if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
       throw new NoSuchFieldException("Only public, protected and package members allowed");
     }
-    member.setAccessible(true);
-    return createWrapper(scopeIndex, wrappers, guard, member, null);
   }
 
   protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, AccessibleObject member, Object[] arguments) {

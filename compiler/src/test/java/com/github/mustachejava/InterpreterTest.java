@@ -9,6 +9,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.MappingJsonFactory;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +45,36 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
+  public void testNestedLatches() throws IOException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("latchedtest.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      Callable<Object> nest = new Callable<Object>() {
+        @Override
+        public Object call() throws Exception {
+          Thread.sleep(300);
+          return "How";
+        }
+      };
+      Callable<Object> nested = new Callable<Object>() {
+        @Override
+        public Object call() throws Exception {
+          Thread.sleep(200);
+          return "are";
+        }
+      };
+      Callable<Object> nestest = new Callable<Object>() {
+        @Override
+        public Object call() throws Exception {
+          Thread.sleep(100);
+          return "you?";
+        }
+      };
+    });
+    assertEquals(getContents(root, "latchedtest.txt"), sw.toString());
+  }
+
   public void testBrokenSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
     try {
       MustacheFactory c = init();
@@ -63,6 +94,16 @@ public class InterpreterTest extends TestCase {
     } catch (Exception e) {
       // success
     }
+  }
+
+  public void testIsNotEmpty() throws IOException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("isempty.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      List people = Arrays.asList("Test");
+    });
+    assertEquals(getContents(root, "isempty.txt"), sw.toString());
   }
 
   public void testSecurity() throws MustacheException, IOException, ExecutionException, InterruptedException {

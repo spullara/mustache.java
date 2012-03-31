@@ -17,12 +17,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 /**
-* Created by IntelliJ IDEA.
-* User: spullara
-* Date: 1/9/12
-* Time: 2:57 PM
-* To change this template use File | Settings | File Templates.
-*/
+ * Created by IntelliJ IDEA.
+ * User: spullara
+ * Date: 1/9/12
+ * Time: 2:57 PM
+ * To change this template use File | Settings | File Templates.
+ */
 public class IterableCode extends DefaultCode implements Iteration {
 
   private final String variable;

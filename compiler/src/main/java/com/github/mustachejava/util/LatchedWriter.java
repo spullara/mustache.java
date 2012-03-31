@@ -33,31 +33,24 @@ public class LatchedWriter extends Writer {
   }
 
   // Call this when your processing is complete
-  public synchronized void done() {
+  public synchronized void done() throws IOException {
+    writer.append(buffer);
     latch.countDown();
   }
 
   // If you fail to complete, put an exception here
   public void failed(Throwable e) {
     this.e = e;
-    done();
+    latch.countDown();
   }
 
   @Override
   public synchronized void write(char[] cbuf, int off, int len) throws IOException {
     checkException();
     if (latch.getCount() == 0) {
-      checkWrite();
       writer.write(cbuf, off, len);
     } else {
       buffer.append(cbuf, off, len);
-    }
-  }
-
-  private void checkWrite() throws IOException {
-    if (!isWritten) {
-      isWritten = true;
-      writer.append(buffer);
     }
   }
 
@@ -76,7 +69,6 @@ public class LatchedWriter extends Writer {
     if (latch.getCount() == 0) {
       checkException();
       synchronized (this) {
-        checkWrite();
         writer.flush();
       }
     }

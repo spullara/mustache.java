@@ -3,30 +3,22 @@ package com.twitter.mustache
 import com.twitter.util.Future
 import java.io.Writer
 import com.github.mustachejava.reflect.ReflectionObjectHandler
-import com.github.mustachejava.util.Wrapper
 import com.github.mustachejava.Iteration
 import java.util.concurrent.Callable
+import java.lang.reflect.{Method, Field}
 
 class TwitterObjectHandler extends ReflectionObjectHandler {
-  val debug = "true" == System.getProperty("mustache.debug")
 
-  // Need to look at this in the context of latchedwriters
+  // Allow any method or field
+  override def checkMethod(member: Method) {}
+  override def checkField(member: Field) {}
+
   override def find(name: String, scopes: Array[ AnyRef ]) = {
     val wrapper = super.find(name, scopes)
     if (wrapper == null) {
       null
     } else {
-      if (debug) {
-        new Wrapper {
-          def call(scopes: Array[ AnyRef ]): AnyRef = {
-            val value = wrapper.call(scopes)
-            println("Value: " + name + " = '" + value + "'")
-            value
-          }
-        }
-      } else {
-        wrapper
-      }
+      wrapper
     }
   }
 
