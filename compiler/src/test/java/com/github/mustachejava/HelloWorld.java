@@ -5,9 +5,6 @@ import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.Writer;
 
-import com.github.mustachejava.reflect.ReflectionObjectHandler;
-import com.github.mustachejava.util.Wrapper;
-
 public class HelloWorld {
   //  String hello = "Hello";
   String world() {return "world";}
