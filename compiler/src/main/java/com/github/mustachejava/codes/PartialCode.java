@@ -10,10 +10,11 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.LatchedWriter;
+import scala.runtime.StringAdd;
 
 public class PartialCode extends DefaultCode {
   protected Mustache partial;
-  private final String variable;
+  protected final String variable;
   protected final String extension;
   private DefaultMustacheFactory cf;
   private final ExecutorService les;
@@ -49,7 +50,7 @@ public class PartialCode extends DefaultCode {
 
   @Override
   public synchronized void init() {
-    partial = cf.compile(variable + extension);
+    partial = cf.compile(buildFileName());
     if (partial == null) {
       throw new MustacheException("Failed to compile partial: " + variable);
     }
@@ -88,5 +89,14 @@ public class PartialCode extends DefaultCode {
   protected Writer execute(Writer writer, Object scope, Object[] scopes) {
     Object[] newscopes = addScope(scope, scopes);
     return appendText(partial.execute(writer, newscopes));
+  }
+
+  /**
+   * Builds the file name to be included by this partial tag. Default implementation ppends the tag contents with
+   * the current file's extension.
+   * @return The filename to be included by this partial tag
+   */
+  protected String buildFileName() {
+      return variable + extension;
   }
 }
