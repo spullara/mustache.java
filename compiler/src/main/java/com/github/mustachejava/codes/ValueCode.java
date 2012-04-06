@@ -8,7 +8,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import com.google.common.base.Function;
-import com.google.common.util.concurrent.ListeningExecutorService;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
@@ -25,6 +24,27 @@ public class ValueCode extends DefaultCode {
   private final boolean encoded;
   private final DefaultMustacheFactory cf;
   private ExecutorService les;
+
+  @Override
+  public void identity(Writer writer) {
+    try {
+      if (name != null) {
+        writer.write(tc.startChars());
+        if (!encoded) {
+          writer.write("{");
+        }
+        writer.write(type);
+        writer.write(name);
+        if (!encoded) {
+          writer.write("}");
+        }
+        writer.write(tc.endChars());
+      }
+      appendText(writer);
+    } catch (IOException e) {
+      throw new MustacheException(e);
+    }
+  }
 
   public ValueCode(TemplateContext tc, DefaultMustacheFactory cf, String variable, boolean encoded) {
     super(tc, cf.getObjectHandler(), null, variable, "");

@@ -31,7 +31,7 @@ class TwitterObjectHandler extends ReflectionObjectHandler {
       case f: Future[ _ ] => {
         new Callable[Any]() {
           def call() = {
-            f.get()
+            coerce(f.get().asInstanceOf[Object])
           }
         }
       }
