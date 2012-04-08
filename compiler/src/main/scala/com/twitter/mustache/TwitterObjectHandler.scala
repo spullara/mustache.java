@@ -45,7 +45,7 @@ class TwitterObjectHandler extends ReflectionObjectHandler {
         var newWriter = writer
         t map {
           next =>
-            newWriter = iteration.next(newWriter, next, scopes)
+            newWriter = iteration.next(newWriter, coerce(next), scopes)
         }
         newWriter
       }
