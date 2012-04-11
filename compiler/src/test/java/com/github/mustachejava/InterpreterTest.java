@@ -61,6 +61,7 @@ public class InterpreterTest extends TestCase {
         int taxed_value() {
           return (int) (value - (value * 0.4));
         }
+        String fred = "test";
       };
 
       Object in_ca = Arrays.asList(

@@ -11,6 +11,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.reflect.GuardedWrapper;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
@@ -115,7 +116,7 @@ public class DefaultCode implements Code {
     boolean notfound = false;
     wrapper = oh.find(name, scopes);
     if (wrapper == null) {
-      wrapper = Wrapper.NULL_WRAPPER;
+      wrapper = new GuardedWrapper(scopes);
       notfound = true;
       if (debug) {
         // Ugly but generally not interesting
