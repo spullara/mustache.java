@@ -221,6 +221,11 @@ public class SpecTest {
       return convert(value);
     }
 
+    @Override
+    public boolean containsKey(Object key) {
+      return test.has(key.toString());
+    }
+
     private Object convert(final JsonNode value) {
       if (value == null || value.isNull()) return null;
       if (value.isBoolean()) {

@@ -8,11 +8,14 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
+
+import com.google.common.base.Predicate;
 
 /**
  * Used for evaluating values at a callsite
  */
-public class ReflectionWrapper implements Wrapper {
+public class ReflectionWrapper extends GuardedWrapper {
   // Context
   protected int scopeIndex;
   protected Wrapper[] wrappers;
@@ -21,9 +24,9 @@ public class ReflectionWrapper implements Wrapper {
   protected final Method method;
   protected final Field field;
   protected final Object[] arguments;
-  protected final Class[] guard;
 
-  public ReflectionWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, AccessibleObject method, Object[] arguments) {
+  public ReflectionWrapper(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, AccessibleObject method, Object[] arguments) {
+    super(guard);
     this.wrappers = wrappers;
     if (method instanceof Field) {
       this.method = null;
@@ -33,7 +36,6 @@ public class ReflectionWrapper implements Wrapper {
       this.field = null;
     }
     this.arguments = arguments;
-    this.guard = guard;
     this.scopeIndex = scopeIndex;
   }
 
@@ -63,24 +65,11 @@ public class ReflectionWrapper implements Wrapper {
     Object scope = scopes[scopeIndex];
     // The value may be buried by . notation
     if (wrappers != null) {
-      for (int i = 0; i < wrappers.length; i++) {
-        scope = wrappers[i].call(new Object[] { scope });
+      for (Wrapper wrapper : wrappers) {
+        scope = wrapper.call(new Object[]{scope});
       }
     }
     return scope;
-  }
-
-  protected void guardCall(Object[] scopes) throws GuardException {
-    int length = scopes.length;
-    if (guard.length != length) {
-      throw new GuardException();
-    }
-    for (int j = 0; j < length; j++) {
-      Class guardClass = guard[j];
-      if (guardClass != null && !guardClass.isInstance(scopes[j])) {
-        throw new GuardException();
-      }
-    }
   }
 
   public Method getMethod() {

@@ -1,5 +1,14 @@
 package com.github.mustachejava.codes;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+
+import com.google.common.base.Function;
+
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Iteration;
 import com.github.mustachejava.Mustache;
@@ -7,14 +16,6 @@ import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.TemplateFunction;
 import com.github.mustachejava.util.LatchedWriter;
-import com.google.common.base.Function;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Created by IntelliJ IDEA.
@@ -38,17 +39,23 @@ public class IterableCode extends DefaultCode implements Iteration {
 
   @Override
   public Writer execute(Writer writer, final Object[] scopes) {
-    Object resolve = get(variable, scopes);
-    if (resolve != null) {
-      if (resolve instanceof Function) {
-        writer = handleFunction(writer, (Function) resolve, scopes);
-      } else if (resolve instanceof Callable) {
-        writer = handleCallable(writer, (Callable) resolve, scopes);
+    Object resolved = get(variable, scopes);
+    writer = handle(writer, resolved, scopes);
+    appendText(writer);
+    return writer;
+  }
+
+  private Writer handle(Writer writer, Object resolved, Object[] scopes) {
+    if (resolved != null) {
+      if (resolved instanceof Function) {
+        writer = handleFunction(writer, (Function) resolved, scopes);
+      } else if (resolved instanceof Callable) {
+        writer = handleCallable(writer, (Callable) resolved, scopes);
       } else {
-        writer = execute(writer, resolve, scopes);
+        writer = execute(writer, resolved, scopes);
       }
     }
-    return appendText(writer);
+    return writer;
   }
 
   protected Writer handleCallable(Writer writer, final Callable callable, final Object[] scopes) {
@@ -70,7 +77,7 @@ public class IterableCode extends DefaultCode implements Iteration {
         public void run() {
           try {
             Object call = callable.call();
-            execute(finalWriter, call, newScopes);
+            handle(finalWriter, call, newScopes);
             latchedWriter.done();
           } catch (Throwable e) {
             latchedWriter.failed(e);

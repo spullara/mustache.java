@@ -1,15 +1,11 @@
 package com.github.mustachejava;
 
-import com.github.mustachejavabenchmarks.JsonCapturer;
-import com.github.mustachejavabenchmarks.JsonInterpreterTest;
-import com.github.mustachejava.util.CapturingMustacheVisitor;
-import junit.framework.TestCase;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.MappingJsonFactory;
-
-import java.io.*;
-import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +13,14 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+
+import com.github.mustachejava.util.CapturingMustacheVisitor;
+import com.github.mustachejavabenchmarks.JsonCapturer;
+import com.github.mustachejavabenchmarks.JsonInterpreterTest;
+import junit.framework.TestCase;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.MappingJsonFactory;
 
 /**
  * Tests for the compiler.
@@ -43,6 +47,31 @@ public class InterpreterTest extends TestCase {
       boolean in_ca = true;
     });
     assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
+  public void testMultipleWrappers() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("simple.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      String name = "Chris";
+      int value = 10000;
+
+      Object o = new Object() {
+        int taxed_value() {
+          return (int) (value - (value * 0.4));
+        }
+        String fred = "test";
+      };
+
+      Object in_ca = Arrays.asList(
+              o, new Object() {
+                int taxed_value = (int) (value - (value * 0.2));
+              },
+              o
+      );
+    });
+    assertEquals(getContents(root, "simplerewrap.txt"), sw.toString());
   }
 
   public void testNestedLatches() throws IOException {
@@ -194,7 +223,7 @@ public class InterpreterTest extends TestCase {
     MustacheFactory c = new DefaultMustacheFactory(root) {
       @Override
       public MustacheVisitor createMustacheVisitor() {
-          return new CapturingMustacheVisitor(this, captured);
+        return new CapturingMustacheVisitor(this, captured);
       }
     };
     Mustache m = c.compile("complex.html");

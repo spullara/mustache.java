@@ -1,16 +1,22 @@
 package com.github.mustachejava.codes;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+
 import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.reflect.ClassGuard;
+import com.github.mustachejava.reflect.GuardedWrapper;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.util.logging.Logger;
 
 /**
  * Simplest possible code implementaion with some default shared behavior
@@ -36,7 +42,6 @@ public class DefaultCode implements Code {
   protected Logger logger = Logger.getLogger("mustache");
 
   // TODO: Recursion protection. Need better guard logic. But still fast.
-  protected boolean notfound = false;
   protected boolean returnThis = false;
 
   public DefaultCode() {
@@ -86,12 +91,13 @@ public class DefaultCode implements Code {
    * @return The value of the field or method
    */
   public Object get(String name, Object[] scopes) {
-    if (notfound) return null;
     if (returnThis) {
       return scopes[scopes.length - 1];
     }
     if (wrapper == null) {
-      if (getWrapper(name, scopes)) return null;
+      if (getWrapper(name, scopes)) {
+        return null;
+      }
     }
     try {
       return oh.coerce(wrapper.call(scopes));
@@ -102,14 +108,21 @@ public class DefaultCode implements Code {
   }
 
   private boolean getWrapper(String name, Object[] scopes) {
+    boolean notfound = false;
     wrapper = oh.find(name, scopes);
     if (wrapper == null) {
+      List<ClassGuard> guards = new ArrayList<ClassGuard>(scopes.length);
+      for (int i = 0; i < scopes.length; i++) {
+        guards.add(new ClassGuard(i, scopes[i]));
+      }
+      wrapper = new GuardedWrapper(guards);
       notfound = true;
       if (debug) {
         // Ugly but generally not interesting
         if (!(this instanceof PartialCode)) {
           StringBuilder sb = new StringBuilder("Failed to find: ");
-          sb.append(name).append(" (").append(tc.file()).append(":").append(tc.line()).append(") ").append("in");
+          sb.append(name).append(" (").append(tc.file()).append(":").append(tc.line()).append(
+                  ") ").append("in");
           for (Object scope : scopes) {
             if (scope != null) {
               sb.append(" ").append(scope.getClass().getSimpleName());
@@ -118,9 +131,8 @@ public class DefaultCode implements Code {
           logger.warning(sb.toString());
         }
       }
-      return true;
     }
-    return false;
+    return notfound;
   }
 
   @Override
