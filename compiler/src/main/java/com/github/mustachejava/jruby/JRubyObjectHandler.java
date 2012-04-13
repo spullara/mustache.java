@@ -1,11 +1,13 @@
 package com.github.mustachejava.jruby;
 
+import com.github.mustachejava.Iteration;
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.util.Wrapper;
 import org.jruby.RubyHash;
 import org.jruby.RubyObject;
 import org.jruby.RubySymbol;
 
+import java.io.Writer;
 import java.lang.reflect.Method;
 
 public class JRubyObjectHandler extends ReflectionObjectHandler {
