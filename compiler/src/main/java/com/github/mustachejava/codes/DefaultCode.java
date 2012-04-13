@@ -104,15 +104,7 @@ public class DefaultCode implements Code {
     }
   }
 
-  private Map<String, Wrapper> wrappers = new ConcurrentHashMap<String, Wrapper>();
-
   private boolean getWrapper(String name, Object[] scopes) {
-    String key = createKey(name, scopes);
-    Wrapper cached = wrappers.get(key);
-    if (cached != null) {
-      wrapper = cached;
-      return false;
-    }
     boolean notfound = false;
     wrapper = oh.find(name, scopes);
     if (wrapper == null) {
@@ -133,23 +125,7 @@ public class DefaultCode implements Code {
         }
       }
     }
-    wrappers.put(key, wrapper);
     return notfound;
-  }
-
-  private String createKey(String name, Object[] scopes) {
-    StringBuilder sb = new StringBuilder(name);
-    if (scopes != null) {
-      for (Object scope : scopes) {
-        if (scope == null) {
-          sb.append(":null");
-        } else {
-          sb.append(":");
-          sb.append(scope.getClass().getName());
-        }
-      }
-    }
-    return sb.toString();
   }
 
   @Override
