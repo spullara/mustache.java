@@ -6,9 +6,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nullable;
+
+import com.google.common.base.Predicate;
 
 import com.github.mustachejava.Iteration;
 import com.github.mustachejava.ObjectHandler;
@@ -35,21 +40,26 @@ public class ReflectionObjectHandler implements ObjectHandler {
   }
 
   @Override
-  public Wrapper find(String name, Object[] scopes) {
+  public Wrapper find(String name, final Object[] scopes) {
     Wrapper wrapper = null;
-    int length = scopes.length;
-    Class[] guard = createGuard(scopes);
+    final int length = scopes.length;
+    List<Predicate<Object[]>> guards = new ArrayList<Predicate<Object[]>>(scopes.length);
+    guards.add(new DepthGuard(length));
     NEXT:
     for (int i = length - 1; i >= 0; i--) {
       Object scope = scopes[i];
       if (scope == null) continue;
+      Predicate<Object[]> guard = new ClassGuard(i, scope);
+      guards.add(guard);
       List<Wrapper> wrappers = null;
       int dotIndex;
       String subname = name;
       while ((dotIndex = subname.indexOf('.')) != -1) {
-        String lookup = subname.substring(0, dotIndex);
+        final String lookup = subname.substring(0, dotIndex);
         subname = subname.substring(dotIndex + 1);
-        wrapper = findWrapper(0, null, new Class[]{scope.getClass()}, scope, lookup);
+        guards.add(new DotGuard(lookup, i, scope));
+        List<ClassGuard> classGuards = Arrays.asList(new ClassGuard(0, scope));
+        wrapper = findWrapper(0, null, classGuards, scope, lookup);
         if (wrapper != null) {
           if (wrappers == null) wrappers = new ArrayList<Wrapper>();
           wrappers.add(wrapper);
@@ -65,7 +75,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
       }
       Wrapper[] foundWrappers = wrappers == null ? null : wrappers.toArray(
               new Wrapper[wrappers.size()]);
-      Wrapper foundWrapper = findWrapper(i, foundWrappers, guard, scope, subname);
+      Wrapper foundWrapper = findWrapper(i, foundWrappers, guards, scope, subname);
       if (foundWrapper != null) {
         wrapper = foundWrapper;
         break;
@@ -79,19 +89,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return object;
   }
 
-  protected Class[] createGuard(Object[] scopes) {
-    int length = scopes.length;
-    Class[] guard = new Class[length];
-    for (int i = 0; i < length; i++) {
-      Object scope = scopes[i];
-      if (scope != null) {
-        guard[i] = scope.getClass();
-      }
-    }
-    return guard;
-  }
-
-  protected Wrapper findWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, Object scope, String name) {
+  protected Wrapper findWrapper(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, Object scope, String name) {
     if (scope == null) return null;
     if (scope instanceof Map) {
       Map map = (Map) scope;
@@ -133,7 +131,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return member;
   }
 
-  protected Wrapper getMethod(int scopeIndex, Wrapper[] wrappers, Class[] guard, String name, Class aClass, Class... params) throws NoSuchMethodException {
+  protected Wrapper getMethod(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, String name, Class aClass, Class... params) throws NoSuchMethodException {
     Method member;
     try {
       member = aClass.getDeclaredMethod(name, params);
@@ -155,7 +153,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
     }
   }
 
-  protected Wrapper getField(int scopeIndex, Wrapper[] wrappers, Class[] guard, String name, Class aClass) throws NoSuchFieldException {
+  protected Wrapper getField(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, String name, Class aClass) throws NoSuchFieldException {
     Field member;
     try {
       member = aClass.getDeclaredField(name);
@@ -177,7 +175,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
     }
   }
 
-  protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, AccessibleObject member, Object[] arguments) {
+  protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, AccessibleObject member, Object[] arguments) {
     return new ReflectionWrapper(scopeIndex, wrappers, guard, member, arguments);
   }
 
@@ -246,4 +244,62 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return writer;
   }
 
+  private static class DepthGuard implements Predicate<Object[]> {
+    private final int length;
+
+    public DepthGuard(int length) {
+      this.length = length;
+    }
+
+    @Override
+    public int hashCode() {
+      return length;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (o instanceof DepthGuard) {
+        DepthGuard depthGuard = (DepthGuard) o;
+        return length == depthGuard.length;
+      }
+      return false;
+    }
+
+    @Override
+    public boolean apply(@Nullable Object[] objects) {
+      return objects != null && length == objects.length;
+    }
+  }
+
+  private class DotGuard implements Predicate<Object[]> {
+
+    private final String lookup;
+    private final int scopeIndex;
+    private final Class classGuard;
+
+    public DotGuard(String lookup, int scopeIndex, Object classGuard) {
+      this.lookup = lookup;
+      this.scopeIndex = scopeIndex;
+      this.classGuard = classGuard.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+      return (lookup.hashCode() * 43 + scopeIndex) * 43 + classGuard.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (o instanceof DotGuard) {
+        DotGuard other = (DotGuard) o;
+        return scopeIndex == other.scopeIndex && lookup.equals(other.lookup) && classGuard.equals(other.classGuard);
+      }
+      return false;
+    }
+
+    @Override
+    public boolean apply(Object[] objects) {
+      return true;
+    }
+  }
 }

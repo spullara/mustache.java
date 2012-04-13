@@ -1,5 +1,9 @@
 package com.github.mustachejava.reflect;
 
+import java.util.List;
+
+import com.google.common.base.Predicate;
+
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
@@ -7,21 +11,10 @@ import com.github.mustachejava.util.Wrapper;
  * Wrapper that guards.
  */
 public class GuardedWrapper implements Wrapper {
-  protected final Class[] guard;
+  protected final List<? extends Predicate<Object[]>> guard;
 
-  public GuardedWrapper(Class[] guard) {
+  public GuardedWrapper(List<? extends Predicate<Object[]>> guard) {
     this.guard = guard;
-  }
-
-  public GuardedWrapper(Object[] scopes) {
-    int length = scopes.length;
-    guard = new Class[length];
-    for (int i = 0; i < length; i++) {
-      Object scope = scopes[i];
-      if (scope != null) {
-       guard[i] = scope.getClass();
-      }
-    }
   }
 
   @Override
@@ -31,13 +24,8 @@ public class GuardedWrapper implements Wrapper {
   }
 
   protected void guardCall(Object[] scopes) throws GuardException {
-    int length = scopes.length;
-    if (guard.length != length) {
-      throw new GuardException();
-    }
-    for (int j = 0; j < length; j++) {
-      Class guardClass = guard[j];
-      if (guardClass != null && !guardClass.isInstance(scopes[j])) {
+    for (Predicate<Object[]> predicate : guard) {
+      if (!predicate.apply(scopes)) {
         throw new GuardException();
       }
     }

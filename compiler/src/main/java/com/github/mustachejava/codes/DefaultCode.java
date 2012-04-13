@@ -2,6 +2,8 @@ package com.github.mustachejava.codes;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -11,6 +13,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.reflect.ClassGuard;
 import com.github.mustachejava.reflect.GuardedWrapper;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
@@ -108,7 +111,11 @@ public class DefaultCode implements Code {
     boolean notfound = false;
     wrapper = oh.find(name, scopes);
     if (wrapper == null) {
-      wrapper = new GuardedWrapper(scopes);
+      List<ClassGuard> guards = new ArrayList<ClassGuard>(scopes.length);
+      for (int i = 0; i < scopes.length; i++) {
+        guards.add(new ClassGuard(i, scopes[i]));
+      }
+      wrapper = new GuardedWrapper(guards);
       notfound = true;
       if (debug) {
         // Ugly but generally not interesting

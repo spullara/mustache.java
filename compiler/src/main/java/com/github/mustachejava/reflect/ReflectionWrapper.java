@@ -8,6 +8,9 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
+
+import com.google.common.base.Predicate;
 
 /**
  * Used for evaluating values at a callsite
@@ -22,7 +25,7 @@ public class ReflectionWrapper extends GuardedWrapper {
   protected final Field field;
   protected final Object[] arguments;
 
-  public ReflectionWrapper(int scopeIndex, Wrapper[] wrappers, Class[] guard, AccessibleObject method, Object[] arguments) {
+  public ReflectionWrapper(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, AccessibleObject method, Object[] arguments) {
     super(guard);
     this.wrappers = wrappers;
     if (method instanceof Field) {
