@@ -65,8 +65,8 @@ public class ReflectionWrapper extends GuardedWrapper {
     Object scope = scopes[scopeIndex];
     // The value may be buried by . notation
     if (wrappers != null) {
-      for (int i = 0; i < wrappers.length; i++) {
-        scope = wrappers[i].call(new Object[] { scope });
+      for (Wrapper wrapper : wrappers) {
+        scope = wrapper.call(new Object[]{scope});
       }
     }
     return scope;

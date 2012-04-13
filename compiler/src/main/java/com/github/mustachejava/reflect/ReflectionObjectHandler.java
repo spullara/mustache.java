@@ -6,12 +6,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.Nullable;
 
 import com.google.common.base.Predicate;
 
@@ -58,8 +55,9 @@ public class ReflectionObjectHandler implements ObjectHandler {
         final String lookup = subname.substring(0, dotIndex);
         subname = subname.substring(dotIndex + 1);
         guards.add(new DotGuard(lookup, i, scope));
-        List<ClassGuard> classGuards = Arrays.asList(new ClassGuard(0, scope));
-        wrapper = findWrapper(0, null, classGuards, scope, lookup);
+        List<Predicate<Object[]>> wrapperGuard = new ArrayList<Predicate<Object[]>>(1);
+        wrapperGuard.add(new ClassGuard(0, scope));
+        wrapper = findWrapper(0, null, wrapperGuard, scope, lookup);
         if (wrapper != null) {
           if (wrappers == null) wrappers = new ArrayList<Wrapper>();
           wrappers.add(wrapper);
@@ -89,38 +87,40 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return object;
   }
 
-  protected Wrapper findWrapper(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, Object scope, String name) {
+  protected Wrapper findWrapper(final int scopeIndex, Wrapper[] wrappers, List<Predicate<Object[]>> guards, Object scope, final String name) {
     if (scope == null) return null;
     if (scope instanceof Map) {
       Map map = (Map) scope;
       if (map.get(name) == null) {
+        guards.add(new MapGuard(scopeIndex, name, false, wrappers));
         return null;
       } else {
-        return createWrapper(scopeIndex, wrappers, guard, MAP_METHOD, new Object[]{name});
+        guards.add(new MapGuard(scopeIndex, name, true, wrappers));
+        return createWrapper(scopeIndex, wrappers, guards, MAP_METHOD, new Object[]{name});
       }
     }
     Class aClass = scope.getClass();
     // Don't overload methods in your contexts
     Wrapper member = null;
     try {
-      member = getField(scopeIndex, wrappers, guard, name, aClass);
+      member = getField(scopeIndex, wrappers, guards, name, aClass);
     } catch (NoSuchFieldException e) {
       // Not set
     }
     if (member == null) {
       try {
-        member = getMethod(scopeIndex, wrappers, guard, name, aClass);
+        member = getMethod(scopeIndex, wrappers, guards, name, aClass);
       } catch (NoSuchMethodException e) {
         try {
-          member = getMethod(scopeIndex, wrappers, guard, name, aClass, List.class);
+          member = getMethod(scopeIndex, wrappers, guards, name, aClass, List.class);
         } catch (NoSuchMethodException e1) {
           String propertyname = name.substring(0, 1).toUpperCase() +
                   (name.length() > 1 ? name.substring(1) : "");
           try {
-            member = getMethod(scopeIndex, wrappers, guard, "get" + propertyname, aClass);
+            member = getMethod(scopeIndex, wrappers, guards, "get" + propertyname, aClass);
           } catch (NoSuchMethodException e2) {
             try {
-              member = getMethod(scopeIndex, wrappers, guard, "is" + propertyname, aClass);
+              member = getMethod(scopeIndex, wrappers, guards, "is" + propertyname, aClass);
             } catch (NoSuchMethodException e3) {
               // Nothing to be done
             }
@@ -244,62 +244,4 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return writer;
   }
 
-  private static class DepthGuard implements Predicate<Object[]> {
-    private final int length;
-
-    public DepthGuard(int length) {
-      this.length = length;
-    }
-
-    @Override
-    public int hashCode() {
-      return length;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (o instanceof DepthGuard) {
-        DepthGuard depthGuard = (DepthGuard) o;
-        return length == depthGuard.length;
-      }
-      return false;
-    }
-
-    @Override
-    public boolean apply(@Nullable Object[] objects) {
-      return objects != null && length == objects.length;
-    }
-  }
-
-  private class DotGuard implements Predicate<Object[]> {
-
-    private final String lookup;
-    private final int scopeIndex;
-    private final Class classGuard;
-
-    public DotGuard(String lookup, int scopeIndex, Object classGuard) {
-      this.lookup = lookup;
-      this.scopeIndex = scopeIndex;
-      this.classGuard = classGuard.getClass();
-    }
-
-    @Override
-    public int hashCode() {
-      return (lookup.hashCode() * 43 + scopeIndex) * 43 + classGuard.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (o instanceof DotGuard) {
-        DotGuard other = (DotGuard) o;
-        return scopeIndex == other.scopeIndex && lookup.equals(other.lookup) && classGuard.equals(other.classGuard);
-      }
-      return false;
-    }
-
-    @Override
-    public boolean apply(Object[] objects) {
-      return true;
-    }
-  }
 }
