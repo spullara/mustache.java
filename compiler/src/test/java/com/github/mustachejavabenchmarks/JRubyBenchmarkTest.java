@@ -8,8 +8,10 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import com.github.mustachejava.ComplexObject;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.jruby.JRubyObjectHandler;
 import org.jruby.embed.ScriptingContainer;
 import org.junit.BeforeClass;
@@ -18,19 +20,51 @@ import org.junit.Test;
 import static junit.framework.Assert.assertEquals;
 
 public class JRubyBenchmarkTest {
+  private static final int TIME = 2000;
   private static File root;
 
   @Test
   public void testComplex() throws IOException {
-    ScriptingContainer sc = new ScriptingContainer();
-    Object context = sc.runScriptlet(JRubyBenchmarkTest.class.getResourceAsStream("complex.rb"), "complex.rb");
+    Object context = makeComplex();
     DefaultMustacheFactory mf = new DefaultMustacheFactory(root);
     mf.setObjectHandler(new JRubyObjectHandler());
     Mustache m = mf.compile("complex.html");
+    Writer writer = complextest(m, context);
+    assertEquals(getContents(root, "complex.txt"), writer.toString());
+  }
+
+  private Object makeComplex() {
+    ScriptingContainer sc = new ScriptingContainer();
+    return sc.runScriptlet(JRubyBenchmarkTest.class.getResourceAsStream("complex.rb"), "complex.rb");
+  }
+
+  @Test
+  public void testComplexBench() throws MustacheException, IOException {
+    System.out.println("complex.html evaluations per millisecond:");
+    for (int i = 0; i < 3; i++) {
+      {
+        DefaultMustacheFactory cf = new DefaultMustacheFactory();
+        cf.setObjectHandler(new JRubyObjectHandler());
+        Mustache m = cf.compile("complex.html");
+        Object context = makeComplex();
+        assertEquals(getContents(root, "complex.txt"), complextest(m, context).toString());
+        long start = System.currentTimeMillis();
+        int total = 0;
+        while (true) {
+          complextest(m, context);
+          total++;
+          if (System.currentTimeMillis() - start > TIME) break;
+        }
+        System.out.println("Serial: " + total / TIME);
+      }
+    }
+  }
+
+  private Writer complextest(Mustache m, Object context) throws IOException {
     Writer writer = new StringWriter();
     writer = m.execute(writer, context);
     writer.close();
-    assertEquals(getContents(root, "complex.txt"), writer.toString());
+    return writer;
   }
 
   protected String getContents(File root, String file) throws IOException {
