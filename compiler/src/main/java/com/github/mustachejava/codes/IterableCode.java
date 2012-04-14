@@ -1,14 +1,5 @@
 package com.github.mustachejava.codes;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-
-import com.google.common.base.Function;
-
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Iteration;
 import com.github.mustachejava.Mustache;
@@ -16,6 +7,14 @@ import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.TemplateFunction;
 import com.github.mustachejava.util.LatchedWriter;
+import com.google.common.base.Function;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Created by IntelliJ IDEA.
@@ -77,7 +76,7 @@ public class IterableCode extends DefaultCode implements Iteration {
         public void run() {
           try {
             Object call = callable.call();
-            handle(finalWriter, call, newScopes);
+            handle(finalWriter, call, newScopes).close();
             latchedWriter.done();
           } catch (Throwable e) {
             latchedWriter.failed(e);

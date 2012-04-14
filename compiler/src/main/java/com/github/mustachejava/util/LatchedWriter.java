@@ -19,12 +19,6 @@ public class LatchedWriter extends Writer {
   // The underlying writer
   private final Writer writer;
 
-  // true when we have written the buffer to the underlying writer
-  private boolean isWritten;
-
-  // true when we have flushed and closed the underlying writer
-  private boolean isClosed;
-
   // This is set when the latch holder fails
   private volatile Throwable e;
 
@@ -77,10 +71,6 @@ public class LatchedWriter extends Writer {
   @Override
   public void close() throws IOException {
     checkException();
-    synchronized (this) {
-      if (isClosed) throw new IOException("Alread closed");
-      else isClosed = true;
-    }
     try {
       latch.await();
     } catch (InterruptedException e1) {

@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -75,14 +76,18 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testNestedLatchesIterable() throws IOException {
-    MustacheFactory c = new DefaultMustacheFactory(root);
+    DefaultMustacheFactory c = new DefaultMustacheFactory(root);
+    c.setExecutorService(Executors.newCachedThreadPool());
     Mustache m = c.compile("latchedtestiterable.html");
     StringWriter sw = new StringWriter();
+    final StringBuffer sb = new StringBuffer();
+
     m.execute(sw, new Object() { Iterable list = Arrays.asList(
       new Callable<Object>() {
         @Override
         public Object call() throws Exception {
           Thread.sleep(300);
+          sb.append("How");
           return "How";
         }
       },
@@ -90,6 +95,7 @@ public class InterpreterTest extends TestCase {
         @Override
         public Object call() throws Exception {
           Thread.sleep(200);
+          sb.append("are");
           return "are";
         }
       },
@@ -97,18 +103,21 @@ public class InterpreterTest extends TestCase {
         @Override
         public Object call() throws Exception {
           Thread.sleep(100);
+          sb.append("you?");
           return "you?";
         }
       }
-    );});
+    );}).close();
     assertEquals(getContents(root, "latchedtest.txt"), sw.toString());
+    assertEquals("you?areHow", sb.toString());
   }
 
   public void testNestedLatches() throws IOException {
-    MustacheFactory c = new DefaultMustacheFactory(root);
+    DefaultMustacheFactory c = new DefaultMustacheFactory(root);
+    c.setExecutorService(Executors.newCachedThreadPool());
     Mustache m = c.compile("latchedtest.html");
     StringWriter sw = new StringWriter();
-    m.execute(sw, new Object() {
+    Writer execute = m.execute(sw, new Object() {
       Callable<Object> nest = new Callable<Object>() {
         @Override
         public Object call() throws Exception {
@@ -131,8 +140,11 @@ public class InterpreterTest extends TestCase {
         }
       };
     });
-    assertEquals(getContents(root, "latchedtest.txt"), sw.toString());
+    execute.close();
+
+    assertEquals("How\nare\nyou?\n", sw.toString());
   }
+
   public void testBrokenSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
     try {
       MustacheFactory c = init();
