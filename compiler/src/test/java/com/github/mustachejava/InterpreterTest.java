@@ -1,5 +1,13 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.util.CapturingMustacheVisitor;
+import com.github.mustachejavabenchmarks.JsonCapturer;
+import com.github.mustachejavabenchmarks.JsonInterpreterTest;
+import junit.framework.TestCase;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.MappingJsonFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,14 +21,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-
-import com.github.mustachejava.util.CapturingMustacheVisitor;
-import com.github.mustachejavabenchmarks.JsonCapturer;
-import com.github.mustachejavabenchmarks.JsonInterpreterTest;
-import junit.framework.TestCase;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.MappingJsonFactory;
 
 /**
  * Tests for the compiler.
@@ -74,6 +74,36 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simplerewrap.txt"), sw.toString());
   }
 
+  public void testNestedLatchesIterable() throws IOException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("latchedtestiterable.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() { Iterable list = Arrays.asList(
+      new Callable<Object>() {
+        @Override
+        public Object call() throws Exception {
+          Thread.sleep(300);
+          return "How";
+        }
+      },
+      new Callable<Object>() {
+        @Override
+        public Object call() throws Exception {
+          Thread.sleep(200);
+          return "are";
+        }
+      },
+      new Callable<Object>() {
+        @Override
+        public Object call() throws Exception {
+          Thread.sleep(100);
+          return "you?";
+        }
+      }
+    );});
+    assertEquals(getContents(root, "latchedtest.txt"), sw.toString());
+  }
+
   public void testNestedLatches() throws IOException {
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("latchedtest.html");
@@ -103,7 +133,6 @@ public class InterpreterTest extends TestCase {
     });
     assertEquals(getContents(root, "latchedtest.txt"), sw.toString());
   }
-
   public void testBrokenSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
     try {
       MustacheFactory c = init();

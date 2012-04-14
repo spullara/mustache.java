@@ -1,11 +1,9 @@
 package com.github.mustachejava.reflect;
 
-import java.util.Map;
-
+import com.github.mustachejava.util.Wrapper;
 import com.google.common.base.Predicate;
 
-import com.github.mustachejava.util.GuardException;
-import com.github.mustachejava.util.Wrapper;
+import java.util.Map;
 
 /**
 * Created with IntelliJ IDEA.
