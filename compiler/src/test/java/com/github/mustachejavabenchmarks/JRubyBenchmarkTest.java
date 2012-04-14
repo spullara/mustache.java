@@ -55,7 +55,21 @@ public class JRubyBenchmarkTest {
           total++;
           if (System.currentTimeMillis() - start > TIME) break;
         }
-        System.out.println("Serial: " + total / TIME);
+        System.out.println("Ruby: " + total / TIME);
+      }
+      {
+        DefaultMustacheFactory cf = new DefaultMustacheFactory();
+        Mustache m = cf.compile("complex.html");
+        Object context = new ComplexObject();
+        assertEquals(getContents(root, "complex.txt"), complextest(m, context).toString());
+        long start = System.currentTimeMillis();
+        int total = 0;
+        while (true) {
+          complextest(m, context);
+          total++;
+          if (System.currentTimeMillis() - start > TIME) break;
+        }
+        System.out.println("Java: " + total / TIME);
       }
     }
   }
