@@ -50,6 +50,14 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
             }
           });
           return createWrapper(scopeIndex, wrappers, guards, MAP_METHOD, new Object[]{rs});
+        } else {
+          guards.add(new Predicate<Object[]>() {
+            @Override
+            public boolean apply(@Nullable Object[] input) {
+              assert input != null;
+              return !((RubyHash)input[scopeIndex]).containsKey(rs);
+            }
+          });
         }
       }
       if (scope instanceof RubyObject) {
