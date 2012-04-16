@@ -35,7 +35,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
   }
 
   @Override
-  protected Wrapper findWrapper(final int scopeIndex, Wrapper[] wrappers, List<Predicate<Object[]>> guards, Object scope, String name) {
+  protected Wrapper findWrapper(final int scopeIndex, final Wrapper[] wrappers, final List<Predicate<Object[]>> guards, final Object scope, final String name) {
     Wrapper wrapper = super.findWrapper(scopeIndex, wrappers, guards, scope, name);
     if (wrapper == null) {
       if (scope instanceof RubyHash) {
@@ -55,7 +55,22 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
       if (scope instanceof RubyObject) {
         RubyObject ro = (RubyObject) scope;
         if (ro.respondsTo(name)) {
+          guards.add(new Predicate<Object[]>() {
+            @Override
+            public boolean apply(@Nullable Object[] objects) {
+              RubyObject scope = (RubyObject) objects[scopeIndex];
+              return scope.respondsTo(name);
+            }
+          });
           return createWrapper(scopeIndex, wrappers, guards, CALL_METHOD, new Object[]{ name });
+        } else {
+          guards.add(new Predicate<Object[]>() {
+            @Override
+            public boolean apply(@Nullable Object[] objects) {
+              RubyObject scope = (RubyObject) objects[scopeIndex];
+              return !scope.respondsTo(name);
+            }
+          });
         }
       }
     }
