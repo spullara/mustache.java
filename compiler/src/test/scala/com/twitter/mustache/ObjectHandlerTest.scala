@@ -1,9 +1,9 @@
 package com.twitter.mustache
 
-import com.twitter.util.FuturePool
-import java.util.concurrent.Executors
 import com.github.mustachejava.DefaultMustacheFactory
+import com.twitter.util.FuturePool
 import java.io.{StringWriter, StringReader}
+import java.util.concurrent.Executors
 import org.junit.{Assert, Test}
 
 class ObjectHandlerTest {

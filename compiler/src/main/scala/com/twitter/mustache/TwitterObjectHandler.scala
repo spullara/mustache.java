@@ -1,19 +1,20 @@
 package com.twitter.mustache
 
+import com.github.mustachejava.Iteration
+import com.github.mustachejava.reflect.ReflectionObjectHandler
 import com.twitter.util.Future
 import java.io.Writer
-import com.github.mustachejava.reflect.ReflectionObjectHandler
-import com.github.mustachejava.Iteration
-import java.util.concurrent.Callable
 import java.lang.reflect.{Method, Field}
+import java.util.concurrent.Callable
 
 class TwitterObjectHandler extends ReflectionObjectHandler {
 
   // Allow any method or field
   override def checkMethod(member: Method) {}
+
   override def checkField(member: Field) {}
 
-  override def find(name: String, scopes: Array[ AnyRef ]) = {
+  override def find(name: String, scopes: Array[AnyRef]) = {
     val wrapper = super.find(name, scopes)
     if (wrapper == null) {
       null
@@ -24,14 +25,14 @@ class TwitterObjectHandler extends ReflectionObjectHandler {
 
   override def coerce(value: Object) = {
     value match {
-      case o: Option[ _ ] => o match {
+      case o: Option[_] => o match {
         case Some(some: Object) => coerce(some)
         case None => null
       }
-      case f: Future[ _ ] => {
+      case f: Future[_] => {
         new Callable[Any]() {
           def call() = {
-            val value = f.get().asInstanceOf[ Object ]
+            val value = f.get().asInstanceOf[Object]
             coerce(value)
           }
         }
@@ -40,9 +41,9 @@ class TwitterObjectHandler extends ReflectionObjectHandler {
     }
   }
 
-  override def iterate(iteration: Iteration, writer: Writer, value: Object, scopes: Array[ Object ]) = {
+  override def iterate(iteration: Iteration, writer: Writer, value: Object, scopes: Array[Object]) = {
     value match {
-      case t: Traversable[ AnyRef ] => {
+      case t: Traversable[AnyRef] => {
         var newWriter = writer
         t map {
           next =>
@@ -54,9 +55,9 @@ class TwitterObjectHandler extends ReflectionObjectHandler {
     }
   }
 
-  override def falsey(iteration: Iteration, writer: Writer, value: Object, scopes: Array[ Object ]) = {
+  override def falsey(iteration: Iteration, writer: Writer, value: Object, scopes: Array[Object]) = {
     value match {
-      case t: Traversable[ AnyRef ] => {
+      case t: Traversable[AnyRef] => {
         if (t.isEmpty) {
           iteration.next(writer, value, scopes)
         } else {
