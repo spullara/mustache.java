@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.github.mustachejava.Code;
@@ -91,6 +92,13 @@ public class DefaultCode implements Code {
    * @return The value of the field or method
    */
   public Object get(String name, Object[] scopes) {
+    return get_recurse(name, scopes, 0);
+  }
+
+  private Object get_recurse(String name, Object[] scopes, int depth) {
+    if (depth > 10) {
+      return recursionError(name, scopes);
+    }
     if (returnThis) {
       return scopes[scopes.length - 1];
     }
@@ -103,8 +111,23 @@ public class DefaultCode implements Code {
       return oh.coerce(wrapper.call(scopes));
     } catch (GuardException e) {
       wrapper = null;
-      return get(name, scopes);
+      return get_recurse(name, scopes, depth + 1);
     }
+  }
+
+  private Object recursionError(String name, Object[] scopes) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(name);
+    for (Object scope : scopes) {
+      sb.append(":");
+      sb.append(scope);
+      if (scope != null) {
+        sb.append("<");
+        sb.append(scope.getClass());
+        sb.append(">");
+      }
+    }
+    throw new AssertionError("Guard recursion: " + sb);
   }
 
   private boolean getWrapper(String name, Object[] scopes) {

@@ -48,11 +48,12 @@ public class BenchmarkTest extends TestCase {
       {
         DefaultMustacheFactory cf = new DefaultMustacheFactory();
         Mustache m = cf.compile("complex.html");
-        complextest(m, new ComplexObject()).toString();
+        ComplexObject complexObject = new ComplexObject();
+        complextest(m, complexObject).toString();
         long start = System.currentTimeMillis();
         int total = 0;
         while (true) {
-          complextest(m, new ComplexObject());
+          complextest(m, complexObject);
           total++;
           if (System.currentTimeMillis() - start > TIME) break;
         }

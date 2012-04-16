@@ -396,6 +396,20 @@ public class InterpreterTest extends TestCase {
     }
   }
 
+  public void testDeferred() throws IOException {
+    DefaultMustacheFactory mf = new DeferringMustacheFactory(root);
+    mf.setExecutorService(Executors.newCachedThreadPool());
+    Object context = new Object() {
+      String title = "Deferred";
+      Object deferred = new DeferringMustacheFactory.DeferredCallable();
+      Object deferredpartial = DeferringMustacheFactory.DEFERRED;
+    };
+    Mustache m = mf.compile("deferred.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, context).close();
+    assertEquals(getContents(root, "deferred.txt"), sw.toString());
+  }
+
   private MustacheFactory init() {
     DefaultMustacheFactory cf = new DefaultMustacheFactory(root);
     return cf;
