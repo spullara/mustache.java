@@ -45,7 +45,6 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
           guards.add(new Predicate<Object[]>() {
             @Override
             public boolean apply(@Nullable Object[] input) {
-              assert input != null;
               return ((RubyHash)input[scopeIndex]).containsKey(rs);
             }
           });
@@ -54,8 +53,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
           guards.add(new Predicate<Object[]>() {
             @Override
             public boolean apply(@Nullable Object[] input) {
-              assert input != null;
-               return !((RubyHash)input[scopeIndex]).containsKey(rs);
+              return !((RubyHash)input[scopeIndex]).containsKey(rs);
             }
           });
         }
