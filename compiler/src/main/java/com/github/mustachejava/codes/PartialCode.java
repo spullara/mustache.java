@@ -13,7 +13,6 @@ import com.github.mustachejava.util.LatchedWriter;
 
 public class PartialCode extends DefaultCode {
   protected Mustache partial;
-  private final String variable;
   protected final String extension;
   private DefaultMustacheFactory cf;
   private final ExecutorService les;
@@ -21,7 +20,6 @@ public class PartialCode extends DefaultCode {
   protected PartialCode(TemplateContext tc, DefaultMustacheFactory cf, Mustache mustache, String type, String variable) {
     super(tc, cf.getObjectHandler(), mustache, variable, type);
     this.cf = cf;
-    this.variable = variable;
     // Use the  name of the parent to get the name of the partial
     int index = tc.file().lastIndexOf(".");
     extension = index == -1 ? "" : tc.file().substring(index);
@@ -49,14 +47,14 @@ public class PartialCode extends DefaultCode {
 
   @Override
   public synchronized void init() {
-    partial = cf.compile(variable + extension);
+    partial = cf.compile(name + extension);
     if (partial == null) {
-      throw new MustacheException("Failed to compile partial: " + variable);
+      throw new MustacheException("Failed to compile partial: " + name);
     }
   }
 
   protected Writer partialExecute(Writer writer, final Object[] scopes) {
-    Object object = get(variable, scopes);
+    Object object = get(scopes);
     if (object instanceof Callable) {
       final Callable callable = (Callable) object;
       if (les == null) {

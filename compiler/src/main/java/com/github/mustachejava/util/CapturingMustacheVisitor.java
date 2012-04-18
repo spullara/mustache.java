@@ -38,8 +38,8 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
   public void value(TemplateContext tc, String variable, boolean encoded) {
     list.add(new ValueCode(tc, cf, variable, encoded) {
       @Override
-      public Object get(String name, Object[] scopes) {
-        Object o = super.get(name, scopes);
+      public Object get(Object[] scopes) {
+        Object o = super.get(scopes);
         if (o != null) {
           captured.value(name, o.toString());
         }
@@ -68,8 +68,8 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
       }
 
       @Override
-      public Object get(String name, Object[] scopes) {
-        Object o = super.get(name, scopes);
+      public Object get(Object[] scopes) {
+        Object o = super.get(scopes);
         captured.arrayStart(name);
         return o;
       }
@@ -79,14 +79,12 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
   @Override
   public void notIterable(TemplateContext tc, String variable, Mustache mustache) {
     list.add(new NotIterableCode(tc, cf, mustache, variable) {
-      String name;
       Object value;
       boolean called;
 
       @Override
-      public Object get(String name, Object[] scopes) {
-        this.name = name;
-        return super.get(name, scopes);
+      public Object get(Object[] scopes) {
+        return super.get(scopes);
       }
 
       @Override

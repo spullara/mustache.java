@@ -25,20 +25,18 @@ import java.util.concurrent.ExecutorService;
  */
 public class IterableCode extends DefaultCode implements Iteration {
 
-  private final String variable;
   private DefaultMustacheFactory cf;
   private ExecutorService les;
 
   public IterableCode(TemplateContext tc, DefaultMustacheFactory cf, Mustache mustache, String variable) {
     super(tc, cf.getObjectHandler(), mustache, variable, "#");
     this.cf = cf;
-    this.variable = variable;
     les = cf.getExecutorService();
   }
 
   @Override
   public Writer execute(Writer writer, final Object[] scopes) {
-    Object resolved = get(variable, scopes);
+    Object resolved = get(scopes);
     writer = handle(writer, resolved, scopes);
     appendText(writer);
     return writer;

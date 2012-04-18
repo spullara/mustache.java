@@ -19,7 +19,6 @@ import java.util.concurrent.ExecutorService;
  * Output a value
  */
 public class ValueCode extends DefaultCode {
-  private final String variable;
   private final boolean encoded;
   private final DefaultMustacheFactory cf;
   private ExecutorService les;
@@ -48,14 +47,13 @@ public class ValueCode extends DefaultCode {
   public ValueCode(TemplateContext tc, DefaultMustacheFactory cf, String variable, boolean encoded) {
     super(tc, cf.getObjectHandler(), null, variable, "");
     this.cf = cf;
-    this.variable = variable;
     this.encoded = encoded;
     les = cf.getExecutorService();
   }
 
   @Override
   public Writer execute(Writer writer, final Object[] scopes) {
-    final Object object = get(variable, scopes);
+    final Object object = get(scopes);
     if (object != null) {
       try {
         if (object instanceof Function) {
@@ -66,7 +64,7 @@ public class ValueCode extends DefaultCode {
           execute(writer, object.toString());
         }
       } catch (Exception e) {
-        throw new MustacheException("Failed to get value for " + variable + " at line " + tc.file() + ":" + tc.line(), e);
+        throw new MustacheException("Failed to get value for " + name + " at line " + tc.file() + ":" + tc.line(), e);
       }
     }
     return super.execute(writer, scopes);
@@ -103,7 +101,7 @@ public class ValueCode extends DefaultCode {
       String templateText = newtemplate.toString();
       Mustache mustache = cf.getTemplate(templateText);
       if (mustache == null) {
-        mustache = cf.compile(new StringReader(templateText), variable,
+        mustache = cf.compile(new StringReader(templateText), name,
                 MustacheParser.DEFAULT_SM, MustacheParser.DEFAULT_EM);
         cf.putTemplate(templateText, mustache);
       }

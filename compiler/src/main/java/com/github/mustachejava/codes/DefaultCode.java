@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.github.mustachejava.Code;
@@ -23,20 +20,17 @@ import com.github.mustachejava.util.Wrapper;
  * Simplest possible code implementaion with some default shared behavior
  */
 public class DefaultCode implements Code {
-  private StringBuilder sb = new StringBuilder();
-  protected String appended;
+  protected StringBuilder appended;
 
   protected final ObjectHandler oh;
   protected final String name;
-  protected TemplateContext tc;
+  protected final TemplateContext tc;
   protected final Mustache mustache;
   protected final String type;
 
   // Callsite caching
   protected Wrapper wrapper;
-
-  // Initialization
-  protected boolean inited;
+  protected volatile boolean cacheWrapper;
 
   // Debug callsites
   private static boolean debug = Boolean.getBoolean("mustache.debug");
@@ -87,18 +81,11 @@ public class DefaultCode implements Code {
    * another lookup on a guard failure and finally coerced to a final
    * value based on the ObjectHandler you provide.
    *
-   * @param name   The common name of the field or method
+   *
    * @param scopes An array of scopes to interrogate from right to left.
    * @return The value of the field or method
    */
-  public Object get(String name, Object[] scopes) {
-    return get_recurse(name, scopes, 0);
-  }
-
-  private Object get_recurse(String name, Object[] scopes, int depth) {
-    if (depth > 10) {
-      return recursionError(name, scopes);
-    }
+  public Object get(Object[] scopes) {
     if (returnThis) {
       return scopes[scopes.length - 1];
     }
@@ -108,29 +95,19 @@ public class DefaultCode implements Code {
       }
     }
     try {
-      return oh.coerce(wrapper.call(scopes));
-    } catch (GuardException e) {
-      wrapper = null;
-      return get_recurse(name, scopes, depth + 1);
-    }
-  }
-
-  private Object recursionError(String name, Object[] scopes) {
-    StringBuilder sb = new StringBuilder();
-    sb.append(name);
-    for (Object scope : scopes) {
-      sb.append(":");
-      sb.append(scope);
-      if (scope != null) {
-        sb.append("<");
-        sb.append(scope.getClass());
-        sb.append(">");
+      if (cacheWrapper) {
+        return oh.coerce(wrapper.call(scopes));
+      } else {
+        Wrapper wrapper = oh.find(name, scopes);
+        return wrapper == null ? null : oh.coerce(wrapper.call(scopes));
       }
+    } catch (GuardException e) {
+      cacheWrapper = false;
+      return get(scopes);
     }
-    throw new AssertionError("Guard recursion: " + sb);
   }
 
-  private boolean getWrapper(String name, Object[] scopes) {
+  private synchronized boolean getWrapper(String name, Object[] scopes) {
     boolean notfound = false;
     wrapper = oh.find(name, scopes);
     if (wrapper == null) {
@@ -155,6 +132,7 @@ public class DefaultCode implements Code {
         }
       }
     }
+    cacheWrapper = true;
     return notfound;
   }
 
@@ -207,7 +185,7 @@ public class DefaultCode implements Code {
   protected Writer appendText(Writer writer) {
     if (appended != null) {
       try {
-        writer.write(appended);
+        writer.append(appended);
       } catch (IOException e) {
         throw new MustacheException(e);
       }
@@ -227,8 +205,10 @@ public class DefaultCode implements Code {
 
   @Override
   public void append(String text) {
-    sb.append(text);
-    appended = sb.toString();
+    if (appended == null) {
+      appended = new StringBuilder();
+    }
+    appended.append(text);
   }
 
   private ThreadLocal<Object[]> localScopes = new ThreadLocal<Object[]>();

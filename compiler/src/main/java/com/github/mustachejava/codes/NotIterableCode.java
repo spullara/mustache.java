@@ -15,16 +15,14 @@ import com.github.mustachejava.TemplateContext;
 * To change this template use File | Settings | File Templates.
 */
 public class NotIterableCode extends DefaultCode implements Iteration {
-  private final String variable;
 
   public NotIterableCode(TemplateContext templateContext, DefaultMustacheFactory cf, Mustache mustache, String variable) {
     super(templateContext, cf.getObjectHandler(), mustache, variable, "^");
-    this.variable = variable;
   }
 
   @Override
   public Writer execute(Writer writer, Object[] scopes) {
-    return appendText(oh.falsey(this, writer, get(variable, scopes), scopes));
+    return appendText(oh.falsey(this, writer, get(scopes), scopes));
   }
 
   @Override
