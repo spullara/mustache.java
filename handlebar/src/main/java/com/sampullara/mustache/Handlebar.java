@@ -64,6 +64,8 @@ public class Handlebar {
           put(next.getKey(), o);
         }
       }};
+    } else if (node.isBoolean()) {
+      return node.getBooleanValue();
     } else if (node.isNull()) {
       return null;
     } else {
