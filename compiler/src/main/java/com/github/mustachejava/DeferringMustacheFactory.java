@@ -78,7 +78,7 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
 
           @Override
           protected Writer partialExecute(Writer writer, final Object[] scopes) {
-            final Object object = get(variable, scopes);
+            final Object object = get(scopes);
             final DeferredCallable deferredCallable = getDeferred(scopes);
             if (object == DEFERRED && deferredCallable != null) {
               try {
