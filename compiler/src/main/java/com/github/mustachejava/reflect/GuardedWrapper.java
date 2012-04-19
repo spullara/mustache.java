@@ -15,8 +15,8 @@ public class GuardedWrapper implements Wrapper {
   protected final Predicate[] guard;
   private int hashCode;
 
-  public GuardedWrapper(List<? extends Predicate<Object[]>> guard) {
-    this.guard = guard.toArray(new Predicate[guard.size()]);
+  public GuardedWrapper(Predicate[] guard) {
+    this.guard = guard;
   }
 
   @Override

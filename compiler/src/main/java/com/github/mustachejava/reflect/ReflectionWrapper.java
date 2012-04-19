@@ -26,7 +26,7 @@ public class ReflectionWrapper extends GuardedWrapper {
   protected final Field field;
   protected final Object[] arguments;
 
-  public ReflectionWrapper(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, AccessibleObject method, Object[] arguments) {
+  public ReflectionWrapper(int scopeIndex, Wrapper[] wrappers, Predicate[] guard, AccessibleObject method, Object[] arguments) {
     super(guard);
     this.wrappers = wrappers;
     if (method instanceof Field) {
@@ -41,7 +41,7 @@ public class ReflectionWrapper extends GuardedWrapper {
   }
 
   public ReflectionWrapper(ReflectionWrapper rw) {
-    this(rw.scopeIndex, rw.wrappers, Arrays.asList(rw.guard), rw.method == null ? rw.field : rw.method, rw.arguments);
+    this(rw.scopeIndex, rw.wrappers, rw.guard, rw.method == null ? rw.field : rw.method, rw.arguments);
   }
 
   @Override

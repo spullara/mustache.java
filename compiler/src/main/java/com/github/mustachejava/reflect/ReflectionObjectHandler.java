@@ -79,7 +79,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
         break;
       }
     }
-    return wrapper == null ? new MissingWrapper(guards) : wrapper;
+    return wrapper == null ? new MissingWrapper(guards.toArray(new Predicate[guards.size()])) : wrapper;
   }
 
   @Override
@@ -176,7 +176,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
   }
 
   protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, AccessibleObject member, Object[] arguments) {
-    return new ReflectionWrapper(scopeIndex, wrappers, guard, member, arguments);
+    return new ReflectionWrapper(scopeIndex, wrappers, guard.toArray(new Predicate[guard.size()]), member, arguments);
   }
 
   @Override
