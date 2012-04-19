@@ -79,7 +79,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
         break;
       }
     }
-    return wrapper;
+    return wrapper == null ? new MissingWrapper(guards) : wrapper;
   }
 
   @Override

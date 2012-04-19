@@ -13,6 +13,7 @@ import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.reflect.ClassGuard;
 import com.github.mustachejava.reflect.GuardedWrapper;
+import com.github.mustachejava.reflect.MissingWrapper;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
@@ -110,12 +111,7 @@ public class DefaultCode implements Code {
   private synchronized boolean getWrapper(String name, Object[] scopes) {
     boolean notfound = false;
     wrapper = oh.find(name, scopes);
-    if (wrapper == null) {
-      List<ClassGuard> guards = new ArrayList<ClassGuard>(scopes.length);
-      for (int i = 0; i < scopes.length; i++) {
-        guards.add(new ClassGuard(i, scopes[i]));
-      }
-      wrapper = new GuardedWrapper(guards);
+    if (wrapper instanceof MissingWrapper) {
       notfound = true;
       if (debug) {
         // Ugly but generally not interesting
