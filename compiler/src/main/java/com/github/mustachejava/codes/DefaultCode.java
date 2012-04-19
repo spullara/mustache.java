@@ -2,8 +2,7 @@ package com.github.mustachejava.codes;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 import com.github.mustachejava.Code;
@@ -11,8 +10,6 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.TemplateContext;
-import com.github.mustachejava.reflect.ClassGuard;
-import com.github.mustachejava.reflect.GuardedWrapper;
 import com.github.mustachejava.reflect.MissingWrapper;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
@@ -28,17 +25,15 @@ public class DefaultCode implements Code {
   protected final TemplateContext tc;
   protected final Mustache mustache;
   protected final String type;
+  protected final boolean returnThis;
 
   // Callsite caching
-  protected Wrapper wrapper;
-  protected volatile boolean cacheWrapper;
+  protected volatile Wrapper cachedWrapper;
 
   // Debug callsites
-  private static boolean debug = Boolean.getBoolean("mustache.debug");
-  protected Logger logger = Logger.getLogger("mustache");
+  protected static boolean debug = Boolean.getBoolean("mustache.debug");
+  protected static Logger logger = Logger.getLogger("mustache");
 
-  // TODO: Recursion protection. Need better guard logic. But still fast.
-  protected boolean returnThis = false;
 
   public DefaultCode() {
     this(null, null, null, null, null);
@@ -50,9 +45,7 @@ public class DefaultCode implements Code {
     this.type = type;
     this.name = name;
     this.tc = tc;
-    if (".".equals(name)) {
-      returnThis = true;
-    }
+    returnThis = ".".equals(name);
   }
 
   public Code[] getCodes() {
@@ -82,7 +75,6 @@ public class DefaultCode implements Code {
    * another lookup on a guard failure and finally coerced to a final
    * value based on the ObjectHandler you provide.
    *
-   *
    * @param scopes An array of scopes to interrogate from right to left.
    * @return The value of the field or method
    */
@@ -90,29 +82,29 @@ public class DefaultCode implements Code {
     if (returnThis) {
       return scopes[scopes.length - 1];
     }
-    if (wrapper == null) {
-      if (getWrapper(name, scopes)) {
-        return null;
-      }
+    // Avoid this being changed out from under us
+    // and thrashing between two competing contexts
+    Wrapper current = cachedWrapper;
+    boolean newWrapper = false;
+    if (current == null) {
+      current = getWrapper(name, scopes);
+      cachedWrapper = current;
+      newWrapper = true;
     }
     try {
-      if (cacheWrapper) {
-        return oh.coerce(wrapper.call(scopes));
-      } else {
-        Wrapper wrapper = oh.find(name, scopes);
-        return wrapper == null ? null : oh.coerce(wrapper.call(scopes));
-      }
+      return oh.coerce(current.call(scopes));
     } catch (GuardException e) {
-      cacheWrapper = false;
+      if (newWrapper) {
+        throw new MustacheException("Guard failure: " + Arrays.asList(scopes));
+      }
+      this.cachedWrapper = null;
       return get(scopes);
     }
   }
 
-  private synchronized boolean getWrapper(String name, Object[] scopes) {
-    boolean notfound = false;
-    wrapper = oh.find(name, scopes);
+  protected synchronized Wrapper getWrapper(String name, Object[] scopes) {
+    Wrapper wrapper = oh.find(name, scopes);
     if (wrapper instanceof MissingWrapper) {
-      notfound = true;
       if (debug) {
         // Ugly but generally not interesting
         if (!(this instanceof PartialCode)) {
@@ -128,8 +120,7 @@ public class DefaultCode implements Code {
         }
       }
     }
-    cacheWrapper = true;
-    return notfound;
+    return wrapper;
   }
 
   @Override
