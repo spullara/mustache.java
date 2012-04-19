@@ -1,5 +1,6 @@
 package com.github.mustachejava.reflect;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.base.Predicate;
@@ -11,13 +12,11 @@ import com.github.mustachejava.util.Wrapper;
  * Wrapper that guards.
  */
 public class GuardedWrapper implements Wrapper {
-  protected final List<? extends Predicate<Object[]>> guard;
-  private Predicate[] predicates;
+  protected final Predicate[] guard;
   private int hashCode;
-  private int size;
 
   public GuardedWrapper(List<? extends Predicate<Object[]>> guard) {
-    this.guard = guard;
+    this.guard = guard.toArray(new Predicate[guard.size()]);
   }
 
   @Override
@@ -27,23 +26,9 @@ public class GuardedWrapper implements Wrapper {
   }
 
   protected void guardCall(Object[] scopes) throws GuardException {
-    if (predicates == null) {
-      size = guard.size();
-      predicates = new Predicate[size];
-      int size = guard.size();
-      for (int i = 0; i < size; i++) {
-        Predicate<Object[]> predicate = guard.get(i);
-        predicates[i] = predicate;
-        if (!predicate.apply(scopes)) {
-          throw new GuardException();
-        }
-      }
-    } else {
-      int length = size;
-      for (int i = 0; i < length; i++) {
-        if (!predicates[i].apply(scopes)) {
-          throw new GuardException();
-        }
+    for (Predicate predicate : guard) {
+      if (!predicate.apply(scopes)) {
+        throw new GuardException();
       }
     }
   }
@@ -51,7 +36,7 @@ public class GuardedWrapper implements Wrapper {
   @Override
   public int hashCode() {
     if (hashCode == 0) {
-      for (Predicate<Object[]> predicate : guard) {
+      for (Predicate predicate : guard) {
         hashCode += hashCode * 43 + predicate.hashCode();
       }
       if (hashCode == 0) hashCode = 1;
@@ -63,7 +48,7 @@ public class GuardedWrapper implements Wrapper {
   public boolean equals(Object o) {
     if (o instanceof GuardedWrapper) {
       GuardedWrapper other = (GuardedWrapper) o;
-      return (guard == null && other.guard == null) || other.guard.equals(guard);
+      return (guard == null && other.guard == null) || Arrays.equals(other.guard, guard);
     }
     return false;
   }
