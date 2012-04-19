@@ -1,18 +1,11 @@
 package com.github.mustachejava;
 
-import com.github.mustachejava.util.CapturingMustacheVisitor;
-import com.github.mustachejavabenchmarks.JsonCapturer;
-import com.github.mustachejavabenchmarks.JsonInterpreterTest;
-import junit.framework.TestCase;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.MappingJsonFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
@@ -22,6 +15,16 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+
+import junit.framework.TestCase;
+
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.MappingJsonFactory;
+
+import com.github.mustachejava.util.CapturingMustacheVisitor;
+import com.github.mustachejavabenchmarks.JsonCapturer;
+import com.github.mustachejavabenchmarks.JsonInterpreterTest;
 
 /**
  * Tests for the compiler.
@@ -408,6 +411,41 @@ public class InterpreterTest extends TestCase {
     StringWriter sw = new StringWriter();
     m.execute(sw, context).close();
     assertEquals(getContents(root, "deferred.txt"), sw.toString());
+  }
+
+  public void testMultipleCallsWithDifferentScopes() throws IOException {
+    String template = "Value: {{value}}";
+    Mustache mustache = new DefaultMustacheFactory().compile(new StringReader(
+        template), "test");
+
+    // scope object doesn't have a 'value' property, lookup will fail
+    mustache.execute(new StringWriter(), new Object());
+
+    // scope object has a 'value' property, lookup shouldn't fail
+    StringWriter sw = new StringWriter();
+    mustache.execute(sw, new Object() {
+      String value = "something";
+    });
+
+    assertEquals("Value: something", sw.toString());
+  }
+
+  public void testMultipleCallsWithDifferentMapScopes() throws IOException {
+    String template = "Value: {{value}}";
+    Mustache mustache = new DefaultMustacheFactory().compile(new StringReader(
+        template), "test");
+    Map<String, String> emptyMap = new HashMap<String, String>();
+    Map<String, String> map = new HashMap<String, String>();
+    map.put("value", "something");
+
+    // map doesn't have an entry for 'value', lookup will fail
+    mustache.execute(new StringWriter(), emptyMap);
+
+    // map has an entry for 'value', lookup shouldn't fail
+    StringWriter sw = new StringWriter();
+    mustache.execute(sw, map);
+
+    assertEquals("Value: something", sw.toString());
   }
 
   private MustacheFactory init() {
