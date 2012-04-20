@@ -61,7 +61,6 @@ public class LatchedWriter extends Writer {
   public void flush() throws IOException {
     checkException();
     if (latch.getCount() == 0) {
-      checkException();
       synchronized (this) {
         writer.flush();
       }

@@ -16,7 +16,7 @@ class ObjectHandlerTest {
     mf.setExecutorService(pool)
     val m = mf.compile(
       new StringReader("{{#list}}{{optionalHello}}, {{futureWorld}}!" +
-              "{{#test}}?{{/test}}{{^test}}!{{/test}}\n{{/list}}"),
+              "{{#test}}?{{/test}}{{^test}}!{{/test}}{{#map}}{{value}}{{/map}}\n{{/list}}"),
       "helloworld"
     )
     val sw = new StringWriter
@@ -33,10 +33,11 @@ class ObjectHandlerTest {
           "thanks for all the fish"
         }
         val test = false
+        val map = Map(("value", "test"))
       })
     })
     // You must use close if you use concurrent latched writers
     writer.close()
-    Assert.assertEquals("Hello, world!?\nGoodbye, thanks for all the fish!!\n", sw.toString)
+    Assert.assertEquals("Hello, world!?\nGoodbye, thanks for all the fish!!test\n", sw.toString)
   }
 }

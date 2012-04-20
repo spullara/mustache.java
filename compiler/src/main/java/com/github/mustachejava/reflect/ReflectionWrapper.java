@@ -1,17 +1,15 @@
 package com.github.mustachejava.reflect;
 
 import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
+import com.google.common.base.Predicate;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-
-import com.google.common.base.Predicate;
 
 /**
  * Used for evaluating values at a callsite
@@ -20,15 +18,17 @@ public class ReflectionWrapper extends GuardedWrapper {
   // Context
   protected int scopeIndex;
   protected Wrapper[] wrappers;
+  private final ObjectHandler oh;
 
   // Dispatch
   protected final Method method;
   protected final Field field;
   protected final Object[] arguments;
 
-  public ReflectionWrapper(int scopeIndex, Wrapper[] wrappers, Predicate[] guard, AccessibleObject method, Object[] arguments) {
+  public ReflectionWrapper(int scopeIndex, Wrapper[] wrappers, Predicate[] guard, AccessibleObject method, Object[] arguments, ObjectHandler oh) {
     super(guard);
     this.wrappers = wrappers;
+    this.oh = oh;
     if (method instanceof Field) {
       this.method = null;
       this.field = (Field) method;
@@ -41,7 +41,7 @@ public class ReflectionWrapper extends GuardedWrapper {
   }
 
   public ReflectionWrapper(ReflectionWrapper rw) {
-    this(rw.scopeIndex, rw.wrappers, rw.guard, rw.method == null ? rw.field : rw.method, rw.arguments);
+    this(rw.scopeIndex, rw.wrappers, rw.guard, rw.method == null ? rw.field : rw.method, rw.arguments, rw.oh);
   }
 
   @Override
@@ -63,11 +63,11 @@ public class ReflectionWrapper extends GuardedWrapper {
   }
 
   protected Object unwrap(Object[] scopes) throws GuardException {
-    Object scope = scopes[scopeIndex];
+    Object scope = oh.coerce(scopes[scopeIndex]);
     // The value may be buried by . notation
     if (wrappers != null) {
       for (Wrapper wrapper : wrappers) {
-        scope = wrapper.call(new Object[]{scope});
+        scope = oh.coerce(wrapper.call(new Object[]{scope}));
       }
     }
     return scope;

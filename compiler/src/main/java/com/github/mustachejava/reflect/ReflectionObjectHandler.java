@@ -1,5 +1,11 @@
 package com.github.mustachejava.reflect;
 
+import com.github.mustachejava.Iteration;
+import com.github.mustachejava.ObjectHandler;
+import com.github.mustachejava.util.GuardException;
+import com.github.mustachejava.util.Wrapper;
+import com.google.common.base.Predicate;
+
 import java.io.Writer;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
@@ -9,13 +15,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import com.google.common.base.Predicate;
-
-import com.github.mustachejava.Iteration;
-import com.github.mustachejava.ObjectHandler;
-import com.github.mustachejava.util.GuardException;
-import com.github.mustachejava.util.Wrapper;
 
 /**
  * Lookup objects using reflection and execute them the same way.
@@ -88,6 +87,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
   }
 
   protected Wrapper findWrapper(final int scopeIndex, Wrapper[] wrappers, List<Predicate<Object[]>> guards, Object scope, final String name) {
+    scope = coerce(scope);
     if (scope == null) return null;
     if (scope instanceof Map) {
       Map map = (Map) scope;
@@ -111,19 +111,15 @@ public class ReflectionObjectHandler implements ObjectHandler {
       try {
         member = getMethod(scopeIndex, wrappers, guards, name, aClass);
       } catch (NoSuchMethodException e) {
+        String propertyname = name.substring(0, 1).toUpperCase() +
+                (name.length() > 1 ? name.substring(1) : "");
         try {
-          member = getMethod(scopeIndex, wrappers, guards, name, aClass, List.class);
-        } catch (NoSuchMethodException e1) {
-          String propertyname = name.substring(0, 1).toUpperCase() +
-                  (name.length() > 1 ? name.substring(1) : "");
+          member = getMethod(scopeIndex, wrappers, guards, "get" + propertyname, aClass);
+        } catch (NoSuchMethodException e2) {
           try {
-            member = getMethod(scopeIndex, wrappers, guards, "get" + propertyname, aClass);
-          } catch (NoSuchMethodException e2) {
-            try {
-              member = getMethod(scopeIndex, wrappers, guards, "is" + propertyname, aClass);
-            } catch (NoSuchMethodException e3) {
-              // Nothing to be done
-            }
+            member = getMethod(scopeIndex, wrappers, guards, "is" + propertyname, aClass);
+          } catch (NoSuchMethodException e3) {
+            // Nothing to be done
           }
         }
       }
@@ -176,7 +172,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
   }
 
   protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, AccessibleObject member, Object[] arguments) {
-    return new ReflectionWrapper(scopeIndex, wrappers, guard.toArray(new Predicate[guard.size()]), member, arguments);
+    return new ReflectionWrapper(scopeIndex, wrappers, guard.toArray(new Predicate[guard.size()]), member, arguments, this);
   }
 
   @Override
