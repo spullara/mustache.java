@@ -1,18 +1,26 @@
 package com.github.mustachejava.reflect;
 
-import java.util.Arrays;
-import java.util.List;
-
-import com.google.common.base.Predicate;
-
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
+import com.google.common.base.Predicate;
+
+import java.util.Arrays;
 
 /**
  * Wrapper that guards.
  */
 public class GuardedWrapper implements Wrapper {
+  // We only need a single guard exception -- don't fill stack trace
+  // and don't reallocate it.
+  private static final GuardException guardException = new GuardException();
+  static {
+    guardException.setStackTrace(new StackTraceElement[0]);
+  }
+
+  // Array of guards that must be satisfied
   protected final Predicate[] guard;
+
+  // Hashcode cache
   private int hashCode;
 
   public GuardedWrapper(Predicate[] guard) {
@@ -28,7 +36,7 @@ public class GuardedWrapper implements Wrapper {
   protected void guardCall(Object[] scopes) throws GuardException {
     for (Predicate predicate : guard) {
       if (!predicate.apply(scopes)) {
-        throw new GuardException();
+        throw guardException;
       }
     }
   }

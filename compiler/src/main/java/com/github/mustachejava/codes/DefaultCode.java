@@ -72,7 +72,8 @@ public class DefaultCode implements Code {
    * The chances of a new guard every time is very low. Instead we will
    * store previously used guards and try them all before creating a new one.
    */
-  private Set<Wrapper> previous = new CopyOnWriteArraySet<Wrapper>();
+  private Set<Wrapper> previousSet = new CopyOnWriteArraySet<Wrapper>();
+  private Wrapper[] prevWrappers;
 
   /**
    * Retrieve the first value in the stacks of scopes that matches
@@ -112,7 +113,10 @@ public class DefaultCode implements Code {
   private Object rewrapper(Object[] scopes, Wrapper current) {
     // Check the previous successful wrappers for a match
     try {
-      for (Wrapper prevWrapper : previous) {
+      if (prevWrappers == null || prevWrappers.length != previousSet.size()) {
+        prevWrappers = previousSet.toArray(new Wrapper[previousSet.size()]);
+      }
+      for (Wrapper prevWrapper : prevWrappers) {
         try {
           Object result = prevWrapper.call(scopes);
           cachedWrapper = prevWrapper;
@@ -123,7 +127,7 @@ public class DefaultCode implements Code {
       }
     } finally {
       // Add the current wrapper to the set
-      previous.add(current);
+      previousSet.add(current);
     }
     this.cachedWrapper = null;
     return get(scopes);
