@@ -2,6 +2,7 @@ package com.github.mustachejava.codes;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Logger;
@@ -14,7 +15,6 @@ import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.reflect.MissingWrapper;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
-import scala.actors.threadpool.Arrays;
 
 /**
  * Simplest possible code implementaion with some default shared behavior
@@ -114,7 +114,8 @@ public class DefaultCode implements Code {
     try {
       return oh.coerce(wrapper.call(scopes));
     } catch (GuardException e) {
-      throw new AssertionError("Unexpected guard failure: " + previousSet + " " + Arrays.asList(scopes));
+      throw new AssertionError(
+              "Unexpected guard failure: " + previousSet + " " + Arrays.asList(scopes));
     }
   }
 
