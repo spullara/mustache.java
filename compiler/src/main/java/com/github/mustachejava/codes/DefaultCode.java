@@ -1,5 +1,11 @@
 package com.github.mustachejava.codes;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.logging.Logger;
+
 import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
@@ -8,13 +14,7 @@ import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.reflect.MissingWrapper;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.logging.Logger;
+import scala.actors.threadpool.Arrays;
 
 /**
  * Simplest possible code implementaion with some default shared behavior
@@ -28,9 +28,6 @@ public class DefaultCode implements Code {
   protected final Mustache mustache;
   protected final String type;
   protected final boolean returnThis;
-
-  // Callsite caching
-  protected volatile Wrapper cachedWrapper;
 
   // Debug callsites
   protected static boolean debug = Boolean.getBoolean("mustache.debug");
@@ -77,8 +74,8 @@ public class DefaultCode implements Code {
 
   /**
    * Retrieve the first value in the stacks of scopes that matches
-   * the give name. The method wrapper is cached and guarded against
-   * the type or number of scopes changing. We should deepen the guard.
+   * the give name. The method wrappers are cached and guarded against
+   * the type or number of scopes changing.
    * <p/>
    * Methods will be found using the object handler, called here with
    * another lookup on a guard failure and finally coerced to a final
@@ -91,50 +88,34 @@ public class DefaultCode implements Code {
     if (returnThis) {
       return scopes[scopes.length - 1];
     }
-    return get(scopes, cachedWrapper == null);
-  }
-
-  // We know going into this method whether we need to find a
-  // new wrapper. If we find one, we should use it. There shouldn't
-  // be any way for it to change out from under us.
-  private Object get(Object[] scopes, boolean newWrapper) {
-    // Avoid this being changed out from under us
-    // and thrashing between two competing contexts
-    Wrapper current;
-    if (newWrapper) {
-      cachedWrapper = current = getWrapper(name, scopes);
-    } else {
-      current = cachedWrapper;
-    }
-    try {
-      return oh.coerce(current.call(scopes));
-    } catch (GuardException e) {
-      if (newWrapper) {
-        throw new MustacheException("Guard failure: " + Arrays.asList(scopes));
+    // Loop over the wrappers and find the one that matches
+    // this set of scopes or get a new one
+    Wrapper[] wrappers = prevWrappers;
+    if (wrappers != null) {
+      for (Wrapper prevWrapper : wrappers) {
+        try {
+          return oh.coerce(prevWrapper.call(scopes));
+        } catch (GuardException ge) {
+          // Check the next one or create a new one
+        }
       }
-      return rewrapper(scopes, current);
     }
+    return createAndGet(scopes);
   }
 
-  private Object rewrapper(Object[] scopes, Wrapper current) {
-    // If we have added to the set of previous wrappers since the last
-    // time we hit a guard, copy the new set into the array and add
-    // the current wrapper to the previousSet for next time.
+  private Object createAndGet(Object[] scopes) {
+    // Make a new wrapper for this set of scopes and add it to the set
+    Wrapper wrapper = getWrapper(name, scopes);
+    previousSet.add(wrapper);
     if (prevWrappers == null || prevWrappers.length != previousSet.size()) {
       prevWrappers = previousSet.toArray(new Wrapper[previousSet.size()]);
-      previousSet.add(current);
     }
-    // Check the previous successful wrappers for a match
-    for (Wrapper prevWrapper : prevWrappers) {
-      try {
-        Object result = prevWrapper.call(scopes);
-        cachedWrapper = prevWrapper;
-        return oh.coerce(result);
-      } catch (GuardException ge) {
-        // Not a match go to next one or rewrap
-      }
+    // If this fails the guard, there is a bug
+    try {
+      return oh.coerce(wrapper.call(scopes));
+    } catch (GuardException e) {
+      throw new AssertionError("Unexpected guard failure: " + previousSet + " " + Arrays.asList(scopes));
     }
-    return get(scopes, true);
   }
 
   protected synchronized Wrapper getWrapper(String name, Object[] scopes) {
