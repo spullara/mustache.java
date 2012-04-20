@@ -73,7 +73,7 @@ public class DefaultCode implements Code {
    * store previously used guards and try them all before creating a new one.
    */
   private Set<Wrapper> previousSet = new CopyOnWriteArraySet<Wrapper>();
-  private Wrapper[] prevWrappers;
+  private volatile Wrapper[] prevWrappers;
 
   /**
    * Retrieve the first value in the stacks of scopes that matches
