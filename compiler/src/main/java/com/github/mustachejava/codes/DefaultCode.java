@@ -112,22 +112,18 @@ public class DefaultCode implements Code {
 
   private Object rewrapper(Object[] scopes, Wrapper current) {
     // Check the previous successful wrappers for a match
-    try {
-      if (prevWrappers == null || prevWrappers.length != previousSet.size()) {
-        prevWrappers = previousSet.toArray(new Wrapper[previousSet.size()]);
-      }
-      for (Wrapper prevWrapper : prevWrappers) {
-        try {
-          Object result = prevWrapper.call(scopes);
-          cachedWrapper = prevWrapper;
-          return oh.coerce(result);
-        } catch (GuardException ge) {
-          // Not a match go to next one or rewrap
-        }
-      }
-    } finally {
-      // Add the current wrapper to the set
+    if (prevWrappers == null || prevWrappers.length != previousSet.size()) {
+      prevWrappers = previousSet.toArray(new Wrapper[previousSet.size()]);
       previousSet.add(current);
+    }
+    for (Wrapper prevWrapper : prevWrappers) {
+      try {
+        Object result = prevWrapper.call(scopes);
+        cachedWrapper = prevWrapper;
+        return oh.coerce(result);
+      } catch (GuardException ge) {
+        // Not a match go to next one or rewrap
+      }
     }
     this.cachedWrapper = null;
     return get(scopes);
