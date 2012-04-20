@@ -1,15 +1,15 @@
 package com.github.mustachejava.codes;
 
-import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.github.mustachejava.Code;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.MustacheFactory;
 import com.github.mustachejava.TemplateContext;
+
+import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Extending a template.
@@ -72,7 +72,7 @@ public class ExtendCode extends PartialCode {
                 "Illegal code in extend section: " + code.getClass().getName());
       }
     }
-    partial = mf.compile(name + extension);
+    partial = mf.compile(partialName());
     Code[] supercodes = partial.getCodes();
     // recursively replace named sections with replacements
     partial.setCodes(replaceCodes(supercodes, replaceMap));
