@@ -62,6 +62,28 @@ public class BenchmarkTest extends TestCase {
     }
   }
 
+  public void testComplexFlapping() throws MustacheException, IOException {
+    System.out.println("complex.html evaluations with 3 different objects per millisecond:");
+    for (int i = 0; i < 3; i++) {
+      {
+        DefaultMustacheFactory cf = new DefaultMustacheFactory();
+        Mustache m = cf.compile("complex.html");
+        ComplexObject complexObject = new ComplexObject();
+        ComplexObject complexObject2 = new ComplexObject() {};
+        ComplexObject complexObject3 = new ComplexObject() {};
+        complextest(m, complexObject).toString();
+        long start = System.currentTimeMillis();
+        int total = 0;
+        while (true) {
+          complextest(m, total % 3 == 0 ? complexObject : total % 3 == 1 ? complexObject2 : complexObject3);
+          total++;
+          if (System.currentTimeMillis() - start > TIME) break;
+        }
+        System.out.println("Serial: " + total / TIME);
+      }
+    }
+  }
+
   public void
   testParallelComplex() throws MustacheException, IOException {
     System.out.println("complex.html evaluations per millisecond:");

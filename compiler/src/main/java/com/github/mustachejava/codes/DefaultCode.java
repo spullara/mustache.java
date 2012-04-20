@@ -1,10 +1,5 @@
 package com.github.mustachejava.codes;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Arrays;
-import java.util.logging.Logger;
-
 import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
@@ -13,6 +8,13 @@ import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.reflect.MissingWrapper;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.logging.Logger;
 
 /**
  * Simplest possible code implementaion with some default shared behavior
@@ -67,6 +69,12 @@ public class DefaultCode implements Code {
   }
 
   /**
+   * The chances of a new guard every time is very low. Instead we will
+   * store previously used guards and try them all before creating a new one.
+   */
+  private Set<Wrapper> previous = new CopyOnWriteArraySet<Wrapper>();
+
+  /**
    * Retrieve the first value in the stacks of scopes that matches
    * the give name. The method wrapper is cached and guarded against
    * the type or number of scopes changing. We should deepen the guard.
@@ -97,9 +105,28 @@ public class DefaultCode implements Code {
       if (newWrapper) {
         throw new MustacheException("Guard failure: " + Arrays.asList(scopes));
       }
-      this.cachedWrapper = null;
-      return get(scopes);
+      return rewrapper(scopes, current);
     }
+  }
+
+  private Object rewrapper(Object[] scopes, Wrapper current) {
+    // Check the previous successful wrappers for a match
+    try {
+      for (Wrapper prevWrapper : previous) {
+        try {
+          Object result = prevWrapper.call(scopes);
+          cachedWrapper = prevWrapper;
+          return oh.coerce(result);
+        } catch (GuardException ge) {
+          // Not a match go to next one or rewrap
+        }
+      }
+    } finally {
+      // Add the current wrapper to the set
+      previous.add(current);
+    }
+    this.cachedWrapper = null;
+    return get(scopes);
   }
 
   protected synchronized Wrapper getWrapper(String name, Object[] scopes) {
