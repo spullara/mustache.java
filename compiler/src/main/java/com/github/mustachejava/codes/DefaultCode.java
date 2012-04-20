@@ -91,14 +91,20 @@ public class DefaultCode implements Code {
     if (returnThis) {
       return scopes[scopes.length - 1];
     }
+    return get(scopes, cachedWrapper == null);
+  }
+
+  // We know going into this method whether we need to find a
+  // new wrapper. If we find one, we should use it. There shouldn't
+  // be any way for it to change out from under us.
+  private Object get(Object[] scopes, boolean newWrapper) {
     // Avoid this being changed out from under us
     // and thrashing between two competing contexts
-    Wrapper current = cachedWrapper;
-    boolean newWrapper = false;
-    if (current == null) {
-      current = getWrapper(name, scopes);
-      cachedWrapper = current;
-      newWrapper = true;
+    Wrapper current;
+    if (newWrapper) {
+      cachedWrapper = current = getWrapper(name, scopes);
+    } else {
+      current = cachedWrapper;
     }
     try {
       return oh.coerce(current.call(scopes));
@@ -111,11 +117,14 @@ public class DefaultCode implements Code {
   }
 
   private Object rewrapper(Object[] scopes, Wrapper current) {
-    // Check the previous successful wrappers for a match
+    // If we have added to the set of previous wrappers since the last
+    // time we hit a guard, copy the new set into the array and add
+    // the current wrapper to the previousSet for next time.
     if (prevWrappers == null || prevWrappers.length != previousSet.size()) {
       prevWrappers = previousSet.toArray(new Wrapper[previousSet.size()]);
       previousSet.add(current);
     }
+    // Check the previous successful wrappers for a match
     for (Wrapper prevWrapper : prevWrappers) {
       try {
         Object result = prevWrapper.call(scopes);
@@ -125,8 +134,7 @@ public class DefaultCode implements Code {
         // Not a match go to next one or rewrap
       }
     }
-    this.cachedWrapper = null;
-    return get(scopes);
+    return get(scopes, true);
   }
 
   protected synchronized Wrapper getWrapper(String name, Object[] scopes) {
