@@ -3,7 +3,7 @@
 
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>mustache.java</artifactId>
-  <version>0.7.3-SNAPSHOT</version>
+  <version>0.7.5-SNAPSHOT</version>
   <description>Implementation of the Mustache language in Java.</description>
 
   <modules>
@@ -67,7 +67,7 @@
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
-      <!--<plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
         <executions>
@@ -79,7 +79,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>-->
+      </plugin>
     </plugins>
   </build>
 </project>
