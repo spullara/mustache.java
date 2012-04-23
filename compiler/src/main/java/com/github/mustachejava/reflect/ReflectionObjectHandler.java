@@ -68,7 +68,11 @@ public class ReflectionObjectHandler implements ObjectHandler {
         } else {
           continue NEXT;
         }
-        if (scope == null) return null;
+        if (scope == null) {
+          // Failed to find next dot
+          wrapper = null;
+          break NEXT;
+        }
       }
       Wrapper[] foundWrappers = wrappers == null ? null : wrappers.toArray(
               new Wrapper[wrappers.size()]);
