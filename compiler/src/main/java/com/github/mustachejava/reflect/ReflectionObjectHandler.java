@@ -95,7 +95,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
     if (scope == null) return null;
     if (scope instanceof Map) {
       Map map = (Map) scope;
-      if (map.get(name) == null) {
+      if (!map.containsKey(name)) {
         guards.add(new MapGuard(scopeIndex, name, false, wrappers));
         return null;
       } else {

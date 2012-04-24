@@ -1,7 +1,5 @@
 package com.github.mustachejava.reflect;
 
-import java.util.List;
-
 import com.google.common.base.Predicate;
 
 /**
