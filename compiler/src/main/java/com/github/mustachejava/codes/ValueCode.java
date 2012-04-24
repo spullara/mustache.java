@@ -83,7 +83,6 @@ public class ValueCode extends DefaultCode {
           try {
             Object call = callable.call();
             execute(finalWriter, call == null ? null : call.toString());
-            finalWriter.close();
             latchedWriter.done();
           } catch (Throwable e) {
             latchedWriter.failed(e);

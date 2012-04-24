@@ -74,7 +74,10 @@ public class IterableCode extends DefaultCode implements Iteration {
         public void run() {
           try {
             Object call = callable.call();
-            handle(finalWriter, call, newScopes).close();
+            Writer writer = handle(finalWriter, call, newScopes);
+            if (writer != finalWriter) {
+              writer.close();
+            }
             latchedWriter.done();
           } catch (Throwable e) {
             latchedWriter.failed(e);
