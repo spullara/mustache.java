@@ -76,9 +76,8 @@ public class ReflectionObjectHandler implements ObjectHandler {
       }
       Wrapper[] foundWrappers = wrappers == null ? null : wrappers.toArray(
               new Wrapper[wrappers.size()]);
-      Wrapper foundWrapper = findWrapper(i, foundWrappers, guards, scope, subname);
-      if (foundWrapper != null) {
-        wrapper = foundWrapper;
+      wrapper = findWrapper(i, foundWrappers, guards, scope, subname);
+      if (wrapper != null) {
         break;
       }
     }
