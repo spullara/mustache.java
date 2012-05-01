@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
@@ -84,12 +85,14 @@ public class InterpreterTest extends TestCase {
     Mustache m = c.compile("latchedtestiterable.html");
     StringWriter sw = new StringWriter();
     final StringBuffer sb = new StringBuffer();
+    final CountDownLatch cdl1 = new CountDownLatch(1);
+    final CountDownLatch cdl2 = new CountDownLatch(1);
 
     m.execute(sw, new Object() { Iterable list = Arrays.asList(
       new Callable<Object>() {
         @Override
         public Object call() throws Exception {
-          Thread.sleep(300);
+          cdl1.await();
           sb.append("How");
           return "How";
         }
@@ -97,7 +100,8 @@ public class InterpreterTest extends TestCase {
       new Callable<Object>() {
         @Override
         public Object call() throws Exception {
-          Thread.sleep(200);
+          cdl2.await();
+          cdl1.countDown();
           sb.append("are");
           return "are";
         }
@@ -105,7 +109,7 @@ public class InterpreterTest extends TestCase {
       new Callable<Object>() {
         @Override
         public Object call() throws Exception {
-          Thread.sleep(100);
+          cdl2.countDown();
           sb.append("you?");
           return "you?";
         }
