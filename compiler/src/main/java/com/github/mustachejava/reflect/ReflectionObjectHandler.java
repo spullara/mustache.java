@@ -92,6 +92,8 @@ public class ReflectionObjectHandler implements ObjectHandler {
   protected Wrapper findWrapper(final int scopeIndex, Wrapper[] wrappers, List<Predicate<Object[]>> guards, Object scope, final String name) {
     scope = coerce(scope);
     if (scope == null) return null;
+    // If the scope is a map, then we use the get() method
+    // to see if it contains a value named name.
     if (scope instanceof Map) {
       Map map = (Map) scope;
       if (!map.containsKey(name)) {
@@ -103,26 +105,27 @@ public class ReflectionObjectHandler implements ObjectHandler {
       }
     }
     Class aClass = scope.getClass();
-    // Don't overload methods in your contexts
+    // Variable resolution looks for:
+    // 1) method named name
+    // 2) method named getName
+    // 3) method named isName
+    // 4) field named name
     Wrapper member = null;
     try {
-      member = getField(scopeIndex, wrappers, guards, name, aClass);
-    } catch (NoSuchFieldException e) {
-      // Not set
-    }
-    if (member == null) {
+      member = getMethod(scopeIndex, wrappers, guards, name, aClass);
+    } catch (NoSuchMethodException e) {
+      String propertyname = name.substring(0, 1).toUpperCase() +
+              (name.length() > 1 ? name.substring(1) : "");
       try {
-        member = getMethod(scopeIndex, wrappers, guards, name, aClass);
-      } catch (NoSuchMethodException e) {
-        String propertyname = name.substring(0, 1).toUpperCase() +
-                (name.length() > 1 ? name.substring(1) : "");
+        member = getMethod(scopeIndex, wrappers, guards, "get" + propertyname, aClass);
+      } catch (NoSuchMethodException e2) {
         try {
-          member = getMethod(scopeIndex, wrappers, guards, "get" + propertyname, aClass);
-        } catch (NoSuchMethodException e2) {
+          member = getMethod(scopeIndex, wrappers, guards, "is" + propertyname, aClass);
+        } catch (NoSuchMethodException e3) {
           try {
-            member = getMethod(scopeIndex, wrappers, guards, "is" + propertyname, aClass);
-          } catch (NoSuchMethodException e3) {
-            // Nothing to be done
+            member = getField(scopeIndex, wrappers, guards, name, aClass);
+          } catch (NoSuchFieldException e4) {
+            // Not set
           }
         }
       }
@@ -146,6 +149,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return createWrapper(scopeIndex, wrappers, guard, member, null);
   }
 
+  // We default to not allowing private methods
   protected void checkMethod(Method member) throws NoSuchMethodException {
     if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
       throw new NoSuchMethodException("Only public, protected and package members allowed");
@@ -168,6 +172,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return createWrapper(scopeIndex, wrappers, guard, member, null);
   }
 
+  // We default to not allowing private fields
   protected void checkField(Field member) throws NoSuchFieldException {
     if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
       throw new NoSuchFieldException("Only public, protected and package members allowed");

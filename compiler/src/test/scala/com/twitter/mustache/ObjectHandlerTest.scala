@@ -22,7 +22,7 @@ class ObjectHandlerTest {
     val sw = new StringWriter
     val writer = m.execute(sw, new {
       val list = Seq(new {
-        val optionalHello = Some("Hello")
+        lazy val optionalHello = Some("Hello")
         val futureWorld = futurePool {
           "world"
         }
@@ -32,7 +32,7 @@ class ObjectHandlerTest {
         val futureWorld = futurePool {
           "thanks for all the fish"
         }
-        val test = false
+        lazy val test = false
         val map = Map(("value", "test"))
       })
     })
