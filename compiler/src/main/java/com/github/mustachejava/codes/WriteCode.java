@@ -13,30 +13,12 @@ import com.github.mustachejava.MustacheException;
 * To change this template use File | Settings | File Templates.
 */
 public class WriteCode extends DefaultCode {
-  private String text;
-
   public WriteCode(String text) {
-    appended = new StringBuilder(this.text = text);
+    super.append(text);
   }
 
   @Override
   public void identity(Writer writer) {
     execute(writer, null);
-  }
-
-  @Override
-  public void append(String text) {
-    super.append(text);
-    this.text = appended.toString();
-  }
-
-  @Override
-  public Writer execute(Writer writer, Object[] scopes) {
-    try {
-      writer.write(text);
-    } catch (IOException e) {
-      throw new MustacheException();
-    }
-    return writer;
   }
 }

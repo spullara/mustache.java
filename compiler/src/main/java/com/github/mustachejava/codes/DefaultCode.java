@@ -20,7 +20,7 @@ import com.github.mustachejava.util.Wrapper;
  * Simplest possible code implementaion with some default shared behavior
  */
 public class DefaultCode implements Code {
-  protected StringBuilder appended;
+  protected String appended;
 
   protected final ObjectHandler oh;
   protected final String name;
@@ -189,7 +189,7 @@ public class DefaultCode implements Code {
   protected Writer appendText(Writer writer) {
     if (appended != null) {
       try {
-        writer.append(appended);
+        writer.write(appended);
       } catch (IOException e) {
         throw new MustacheException(e);
       }
@@ -210,9 +210,10 @@ public class DefaultCode implements Code {
   @Override
   public void append(String text) {
     if (appended == null) {
-      appended = new StringBuilder();
+      appended = text;
+    } else {
+      appended = appended + text;
     }
-    appended.append(text);
   }
 
   private ThreadLocal<Object[]> localScopes = new ThreadLocal<Object[]>();
