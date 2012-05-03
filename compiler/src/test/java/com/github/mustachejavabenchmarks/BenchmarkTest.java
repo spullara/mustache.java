@@ -23,9 +23,15 @@ public class BenchmarkTest extends TestCase {
     super.setUp();
     File file = new File("src/test/resources");
     root = new File(file, "simple.html").exists() ? file : new File("../src/test/resources");
+
+  }
+
+  public static boolean skip() {
+    return System.getenv().containsKey("CI") || System.getProperty("CI") != null;
   }
 
   public void testCompiler() {
+    if (skip()) return;
     System.out.println("complex.html compilations per second:");
     for (int i = 0; i < 3; i++) {
       {
@@ -43,6 +49,7 @@ public class BenchmarkTest extends TestCase {
   }
 
   public void testComplex() throws MustacheException, IOException {
+    if (skip()) return;
     System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 3; i++) {
       {
@@ -63,6 +70,7 @@ public class BenchmarkTest extends TestCase {
   }
 
   public void testComplexFlapping() throws MustacheException, IOException {
+    if (skip()) return;
     System.out.println("complex.html evaluations with 3 different objects per millisecond:");
     for (int i = 0; i < 3; i++) {
       {
@@ -84,8 +92,8 @@ public class BenchmarkTest extends TestCase {
     }
   }
 
-  public void
-  testParallelComplex() throws MustacheException, IOException {
+  public void testParallelComplex() throws MustacheException, IOException {
+    if (skip()) return;
     System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 3; i++) {
       {
@@ -106,6 +114,7 @@ public class BenchmarkTest extends TestCase {
   }
 
   public void testParallelComplexNoExecutor() throws MustacheException, IOException {
+    if (skip()) return;
     System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 3; i++) {
       {

@@ -17,6 +17,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.github.mustachejavabenchmarks.BenchmarkTest.skip;
+
 /**
  * Tests for the compiler.
  * <p/>
@@ -52,6 +54,7 @@ public class JsonInterpreterTest extends TestCase {
   }
 
   public void testSingleThreaded() throws MustacheException, IOException, InterruptedException {
+    if (skip()) return;
     final Mustache parse = getMustache();
     final Object parent = getScope();
 
@@ -59,6 +62,7 @@ public class JsonInterpreterTest extends TestCase {
   }
 
   public void testCompiler() throws MustacheException, IOException, InterruptedException {
+    if (skip()) return;
     for (int i = 0; i < 3; i++) {
       {
         long start = System.currentTimeMillis();
@@ -75,6 +79,7 @@ public class JsonInterpreterTest extends TestCase {
   }
 
   public void testMultithreaded() throws IOException, InterruptedException {
+    if (skip()) return;
     final Mustache parse = getMustache();
     final Object parent = getScope();
 

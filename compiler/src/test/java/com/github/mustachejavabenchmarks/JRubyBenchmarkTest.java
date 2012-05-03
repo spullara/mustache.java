@@ -17,6 +17,7 @@ import org.jruby.embed.ScriptingContainer;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static com.github.mustachejavabenchmarks.BenchmarkTest.skip;
 import static junit.framework.Assert.assertEquals;
 
 public class JRubyBenchmarkTest {
@@ -40,6 +41,7 @@ public class JRubyBenchmarkTest {
 
   @Test
   public void testComplexBench() throws MustacheException, IOException {
+    if (skip()) return;
     System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 3; i++) {
       {
