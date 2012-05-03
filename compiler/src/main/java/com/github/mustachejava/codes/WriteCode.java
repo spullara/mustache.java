@@ -16,7 +16,7 @@ public class WriteCode extends DefaultCode {
   private String text;
 
   public WriteCode(String text) {
-    this.text = text;
+    appended = new StringBuilder(this.text = text);
   }
 
   @Override
@@ -26,7 +26,8 @@ public class WriteCode extends DefaultCode {
 
   @Override
   public void append(String text) {
-    this.text += text;
+    super.append(text);
+    this.text = appended.toString();
   }
 
   @Override
