@@ -25,7 +25,7 @@ public class ReflectionWrapper extends GuardedWrapper {
   protected final Field field;
   protected final Object[] arguments;
 
-  public ReflectionWrapper(int scopeIndex, Wrapper[] wrappers, Predicate[] guard, AccessibleObject method, Object[] arguments, ObjectHandler oh) {
+  public ReflectionWrapper(int scopeIndex, Wrapper[] wrappers, Predicate<Object[]>[] guard, AccessibleObject method, Object[] arguments, ObjectHandler oh) {
     super(guard);
     this.wrappers = wrappers;
     this.oh = oh;
