@@ -101,8 +101,8 @@ public class InterpreterTest extends TestCase {
         @Override
         public Object call() throws Exception {
           cdl2.await();
-          cdl1.countDown();
           sb.append("are");
+          cdl1.countDown();
           return "are";
         }
       },
