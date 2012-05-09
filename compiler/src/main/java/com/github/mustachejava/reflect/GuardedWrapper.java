@@ -18,12 +18,12 @@ public class GuardedWrapper implements Wrapper {
   }
 
   // Array of guards that must be satisfied
-  protected final Predicate[] guard;
+  protected final Predicate<Object[]>[] guard;
 
   // Hashcode cache
   private int hashCode;
 
-  public GuardedWrapper(Predicate[] guard) {
+  public GuardedWrapper(Predicate<Object[]>[] guard) {
     this.guard = guard;
   }
 
@@ -34,7 +34,7 @@ public class GuardedWrapper implements Wrapper {
   }
 
   protected void guardCall(Object[] scopes) throws GuardException {
-    for (Predicate predicate : guard) {
+    for (Predicate<Object[]> predicate : guard) {
       if (!predicate.apply(scopes)) {
         throw guardException;
       }
