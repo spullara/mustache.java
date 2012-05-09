@@ -9,7 +9,7 @@
   <modules>
     <module>compiler</module>
     <module>handlebar</module>
-    <module>indy</module>
+    <!--<module>indy</module>-->
   </modules>
   <packaging>pom</packaging>
 
