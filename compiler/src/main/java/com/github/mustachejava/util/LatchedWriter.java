@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.concurrent.CountDownLatch;
 
+import com.github.mustachejava.MustacheException;
+
 /**
  * Buffer content while a future is being evaluated in another thread.
  */
@@ -70,13 +72,17 @@ public class LatchedWriter extends Writer {
   @Override
   public void close() throws IOException {
     checkException();
+    await();
+    flush();
+    writer.close();
+  }
+
+  public void await() {
     try {
       latch.await();
     } catch (InterruptedException e1) {
-      throw new IOException("Interrupted while waiting for completion", e1);
+      throw new MustacheException("Interrupted while waiting for completion", e1);
     }
-    flush();
-    writer.close();
   }
 
 }

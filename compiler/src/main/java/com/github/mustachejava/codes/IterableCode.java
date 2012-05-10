@@ -63,7 +63,7 @@ public class IterableCode extends DefaultCode implements Iteration {
         throw new MustacheException(e);
       }
     } else {
-      final Writer finalWriter = writer;
+      final Writer originalWriter = writer;
       final LatchedWriter latchedWriter = new LatchedWriter(writer);
       writer = latchedWriter;
       // Scopes must not cross thread boundaries as they
@@ -74,10 +74,12 @@ public class IterableCode extends DefaultCode implements Iteration {
         public void run() {
           try {
             Object call = callable.call();
-            Writer writer = handle(finalWriter, call, newScopes);
-            if (writer != finalWriter) {
-              writer.close();
+            Writer subWriter = handle(originalWriter, call, newScopes);
+            // Wait for the subwriter to complete
+            if (subWriter instanceof LatchedWriter) {
+              ((LatchedWriter) subWriter).await();
             }
+            // Tell the replacement writer that we are done
             latchedWriter.done();
           } catch (Throwable e) {
             latchedWriter.failed(e);
