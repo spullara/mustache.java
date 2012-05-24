@@ -167,7 +167,20 @@ public class MustacheParser {
               }
               case '%':
                 // Pragmas
-                out = write(mv, out, file, currentLine.intValue());
+                if (!onlywhitespace) {
+                  out = write(mv, out, file, currentLine.intValue());
+                }
+                int index = variable.indexOf(" ");
+                String pragma;
+                String args;
+                if (index == -1) {
+                  pragma = variable;
+                  args = null;
+                } else {
+                  pragma = variable.substring(0, index);
+                  args = variable.substring(index + 1);
+                }
+                mv.pragma(new TemplateContext(sm, em, file, currentLine.get()), pragma, args);
                 break;
               case '!':
                 // Comment

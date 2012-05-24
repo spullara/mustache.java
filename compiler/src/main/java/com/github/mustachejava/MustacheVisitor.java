@@ -13,6 +13,7 @@ public interface MustacheVisitor {
   void partial(TemplateContext templateContext, String variable);
   void value(TemplateContext templateContext, String variable, boolean encoded);
   void write(TemplateContext templateContext, String text);
+  void pragma(TemplateContext templateContext, String pragma, String args);
 
   // Internal
   void eof(TemplateContext templateContext);
@@ -20,4 +21,5 @@ public interface MustacheVisitor {
   // Extension
   void extend(TemplateContext templateContext, String variable, Mustache mustache);
   void name(TemplateContext templateContext, String variable, Mustache mustache);
+
 }

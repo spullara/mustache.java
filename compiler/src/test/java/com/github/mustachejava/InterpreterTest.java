@@ -54,6 +54,23 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
+  public void testSimplePragma() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("simplepragma.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      String name = "Chris";
+      int value = 10000;
+
+      int taxed_value() {
+        return (int) (this.value - (this.value * 0.4));
+      }
+
+      boolean in_ca = true;
+    });
+    assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
   public void testMultipleWrappers() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("simple.html");

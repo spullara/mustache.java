@@ -2,20 +2,44 @@ package com.github.mustachejava;
 
 import com.github.mustachejava.codes.*;
 
+import java.io.Writer;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * The default implementation that builds up Code lists
  */
 public class DefaultMustacheVisitor implements MustacheVisitor {
+  protected static Logger logger = Logger.getLogger(DefaultMustacheVisitor.class.getSimpleName());
+
   private static final Code EOF = new DefaultCode();
 
   protected final List<Code> list = new LinkedList<Code>();
+  private final Map<String, PragmaHandler> handlers = new HashMap<String, PragmaHandler>() {{
+    put("implicit-iterator", new PragmaHandler() {
+      @Override
+      public Code handle(String pragma, String args) {
+        return new DefaultCode() {
+          @Override
+          public Writer execute(Writer writer, Object[] scopes) {
+            return super.execute(writer, scopes);
+          }
+        };
+      }
+    });
+  }};
+
   protected DefaultMustacheFactory cf;
 
   public DefaultMustacheVisitor(DefaultMustacheFactory cf) {
     this.cf = cf;
+  }
+
+  public void addPragmaHandler(String pragma, PragmaHandler handler) {
+    handlers.put(pragma.toLowerCase(), handler);
   }
 
   @Override
@@ -58,6 +82,20 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
         code.append(text);
       } else {
         list.add(new WriteCode(text));
+      }
+    }
+  }
+
+  @Override
+  public void pragma(TemplateContext templateContext, String pragma, String args) {
+    PragmaHandler pragmaHandler = handlers.get(pragma.toLowerCase());
+    if (pragmaHandler == null) {
+      // By default, warn that no pragmas are understood
+      logger.warning("Unimplemented pragma: " + pragma);
+    } else {
+      Code code = pragmaHandler.handle(pragma, args);
+      if (code != null) {
+        list.add(code);
       }
     }
   }
