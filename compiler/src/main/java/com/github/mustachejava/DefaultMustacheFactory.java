@@ -10,23 +10,18 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
-import com.github.mustachejava.codes.DefaultCode;
-import com.github.mustachejava.codes.ExtendCode;
-import com.github.mustachejava.codes.ExtendNameCode;
-import com.github.mustachejava.codes.IterableCode;
-import com.github.mustachejava.codes.NotIterableCode;
-import com.github.mustachejava.codes.PartialCode;
-import com.github.mustachejava.codes.ValueCode;
-import com.github.mustachejava.codes.WriteCode;
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
 
 /**
@@ -36,7 +31,13 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   private final MustacheParser mc = new MustacheParser(this);
   private final Map<String, Mustache> templateCache = new ConcurrentHashMap<String, Mustache>();
-  private final Map<String, Mustache> mustacheCache = new ConcurrentHashMap<String, Mustache>();
+  private final LoadingCache<String, Mustache> mustacheCache = CacheBuilder.newBuilder().build(
+          new CacheLoader<String, Mustache>() {
+            @Override
+            public Mustache load(String key) throws Exception {
+              return mc.compile(key);
+            }
+          });
   private ObjectHandler oh = new ReflectionObjectHandler();
 
   private String resourceRoot;
@@ -168,14 +169,18 @@ public class DefaultMustacheFactory implements MustacheFactory {
   }
 
   @Override
-  public synchronized Mustache compile(String name) {
-    Mustache mustache = mustacheCache.get(name);
-    if (mustache == null) {
-      mustache = mc.compile(name);
-      mustacheCache.put(name, mustache);
+  public Mustache compile(String name) {
+    try {
+      Mustache mustache = mustacheCache.get(name);
       mustache.init();
+      return mustache;
+    } catch (ExecutionException e) {
+      Throwable cause = e.getCause();
+      if (cause instanceof MustacheException) {
+        throw (MustacheException) cause;
+      }
+      throw new MustacheException(cause);
     }
-    return mustache;
   }
 
   @Override
