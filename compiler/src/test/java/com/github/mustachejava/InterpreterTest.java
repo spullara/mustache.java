@@ -109,8 +109,8 @@ public class InterpreterTest extends TestCase {
       new Callable<Object>() {
         @Override
         public Object call() throws Exception {
-          cdl2.countDown();
           sb.append("you?");
+          cdl2.countDown();
           return "you?";
         }
       }
