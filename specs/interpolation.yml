@@ -171,6 +171,14 @@ tests:
     template: '"{{#a}}{{b.c.d.e.name}}{{/a}}" == "Phil"'
     expected: '"Phil" == "Phil"'
 
+  - name: Dotted Names - Context Precedence
+    desc: Dotted names should be resolved against former resolutions.
+    data:
+      a: { b: { } }
+      b: { c: 'ERROR' }
+    template: '{{#a}}{{b.c}}{{/a}}'
+    expected: ''
+
   # Whitespace Sensitivity
 
   - name: Interpolation - Surrounding Whitespace
