@@ -84,4 +84,20 @@ public class ReflectionWrapper extends GuardedWrapper {
   public Object[] getArguments() {
     return arguments;
   }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    if (field == null) {
+      sb.append(method.toString());
+      if (arguments != null) {
+        for (Object arg : arguments) {
+          sb.append(",").append(arg);
+        }
+      }
+    } else {
+      sb.append(field);
+    }
+    return sb.toString();
+  }
 }

@@ -90,13 +90,17 @@ public class DefaultCode implements Code {
     }
     // Loop over the wrappers and find the one that matches
     // this set of scopes or get a new one
+    Wrapper current = null;
     Wrapper[] wrappers = prevWrappers;
     if (wrappers != null) {
       for (Wrapper prevWrapper : wrappers) {
         try {
+          current = prevWrapper;
           return oh.coerce(prevWrapper.call(scopes));
         } catch (GuardException ge) {
           // Check the next one or create a new one
+        } catch (MustacheException me) {
+          throw new MustacheException("Failed: " + current, me);
         }
       }
     }
