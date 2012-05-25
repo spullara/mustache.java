@@ -173,9 +173,11 @@ tests:
 
   - name: Dotted Names - Context Precedence
     desc: Dotted names should be resolved against former resolutions.
-    data: { a: { b: 'b found: ERROR' }, c: { a: 'b not found'} }
-    template: '{{#c}}"{{a}}" : "{{a.b}}"{{/c}}'
-    expected: '"b not found" : ""'
+    data:
+      a: { b: { } }
+      b: { c: 'ERROR' }
+    template: '{{#a}}{{b.c}}{{/a}}'
+    expected: ''
 
   # Whitespace Sensitivity
 
