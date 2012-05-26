@@ -3,7 +3,7 @@
 
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>mustache.java</artifactId>
-  <version>0.7.9-SNAPSHOT</version>
+  <version>0.7.9</version>
   <description>Implementation of the Mustache language in Java.</description>
 
   <modules>
