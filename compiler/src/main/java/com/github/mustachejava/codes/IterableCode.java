@@ -17,13 +17,6 @@ import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.TemplateFunction;
 import com.github.mustachejava.util.LatchedWriter;
 
-/**
- * Created by IntelliJ IDEA.
- * User: spullara
- * Date: 1/9/12
- * Time: 2:57 PM
- * To change this template use File | Settings | File Templates.
- */
 public class IterableCode extends DefaultCode implements Iteration {
 
   private DefaultMustacheFactory cf;
