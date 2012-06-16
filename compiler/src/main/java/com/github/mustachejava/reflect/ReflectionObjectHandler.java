@@ -82,7 +82,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
       }
     }
     //noinspection unchecked
-    return wrapper == null ? new MissingWrapper(guards.toArray(new Predicate[guards.size()])) : wrapper;
+    return wrapper;
   }
 
   @Override
