@@ -56,7 +56,7 @@ public class TestWrapperCaching {
     }
 
     /**
-     * Test that initial hits on dot-notation are not cached.
+     * Test that initial misses on map dot notation are not incorrectly cached.
      */
     @Test
     public void testMapInitialMiss() {
