@@ -166,7 +166,7 @@ public class InterpreterTest extends TestCase {
     });
     execute.close();
 
-    assertEquals("How\nare\nyou?\n", sw.toString());
+    assertEquals("<outer>\n<inner>How</inner>\n<inner>are</inner>\n<inner>you?</inner>\n</outer>\n", sw.toString());
   }
 
   public void testBrokenSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
