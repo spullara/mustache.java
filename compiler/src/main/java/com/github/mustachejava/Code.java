@@ -13,4 +13,5 @@ public interface Code {
   Code[] getCodes();
   void setCodes(Code[] codes);
   void init();
+  Object clone();
 }

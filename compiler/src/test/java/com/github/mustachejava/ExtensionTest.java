@@ -48,6 +48,15 @@ public class ExtensionTest {
   }
 
   @Test
+  public void testMultipleExtensions() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("multipleextensions.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object());
+    assertEquals(getContents(root, "multipleextensions.txt"), sw.toString());
+  }
+
+  @Test
   public void testSubSub() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("subsub.html");

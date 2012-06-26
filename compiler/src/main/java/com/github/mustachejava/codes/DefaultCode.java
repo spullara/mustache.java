@@ -1,12 +1,5 @@
 package com.github.mustachejava.codes;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.logging.Logger;
-
 import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
@@ -16,10 +9,17 @@ import com.github.mustachejava.reflect.MissingWrapper;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.logging.Logger;
+
 /**
  * Simplest possible code implementaion with some default shared behavior
  */
-public class DefaultCode implements Code {
+public class DefaultCode implements Code, Cloneable {
   protected String appended;
 
   protected final ObjectHandler oh;
@@ -33,6 +33,14 @@ public class DefaultCode implements Code {
   protected static boolean debug = Boolean.getBoolean("mustache.debug");
   protected static Logger logger = Logger.getLogger("mustache");
 
+
+  public Object clone() {
+    try {
+      return super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new MustacheException("Clone not supported");
+    }
+  }
 
   public DefaultCode() {
     this(null, null, null, null, null);
