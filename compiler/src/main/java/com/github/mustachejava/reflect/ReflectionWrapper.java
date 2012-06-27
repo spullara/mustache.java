@@ -11,6 +11,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static com.github.mustachejava.reflect.ReflectionObjectHandler.unwrap;
+
 /**
  * Used for evaluating values at a callsite
  */
@@ -48,7 +50,7 @@ public class ReflectionWrapper extends GuardedWrapper {
   public Object call(Object[] scopes) throws GuardException {
     try {
       guardCall(scopes);
-      Object scope = unwrap(scopes);
+      Object scope = unwrap(oh, scopeIndex, wrappers, scopes);
       if (scope == null) return null;
       if (method == null) {
         return field.get(scope);
@@ -60,17 +62,6 @@ public class ReflectionWrapper extends GuardedWrapper {
     } catch (IllegalAccessException e) {
       throw new MustacheException("Failed to execute method: " + method, e);
     }
-  }
-
-  protected Object unwrap(Object[] scopes) throws GuardException {
-    Object scope = oh.coerce(scopes[scopeIndex]);
-    // The value may be buried by . notation
-    if (wrappers != null) {
-      for (Wrapper wrapper : wrappers) {
-        scope = oh.coerce(wrapper.call(new Object[]{scope}));
-      }
-    }
-    return scope;
   }
 
   public Method getMethod() {

@@ -27,6 +27,17 @@ public class ReflectionObjectHandler implements ObjectHandler {
 
   protected static final Method MAP_METHOD;
 
+  protected static Object unwrap(ObjectHandler oh, int scopeIndex, Wrapper[] wrappers, Object[] scopes) throws GuardException {
+    Object scope = oh.coerce(scopes[scopeIndex]);
+    // The value may be buried by . notation
+    if (wrappers != null) {
+      for (Wrapper wrapper : wrappers) {
+        scope = oh.coerce(wrapper.call(new Object[]{scope}));
+      }
+    }
+    return scope;
+  }
+
   static {
     try {
       MAP_METHOD = Map.class.getMethod("get", Object.class);
@@ -57,15 +68,16 @@ public class ReflectionObjectHandler implements ObjectHandler {
         List<Predicate<Object[]>> wrapperGuard = new ArrayList<Predicate<Object[]>>(1);
         wrapperGuard.add(new ClassGuard(0, scope));
         wrapper = findWrapper(0, null, wrapperGuard, scope, lookup);
+        if (wrappers == null) wrappers = new ArrayList<Wrapper>();
         if (wrapper != null) {
-          if (wrappers == null) wrappers = new ArrayList<Wrapper>();
           wrappers.add(wrapper);
           try {
-            scope = wrapper.call(new Object[]{scope});
+            scope = coerce(wrapper.call(new Object[]{scope}));
           } catch (GuardException e) {
             throw new AssertionError(e);
           }
         } else {
+          guards.add(new WrappedGuard(this, i, wrappers, wrapperGuard));
           continue NEXT;
         }
         if (scope == null) {
@@ -98,10 +110,10 @@ public class ReflectionObjectHandler implements ObjectHandler {
     if (scope instanceof Map) {
       Map map = (Map) scope;
       if (!map.containsKey(name)) {
-        guards.add(new MapGuard(scopeIndex, name, false, wrappers));
+        guards.add(new MapGuard(this, scopeIndex, name, false, wrappers));
         return null;
       } else {
-        guards.add(new MapGuard(scopeIndex, name, true, wrappers));
+        guards.add(new MapGuard(this, scopeIndex, name, true, wrappers));
         return createWrapper(scopeIndex, wrappers, guards, MAP_METHOD, new Object[]{name});
       }
     }
