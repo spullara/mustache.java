@@ -10,6 +10,7 @@ import com.github.mustachejava.TemplateContext;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Extending a template.
@@ -19,6 +20,8 @@ import java.util.Map;
  * Time: 10:39 AM
  */
 public class ExtendCode extends PartialCode {
+
+  private static Pattern WS = Pattern.compile("\\s+", Pattern.MULTILINE);
 
   private MustacheFactory mf;
 
@@ -35,8 +38,9 @@ public class ExtendCode extends PartialCode {
         ExtendNameCode enc = (ExtendNameCode) code;
         ExtendNameCode extendReplaceCode = replaceMap.get(enc.getName());
         if (extendReplaceCode != null) {
-          newcodes[i] = extendReplaceCode;
-          extendReplaceCode.appended = enc.appended;
+          newcodes[i] = (Code) extendReplaceCode.clone();
+          if (extendReplaceCode.appended != null && WS.matcher(extendReplaceCode.appended).matches()) extendReplaceCode.appended = null;
+          if (enc.appended != null && !WS.matcher(enc.appended).matches()) newcodes[i].append(enc.appended);
         } else {
           enc.setCodes(replaceCodes(enc.getCodes(), replaceMap));
         }

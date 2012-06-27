@@ -57,6 +57,15 @@ public class ExtensionTest {
   }
 
   @Test
+  public void testParentReplace() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("replace.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() { String replace = "true"; });
+    assertEquals(getContents(root, "replace.txt"), sw.toString());
+  }
+
+  @Test
   public void testSubSub() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("subsub.html");
