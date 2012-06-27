@@ -5,7 +5,6 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.TemplateContext;
-import com.github.mustachejava.reflect.MissingWrapper;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
@@ -118,6 +117,9 @@ public class DefaultCode implements Code, Cloneable {
   private Object createAndGet(Object[] scopes) {
     // Make a new wrapper for this set of scopes and add it to the set
     Wrapper wrapper = getWrapper(name, scopes);
+    if (wrapper == null) {
+      return oh.coerce(null);
+    }
     previousSet.add(wrapper);
     if (prevWrappers == null || prevWrappers.length != previousSet.size()) {
       prevWrappers = previousSet.toArray(new Wrapper[previousSet.size()]);
@@ -133,7 +135,7 @@ public class DefaultCode implements Code, Cloneable {
 
   protected synchronized Wrapper getWrapper(String name, Object[] scopes) {
     Wrapper wrapper = oh.find(name, scopes);
-    if (wrapper instanceof MissingWrapper) {
+    if (wrapper == null) {
       if (debug) {
         // Ugly but generally not interesting
         if (!(this instanceof PartialCode)) {
