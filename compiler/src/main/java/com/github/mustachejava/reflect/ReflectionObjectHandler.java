@@ -12,9 +12,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Lookup objects using reflection and execute them the same way.
@@ -51,13 +54,14 @@ public class ReflectionObjectHandler implements ObjectHandler {
     Wrapper wrapper = null;
     final int length = scopes.length;
     List<Predicate<Object[]>> guards = new ArrayList<Predicate<Object[]>>(scopes.length);
+    // Simple guard to break if the number of scopes at this call site have changed
     guards.add(new DepthGuard(length));
     NEXT:
     for (int i = length - 1; i >= 0; i--) {
       Object scope = scopes[i];
       if (scope == null) continue;
-      Predicate<Object[]> guard = new ClassGuard(i, scope);
-      guards.add(guard);
+      // Make sure that the current scope is the same class
+      guards.add(new ClassGuard(i, scope));
       List<Wrapper> wrappers = null;
       int dotIndex;
       String subname = name;
@@ -66,7 +70,6 @@ public class ReflectionObjectHandler implements ObjectHandler {
         subname = subname.substring(dotIndex + 1);
         guards.add(new DotGuard(lookup, i, scope));
         List<Predicate<Object[]>> wrapperGuard = new ArrayList<Predicate<Object[]>>(1);
-        wrapperGuard.add(new ClassGuard(0, scope));
         wrapper = findWrapper(0, null, wrapperGuard, scope, lookup);
         if (wrappers == null) wrappers = new ArrayList<Wrapper>();
         if (wrapper != null) {
@@ -77,13 +80,16 @@ public class ReflectionObjectHandler implements ObjectHandler {
             throw new AssertionError(e);
           }
         } else {
+          wrapperGuard.add(new ClassGuard(0, scope));
           guards.add(new WrappedGuard(this, i, wrappers, wrapperGuard));
           continue NEXT;
         }
         if (scope == null) {
           // Failed to find next dot
-          wrapper = null;
-          break NEXT;
+          wrapperGuard.add(new NullGuard());
+          guards.add(new WrappedGuard(this, i, wrappers, wrapperGuard));
+          // Break here to allow the wrapper to be returned with the partial evaluation of the dot notation
+          break;
         }
       }
       Wrapper[] foundWrappers = wrappers == null ? null : wrappers.toArray(

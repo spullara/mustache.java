@@ -23,7 +23,7 @@ public class TestWrapperCaching {
 
   private class TestObject {
 
-    public TestObject() {};
+    public TestObject() {}
     public TestObject(Object data) {
       this.data = data;
     }
@@ -36,6 +36,10 @@ public class TestWrapperCaching {
 
     public void setData(Object data) {
       this.data = data;
+    }
+
+    public String toString() {
+      return "{data=" + data + "}";
     }
   }
 
