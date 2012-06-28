@@ -65,27 +65,32 @@ public class ReflectionObjectHandler implements ObjectHandler {
       List<Wrapper> wrappers = null;
       int dotIndex;
       String subname = name;
+      // If there is dot notation, start evaluating it
       while ((dotIndex = subname.indexOf('.')) != -1) {
         final String lookup = subname.substring(0, dotIndex);
         subname = subname.substring(dotIndex + 1);
+        // This is used for lookups but otherwise always succeeds
         guards.add(new DotGuard(lookup, i, scope));
         List<Predicate<Object[]>> wrapperGuard = new ArrayList<Predicate<Object[]>>(1);
         wrapper = findWrapper(0, null, wrapperGuard, scope, lookup);
         if (wrappers == null) wrappers = new ArrayList<Wrapper>();
         if (wrapper != null) {
+          // We need to dig into a scope when dot notation shows up
           wrappers.add(wrapper);
           try {
+            // Pull out the next level
             scope = coerce(wrapper.call(new Object[]{scope}));
           } catch (GuardException e) {
             throw new AssertionError(e);
           }
         } else {
+          // Failed to find a wrapper for the next dot
           wrapperGuard.add(new ClassGuard(0, scope));
           guards.add(new WrappedGuard(this, i, wrappers, wrapperGuard));
           continue NEXT;
         }
         if (scope == null) {
-          // Failed to find next dot
+          // Found a wrapper, but the result of was null
           wrapperGuard.add(new NullGuard());
           guards.add(new WrappedGuard(this, i, wrappers, wrapperGuard));
           // Break here to allow the wrapper to be returned with the partial evaluation of the dot notation
