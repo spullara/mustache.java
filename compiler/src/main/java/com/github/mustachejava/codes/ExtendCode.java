@@ -38,9 +38,9 @@ public class ExtendCode extends PartialCode {
         ExtendNameCode enc = (ExtendNameCode) code;
         ExtendNameCode extendReplaceCode = replaceMap.get(enc.getName());
         if (extendReplaceCode != null) {
-          newcodes[i] = (Code) extendReplaceCode.clone();
-          if (extendReplaceCode.appended != null && WS.matcher(extendReplaceCode.appended).matches()) extendReplaceCode.appended = null;
-          if (enc.appended != null && !WS.matcher(enc.appended).matches()) newcodes[i].append(enc.appended);
+          ExtendNameCode newcode = (ExtendNameCode) (newcodes[i] = (Code) extendReplaceCode.clone());
+          // We need to set the appended text of the new code to that of the old code
+          newcode.appended = enc.appended;
         } else {
           enc.setCodes(replaceCodes(enc.getCodes(), replaceMap));
         }
