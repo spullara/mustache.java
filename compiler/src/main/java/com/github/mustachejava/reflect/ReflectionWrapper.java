@@ -11,16 +11,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static com.github.mustachejava.reflect.ReflectionObjectHandler.unwrap;
-
 /**
  * Used for evaluating values at a callsite
  */
 public class ReflectionWrapper extends GuardedWrapper {
   // Context
-  protected int scopeIndex;
-  protected Wrapper[] wrappers;
-  private final ObjectHandler oh;
+  protected final int scopeIndex;
+  protected final Wrapper[] wrappers;
+  protected final ObjectHandler oh;
 
   // Dispatch
   protected final Method method;
@@ -46,11 +44,19 @@ public class ReflectionWrapper extends GuardedWrapper {
     this(rw.scopeIndex, rw.wrappers, rw.guard, rw.method == null ? rw.field : rw.method, rw.arguments, rw.oh);
   }
 
+  protected Object unwrap(Object[] scopes) {
+    if (wrappers == null || wrappers.length == 0) {
+      return scopes[scopeIndex];
+    } else {
+      return ReflectionObjectHandler.unwrap(oh, scopeIndex, wrappers, scopes);
+    }
+  }
+
   @Override
   public Object call(Object[] scopes) throws GuardException {
     try {
       guardCall(scopes);
-      Object scope = unwrap(oh, scopeIndex, wrappers, scopes);
+      Object scope = unwrap(scopes);
       if (scope == null) return null;
       if (method == null) {
         return field.get(scope);

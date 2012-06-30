@@ -12,12 +12,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Lookup objects using reflection and execute them the same way.
@@ -30,7 +27,7 @@ public class ReflectionObjectHandler implements ObjectHandler {
 
   protected static final Method MAP_METHOD;
 
-  protected static Object unwrap(ObjectHandler oh, int scopeIndex, Wrapper[] wrappers, Object[] scopes) throws GuardException {
+  public static Object unwrap(ObjectHandler oh, int scopeIndex, Wrapper[] wrappers, Object[] scopes) throws GuardException {
     Object scope = oh.coerce(scopes[scopeIndex]);
     // The value may be buried by . notation
     if (wrappers != null) {

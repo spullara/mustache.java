@@ -62,6 +62,10 @@ public abstract class IndyWrapper extends ReflectionWrapper implements Opcodes {
 //    return indy(scope);
 
   public static IndyWrapper create(ReflectionWrapper rw) {
+    return create(rw, true);
+  }
+
+  public static IndyWrapper create(ReflectionWrapper rw, boolean guard) {
     String name;
     Method method = rw.getMethod();
     if (method == null) {
@@ -84,7 +88,7 @@ public abstract class IndyWrapper extends ReflectionWrapper implements Opcodes {
         GeneratorAdapter ga = new GeneratorAdapter(ACC_PUBLIC, constructor, null, null, cw);
         ga.loadThis();
         ga.loadArg(0);
-        ga.invokeConstructor(Type.getType(ReflectionWrapper.class), constructor);
+        ga.invokeConstructor(Type.getType(IndyWrapper.class), constructor);
         ga.returnValue();
         ga.endMethod();
       }
@@ -92,10 +96,12 @@ public abstract class IndyWrapper extends ReflectionWrapper implements Opcodes {
         GeneratorAdapter ga = new GeneratorAdapter(ACC_PUBLIC,
                 org.objectweb.asm.commons.Method.getMethod("Object call(Object[])"), null,
                 new Type[] { Type.getType(GuardException.class)}, cw);
-        ga.visitVarInsn(ALOAD, 0);
-        ga.visitVarInsn(ALOAD, 1);
-        ga.invokeVirtual(Type.getType(IndyWrapper.class),
-                org.objectweb.asm.commons.Method.getMethod("void guardCall(Object[])"));
+        if (guard) {
+          ga.visitVarInsn(ALOAD, 0);
+          ga.visitVarInsn(ALOAD, 1);
+          ga.invokeVirtual(Type.getType(IndyWrapper.class),
+                  org.objectweb.asm.commons.Method.getMethod("void guardCall(Object[])"));
+        }
         ga.visitVarInsn(ALOAD, 0);
         ga.visitVarInsn(ALOAD, 1);
         ga.invokeVirtual(Type.getType(IndyWrapper.class),

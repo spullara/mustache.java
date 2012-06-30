@@ -1,13 +1,13 @@
 package com.github.mustachejava.mh;
 
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.reflect.ReflectionWrapper;
+import com.github.mustachejava.util.GuardException;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.reflect.ReflectionWrapper;
-import com.github.mustachejava.util.GuardException;
 
 public class MHWrapper extends ReflectionWrapper {
 
