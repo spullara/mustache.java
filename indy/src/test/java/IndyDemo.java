@@ -67,7 +67,7 @@ public class IndyDemo {
     for (int i = 0; i < 100000000; i++) {
       INDY_NOGUARD.call(scopes);
     }
-    System.out.println("indy OH: " + (System.currentTimeMillis() - start));
+    System.out.println("indy OH no guard: " + (System.currentTimeMillis() - start));
   }
 
   public static void timeReflection(IndyDemo indyDemo) throws Throwable {

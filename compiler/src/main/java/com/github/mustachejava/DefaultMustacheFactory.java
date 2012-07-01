@@ -14,6 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
+import static com.github.mustachejava.util.HtmlEscaper.escape;
+
 /**
  * Simplest possible code factory
  */
@@ -82,95 +84,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
   // to change the way encoding works.
   @Override
   public void encode(String value, Writer writer) {
-    try {
-      int position = 0;
-      int length = value.length();
-      for (int i = 0; i < length; i++) {
-        char c = value.charAt(i);
-        switch (c) {
-          case '&':
-            // If we match an entity or char ref then keep it
-            // as is in the text. Otherwise, replace it.
-            if (matchesEntityRef(i + 1, length, value)) {
-              // If we are at the beginning we can just keep going
-              if (position != 0) {
-                position = append(value, writer, position, i, "&");
-              }
-            } else {
-              position = append(value, writer, position, i, "&amp;");
-            }
-            break;
-          case '<':
-            position = append(value, writer, position, i, "&lt;");
-            break;
-          case '>':
-            position = append(value, writer, position, i, "&gt;");
-            break;
-          case '"':
-            position = append(value, writer, position, i, "&quot;");
-            break;
-          case '\'':
-            position = append(value, writer, position, i, "&#39;");
-            break;
-          case '/':
-            position = append(value, writer, position, i, "&#x2F;");
-            break;
-          case '\n':
-            position = append(value, writer, position, i, "&#10;");
-            break;
-        }
-      }
-      writer.append(value, position, length);
-    } catch (IOException e) {
-      throw new MustacheException("Failed to encode value: " + value);
-    }
-  }
-
-  private int append(String value, Writer writer, int position, int i, String replace) throws IOException {
-    // Append the clean text
-    writer.append(value, position, i);
-    // Append the encoded value
-    writer.append(replace);
-    // and advance the position past it
-    return i + 1;
-  }
-
-  // Matches all HTML named and character entity references
-  private boolean matchesEntityRef(int position, int length, String value) {
-    for (int i = position; i < length; i++) {
-      char c = value.charAt(i);
-      switch (c) {
-        case ';':
-          // End of the entity
-          return i == position;
-        case '#':
-          // Switch to char reference
-          return i == position && matchesCharRef(i + 1, length, value);
-        default:
-          // Letters can be at the start
-          if (c >= 'a' && c <= 'z') continue;
-          if (c >= 'A' && c <= 'Z') continue;
-          if (i != position) {
-            // Can only appear in the middle
-            if (c >= '0' && c <= '9') continue;
-          }
-          return false;
-      }
-    }
-    // Didn't find ending ;
-    return false;
-  }
-
-  private boolean matchesCharRef(int position, int length, String value) {
-    for (int i = position; i < length; i++) {
-      char c = value.charAt(i);
-      if (c == ';') {
-        return i == position;
-      } else if (c < '0' || c > '9') {
-        return false;
-      }
-    }
-    return false;
+    escape(value, writer);
   }
 
   @Override
