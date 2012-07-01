@@ -1,13 +1,14 @@
 package com.github.mustachejava;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
+import com.github.mustachejava.util.CapturingMustacheVisitor;
+import com.github.mustachejavabenchmarks.JsonCapturer;
+import com.github.mustachejavabenchmarks.JsonInterpreterTest;
+import junit.framework.TestCase;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.MappingJsonFactory;
+
+import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -16,16 +17,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-
-import junit.framework.TestCase;
-
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.MappingJsonFactory;
-
-import com.github.mustachejava.util.CapturingMustacheVisitor;
-import com.github.mustachejavabenchmarks.JsonCapturer;
-import com.github.mustachejavabenchmarks.JsonInterpreterTest;
 
 /**
  * Tests for the compiler.
@@ -38,7 +29,7 @@ public class InterpreterTest extends TestCase {
   private File root;
 
   public void testSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheFactory c = new DefaultMustacheFactory(root);
+    MustacheFactory c = createMustacheFactory();
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -54,8 +45,12 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
+  protected DefaultMustacheFactory createMustacheFactory() {
+    return new DefaultMustacheFactory(root);
+  }
+
   public void testSimplePragma() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheFactory c = new DefaultMustacheFactory(root);
+    MustacheFactory c = createMustacheFactory();
     Mustache m = c.compile("simplepragma.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -72,7 +67,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testMultipleWrappers() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheFactory c = new DefaultMustacheFactory(root);
+    MustacheFactory c = createMustacheFactory();
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -97,7 +92,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testNestedLatchesIterable() throws IOException {
-    DefaultMustacheFactory c = new DefaultMustacheFactory(root);
+    DefaultMustacheFactory c = createMustacheFactory();
     c.setExecutorService(Executors.newCachedThreadPool());
     Mustache m = c.compile("latchedtestiterable.html");
     StringWriter sw = new StringWriter();
@@ -137,7 +132,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testNestedLatches() throws IOException {
-    DefaultMustacheFactory c = new DefaultMustacheFactory(root);
+    DefaultMustacheFactory c = createMustacheFactory();
     c.setExecutorService(Executors.newCachedThreadPool());
     Mustache m = c.compile("latchedtest.html");
     StringWriter sw = new StringWriter();
@@ -191,7 +186,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testIsNotEmpty() throws IOException {
-    MustacheFactory c = new DefaultMustacheFactory(root);
+    MustacheFactory c = createMustacheFactory();
     Mustache m = c.compile("isempty.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -470,12 +465,12 @@ public class InterpreterTest extends TestCase {
   }
 
   private MustacheFactory init() {
-    DefaultMustacheFactory cf = new DefaultMustacheFactory(root);
+    DefaultMustacheFactory cf = createMustacheFactory();
     return cf;
   }
 
   private DefaultMustacheFactory initParallel() {
-    DefaultMustacheFactory cf = new DefaultMustacheFactory(root);
+    DefaultMustacheFactory cf = createMustacheFactory();
     cf.setExecutorService(Executors.newCachedThreadPool());
     return cf;
   }

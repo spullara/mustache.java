@@ -159,13 +159,7 @@ public class SpecTest {
     }}; 
     for (final JsonNode test : spec.get("tests")) {
       boolean failed = false;
-      final DefaultMustacheFactory CF = new DefaultMustacheFactory("/spec/specs") {
-        @Override
-        public Reader getReader(String resourceName) {
-          JsonNode partial = test.get("partials").get(resourceName);
-          return new StringReader(partial == null ? "" : partial.getTextValue());
-        }
-      };
+      final DefaultMustacheFactory CF = createMustacheFactory(test);
       String file = test.get("name").getTextValue();
       System.out.print("Running " + file + " - " + test.get("desc").getTextValue());
       StringReader template = new StringReader(test.get("template").getTextValue());
@@ -200,6 +194,16 @@ public class SpecTest {
     }
     System.out.println("Success: " + success + " Whitespace: " + whitespace + " Fail: " + fail);
     assertFalse(fail > 0);
+  }
+
+  protected DefaultMustacheFactory createMustacheFactory(final JsonNode test) {
+    return new DefaultMustacheFactory("/spec/specs") {
+          @Override
+          public Reader getReader(String resourceName) {
+            JsonNode partial = test.get("partials").get(resourceName);
+            return new StringReader(partial == null ? "" : partial.getTextValue());
+          }
+        };
   }
 
   private JsonNode getSpec(String spec) throws IOException {

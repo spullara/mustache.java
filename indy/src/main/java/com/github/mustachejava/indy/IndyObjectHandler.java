@@ -14,7 +14,12 @@ public class IndyObjectHandler extends ReflectionObjectHandler implements Opcode
 
   @Override
   public Wrapper find(String name, Object[] scopes) {
-    ReflectionWrapper rw = (ReflectionWrapper) super.find(name, scopes);
-    return rw == null ? null : IndyWrapper.create(rw);
+    Wrapper wrapper = super.find(name, scopes);
+    if (wrapper instanceof ReflectionWrapper) {
+      ReflectionWrapper rw = (ReflectionWrapper) wrapper;
+      return IndyWrapper.create(rw);
+    } else {
+      return wrapper;
+    }
   }
 }

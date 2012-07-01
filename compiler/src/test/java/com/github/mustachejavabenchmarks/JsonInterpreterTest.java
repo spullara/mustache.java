@@ -68,7 +68,7 @@ public class JsonInterpreterTest extends TestCase {
         long start = System.currentTimeMillis();
         int total = 0;
         while (true) {
-          DefaultMustacheFactory mb = new DefaultMustacheFactory(root);
+          DefaultMustacheFactory mb = createMustacheFactory();
           final Mustache parse = mb.compile("timeline.mustache");
           total++;
           if (System.currentTimeMillis() - start > TIME * 1000) break;
@@ -76,6 +76,10 @@ public class JsonInterpreterTest extends TestCase {
         System.out.println("Compilations: " + total / TIME + "/s");
       }
     }
+  }
+
+  protected DefaultMustacheFactory createMustacheFactory() {
+    return new DefaultMustacheFactory(root);
   }
 
   public void testMultithreaded() throws IOException, InterruptedException {
@@ -127,7 +131,7 @@ public class JsonInterpreterTest extends TestCase {
   }
 
   private Mustache getMustache() {
-    DefaultMustacheFactory mb = new DefaultMustacheFactory(root);
+    DefaultMustacheFactory mb = createMustacheFactory();
     return mb.compile("timeline.mustache");
   }
 

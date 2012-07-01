@@ -38,7 +38,7 @@ public class BenchmarkTest extends TestCase {
         long start = System.currentTimeMillis();
         int total = 0;
         while (true) {
-          DefaultMustacheFactory cf = new DefaultMustacheFactory();
+          DefaultMustacheFactory cf = createMustacheFactory();
           Mustache m = cf.compile("complex.html");
           total++;
           if (System.currentTimeMillis() - start > TIME) break;
@@ -53,7 +53,7 @@ public class BenchmarkTest extends TestCase {
     System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 3; i++) {
       {
-        DefaultMustacheFactory cf = new DefaultMustacheFactory();
+        DefaultMustacheFactory cf = createMustacheFactory();
         Mustache m = cf.compile("complex.html");
         ComplexObject complexObject = new ComplexObject();
         complextest(m, complexObject).toString();
@@ -69,12 +69,16 @@ public class BenchmarkTest extends TestCase {
     }
   }
 
+  protected DefaultMustacheFactory createMustacheFactory() {
+    return new DefaultMustacheFactory();
+  }
+
   public void testComplexFlapping() throws MustacheException, IOException {
     if (skip()) return;
     System.out.println("complex.html evaluations with 3 different objects per millisecond:");
     for (int i = 0; i < 3; i++) {
       {
-        DefaultMustacheFactory cf = new DefaultMustacheFactory();
+        DefaultMustacheFactory cf = createMustacheFactory();
         Mustache m = cf.compile("complex.html");
         ComplexObject complexObject = new ComplexObject();
         ComplexObject complexObject2 = new ComplexObject() {};
@@ -97,7 +101,7 @@ public class BenchmarkTest extends TestCase {
     System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 3; i++) {
       {
-        DefaultMustacheFactory cf = new DefaultMustacheFactory();
+        DefaultMustacheFactory cf = createMustacheFactory();
         cf.setExecutorService(Executors.newCachedThreadPool());
         Mustache m = cf.compile("complex.html");
         complextest(m, new ParallelComplexObject()).toString();
@@ -118,7 +122,7 @@ public class BenchmarkTest extends TestCase {
     System.out.println("complex.html evaluations per millisecond:");
     for (int i = 0; i < 3; i++) {
       {
-        MustacheFactory cf = new DefaultMustacheFactory();
+        MustacheFactory cf = createMustacheFactory();
         Mustache m = cf.compile("complex.html");
         complextest(m, new ParallelComplexObject()).toString();
         long start = System.currentTimeMillis();
