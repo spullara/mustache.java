@@ -1,28 +1,18 @@
 package com.github.mustachejava;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.regex.Pattern;
-
+import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
-import com.github.mustachejava.reflect.ReflectionObjectHandler;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Simplest possible code factory
@@ -88,11 +78,8 @@ public class DefaultMustacheFactory implements MustacheFactory {
     }
   }
 
-  private static Pattern escapedPattern = Pattern.compile("^&\\w+;");
-
   // Override this in a super class if you don't want encoding or would like
-  // to change the way encoding works. Also, if you use unexecute, make sure
-  // also do the inverse in decode.
+  // to change the way encoding works.
   @Override
   public void encode(String value, Writer writer) {
     try {
@@ -102,25 +89,31 @@ public class DefaultMustacheFactory implements MustacheFactory {
         char c = value.charAt(i);
         switch (c) {
           case '&':
-            if (!escapedPattern.matcher(value.substring(i, length)).find()) {
-              position = append(value, writer, position, i, "&amp;");
-            } else {
+            // If we match an entity or char ref then keep it
+            // as is in the text. Otherwise, replace it.
+            if (matchesEntityRef(i + 1, length, value)) {
+              // If we are at the beginning we can just keep going
               if (position != 0) {
                 position = append(value, writer, position, i, "&");
               }
+            } else {
+              position = append(value, writer, position, i, "&amp;");
             }
-            break;
-          case '\\':
-            position = append(value, writer, position, i, "\\\\");
-            break;
-          case '"':
-            position = append(value, writer, position, i, "&quot;");
             break;
           case '<':
             position = append(value, writer, position, i, "&lt;");
             break;
           case '>':
             position = append(value, writer, position, i, "&gt;");
+            break;
+          case '"':
+            position = append(value, writer, position, i, "&quot;");
+            break;
+          case '\'':
+            position = append(value, writer, position, i, "&#39;");
+            break;
+          case '/':
+            position = append(value, writer, position, i, "&#x2F;");
             break;
           case '\n':
             position = append(value, writer, position, i, "&#10;");
@@ -134,9 +127,61 @@ public class DefaultMustacheFactory implements MustacheFactory {
   }
 
   private int append(String value, Writer writer, int position, int i, String replace) throws IOException {
+    // Append the clean text
     writer.append(value, position, i);
+    // Append the encoded value
     writer.append(replace);
+    // and advance the position past it
     return i + 1;
+  }
+
+  // Matches all HTML named and character entity references
+  private boolean matchesEntityRef(int position, int length, String value) {
+    for (int i = position; i < length; i++) {
+      char c = value.charAt(i);
+      switch (c) {
+        case ';':
+          // End of the entity
+          return i == position;
+        case ':':
+        case '_':
+          // Can appear at the start
+          continue;
+        case '-':
+        case '.':
+          // Can only appear in the middle
+          if (i == position) {
+            return false;
+          }
+          continue;
+        case '#':
+          // Switch to char reference
+          return i == position && matchesCharRef(i + 1, length, value);
+        default:
+          // Letters can be at the start
+          if (c >= 'a' && c <= 'z') continue;
+          if (c >= 'A' && c <= 'Z') continue;
+          if (i != position) {
+            // Can only appear in the middle
+            if (c >= '0' && c <= '9') continue;
+          }
+          return false;
+      }
+    }
+    // Didn't find ending ;
+    return false;
+  }
+
+  private boolean matchesCharRef(int position, int length, String value) {
+    for (int i = position; i < length; i++) {
+      char c = value.charAt(i);
+      if (c == ';') {
+        return i == position;
+      } else if (c < '0' || c > '9') {
+        return false;
+      }
+    }
+    return false;
   }
 
   @Override
