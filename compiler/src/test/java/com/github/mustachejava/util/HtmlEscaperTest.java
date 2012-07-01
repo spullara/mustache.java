@@ -55,17 +55,17 @@ public class HtmlEscaperTest extends TestCase {
     }
     {
       StringWriter sw = new StringWriter();
-      escape("\"/Hello/\" &amp 'world'!\n&sam", sw);
-      assertEquals("&quot;&#x2F;Hello&#x2F;&quot; &amp;amp &#39;world&#39;!&#10;&amp;sam", sw.toString());
+      escape("\"Hello\" &amp 'world'!\n&sam", sw);
+      assertEquals("&quot;Hello&quot; &amp;amp &#39;world&#39;!&#10;&amp;sam", sw.toString());
     }
     {
       StringWriter sw = new StringWriter();
-      escape("\"/Hello/\" &amp&#zz 'world'!\n&sam", sw);
-      assertEquals("&quot;&#x2F;Hello&#x2F;&quot; &amp;amp&amp;#zz &#39;world&#39;!&#10;&amp;sam", sw.toString());
+      escape("\"Hello\" &amp&#zz 'world'!\n&sam", sw);
+      assertEquals("&quot;Hello&quot; &amp;amp&amp;#zz &#39;world&#39;!&#10;&amp;sam", sw.toString());
     }
     {
       StringWriter sw = new StringWriter();
-      escape("\"/Hello/\" &amp&#zz 'world'!\n&sam&#", sw);
+      escape("\"Hello\" &amp&#zz 'world'!\n&sam&#", sw);
       assertEquals("&quot;Hello&quot; &amp;amp&amp;#zz &#39;world&#39;!&#10;&amp;sam&amp;#", sw.toString());
     }
   }
