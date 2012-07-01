@@ -143,17 +143,6 @@ public class DefaultMustacheFactory implements MustacheFactory {
         case ';':
           // End of the entity
           return i == position;
-        case ':':
-        case '_':
-          // Can appear at the start
-          continue;
-        case '-':
-        case '.':
-          // Can only appear in the middle
-          if (i == position) {
-            return false;
-          }
-          continue;
         case '#':
           // Switch to char reference
           return i == position && matchesCharRef(i + 1, length, value);
