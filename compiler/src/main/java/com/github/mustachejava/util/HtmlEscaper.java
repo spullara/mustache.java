@@ -40,9 +40,6 @@ public class HtmlEscaper {
           case '\'':
             position = append(value, writer, position, i, "&#39;");
             break;
-          case '/':
-            position = append(value, writer, position, i, "&#x2F;");
-            break;
           case '\n':
             position = append(value, writer, position, i, "&#10;");
             break;
