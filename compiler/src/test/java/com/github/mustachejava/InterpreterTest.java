@@ -8,6 +8,7 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.MappingJsonFactory;
 
+import javax.annotation.Nullable;
 import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -274,7 +275,24 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "template_partial.txt"), sw.toString());
   }
 
-  public void testComplex() throws MustacheException, IOException {
+    public void testPartialWithTF() throws MustacheException, IOException {
+        MustacheFactory c = init();
+        Mustache m = c.compile("partialintemplatefunction.html");
+        StringWriter sw = new StringWriter();
+        m.execute(sw, new Object() {
+            public TemplateFunction i() {
+                return new TemplateFunction() {
+                    @Override
+                    public String apply(@Nullable String s) {
+                        return s;
+                    }
+                };
+            }
+        });
+        assertEquals("This is not interesting.", sw.toString());
+    }
+
+    public void testComplex() throws MustacheException, IOException {
     StringWriter json = new StringWriter();
     MappingJsonFactory jf = new MappingJsonFactory();
     final JsonGenerator jg = jf.createJsonGenerator(json);

@@ -7,6 +7,7 @@ import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.LatchedWriter;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -28,6 +29,21 @@ public class PartialCode extends DefaultCode {
 
   public PartialCode(TemplateContext tc, DefaultMustacheFactory cf, String variable) {
     this(tc, cf, null, ">", variable);
+  }
+
+  @Override
+  public void identity(Writer writer) {
+    try {
+      if (name != null) {
+        writer.write(tc.startChars());
+        writer.write(type);
+        writer.write(name);
+        writer.write(tc.endChars());
+      }
+      appendText(writer);
+    } catch (IOException e) {
+      throw new MustacheException(e);
+    }
   }
 
   @Override
