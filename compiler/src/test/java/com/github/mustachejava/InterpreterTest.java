@@ -1,15 +1,13 @@
 package com.github.mustachejava;
 
-import com.github.mustachejava.util.CapturingMustacheVisitor;
-import com.github.mustachejavabenchmarks.JsonCapturer;
-import com.github.mustachejavabenchmarks.JsonInterpreterTest;
-import junit.framework.TestCase;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.MappingJsonFactory;
-
-import javax.annotation.Nullable;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +16,15 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import javax.annotation.Nullable;
+
+import com.github.mustachejava.util.CapturingMustacheVisitor;
+import com.github.mustachejavabenchmarks.JsonCapturer;
+import com.github.mustachejavabenchmarks.JsonInterpreterTest;
+import junit.framework.TestCase;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.MappingJsonFactory;
 
 /**
  * Tests for the compiler.
@@ -79,13 +86,14 @@ public class InterpreterTest extends TestCase {
         int taxed_value() {
           return (int) (value - (value * 0.4));
         }
+
         String fred = "test";
       };
 
       Object in_ca = Arrays.asList(
               o, new Object() {
-                int taxed_value = (int) (value - (value * 0.2));
-              },
+        int taxed_value = (int) (value - (value * 0.2));
+      },
               o
       );
     });
@@ -101,33 +109,35 @@ public class InterpreterTest extends TestCase {
     final CountDownLatch cdl1 = new CountDownLatch(1);
     final CountDownLatch cdl2 = new CountDownLatch(1);
 
-    m.execute(sw, new Object() { Iterable list = Arrays.asList(
-      new Callable<Object>() {
-        @Override
-        public Object call() throws Exception {
-          cdl1.await();
-          sb.append("How");
-          return "How";
-        }
-      },
-      new Callable<Object>() {
-        @Override
-        public Object call() throws Exception {
-          cdl2.await();
-          sb.append("are");
-          cdl1.countDown();
-          return "are";
-        }
-      },
-      new Callable<Object>() {
-        @Override
-        public Object call() throws Exception {
-          sb.append("you?");
-          cdl2.countDown();
-          return "you?";
-        }
-      }
-    );}).close();
+    m.execute(sw, new Object() {
+      Iterable list = Arrays.asList(
+              new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                  cdl1.await();
+                  sb.append("How");
+                  return "How";
+                }
+              },
+              new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                  cdl2.await();
+                  sb.append("are");
+                  cdl1.countDown();
+                  return "are";
+                }
+              },
+              new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                  sb.append("you?");
+                  cdl2.countDown();
+                  return "you?";
+                }
+              }
+      );
+    }).close();
     assertEquals(getContents(root, "latchedtest.txt"), sw.toString());
     assertEquals("you?areHow", sb.toString());
   }
@@ -275,24 +285,24 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "template_partial.txt"), sw.toString());
   }
 
-    public void testPartialWithTF() throws MustacheException, IOException {
-        MustacheFactory c = init();
-        Mustache m = c.compile("partialintemplatefunction.html");
-        StringWriter sw = new StringWriter();
-        m.execute(sw, new Object() {
-            public TemplateFunction i() {
-                return new TemplateFunction() {
-                    @Override
-                    public String apply(@Nullable String s) {
-                        return s;
-                    }
-                };
-            }
-        });
-        assertEquals("This is not interesting.", sw.toString());
-    }
+  public void testPartialWithTF() throws MustacheException, IOException {
+    MustacheFactory c = init();
+    Mustache m = c.compile("partialintemplatefunction.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      public TemplateFunction i() {
+        return new TemplateFunction() {
+          @Override
+          public String apply(@Nullable String s) {
+            return s;
+          }
+        };
+      }
+    });
+    assertEquals("This is not interesting.", sw.toString());
+  }
 
-    public void testComplex() throws MustacheException, IOException {
+  public void testComplex() throws MustacheException, IOException {
     StringWriter json = new StringWriter();
     MappingJsonFactory jf = new MappingJsonFactory();
     final JsonGenerator jg = jf.createJsonGenerator(json);
@@ -450,7 +460,7 @@ public class InterpreterTest extends TestCase {
   public void testMultipleCallsWithDifferentScopes() throws IOException {
     String template = "Value: {{value}}";
     Mustache mustache = new DefaultMustacheFactory().compile(new StringReader(
-        template), "test");
+            template), "test");
 
     // scope object doesn't have a 'value' property, lookup will fail
     mustache.execute(new StringWriter(), new Object());
@@ -467,7 +477,7 @@ public class InterpreterTest extends TestCase {
   public void testMultipleCallsWithDifferentMapScopes() throws IOException {
     String template = "Value: {{value}}";
     Mustache mustache = new DefaultMustacheFactory().compile(new StringReader(
-        template), "test");
+            template), "test");
     Map<String, String> emptyMap = new HashMap<String, String>();
     Map<String, String> map = new HashMap<String, String>();
     map.put("value", "something");
