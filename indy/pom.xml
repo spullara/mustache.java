@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>indy</artifactId>
-  <version>0.8.3</version>
+  <version>0.8.4-SNAPSHOT</version>
 
   <name>indy</name>
   <description>Invokedynamic implementation of ObjectHandler</description>
@@ -38,7 +38,7 @@
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>compiler</artifactId>
-      <version>0.8.3</version>
+      <version>0.8.4-SNAPSHOT</version>
     </dependency>
 
     <!-- ASM -->
@@ -69,7 +69,7 @@
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>compiler</artifactId>
-      <version>0.8.3</version>
+      <version>0.8.4-SNAPSHOT</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
