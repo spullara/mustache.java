@@ -118,7 +118,7 @@ public class IterableCode extends DefaultCode implements Iteration {
   }
 
   public Writer next(Writer writer, Object next, Object... scopes) {
-    Object[] iteratorScopes = addScope(next, scopes);
+    Object[] iteratorScopes = addScope(scopes, next);
     writer = runCodes(writer, iteratorScopes);
     return writer;
   }

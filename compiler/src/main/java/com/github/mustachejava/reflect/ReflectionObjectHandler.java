@@ -23,7 +23,7 @@ import java.util.Map;
  * Date: 7/24/11
  * Time: 3:02 PM
  */
-public class ReflectionObjectHandler implements ObjectHandler {
+public class ReflectionObjectHandler extends BaseObjectHandler {
 
   protected static final Method MAP_METHOD;
 
@@ -105,11 +105,6 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return wrapper == null ? new MissingWrapper(guards.toArray(new Predicate[guards.size()])) : wrapper;
   }
 
-  @Override
-  public Object coerce(Object object) {
-    return object;
-  }
-
   protected Wrapper findWrapper(final int scopeIndex, Wrapper[] wrappers, List<Predicate<Object[]>> guards, Object scope, final String name) {
     scope = coerce(scope);
     if (scope == null) return null;
@@ -170,13 +165,6 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return createWrapper(scopeIndex, wrappers, guard, member, null);
   }
 
-  // We default to not allowing private methods
-  protected void checkMethod(Method member) throws NoSuchMethodException {
-    if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
-      throw new NoSuchMethodException("Only public, protected and package members allowed");
-    }
-  }
-
   protected Wrapper getField(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, String name, Class aClass) throws NoSuchFieldException {
     Field member;
     try {
@@ -193,81 +181,9 @@ public class ReflectionObjectHandler implements ObjectHandler {
     return createWrapper(scopeIndex, wrappers, guard, member, null);
   }
 
-  // We default to not allowing private fields
-  protected void checkField(Field member) throws NoSuchFieldException {
-    if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
-      throw new NoSuchFieldException("Only public, protected and package members allowed");
-    }
-  }
-
   protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, AccessibleObject member, Object[] arguments) {
     //noinspection unchecked
     return new ReflectionWrapper(scopeIndex, wrappers, guard.toArray(new Predicate[guard.size()]), member, arguments, this);
-  }
-
-  @Override
-  public Writer falsey(Iteration iteration, Writer writer, Object object, Object[] scopes) {
-    if (object != null) {
-      if (object instanceof Boolean) {
-        if ((Boolean) object) {
-          return writer;
-        }
-      } else if (object instanceof String) {
-        if (!object.toString().equals("")) {
-          return writer;
-        }
-      } else if (object instanceof List) {
-        List list = (List) object;
-        int length = list.size();
-        if (length > 0) return writer;
-      } else if (object instanceof Iterable) {
-        Iterable iterable = (Iterable) object;
-        if (iterable.iterator().hasNext()) return writer;
-      } else if (object instanceof Iterator) {
-        Iterator iterator = (Iterator) object;
-        if (iterator.hasNext()) return writer;
-      } else if (object instanceof Object[]) {
-        Object[] array = (Object[]) object;
-        int length = array.length;
-        if (length > 0) return writer;
-      } else {
-        // All other objects are truthy
-        return writer;
-      }
-    }
-    return iteration.next(writer, object, scopes);
-  }
-
-  public Writer iterate(Iteration iteration, Writer writer, Object object, Object[] scopes) {
-    if (object == null) return writer;
-    if (object instanceof Boolean) {
-      if (!(Boolean) object) {
-        return writer;
-      }
-    }
-    if (object instanceof String) {
-      if (object.toString().equals("")) {
-        return writer;
-      }
-    }
-    if (object instanceof Iterable) {
-      for (Object next : ((Iterable) object)) {
-        writer = iteration.next(writer, coerce(next), scopes);
-      }
-    } else if (object instanceof Iterator) {
-      Iterator iterator = (Iterator) object;
-      while (iterator.hasNext()) {
-        writer = iteration.next(writer, coerce(iterator.next()), scopes);
-      }
-    } else if (object instanceof Object[]) {
-      Object[] array = (Object[]) object;
-      for (Object o : array) {
-        writer = iteration.next(writer, coerce(o), scopes);
-      }
-    } else {
-      writer = iteration.next(writer, object, scopes);
-    }
-    return writer;
   }
 
 }

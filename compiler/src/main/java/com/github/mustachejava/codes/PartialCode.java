@@ -110,7 +110,7 @@ public class PartialCode extends DefaultCode {
   }
 
   protected Writer execute(Writer writer, Object scope, Object[] scopes) {
-    Object[] newscopes = addScope(scope, scopes);
+    Object[] newscopes = addScope(scopes, scope);
     return appendText(partial.execute(writer, newscopes));
   }
 }

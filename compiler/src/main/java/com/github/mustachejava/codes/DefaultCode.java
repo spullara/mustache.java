@@ -35,7 +35,6 @@ public class DefaultCode implements Code, Cloneable {
   protected static boolean debug = Boolean.getBoolean("mustache.debug");
   protected static Logger logger = Logger.getLogger("mustache");
 
-
   public Object clone() {
     try {
       return super.clone();
@@ -230,38 +229,15 @@ public class DefaultCode implements Code, Cloneable {
     }
   }
 
-  /**
-   * A thread local cache of various scope sizes that can be reused.
-   */
-  private static ThreadLocal<Map<Integer, Object[]>> localScopes = new ThreadLocal<Map<Integer, Object[]>>() {
-    @Override
-    protected Map<Integer, Object[]> initialValue() {
-      return new HashMap<Integer, Object[]>();
-    }
-  };
-
-  /**
-   * Allocating new scopes is currently the only place where we are activtely allocating
-   * memory within the templating system. It is possible that recycling these might lend
-   * some additional benefit or using the same one in each thread. The only time this
-   * grows is when there are recursive calls to the same scope. In most non-degenerate cases
-   * we won't encounter that. Also, since we are copying the results across these boundaries
-   * we don't have to worry about threads.
-   */
-  protected Object[] addScope(Object next, Object[] scopes) {
-    if (next == null) {
+  // Expand the current set of scopes
+  protected Object[] addScope(Object[] scopes, Object scope) {
+    if (scope == null) {
       return scopes;
     } else {
-      Map<Integer, Object[]> map = localScopes.get();
-      int numScopes = scopes.length + 1;
-      // Don't cache very large scope objects in case there is a very deep recursion
-      Object[] newScopes = numScopes > 100 ? new Object[numScopes] : map.get(numScopes);
-      if (newScopes == null) {
-        newScopes = new Object[numScopes];
-        map.put(numScopes, newScopes);
-      }
-      System.arraycopy(scopes, 0, newScopes, 0, scopes.length);
-      newScopes[scopes.length] = next;
+      int length = scopes.length;
+      Object[] newScopes = new Object[length + 1];
+      System.arraycopy(scopes, 0, newScopes, 0, length);
+      newScopes[length] = scope;
       return newScopes;
     }
   }
