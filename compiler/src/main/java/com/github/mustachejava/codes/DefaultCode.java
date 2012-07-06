@@ -1,5 +1,14 @@
 package com.github.mustachejava.codes;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.logging.Logger;
+
 import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
@@ -8,13 +17,6 @@ import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.reflect.MissingWrapper;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.logging.Logger;
 
 /**
  * Simplest possible code implementaion with some default shared behavior
@@ -228,7 +230,15 @@ public class DefaultCode implements Code, Cloneable {
     }
   }
 
-  private ThreadLocal<Object[]> localScopes = new ThreadLocal<Object[]>();
+  /**
+   * A thread local cache of various scope sizes that can be reused.
+   */
+  private static ThreadLocal<Map<Integer, Object[]>> localScopes = new ThreadLocal<Map<Integer, Object[]>>() {
+    @Override
+    protected Map<Integer, Object[]> initialValue() {
+      return new HashMap<Integer, Object[]>();
+    }
+  };
 
   /**
    * Allocating new scopes is currently the only place where we are activtely allocating
@@ -239,27 +249,20 @@ public class DefaultCode implements Code, Cloneable {
    * we don't have to worry about threads.
    */
   protected Object[] addScope(Object next, Object[] scopes) {
-    Object[] iteratorScopes = scopes;
-    if (next != null) {
-      // Need to expand the scopes holder
-      iteratorScopes = localScopes.get();
-      if (iteratorScopes == null) {
-        iteratorScopes = new Object[scopes.length + 1];
-        localScopes.set(iteratorScopes);
-      } else {
-        if (iteratorScopes.length < scopes.length + 1) {
-          // Need to expand the scopes holder
-          iteratorScopes = new Object[scopes.length + 1];
-          localScopes.set(iteratorScopes);
-        }
+    if (next == null) {
+      return scopes;
+    } else {
+      Map<Integer, Object[]> map = localScopes.get();
+      int numScopes = scopes.length + 1;
+      // Don't cache very large scope objects in case there is a very deep recursion
+      Object[] newScopes = numScopes > 100 ? new Object[numScopes] : map.get(numScopes);
+      if (newScopes == null) {
+        newScopes = new Object[numScopes];
+        map.put(numScopes, newScopes);
       }
-      int srcPos = iteratorScopes.length - scopes.length - 1;
-      System.arraycopy(scopes, 0, iteratorScopes, srcPos, scopes.length);
-      for (; srcPos > 0; srcPos--) {
-        iteratorScopes[srcPos - 1] = null;
-      }
-      iteratorScopes[iteratorScopes.length - 1] = next;
+      System.arraycopy(scopes, 0, newScopes, 0, scopes.length);
+      newScopes[scopes.length] = next;
+      return newScopes;
     }
-    return iteratorScopes;
   }
 }

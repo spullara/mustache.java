@@ -21,8 +21,6 @@ import java.util.regex.Pattern;
  */
 public class ExtendCode extends PartialCode {
 
-  private static Pattern WS = Pattern.compile("\\s+", Pattern.MULTILINE);
-
   private MustacheFactory mf;
 
   public ExtendCode(TemplateContext tc, DefaultMustacheFactory mf, Mustache codes, String name) throws MustacheException {
