@@ -1,13 +1,8 @@
-package com.github.mustachejavabenchmarks;
+package com.github.mustachejava.simple;
 
-import com.github.mustachejava.*;
+import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.reflect.SimpleObjectHandler;
-import junit.framework.TestCase;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.concurrent.Executors;
+import com.github.mustachejavabenchmarks.BenchmarkTest;
 
 /**
  * Compare compilation with interpreter.
@@ -17,6 +12,10 @@ import java.util.concurrent.Executors;
  * Time: 9:28 PM
  */
 public class SimpleBenchmarkTest extends BenchmarkTest {
+  @Override
+  public void testCompiler() {
+  }
+
   @Override
   protected DefaultMustacheFactory createMustacheFactory() {
     DefaultMustacheFactory mf = new DefaultMustacheFactory();

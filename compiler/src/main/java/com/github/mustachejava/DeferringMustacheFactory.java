@@ -93,7 +93,7 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
                         public Object call() {
                           try {
                             StringWriter writer = new StringWriter();
-                            Object[] newscopes = addScope(object, scopes);
+                            Object[] newscopes = addScope(scopes, object);
                             partial.execute(writer, newscopes).close();
                             return writer.toString();
                           } catch (IOException e) {

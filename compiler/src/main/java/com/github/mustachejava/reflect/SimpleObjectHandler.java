@@ -1,14 +1,16 @@
 package com.github.mustachejava.reflect;
 
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.util.GuardException;
+import com.github.mustachejava.util.Wrapper;
+
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
-
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.util.GuardException;
-import com.github.mustachejava.util.Wrapper;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SimpleObjectHandler extends BaseObjectHandler {
   @Override
@@ -27,26 +29,13 @@ public class SimpleObjectHandler extends BaseObjectHandler {
                   return map.get(name);
                 }
               }
-              Class sClass = scope.getClass();
+              final Class sClass = scope.getClass();
               try {
-                try {
-                  return getMethod(sClass, name).invoke(scope);
-                } catch (NoSuchMethodException e) {
-                  String propertyname = name.substring(0, 1).toUpperCase() +
-                          (name.length() > 1 ? name.substring(1) : "");
-                  try {
-                    return getMethod(sClass, "get" + propertyname).invoke(scope);
-                  } catch (NoSuchMethodException e2) {
-                    try {
-                      return getMethod(sClass, "is" + propertyname).invoke(scope);
-                    } catch (NoSuchMethodException e3) {
-                      try {
-                        return getField(sClass, name).get(scope);
-                      } catch (NoSuchFieldException e4) {
-                        // Not set
-                      }
-                    }
-                  }
+                AccessibleObject ao = lookup(sClass, name);
+                if (ao instanceof Method) {
+                  return ((Method) ao).invoke(scope);
+                } else if (ao instanceof Field) {
+                  return ((Field) ao).get(scope);
                 }
               } catch (InvocationTargetException ie) {
                 throw new MustacheException("Failed to get " + name + " from " + sClass, ie);
@@ -55,12 +44,12 @@ public class SimpleObjectHandler extends BaseObjectHandler {
                         "Set accessible failed to get " + name + " from " + sClass, iae);
               }
             } else {
-              Object[] subscope = { scope };
+              Object[] subscope = {scope};
               Wrapper wrapper = find(name.substring(0, index), subscope);
               if (wrapper != null) {
                 scope = wrapper.call(subscope);
-                subscope = new Object[] { scope };
-                return find(name.substring(index +1), new Object[] { subscope }).call(subscope);
+                subscope = new Object[]{scope};
+                return find(name.substring(index + 1), new Object[]{subscope}).call(subscope);
               }
             }
           }
@@ -68,6 +57,43 @@ public class SimpleObjectHandler extends BaseObjectHandler {
         return null;
       }
     };
+  }
+
+  private static AccessibleObject NONE;
+  static {
+    try {
+      NONE = SimpleObjectHandler.class.getDeclaredField("NONE");
+    } catch (NoSuchFieldException e) {
+      throw new AssertionError("Failed to init", e);
+    }
+  }
+
+  private AccessibleObject lookup(Class sClass, String name) {
+    WrapperKey key = new WrapperKey(sClass, name);
+    AccessibleObject ao = cache.get(key);
+    if (ao == null) {
+      try {
+        ao = getMethod(sClass, name);
+      } catch (NoSuchMethodException e) {
+        String propertyname = name.substring(0, 1).toUpperCase() +
+                (name.length() > 1 ? name.substring(1) : "");
+        try {
+          ao = getMethod(sClass, "get" + propertyname);
+        } catch (NoSuchMethodException e2) {
+          try {
+            ao = getMethod(sClass, "is" + propertyname);
+          } catch (NoSuchMethodException e3) {
+            try {
+              ao = getField(sClass, name);
+            } catch (NoSuchFieldException e4) {
+              ao = NONE;
+            }
+          }
+        }
+      }
+      cache.put(key, ao);
+    }
+    return ao == NONE ? null : ao;
   }
 
   protected Field getField(Class aClass, String name) throws NoSuchFieldException {
@@ -85,6 +111,33 @@ public class SimpleObjectHandler extends BaseObjectHandler {
     member.setAccessible(true);
     return member;
   }
+
+  private static class WrapperKey {
+    private final Class aClass;
+    private final String name;
+
+    WrapperKey(Class aClass, String name) {
+      this.aClass = aClass;
+      this.name = name;
+    }
+
+    @Override
+    public int hashCode() {
+      return aClass.hashCode() + 43 * name.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj instanceof WrapperKey) {
+        WrapperKey oKey = (WrapperKey) obj;
+        return aClass.equals(oKey.aClass) && name.equals(oKey.name);
+      } else {
+        return false;
+      }
+    }
+  }
+
+  private Map<WrapperKey, AccessibleObject> cache = new ConcurrentHashMap<WrapperKey, AccessibleObject>();
 
   protected Method getMethod(Class aClass, String name) throws NoSuchMethodException {
     Method member;
