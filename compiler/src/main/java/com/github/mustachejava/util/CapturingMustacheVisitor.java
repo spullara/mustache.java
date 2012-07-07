@@ -1,7 +1,5 @@
 package com.github.mustachejava.util;
 
-import java.io.Writer;
-
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.DefaultMustacheVisitor;
 import com.github.mustachejava.Mustache;
@@ -9,6 +7,8 @@ import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.codes.IterableCode;
 import com.github.mustachejava.codes.NotIterableCode;
 import com.github.mustachejava.codes.ValueCode;
+
+import java.io.Writer;
 
 /**
  * Grab a map of values returned from calls

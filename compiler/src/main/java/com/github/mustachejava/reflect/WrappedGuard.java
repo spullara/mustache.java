@@ -33,8 +33,8 @@ public class WrappedGuard implements Predicate<Object[]> {
   public boolean apply(@Nullable Object[] objects) {
     Object scope = unwrap(oh, index, wrappers, objects);
     for (Predicate<Object[]> predicate : wrapperGuard) {
-      if (!predicate.apply(new Object[] { scope })) {
-         return false;
+      if (!predicate.apply(new Object[]{scope})) {
+        return false;
       }
     }
     return true;

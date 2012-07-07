@@ -1,8 +1,8 @@
 package com.github.mustachejava.reflect;
 
-import javax.annotation.Nullable;
-
 import com.google.common.base.Predicate;
+
+import javax.annotation.Nullable;
 
 public class NullGuard implements Predicate<Object[]> {
   @Override

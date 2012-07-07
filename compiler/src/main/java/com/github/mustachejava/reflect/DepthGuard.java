@@ -1,8 +1,8 @@
 package com.github.mustachejava.reflect;
 
-import javax.annotation.Nullable;
-
 import com.google.common.base.Predicate;
+
+import javax.annotation.Nullable;
 
 /**
  * Check that there are the same number of scope levels.

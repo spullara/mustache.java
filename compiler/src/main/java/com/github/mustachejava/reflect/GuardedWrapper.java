@@ -13,6 +13,7 @@ public class GuardedWrapper implements Wrapper {
   // We only need a single guard exception -- don't fill stack trace
   // and don't reallocate it.
   private static final GuardException guardException = new GuardException();
+
   static {
     guardException.setStackTrace(new StackTraceElement[0]);
   }

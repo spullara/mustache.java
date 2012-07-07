@@ -1,10 +1,10 @@
 package com.github.mustachejava.util;
 
+import com.github.mustachejava.MustacheException;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.util.concurrent.CountDownLatch;
-
-import com.github.mustachejava.MustacheException;
 
 /**
  * Buffer content while a future is being evaluated in another thread.

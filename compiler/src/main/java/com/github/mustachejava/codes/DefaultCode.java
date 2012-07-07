@@ -1,22 +1,16 @@
 package com.github.mustachejava.codes;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.logging.Logger;
-
-import com.github.mustachejava.Code;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.ObjectHandler;
-import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.*;
 import com.github.mustachejava.reflect.MissingWrapper;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.logging.Logger;
 
 /**
  * Simplest possible code implementaion with some default shared behavior
