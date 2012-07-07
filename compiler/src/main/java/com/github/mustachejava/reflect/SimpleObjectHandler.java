@@ -64,7 +64,7 @@ public class SimpleObjectHandler extends BaseObjectHandler {
     try {
       NONE = SimpleObjectHandler.class.getDeclaredField("NONE");
     } catch (NoSuchFieldException e) {
-      throw new AssertionError("Failed to init", e);
+      throw new AssertionError("Failed to init: " + e);
     }
   }
 
