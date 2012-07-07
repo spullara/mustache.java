@@ -1,10 +1,6 @@
 package com.github.mustachejava.codes;
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.MustacheParser;
-import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.*;
 import com.github.mustachejava.util.LatchedWriter;
 import com.google.common.base.Function;
 
@@ -75,6 +71,12 @@ public class ValueCode extends DefaultCode {
       execute(writer, callable.call().toString());
       return super.execute(writer, scopes);
     } else {
+      // Flush the current writer
+      try {
+        writer.flush();
+      } catch (IOException e) {
+        throw new MustacheException("Failed to flush writer", e);
+      }
       final LatchedWriter latchedWriter = new LatchedWriter(writer);
       final Writer finalWriter = writer;
       les.execute(new Runnable() {

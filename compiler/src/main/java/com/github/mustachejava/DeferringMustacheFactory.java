@@ -1,5 +1,9 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.codes.PartialCode;
+import com.github.mustachejava.util.GuardException;
+import com.github.mustachejava.util.Wrapper;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -9,10 +13,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
-
-import com.github.mustachejava.codes.PartialCode;
-import com.github.mustachejava.util.GuardException;
-import com.github.mustachejava.util.Wrapper;
 
 /**
  * This allows you to automatically defer evaluation of partials. By default
@@ -83,6 +83,7 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
             if (object == DEFERRED && deferredCallable != null) {
               try {
                 writeTarget(writer, divid);
+                writer.append(appended);
               } catch (IOException e) {
                 throw new MustacheException("Failed to write", e);
               }
@@ -92,7 +93,8 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
                         public Object call() {
                           try {
                             StringWriter writer = new StringWriter();
-                            execute(writer, object, scopes).close();
+                            Object[] newscopes = addScope(object, scopes);
+                            partial.execute(writer, newscopes).close();
                             return writer.toString();
                           } catch (IOException e) {
                             throw new MustacheException("Failed to writer", e);
@@ -124,7 +126,7 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
   protected void writeTarget(Writer writer, Long divid) throws IOException {
     writer.append("<div id=\"");
     writer.append(divid.toString());
-    writer.append("\"></div>\n");
+    writer.append("\"></div>");
   }
 
   protected static void writeDeferral(StringBuilder sb, Deferral deferral, Object o) {

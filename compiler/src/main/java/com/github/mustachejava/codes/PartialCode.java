@@ -1,10 +1,6 @@
 package com.github.mustachejava.codes;
 
-import com.github.mustachejava.Code;
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.*;
 import com.github.mustachejava.util.LatchedWriter;
 
 import java.io.IOException;
@@ -82,6 +78,12 @@ public class PartialCode extends DefaultCode {
   protected Writer partialExecute(Writer writer, final Object[] scopes) {
     Object object = get(scopes);
     if (object instanceof Callable) {
+      // Flush the current writer
+      try {
+        writer.flush();
+      } catch (IOException e) {
+        throw new MustacheException("Failed to flush writer", e);
+      }
       final Callable callable = (Callable) object;
       if (les == null) {
         try {
