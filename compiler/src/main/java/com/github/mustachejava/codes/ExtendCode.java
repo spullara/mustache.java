@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  */
 public class ExtendCode extends PartialCode {
 
-  private MustacheFactory mf;
+  private final MustacheFactory mf;
 
   public ExtendCode(TemplateContext tc, DefaultMustacheFactory mf, Mustache codes, String name) throws MustacheException {
     super(tc, mf, codes, "<", name);

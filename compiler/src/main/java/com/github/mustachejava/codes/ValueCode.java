@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutorService;
 public class ValueCode extends DefaultCode {
   private final boolean encoded;
   private final DefaultMustacheFactory cf;
-  private ExecutorService les;
+  private final ExecutorService les;
 
   @Override
   public void identity(Writer writer) {

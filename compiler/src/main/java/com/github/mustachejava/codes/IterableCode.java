@@ -19,8 +19,8 @@ import com.github.mustachejava.util.LatchedWriter;
 
 public class IterableCode extends DefaultCode implements Iteration {
 
-  private DefaultMustacheFactory cf;
-  private ExecutorService les;
+  private final DefaultMustacheFactory cf;
+  private final ExecutorService les;
 
   public IterableCode(TemplateContext tc, DefaultMustacheFactory cf, Mustache mustache, String variable) {
     super(tc, cf.getObjectHandler(), mustache, variable, "#");

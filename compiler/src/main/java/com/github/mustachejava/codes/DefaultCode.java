@@ -35,7 +35,6 @@ public class DefaultCode implements Code, Cloneable {
   protected static boolean debug = Boolean.getBoolean("mustache.debug");
   protected static Logger logger = Logger.getLogger("mustache");
 
-
   public Object clone() {
     try {
       return super.clone();
