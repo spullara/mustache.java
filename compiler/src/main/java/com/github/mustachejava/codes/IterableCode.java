@@ -1,5 +1,9 @@
 package com.github.mustachejava.codes;
 
+import com.github.mustachejava.*;
+import com.github.mustachejava.util.LatchedWriter;
+import com.google.common.base.Function;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -7,20 +11,10 @@ import java.io.Writer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
-import com.google.common.base.Function;
-
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Iteration;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.TemplateContext;
-import com.github.mustachejava.TemplateFunction;
-import com.github.mustachejava.util.LatchedWriter;
-
 public class IterableCode extends DefaultCode implements Iteration {
 
-  private DefaultMustacheFactory cf;
-  private ExecutorService les;
+  private final DefaultMustacheFactory cf;
+  private final ExecutorService les;
 
   public IterableCode(TemplateContext tc, DefaultMustacheFactory cf, Mustache mustache, String variable) {
     super(tc, cf.getObjectHandler(), mustache, variable, "#");
@@ -57,6 +51,12 @@ public class IterableCode extends DefaultCode implements Iteration {
         throw new MustacheException(e);
       }
     } else {
+      // Flush the current writer
+      try {
+        writer.flush();
+      } catch (IOException e) {
+        throw new MustacheException("Failed to flush writer", e);
+      }
       final Writer originalWriter = writer;
       final LatchedWriter latchedWriter = new LatchedWriter(writer);
       writer = latchedWriter;

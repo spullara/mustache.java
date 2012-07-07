@@ -1,17 +1,16 @@
 package com.github.mustachejava.jruby;
 
-import java.lang.reflect.Method;
-import java.util.List;
-import javax.annotation.Nullable;
-
-import com.google.common.base.Predicate;
-
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.util.Wrapper;
+import com.google.common.base.Predicate;
 import org.jruby.RubyBoolean;
 import org.jruby.RubyHash;
 import org.jruby.RubyObject;
 import org.jruby.RubySymbol;
+
+import javax.annotation.Nullable;
+import java.lang.reflect.Method;
+import java.util.List;
 
 public class JRubyObjectHandler extends ReflectionObjectHandler {
 
@@ -45,7 +44,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
           guards.add(new Predicate<Object[]>() {
             @Override
             public boolean apply(@Nullable Object[] input) {
-              return ((RubyHash)input[scopeIndex]).containsKey(rs);
+              return ((RubyHash) input[scopeIndex]).containsKey(rs);
             }
           });
           return createWrapper(scopeIndex, wrappers, guards, MAP_METHOD, new Object[]{rs});
@@ -53,7 +52,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
           guards.add(new Predicate<Object[]>() {
             @Override
             public boolean apply(@Nullable Object[] input) {
-              return !((RubyHash)input[scopeIndex]).containsKey(rs);
+              return !((RubyHash) input[scopeIndex]).containsKey(rs);
             }
           });
         }
@@ -68,7 +67,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
               return scope.respondsTo(name);
             }
           });
-          return createWrapper(scopeIndex, wrappers, guards, CALL_METHOD, new Object[]{ name });
+          return createWrapper(scopeIndex, wrappers, guards, CALL_METHOD, new Object[]{name});
         } else {
           guards.add(new Predicate<Object[]>() {
             @Override

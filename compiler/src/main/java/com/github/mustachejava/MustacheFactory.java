@@ -2,7 +2,6 @@ package com.github.mustachejava;
 
 import java.io.Reader;
 import java.io.Writer;
-import java.util.List;
 
 /**
  * Factory for creating codes
@@ -27,7 +26,7 @@ public interface MustacheFactory {
    * This defines how "encoded" values are encoded. It defaults to
    * something appropriate for HTML output.
    *
-   * @param value the unencoded value
+   * @param value  the unencoded value
    * @param writer where to encode the value
    */
   void encode(String value, Writer writer);
@@ -51,7 +50,7 @@ public interface MustacheFactory {
    * Create a mustache given a reader and a name.
    *
    * @param reader the reader
-   * @param name the name of the resource
+   * @param name   the name of the resource
    * @return the compiled mustache
    */
   Mustache compile(Reader reader, String name);

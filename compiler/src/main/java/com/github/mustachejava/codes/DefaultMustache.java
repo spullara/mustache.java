@@ -8,8 +8,8 @@ import com.github.mustachejava.TemplateContext;
 import java.io.Writer;
 
 /**
-* Default Mustache
-*/
+ * Default Mustache
+ */
 public class DefaultMustache extends DefaultCode implements Mustache {
   private Code[] codes;
   private boolean inited = false;

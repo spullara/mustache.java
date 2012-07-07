@@ -9,12 +9,12 @@ import java.util.Map;
 import static com.github.mustachejava.reflect.ReflectionObjectHandler.unwrap;
 
 /**
-* Created with IntelliJ IDEA.
-* User: spullara
-* Date: 4/13/12
-* Time: 10:10 AM
-* To change this template use File | Settings | File Templates.
-*/
+ * Created with IntelliJ IDEA.
+ * User: spullara
+ * Date: 4/13/12
+ * Time: 10:10 AM
+ * To change this template use File | Settings | File Templates.
+ */
 public class MapGuard implements Predicate<Object[]> {
   private final ObjectHandler oh;
   private final int scopeIndex;

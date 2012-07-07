@@ -3,12 +3,12 @@ package com.github.mustachejava.reflect;
 import com.google.common.base.Predicate;
 
 /**
-* Ensure that the class of the current scope is that same as when this wrapper was generated.
-* User: spullara
-* Date: 4/13/12
-* Time: 9:23 AM
-* To change this template use File | Settings | File Templates.
-*/
+ * Ensure that the class of the current scope is that same as when this wrapper was generated.
+ * User: spullara
+ * Date: 4/13/12
+ * Time: 9:23 AM
+ * To change this template use File | Settings | File Templates.
+ */
 public class ClassGuard implements Predicate<Object[]> {
   private final Class classGuard;
   private final int scopeIndex;
