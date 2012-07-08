@@ -84,6 +84,7 @@ public class IterableCode extends DefaultCode implements Iteration {
     return writer;
   }
 
+  @SuppressWarnings("unchecked")
   protected Writer handleFunction(Writer writer, Function function, Object[] scopes) {
     StringWriter sw = new StringWriter();
     runIdentity(sw);

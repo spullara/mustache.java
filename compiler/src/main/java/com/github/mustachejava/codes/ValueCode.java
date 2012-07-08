@@ -95,6 +95,7 @@ public class ValueCode extends DefaultCode {
     }
   }
 
+  @SuppressWarnings("unchecked")
   protected void handleFunction(Writer writer, Function function, Object[] scopes) throws IOException {
     String value;
     Object newtemplate = function.apply(null);

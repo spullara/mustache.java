@@ -79,7 +79,6 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
   @Override
   public void notIterable(TemplateContext tc, String variable, Mustache mustache) {
     list.add(new NotIterableCode(tc, cf, mustache, variable) {
-      Object value;
       boolean called;
 
       @Override
@@ -90,7 +89,6 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
       @Override
       public Writer next(Writer writer, Object object, Object[] scopes) {
         called = true;
-        value = object;
         return super.next(writer, object, scopes);
       }
 

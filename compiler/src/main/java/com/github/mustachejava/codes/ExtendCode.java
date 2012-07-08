@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Extending a template.
+ * Extending a template through in-place replacement of the overridden codes.
  * <p/>
  * User: sam
  * Date: 11/27/11
