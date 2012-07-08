@@ -31,10 +31,7 @@ public class PartialCode extends DefaultCode {
   public void identity(Writer writer) {
     try {
       if (name != null) {
-        writer.write(tc.startChars());
-        writer.write(type);
-        writer.write(name);
-        writer.write(tc.endChars());
+        super.tag(writer, type);
       }
       appendText(writer);
     } catch (IOException e) {

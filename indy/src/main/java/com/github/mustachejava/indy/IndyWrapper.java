@@ -158,9 +158,7 @@ public abstract class IndyWrapper extends ReflectionWrapper implements Opcodes {
       Field field = iw.getField();
       MethodHandle unreflect = MethodHandles.lookup().unreflectGetter(field);
       unreflect = MethodHandles.dropArguments(unreflect, 0, IndyWrapper.class);
-      unreflect = MethodHandles.explicitCastArguments(unreflect,
-              MethodType.methodType(Object.class, IndyWrapper.class, Object.class));
-      callSite.setTarget(unreflect);
+      setCallsite(callSite, unreflect);
       return field.get(scope);
     } else {
       MethodHandle unreflect = MethodHandles.lookup().unreflect(method);
@@ -170,10 +168,14 @@ public abstract class IndyWrapper extends ReflectionWrapper implements Opcodes {
           unreflect = MethodHandles.insertArguments(unreflect, i + 2, iw.getArguments()[i]);
         }
       }
-      unreflect = MethodHandles.explicitCastArguments(unreflect,
-              MethodType.methodType(Object.class, IndyWrapper.class, Object.class));
-      callSite.setTarget(unreflect);
+      setCallsite(callSite, unreflect);
       return method.invoke(scope, iw.getArguments());
     }
+  }
+
+  private static void setCallsite(MutableCallSite callSite, MethodHandle unreflect) {
+    unreflect = MethodHandles.explicitCastArguments(unreflect,
+            MethodType.methodType(Object.class, IndyWrapper.class, Object.class));
+    callSite.setTarget(unreflect);
   }
 }

@@ -107,7 +107,7 @@ public class DefaultCode implements Code, Cloneable {
     }
   }
 
-  private void tag(Writer writer, String tag) throws IOException {
+  protected void tag(Writer writer, String tag) throws IOException {
     writer.write(tc.startChars());
     writer.write(tag);
     writer.write(name);
