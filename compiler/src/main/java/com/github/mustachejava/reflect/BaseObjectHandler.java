@@ -1,14 +1,15 @@
 package com.github.mustachejava.reflect;
 
+import com.github.mustachejava.Iteration;
+import com.github.mustachejava.ObjectHandler;
+
 import java.io.Writer;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Iterator;
 import java.util.List;
-
-import com.github.mustachejava.Iteration;
-import com.github.mustachejava.ObjectHandler;
 
 public abstract class BaseObjectHandler implements ObjectHandler {
   @Override
@@ -93,5 +94,61 @@ public abstract class BaseObjectHandler implements ObjectHandler {
       writer = iteration.next(writer, object, scopes);
     }
     return writer;
+  }
+
+  protected Field getField(Class aClass, String name) throws NoSuchFieldException {
+    Field member;
+    try {
+      member = aClass.getDeclaredField(name);
+    } catch (NoSuchFieldException nsfe) {
+      Class superclass = aClass.getSuperclass();
+      if (superclass != null && superclass != Object.class) {
+        return getField(superclass, name);
+      }
+      throw nsfe;
+    }
+    checkField(member);
+    member.setAccessible(true);
+    return member;
+  }
+
+  protected Method getMethod(Class aClass, String name, Class... params) throws NoSuchMethodException {
+    Method member;
+    try {
+      member = aClass.getDeclaredMethod(name, params);
+    } catch (NoSuchMethodException nsme) {
+      Class superclass = aClass.getSuperclass();
+      if (superclass != null && superclass != Object.class) {
+        return getMethod(superclass, name);
+      }
+      throw nsme;
+    }
+    checkMethod(member);
+    member.setAccessible(true);
+    return member;
+  }
+
+  protected AccessibleObject findMember(Class sClass, String name) {
+    AccessibleObject ao;
+    try {
+      ao = getMethod(sClass, name);
+    } catch (NoSuchMethodException e) {
+      String propertyname = name.substring(0, 1).toUpperCase() +
+              (name.length() > 1 ? name.substring(1) : "");
+      try {
+        ao = getMethod(sClass, "get" + propertyname);
+      } catch (NoSuchMethodException e2) {
+        try {
+          ao = getMethod(sClass, "is" + propertyname);
+        } catch (NoSuchMethodException e3) {
+          try {
+            ao = getField(sClass, name);
+          } catch (NoSuchFieldException e4) {
+            ao = null;
+          }
+        }
+      }
+    }
+    return ao;
   }
 }

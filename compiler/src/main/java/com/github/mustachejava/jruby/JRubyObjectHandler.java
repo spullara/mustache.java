@@ -8,7 +8,6 @@ import org.jruby.RubyHash;
 import org.jruby.RubyObject;
 import org.jruby.RubySymbol;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -43,7 +42,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
         if (hash.get(rs) != null) {
           guards.add(new Predicate<Object[]>() {
             @Override
-            public boolean apply(@Nullable Object[] input) {
+            public boolean apply(Object[] input) {
               return ((RubyHash) input[scopeIndex]).containsKey(rs);
             }
           });
@@ -51,7 +50,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
         } else {
           guards.add(new Predicate<Object[]>() {
             @Override
-            public boolean apply(@Nullable Object[] input) {
+            public boolean apply(Object[] input) {
               return !((RubyHash) input[scopeIndex]).containsKey(rs);
             }
           });
@@ -62,7 +61,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
         if (ro.respondsTo(name)) {
           guards.add(new Predicate<Object[]>() {
             @Override
-            public boolean apply(@Nullable Object[] objects) {
+            public boolean apply(Object[] objects) {
               RubyObject scope = (RubyObject) objects[scopeIndex];
               return scope.respondsTo(name);
             }
@@ -71,7 +70,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
         } else {
           guards.add(new Predicate<Object[]>() {
             @Override
-            public boolean apply(@Nullable Object[] objects) {
+            public boolean apply(Object[] objects) {
               RubyObject scope = (RubyObject) objects[scopeIndex];
               return !scope.respondsTo(name);
             }

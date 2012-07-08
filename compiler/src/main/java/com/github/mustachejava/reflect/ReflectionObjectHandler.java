@@ -1,18 +1,13 @@
 package com.github.mustachejava.reflect;
 
-import com.github.mustachejava.Iteration;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 import com.google.common.base.Predicate;
 
-import java.io.Writer;
 import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +41,7 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Wrapper find(String name, final Object[] scopes) {
     Wrapper wrapper = null;
@@ -101,7 +97,6 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
         break;
       }
     }
-    //noinspection unchecked
     return wrapper == null ? new MissingWrapper(guards.toArray(new Predicate[guards.size()])) : wrapper;
   }
 
@@ -120,69 +115,12 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
         return createWrapper(scopeIndex, wrappers, guards, MAP_METHOD, new Object[]{name});
       }
     }
-    Class aClass = scope.getClass();
-    // Variable resolution looks for:
-    // 1) method named name
-    // 2) method named getName
-    // 3) method named isName
-    // 4) field named name
-    Wrapper member = null;
-    try {
-      member = getMethod(scopeIndex, wrappers, guards, name, aClass);
-    } catch (NoSuchMethodException e) {
-      String propertyname = name.substring(0, 1).toUpperCase() +
-              (name.length() > 1 ? name.substring(1) : "");
-      try {
-        member = getMethod(scopeIndex, wrappers, guards, "get" + propertyname, aClass);
-      } catch (NoSuchMethodException e2) {
-        try {
-          member = getMethod(scopeIndex, wrappers, guards, "is" + propertyname, aClass);
-        } catch (NoSuchMethodException e3) {
-          try {
-            member = getField(scopeIndex, wrappers, guards, name, aClass);
-          } catch (NoSuchFieldException e4) {
-            // Not set
-          }
-        }
-      }
-    }
-    return member;
+    AccessibleObject member = findMember(scope.getClass(), name);
+    return member == null ? null : createWrapper(scopeIndex, wrappers, guards, member, null);
   }
 
-  protected Wrapper getMethod(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, String name, Class aClass, Class... params) throws NoSuchMethodException {
-    Method member;
-    try {
-      member = aClass.getDeclaredMethod(name, params);
-    } catch (NoSuchMethodException nsme) {
-      Class superclass = aClass.getSuperclass();
-      if (superclass != null && superclass != Object.class) {
-        return getMethod(scopeIndex, wrappers, guard, name, superclass, params);
-      }
-      throw nsme;
-    }
-    checkMethod(member);
-    member.setAccessible(true);
-    return createWrapper(scopeIndex, wrappers, guard, member, null);
-  }
-
-  protected Wrapper getField(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, String name, Class aClass) throws NoSuchFieldException {
-    Field member;
-    try {
-      member = aClass.getDeclaredField(name);
-    } catch (NoSuchFieldException nsfe) {
-      Class superclass = aClass.getSuperclass();
-      if (superclass != null && superclass != Object.class) {
-        return getField(scopeIndex, wrappers, guard, name, superclass);
-      }
-      throw nsfe;
-    }
-    checkField(member);
-    member.setAccessible(true);
-    return createWrapper(scopeIndex, wrappers, guard, member, null);
-  }
-
+  @SuppressWarnings("unchecked")
   protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, AccessibleObject member, Object[] arguments) {
-    //noinspection unchecked
     return new ReflectionWrapper(scopeIndex, wrappers, guard.toArray(new Predicate[guard.size()]), member, arguments, this);
   }
 

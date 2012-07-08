@@ -8,7 +8,6 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,27 +22,28 @@ public class SimpleObjectHandler extends BaseObjectHandler {
           if (scope != null) {
             int index = name.indexOf(".");
             if (index == -1) {
+              // Special case Maps
               if (scope instanceof Map) {
                 Map map = (Map) scope;
                 if (map.containsKey(name)) {
                   return map.get(name);
                 }
               }
-              final Class sClass = scope.getClass();
+              // Check to see if there is a method or field that matches
               try {
-                AccessibleObject ao = lookup(sClass, name);
+                AccessibleObject ao = lookup(scope.getClass(), name);
                 if (ao instanceof Method) {
                   return ((Method) ao).invoke(scope);
                 } else if (ao instanceof Field) {
                   return ((Field) ao).get(scope);
                 }
               } catch (InvocationTargetException ie) {
-                throw new MustacheException("Failed to get " + name + " from " + sClass, ie);
+                throw new MustacheException("Failed to get " + name + " from " + scope.getClass(), ie);
               } catch (IllegalAccessException iae) {
-                throw new MustacheException(
-                        "Set accessible failed to get " + name + " from " + sClass, iae);
+                throw new MustacheException("Set accessible failed to get " + name + " from " + scope.getClass(), iae);
               }
             } else {
+              // Dig into the dot-notation
               Object[] subscope = {scope};
               Wrapper wrapper = find(name.substring(0, index), subscope);
               if (wrapper != null) {
@@ -59,59 +59,7 @@ public class SimpleObjectHandler extends BaseObjectHandler {
     };
   }
 
-  private static AccessibleObject NONE;
-  static {
-    try {
-      NONE = SimpleObjectHandler.class.getDeclaredField("NONE");
-    } catch (NoSuchFieldException e) {
-      throw new AssertionError("Failed to init: " + e);
-    }
-  }
-
-  private AccessibleObject lookup(Class sClass, String name) {
-    WrapperKey key = new WrapperKey(sClass, name);
-    AccessibleObject ao = cache.get(key);
-    if (ao == null) {
-      try {
-        ao = getMethod(sClass, name);
-      } catch (NoSuchMethodException e) {
-        String propertyname = name.substring(0, 1).toUpperCase() +
-                (name.length() > 1 ? name.substring(1) : "");
-        try {
-          ao = getMethod(sClass, "get" + propertyname);
-        } catch (NoSuchMethodException e2) {
-          try {
-            ao = getMethod(sClass, "is" + propertyname);
-          } catch (NoSuchMethodException e3) {
-            try {
-              ao = getField(sClass, name);
-            } catch (NoSuchFieldException e4) {
-              ao = NONE;
-            }
-          }
-        }
-      }
-      cache.put(key, ao);
-    }
-    return ao == NONE ? null : ao;
-  }
-
-  protected Field getField(Class aClass, String name) throws NoSuchFieldException {
-    Field member;
-    try {
-      member = aClass.getDeclaredField(name);
-    } catch (NoSuchFieldException nsfe) {
-      Class superclass = aClass.getSuperclass();
-      if (superclass != null && superclass != Object.class) {
-        return getField(superclass, name);
-      }
-      throw nsfe;
-    }
-    checkField(member);
-    member.setAccessible(true);
-    return member;
-  }
-
+  // Used for the member cache
   private static class WrapperKey {
     private final Class aClass;
     private final String name;
@@ -137,35 +85,27 @@ public class SimpleObjectHandler extends BaseObjectHandler {
     }
   }
 
+  // Cache of classes + name => field mappings
   private Map<WrapperKey, AccessibleObject> cache = new ConcurrentHashMap<WrapperKey, AccessibleObject>();
 
-  protected Method getMethod(Class aClass, String name) throws NoSuchMethodException {
-    Method member;
+  // Used to cache misses
+  private static AccessibleObject NONE;
+  static {
     try {
-      member = aClass.getDeclaredMethod(name, new Class[0]);
-    } catch (NoSuchMethodException nsme) {
-      Class superclass = aClass.getSuperclass();
-      if (superclass != null && superclass != Object.class) {
-        return getMethod(superclass, name);
-      }
-      throw nsme;
-    }
-    checkMethod(member);
-    member.setAccessible(true);
-    return member;
-  }
-
-  // We default to not allowing private methods
-  protected void checkMethod(Method member) throws NoSuchMethodException {
-    if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
-      throw new NoSuchMethodException("Only public, protected and package members allowed");
+      NONE = SimpleObjectHandler.class.getDeclaredField("NONE");
+    } catch (NoSuchFieldException e) {
+      throw new AssertionError("Failed to init: " + e);
     }
   }
 
-  // We default to not allowing private fields
-  protected void checkField(Field member) throws NoSuchFieldException {
-    if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
-      throw new NoSuchFieldException("Only public, protected and package members allowed");
+  // Use the cache to find lookup members faster
+  private AccessibleObject lookup(Class sClass, String name) {
+    WrapperKey key = new WrapperKey(sClass, name);
+    AccessibleObject ao = cache.get(key);
+    if (ao == null) {
+      ao = findMember(sClass, name);
+      cache.put(key, ao == null ? NONE : ao);
     }
+    return ao == NONE ? null : ao;
   }
 }
