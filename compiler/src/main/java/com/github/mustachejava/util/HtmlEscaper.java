@@ -7,8 +7,13 @@ import java.io.Writer;
 
 /**
  * Escapes user data that you wish to include in HTML pages.
+ *
+ * Set
+ * -Dmustache.escapeescaped if you want to reescape valid escaped HTML values
  */
 public class HtmlEscaper {
+  private static boolean escapeEscaped = Boolean.getBoolean("mustache.escapeescaped");
+
   public static void escape(String value, Writer writer) {
     try {
       int position = 0;
@@ -19,7 +24,7 @@ public class HtmlEscaper {
           case '&':
             // If we match an entity or char ref then keep it
             // as is in the text. Otherwise, replace it.
-            if (matchesEntityRef(i + 1, length, value)) {
+            if (!escapeEscaped && matchesEntityRef(i + 1, length, value)) {
               // If we are at the beginning we can just keep going
               if (position != 0) {
                 position = append(value, writer, position, i, "&");

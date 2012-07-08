@@ -1,10 +1,12 @@
-package com.github.mustachejava.codes;
+package com.github.mustachejava.reflect;
 
 import com.github.mustachejava.Binding;
 import com.github.mustachejava.Code;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.codes.DefaultCode;
+import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.reflect.MissingWrapper;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
@@ -40,6 +42,18 @@ public class GuardedBinding implements Binding {
   private Set<Wrapper> previousSet = new CopyOnWriteArraySet<Wrapper>();
   private volatile Wrapper[] prevWrappers;
 
+  /**
+   * Retrieve the first value in the stacks of scopes that matches
+   * the give name. The method wrappers are cached and guarded against
+   * the type or number of scopes changing.
+   * <p/>
+   * Methods will be found using the object handler, called here with
+   * another lookup on a guard failure and finally coerced to a final
+   * value based on the ObjectHandler you provide.
+   *
+   * @param scopes An array of scopes to interrogate from right to left.
+   * @return The value of the field or method
+   */
   @Override
   public Object get(Object[] scopes) {
     // Loop over the wrappers and find the one that matches
