@@ -83,9 +83,14 @@ public class GuardedBinding implements Binding {
       if (DefaultCode.debug) {
         // Ugly but generally not interesting
         if (!(code instanceof PartialCode)) {
-          StringBuilder sb = new StringBuilder("Failed to find: ");
-          sb.append(name).append(" (").append(tc.file()).append(":").append(tc.line()).append(
-                  ") ").append("in");
+          StringBuilder sb = new StringBuilder("Failed to find: ")
+                  .append(name)
+                  .append(" (")
+                  .append(tc.file())
+                  .append(":")
+                  .append(tc.line())
+                  .append(") ")
+                  .append("in");
           for (Object scope : scopes) {
             if (scope != null) {
               sb.append(" ").append(scope.getClass().getSimpleName());
