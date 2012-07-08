@@ -54,9 +54,7 @@ public abstract class BaseObjectHandler implements ObjectHandler {
   }
 
   @Override
-  public Binding createBinding(String name, TemplateContext tc, Code code) {
-    return new GuardedBinding(this, name, tc, code);
-  }
+  public abstract Binding createBinding(String name, TemplateContext tc, Code code);
 
   public Writer iterate(Iteration iteration, Writer writer, Object object, Object[] scopes) {
     if (object == null) return writer;

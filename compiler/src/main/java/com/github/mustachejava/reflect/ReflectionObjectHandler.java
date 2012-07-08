@@ -1,6 +1,9 @@
 package com.github.mustachejava.reflect;
 
+import com.github.mustachejava.Binding;
+import com.github.mustachejava.Code;
 import com.github.mustachejava.ObjectHandler;
+import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 import com.google.common.base.Predicate;
@@ -124,4 +127,8 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
     return new ReflectionWrapper(scopeIndex, wrappers, guard.toArray(new Predicate[guard.size()]), member, arguments, this);
   }
 
+  @Override
+  public Binding createBinding(String name, TemplateContext tc, Code code) {
+    return new GuardedBinding(this, name, tc, code);
+  }
 }
