@@ -20,4 +20,7 @@ public interface ObjectHandler {
 
   // Only call next if the object should be considered falsey
   Writer falsey(Iteration iteration, Writer writer, Object object, Object[] scopes);
+
+  // Create the binding for a code
+  Binding createBinding(String name, TemplateContext tc, Code code);
 }

@@ -1,7 +1,11 @@
 package com.github.mustachejava.reflect;
 
+import com.github.mustachejava.Binding;
+import com.github.mustachejava.Code;
 import com.github.mustachejava.Iteration;
 import com.github.mustachejava.ObjectHandler;
+import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.codes.GuardedBinding;
 
 import java.io.Writer;
 import java.lang.reflect.AccessibleObject;
@@ -15,20 +19,6 @@ public abstract class BaseObjectHandler implements ObjectHandler {
   @Override
   public Object coerce(Object object) {
     return object;
-  }
-
-  // We default to not allowing private methods
-  protected void checkMethod(Method member) throws NoSuchMethodException {
-    if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
-      throw new NoSuchMethodException("Only public, protected and package members allowed");
-    }
-  }
-
-  // We default to not allowing private fields
-  protected void checkField(Field member) throws NoSuchFieldException {
-    if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
-      throw new NoSuchFieldException("Only public, protected and package members allowed");
-    }
   }
 
   @Override
@@ -62,6 +52,11 @@ public abstract class BaseObjectHandler implements ObjectHandler {
       }
     }
     return iteration.next(writer, object, scopes);
+  }
+
+  @Override
+  public Binding createBinding(String name, TemplateContext tc, Code code) {
+    return new GuardedBinding(this, name, tc, code);
   }
 
   public Writer iterate(Iteration iteration, Writer writer, Object object, Object[] scopes) {
@@ -150,5 +145,19 @@ public abstract class BaseObjectHandler implements ObjectHandler {
       }
     }
     return ao;
+  }
+
+  // We default to not allowing private methods
+  protected void checkMethod(Method member) throws NoSuchMethodException {
+    if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
+      throw new NoSuchMethodException("Only public, protected and package members allowed");
+    }
+  }
+
+  // We default to not allowing private fields
+  protected void checkField(Field member) throws NoSuchFieldException {
+    if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
+      throw new NoSuchFieldException("Only public, protected and package members allowed");
+    }
   }
 }
