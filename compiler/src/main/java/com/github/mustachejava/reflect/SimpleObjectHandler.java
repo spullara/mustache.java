@@ -1,6 +1,9 @@
 package com.github.mustachejava.reflect;
 
+import com.github.mustachejava.Binding;
+import com.github.mustachejava.Code;
 import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
@@ -12,6 +15,20 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SimpleObjectHandler extends BaseObjectHandler {
+
+  @Override
+  public Binding createBinding(final String name, TemplateContext tc, Code code) {
+    return new Binding() {
+      // We find the wrapper just once since only the name is needed
+      private Wrapper wrapper = find(name, null);
+
+      @Override
+      public Object get(Object[] scopes) {
+        return wrapper.call(scopes);
+      }
+    };
+  }
+
   @Override
   public Wrapper find(final String name, final Object[] scopes) {
     return new Wrapper() {
@@ -43,7 +60,7 @@ public class SimpleObjectHandler extends BaseObjectHandler {
                 throw new MustacheException("Set accessible failed to get " + name + " from " + scope.getClass(), iae);
               }
             } else {
-              // Dig into the dot-notation
+              // Dig into the dot-notation through recursion
               Object[] subscope = {scope};
               Wrapper wrapper = find(name.substring(0, index), subscope);
               if (wrapper != null) {
@@ -63,15 +80,17 @@ public class SimpleObjectHandler extends BaseObjectHandler {
   private static class WrapperKey {
     private final Class aClass;
     private final String name;
+    private int hashcode;
 
     WrapperKey(Class aClass, String name) {
       this.aClass = aClass;
       this.name = name;
+      hashcode = aClass.hashCode() + 43 * name.hashCode();
     }
 
     @Override
     public int hashCode() {
-      return aClass.hashCode() + 43 * name.hashCode();
+      return hashcode;
     }
 
     @Override
@@ -86,6 +105,7 @@ public class SimpleObjectHandler extends BaseObjectHandler {
   }
 
   // Cache of classes + name => field mappings
+  // By keeping this non-static you can release the cache by releasing the handler
   private Map<WrapperKey, AccessibleObject> cache = new ConcurrentHashMap<WrapperKey, AccessibleObject>();
 
   // Used to cache misses

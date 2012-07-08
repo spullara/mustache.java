@@ -21,10 +21,6 @@ public class DefaultCode implements Code, Cloneable {
   protected final boolean returnThis;
   protected final Binding binding;
 
-  // Debug callsites
-  protected static boolean debug = Boolean.getBoolean("mustache.debug");
-  protected static Logger logger = Logger.getLogger("mustache");
-
   public Object clone() {
     try {
       return super.clone();
@@ -65,18 +61,6 @@ public class DefaultCode implements Code, Cloneable {
     mustache.setCodes(newcodes);
   }
 
-  /**
-   * Retrieve the first value in the stacks of scopes that matches
-   * the give name. The method wrappers are cached and guarded against
-   * the type or number of scopes changing.
-   * <p/>
-   * Methods will be found using the object handler, called here with
-   * another lookup on a guard failure and finally coerced to a final
-   * value based on the ObjectHandler you provide.
-   *
-   * @param scopes An array of scopes to interrogate from right to left.
-   * @return The value of the field or method
-   */
   public Object get(Object[] scopes) {
     if (returnThis) {
       return scopes[scopes.length - 1];

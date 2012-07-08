@@ -14,6 +14,7 @@ import com.github.mustachejava.util.Wrapper;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.logging.Logger;
 
 /**
  * Codes are bound to their variables through bindings.
@@ -23,6 +24,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * Time: 6:05 PM
  */
 public class GuardedBinding implements Binding {
+  // Debug callsites
+  private static Logger logger = Logger.getLogger("mustache");
+  private static boolean debug = Boolean.getBoolean("mustache.debug");
+
   private final ObjectHandler oh;
   private final TemplateContext tc;
   private final String name;
@@ -94,7 +99,7 @@ public class GuardedBinding implements Binding {
   protected synchronized Wrapper getWrapper(String name, Object[] scopes) {
     Wrapper wrapper = oh.find(name, scopes);
     if (wrapper instanceof MissingWrapper) {
-      if (DefaultCode.debug) {
+      if (debug) {
         // Ugly but generally not interesting
         if (!(code instanceof PartialCode)) {
           StringBuilder sb = new StringBuilder("Failed to find: ")
@@ -110,7 +115,7 @@ public class GuardedBinding implements Binding {
               sb.append(" ").append(scope.getClass().getSimpleName());
             }
           }
-          DefaultCode.logger.warning(sb.toString());
+          logger.warning(sb.toString());
         }
       }
     }
