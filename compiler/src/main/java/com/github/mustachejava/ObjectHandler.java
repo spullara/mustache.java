@@ -45,7 +45,8 @@ public interface ObjectHandler {
   Writer falsey(Iteration iteration, Writer writer, Object object, Object[] scopes);
 
   /**
-   * Each call site has its own binding to allow for fine grained caching.
+   * Each call site has its own binding to allow for fine grained caching without
+   * a separate parallel hierarchy of objects.
    * @param name
    * @param tc
    * @param code
