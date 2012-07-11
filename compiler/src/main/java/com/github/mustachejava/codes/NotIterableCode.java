@@ -1,19 +1,15 @@
 package com.github.mustachejava.codes;
 
-import java.io.Writer;
-
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Iteration;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.TemplateContext;
 
+import java.io.Writer;
+
 /**
-* Created by IntelliJ IDEA.
-* User: spullara
-* Date: 1/9/12
-* Time: 2:58 PM
-* To change this template use File | Settings | File Templates.
-*/
+ * Runs the enclosed template once if the value is falsey.
+ */
 public class NotIterableCode extends DefaultCode implements Iteration {
 
   public NotIterableCode(TemplateContext templateContext, DefaultMustacheFactory cf, Mustache mustache, String variable) {

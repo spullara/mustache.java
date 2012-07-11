@@ -1,46 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>mustache.java</artifactId>
+    <groupId>com.github.spullara.mustache.java</groupId>
+    <version>0.8.4-SNAPSHOT</version>
+  </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>indy</artifactId>
-  <version>0.8.3-SNAPSHOT</version>
+  <version>0.8.4-SNAPSHOT</version>
 
   <name>indy</name>
   <description>Invokedynamic implementation of ObjectHandler</description>
   <url>http://github.com/spullara/mustache.java</url>
 
-  <licenses>
-    <license>
-      <name>Apache License 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-
-  <scm>
-    <connection>scm:git:git://github.com/spullara/mustache.java.git</connection>
-    <url>http://github.com/spullara/mustache.java</url>
-  </scm>
-
-  <developers>
-    <developer>
-      <name>Sam Pullara</name>
-      <email>sam@sampullara.com</email>
-      <url>http://www.javarants.com</url>
-    </developer>
-  </developers>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>compiler</artifactId>
-      <version>0.8.3-SNAPSHOT</version>
+      <version>0.8.4-SNAPSHOT</version>
     </dependency>
 
     <!-- ASM -->
@@ -71,7 +49,7 @@
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>compiler</artifactId>
-      <version>0.8.3-SNAPSHOT</version>
+      <version>0.8.4-SNAPSHOT</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>

@@ -11,6 +11,9 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import java.lang.reflect.Method;
+import java.util.List;
+
 public class JRubyObjectHandler extends ReflectionObjectHandler {
 
   private static final Method CALL_METHOD;

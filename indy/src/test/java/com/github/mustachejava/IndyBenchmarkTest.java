@@ -12,6 +12,10 @@ import com.github.mustachejavabenchmarks.BenchmarkTest;
  */
 public class IndyBenchmarkTest extends BenchmarkTest {
   @Override
+  public void testCompiler() {
+  }
+
+  @Override
   protected DefaultMustacheFactory createMustacheFactory() {
     DefaultMustacheFactory mustacheFactory = super.createMustacheFactory();
     mustacheFactory.setObjectHandler(new IndyObjectHandler());

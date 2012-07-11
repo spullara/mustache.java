@@ -37,11 +37,13 @@ Performance:
 
 Maven dependency information:
 
-    <dependency>
-      <groupId>com.github.spullara.mustache.java</groupId>
-      <artifactId>compiler</artifactId>
-      <version>0.8.2</version>
-    </dependency>
+```xml
+<dependency>
+  <groupId>com.github.spullara.mustache.java</groupId>
+  <artifactId>compiler</artifactId>
+  <version>0.8.2</version>
+</dependency>
+```
 
 Example template file:
 
@@ -55,31 +57,33 @@ Example template file:
 
 Might be powered by some backing code:
 
-	public class Context {
-	  List<Item> items() {
-	    return Arrays.asList(
-    	  new Item("Item 1", "$19.99", Arrays.asList(new Feature("New!"), new Feature("Awesome!"))),
-	      new Item("Item 2", "$29.99", Arrays.asList(new Feature("Old."), new Feature("Ugly.")))
-	    );
-	  }
+```java
+public class Context {
+  List<Item> items() {
+    return Arrays.asList(
+      new Item("Item 1", "$19.99", Arrays.asList(new Feature("New!"), new Feature("Awesome!"))),
+      new Item("Item 2", "$29.99", Arrays.asList(new Feature("Old."), new Feature("Ugly.")))
+    );
+  }
 
-	  static class Item {
-	    Item(String name, String price, List<Feature> features) {
-    	  this.name = name;
-	      this.price = price;
-    	  this.features = features;
-	    }
-    	String name, price;
-	    List<Feature> features;
-	  }
+  static class Item {
+    Item(String name, String price, List<Feature> features) {
+      this.name = name;
+      this.price = price;
+      this.features = features;
+    }
+    String name, price;
+    List<Feature> features;
+  }
 
-	  static class Feature {
-    	Feature(String description) {
-	      this.description = description;
-	    }
-    	String description;
-	  }
-	}
+  static class Feature {
+    Feature(String description) {
+       this.description = description;
+    }
+    String description;
+  }
+}
+```
 
 And would result in:
 
@@ -95,77 +99,83 @@ And would result in:
 Evaluation of the template proceeds serially. For instance, if you have blocking code within one of your callbacks
 you the system will pause while executing them:
 
-    static class Feature {
-      Feature(String description) {
-        this.description = description;
-      }
+```java
+static class Feature {
+  Feature(String description) {
+    this.description = description;
+  }
 
-      String description() throws InterruptedException {
-        Thread.sleep(1000);
-        return description;
-      }
-    }
+  String description() throws InterruptedException {
+    Thread.sleep(1000);
+    return description;
+  }
+}
+```
 
 If you change description to return a `Callable` instead it will automatically be executed in a separate
 thread if you have provided an `ExecutorService` when you created your `MustacheFactory`.
 
-      Callable<String> description() throws InterruptedException {
-        return new Callable<String>() {
-          @Override
-          public String call() throws Exception {
-            Thread.sleep(1000);
-            return description;
-          }
-        };
-      }
+```java
+Callable<String> description() throws InterruptedException {
+  return new Callable<String>() {
+
+    @Override
+    public String call() throws Exception {
+      Thread.sleep(1000);
+      return description;
+    }
+  };
+}
+```
 
 This enables scheduled tasks, streaming behavior and asynchronous i/o. Check out the `example` module in order
 to see a complete end-to-end example:
 
-    package mustachejava;
+```java
+package mustachejava;
 
-    import com.github.mustachejava.DefaultMustacheFactory;
-    import com.github.mustachejava.Mustache;
-    import com.github.mustachejava.MustacheFactory;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
 
-    import java.io.IOException;
-    import java.io.PrintWriter;
-    import java.io.Writer;
-    import java.util.Arrays;
-    import java.util.List;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.List;
 
-    public class Example {
+public class Example {
 
-      List<Item> items() {
-        return Arrays.asList(
-                new Item("Item 1", "$19.99", Arrays.asList(new Feature("New!"), new Feature("Awesome!"))),
-                new Item("Item 2", "$29.99", Arrays.asList(new Feature("Old."), new Feature("Ugly.")))
-        );
-      }
+  List<Item> items() {
+    return Arrays.asList(
+      new Item("Item 1", "$19.99", Arrays.asList(new Feature("New!"), new Feature("Awesome!"))),
+      new Item("Item 2", "$29.99", Arrays.asList(new Feature("Old."), new Feature("Ugly.")))
+    );
+  }
 
-      static class Item {
-        Item(String name, String price, List<Feature> features) {
-          this.name = name;
-          this.price = price;
-          this.features = features;
-        }
-
-        String name, price;
-        List<Feature> features;
-      }
-
-      static class Feature {
-        Feature(String description) {
-          this.description = description;
-        }
-
-        String description;
-      }
-
-      public static void main(String[] args) throws IOException {
-        MustacheFactory mf = new DefaultMustacheFactory();
-        Mustache mustache = mf.compile("template.mustache");
-        mustache.execute(new PrintWriter(System.out), new Example()).flush();
-      }
+  static class Item {
+    Item(String name, String price, List<Feature> features) {
+      this.name = name;
+      this.price = price;
+      this.features = features;
     }
 
+    String name, price;
+    List<Feature> features;
+  }
+
+  static class Feature {
+    Feature(String description) {
+      this.description = description;
+    }
+
+    String description;
+  }
+
+  public static void main(String[] args) throws IOException {
+    MustacheFactory mf = new DefaultMustacheFactory();
+    Mustache mustache = mf.compile("template.mustache");
+    mustache.execute(new PrintWriter(System.out), new Example()).flush();
+  }
+}
+```

@@ -1,19 +1,13 @@
 package com.github.mustachejava.codes;
 
-import com.github.mustachejava.Code;
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.MustacheFactory;
-import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.*;
 
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
- * Extending a template.
+ * Extending a template through in-place replacement of the overridden codes.
  * <p/>
  * User: sam
  * Date: 11/27/11
@@ -21,9 +15,7 @@ import java.util.regex.Pattern;
  */
 public class ExtendCode extends PartialCode {
 
-  private static Pattern WS = Pattern.compile("\\s+", Pattern.MULTILINE);
-
-  private MustacheFactory mf;
+  private final MustacheFactory mf;
 
   public ExtendCode(TemplateContext tc, DefaultMustacheFactory mf, Mustache codes, String name) throws MustacheException {
     super(tc, mf, codes, "<", name);

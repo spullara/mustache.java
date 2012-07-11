@@ -1,25 +1,16 @@
 package com.github.mustachejava.codes;
 
-import com.github.mustachejava.Code;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.ObjectHandler;
-import com.github.mustachejava.TemplateContext;
-import com.github.mustachejava.reflect.MissingWrapper;
-import com.github.mustachejava.util.GuardException;
-import com.github.mustachejava.util.Wrapper;
+import com.github.mustachejava.*;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Logger;
 
 /**
  * Simplest possible code implementaion with some default shared behavior
  */
 public class DefaultCode implements Code, Cloneable {
+  // Final once init() is complete
   protected String appended;
 
   protected final ObjectHandler oh;
@@ -28,11 +19,7 @@ public class DefaultCode implements Code, Cloneable {
   protected final Mustache mustache;
   protected final String type;
   protected final boolean returnThis;
-
-  // Debug callsites
-  protected static boolean debug = Boolean.getBoolean("mustache.debug");
-  protected static Logger logger = Logger.getLogger("mustache");
-
+  protected final Binding binding;
 
   public Object clone() {
     try {
@@ -52,7 +39,8 @@ public class DefaultCode implements Code, Cloneable {
     this.type = type;
     this.name = name;
     this.tc = tc;
-    returnThis = ".".equals(name);
+    this.binding = oh == null ? null : oh.createBinding(name, tc, this);
+    this.returnThis = ".".equals(name);
   }
 
   public Code[] getCodes() {
@@ -73,83 +61,11 @@ public class DefaultCode implements Code, Cloneable {
     mustache.setCodes(newcodes);
   }
 
-  /**
-   * The chances of a new guard every time is very low. Instead we will
-   * store previously used guards and try them all before creating a new one.
-   */
-  private Set<Wrapper> previousSet = new CopyOnWriteArraySet<Wrapper>();
-  private volatile Wrapper[] prevWrappers;
-
-  /**
-   * Retrieve the first value in the stacks of scopes that matches
-   * the give name. The method wrappers are cached and guarded against
-   * the type or number of scopes changing.
-   * <p/>
-   * Methods will be found using the object handler, called here with
-   * another lookup on a guard failure and finally coerced to a final
-   * value based on the ObjectHandler you provide.
-   *
-   * @param scopes An array of scopes to interrogate from right to left.
-   * @return The value of the field or method
-   */
   public Object get(Object[] scopes) {
     if (returnThis) {
       return scopes[scopes.length - 1];
     }
-    // Loop over the wrappers and find the one that matches
-    // this set of scopes or get a new one
-    Wrapper current = null;
-    Wrapper[] wrappers = prevWrappers;
-    if (wrappers != null) {
-      for (Wrapper prevWrapper : wrappers) {
-        try {
-          current = prevWrapper;
-          return oh.coerce(prevWrapper.call(scopes));
-        } catch (GuardException ge) {
-          // Check the next one or create a new one
-        } catch (MustacheException me) {
-          throw new MustacheException("Failed: " + current, me);
-        }
-      }
-    }
-    return createAndGet(scopes);
-  }
-
-  private Object createAndGet(Object[] scopes) {
-    // Make a new wrapper for this set of scopes and add it to the set
-    Wrapper wrapper = getWrapper(name, scopes);
-    previousSet.add(wrapper);
-    if (prevWrappers == null || prevWrappers.length != previousSet.size()) {
-      prevWrappers = previousSet.toArray(new Wrapper[previousSet.size()]);
-    }
-    // If this fails the guard, there is a bug
-    try {
-      return oh.coerce(wrapper.call(scopes));
-    } catch (GuardException e) {
-      throw new AssertionError(
-              "Unexpected guard failure: " + previousSet + " " + Arrays.asList(scopes));
-    }
-  }
-
-  protected synchronized Wrapper getWrapper(String name, Object[] scopes) {
-    Wrapper wrapper = oh.find(name, scopes);
-    if (wrapper instanceof MissingWrapper) {
-      if (debug) {
-        // Ugly but generally not interesting
-        if (!(this instanceof PartialCode)) {
-          StringBuilder sb = new StringBuilder("Failed to find: ");
-          sb.append(name).append(" (").append(tc.file()).append(":").append(tc.line()).append(
-                  ") ").append("in");
-          for (Object scope : scopes) {
-            if (scope != null) {
-              sb.append(" ").append(scope.getClass().getSimpleName());
-            }
-          }
-          logger.warning(sb.toString());
-        }
-      }
-    }
-    return wrapper;
+    return binding.get(scopes);
   }
 
   @Override
@@ -191,7 +107,7 @@ public class DefaultCode implements Code, Cloneable {
     }
   }
 
-  private void tag(Writer writer, String tag) throws IOException {
+  protected void tag(Writer writer, String tag) throws IOException {
     writer.write(tc.startChars());
     writer.write(tag);
     writer.write(name);
@@ -228,38 +144,16 @@ public class DefaultCode implements Code, Cloneable {
     }
   }
 
-  private ThreadLocal<Object[]> localScopes = new ThreadLocal<Object[]>();
-
-  /**
-   * Allocating new scopes is currently the only place where we are activtely allocating
-   * memory within the templating system. It is possible that recycling these might lend
-   * some additional benefit or using the same one in each thread. The only time this
-   * grows is when there are recursive calls to the same scope. In most non-degenerate cases
-   * we won't encounter that. Also, since we are copying the results across these boundaries
-   * we don't have to worry about threads.
-   */
-  protected Object[] addScope(Object next, Object[] scopes) {
-    Object[] iteratorScopes = scopes;
-    if (next != null) {
-      // Need to expand the scopes holder
-      iteratorScopes = localScopes.get();
-      if (iteratorScopes == null) {
-        iteratorScopes = new Object[scopes.length + 1];
-        localScopes.set(iteratorScopes);
-      } else {
-        if (iteratorScopes.length < scopes.length + 1) {
-          // Need to expand the scopes holder
-          iteratorScopes = new Object[scopes.length + 1];
-          localScopes.set(iteratorScopes);
-        }
-      }
-      int srcPos = iteratorScopes.length - scopes.length - 1;
-      System.arraycopy(scopes, 0, iteratorScopes, srcPos, scopes.length);
-      for (; srcPos > 0; srcPos--) {
-        iteratorScopes[srcPos - 1] = null;
-      }
-      iteratorScopes[iteratorScopes.length - 1] = next;
+  // Expand the current set of scopes
+  protected Object[] addScope(Object[] scopes, Object scope) {
+    if (scope == null) {
+      return scopes;
+    } else {
+      int length = scopes.length;
+      Object[] newScopes = new Object[length + 1];
+      System.arraycopy(scopes, 0, newScopes, 0, length);
+      newScopes[length] = scope;
+      return newScopes;
     }
-    return iteratorScopes;
   }
 }

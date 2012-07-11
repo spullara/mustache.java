@@ -7,11 +7,18 @@ import java.io.Writer;
  */
 public interface Code {
   Writer execute(Writer writer, Object scope);
+
   Writer execute(Writer writer, Object[] scopes);
+
   void identity(Writer writer);
+
   void append(String text);
+
   Code[] getCodes();
+
   void setCodes(Code[] codes);
+
   void init();
+
   Object clone();
 }
