@@ -3,8 +3,8 @@ package com.github.mustachejava;
 import com.google.common.base.Function;
 
 /**
- * This function is required if you want the opportunity to change
- * the template vs just changing the output of the template.
+ * Use this function if you to implement additional functions/lambdas
+ * (eg. `{{#func1}}`) and want mustache.java to reparse their results again.
  */
 public interface TemplateFunction extends Function<String, String> {
 }
