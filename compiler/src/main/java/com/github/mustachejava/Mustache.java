@@ -13,7 +13,7 @@ public interface Mustache extends Code {
   void append(String text);
 
   /**
-   * Shallow clone of the mustache object.
+   * Deep clone of the mustache object.
    * @return
    */
   Object clone();

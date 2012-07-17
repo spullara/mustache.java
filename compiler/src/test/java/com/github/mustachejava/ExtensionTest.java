@@ -4,6 +4,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -75,6 +76,18 @@ public class ExtensionTest {
     scope.put("randomid", "asdlkfj");
     m.execute(sw, scope);
     assertEquals(getContents(root, "subsub.txt"), sw.toString());
+  }
+
+  @Test
+  public void testClientMethod() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("client.html");
+    StringWriter sw = new StringWriter();
+    Map scope = new HashMap();
+    scope.put("reply", "TestReply");
+    scope.put("commands", Arrays.asList("a", "b"));
+    m.execute(sw, scope);
+    assertEquals(getContents(root, "client.txt"), sw.toString());
   }
 
   protected String getContents(File root, String file) throws IOException {

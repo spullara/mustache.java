@@ -13,17 +13,29 @@ public class DefaultCode implements Code, Cloneable {
   // Final once init() is complete
   protected String appended;
 
+  protected Mustache mustache;
   protected final ObjectHandler oh;
   protected final String name;
   protected final TemplateContext tc;
-  protected final Mustache mustache;
   protected final String type;
   protected final boolean returnThis;
   protected final Binding binding;
 
   public Object clone() {
     try {
-      return super.clone();
+      DefaultCode code = (DefaultCode) super.clone();
+      Code[] codes = code.getCodes();
+      if (codes != null) {
+        codes = codes.clone();
+        for (int i = 0; codes != null && i < codes.length; i++) {
+          codes[i] = (Code) codes[i].clone();
+        }
+        code.setCodes(codes);
+      }
+      if (mustache != null) {
+        code.mustache = (Mustache) mustache.clone();
+      }
+      return code;
     } catch (CloneNotSupportedException e) {
       throw new MustacheException("Clone not supported");
     }
