@@ -7,6 +7,7 @@ import java.io.Writer
 import java.lang.reflect.{Method, Field}
 import java.util.concurrent.Callable
 import scala.collection.JavaConversions.asJavaMap
+import scala.collection.JavaConversions.asJavaList
 
 class TwitterObjectHandler extends ReflectionObjectHandler {
 
@@ -30,6 +31,7 @@ class TwitterObjectHandler extends ReflectionObjectHandler {
           }
         }
       }
+      case l: List[_] => asJavaList(l)
       case _ => value
     }
   }
