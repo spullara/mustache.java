@@ -61,8 +61,27 @@ public class ExtensionTest {
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("replace.html");
     StringWriter sw = new StringWriter();
-    m.execute(sw, new Object() { String replace = "true"; });
+    m.execute(sw, new Object() { String replace = "false"; });
     assertEquals(getContents(root, "replace.txt"), sw.toString());
+  }
+
+  @Test
+  public void testSubBlockCaching() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("subblockchild1.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {});
+    assertEquals(getContents(root, "subblockchild1.txt"), sw.toString());
+    
+    m = c.compile("subblockchild2.html");
+    sw = new StringWriter();
+    m.execute(sw,  new Object() {});
+    assertEquals(getContents(root, "subblockchild2.txt"), sw.toString());
+    
+    m = c.compile("subblockchild1.html");
+    sw = new StringWriter();
+    m.execute(sw, new Object() {});
+    assertEquals(getContents(root, "subblockchild1.txt"), sw.toString());
   }
 
   @Test
