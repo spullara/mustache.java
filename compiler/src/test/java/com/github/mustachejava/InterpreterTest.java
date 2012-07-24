@@ -492,9 +492,16 @@ public class InterpreterTest extends TestCase {
     assertEquals("Value: something", sw.toString());
   }
 
+  public void testOutputDelimiters() {
+    String template = "{{=## ##=}}{{##={{ }}=####";
+    Mustache mustache = new DefaultMustacheFactory().compile(new StringReader(template), "test");
+    StringWriter sw = new StringWriter();
+    mustache.execute(sw, new Object[0]);
+    assertEquals("{{##", sw.toString());
+  }
+
   private MustacheFactory init() {
-    DefaultMustacheFactory cf = createMustacheFactory();
-    return cf;
+    return createMustacheFactory();
   }
 
   private DefaultMustacheFactory initParallel() {
