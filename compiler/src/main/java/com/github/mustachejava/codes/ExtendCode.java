@@ -48,7 +48,7 @@ public class ExtendCode extends PartialCode {
 
   @Override
   public Writer execute(Writer writer, Object[] scopes) throws MustacheException {
-    return partialExecute(writer, scopes);
+    return appendText(partial.execute(writer, scopes));
   }
 
   @Override

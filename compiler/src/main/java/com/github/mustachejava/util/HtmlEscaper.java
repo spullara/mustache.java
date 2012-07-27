@@ -12,9 +12,7 @@ import java.io.Writer;
  * -Dmustache.escapeescaped if you want to reescape valid escaped HTML values
  */
 public class HtmlEscaper {
-  private static boolean escapeEscaped = Boolean.getBoolean("mustache.escapeescaped");
-
-  public static void escape(String value, Writer writer) {
+  public static void escape(String value, Writer writer, boolean escapeEscaped) {
     try {
       int position = 0;
       int length = value.length();

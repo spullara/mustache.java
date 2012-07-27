@@ -272,19 +272,6 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
-  public void testPartial() throws MustacheException, IOException {
-    MustacheFactory c = init();
-    Mustache m = c.compile("template_partial.html");
-    StringWriter sw = new StringWriter();
-    Map scope = new HashMap();
-    scope.put("title", "Welcome");
-    scope.put("template_partial_2", new Object() {
-      String again = "Goodbye";
-    });
-    m.execute(sw, scope);
-    assertEquals(getContents(root, "template_partial.txt"), sw.toString());
-  }
-
   public void testPartialWithTF() throws MustacheException, IOException {
     MustacheFactory c = init();
     Mustache m = c.compile("partialintemplatefunction.html");

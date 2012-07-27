@@ -1,6 +1,8 @@
 package com.github.mustachejava;
 
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
+import com.github.mustachejava.util.HtmlEscaper;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -84,7 +86,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
   // to change the way encoding works.
   @Override
   public void encode(String value, Writer writer) {
-    escape(value, writer);
+    escape(value, writer, true);
   }
 
   @Override
