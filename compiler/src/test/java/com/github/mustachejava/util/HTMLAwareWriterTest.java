@@ -170,7 +170,7 @@ public class HTMLAwareWriterTest {
     String value = sw.toString();
     int ITERATIONS = 1000;
 
-    for (int j = 0; j < 3; j++) {
+    for (int j = 0; j < 10; j++) {
       long start = System.currentTimeMillis();
       for (int i = 0; i < ITERATIONS; i++) {
         Writer hawriter = new HTMLAwareWriter(new NullWriter());

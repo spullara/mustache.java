@@ -21,9 +21,50 @@ public class HTMLAwareWriter extends Writer {
   private Context quoteState;
   private Context bodyState;
 
-  // Buffer for tracking things
-  private StringBuilder buffer = new StringBuilder();
+  // Ringbuffer
+  private RingBuffer ringBuffer = new RingBuffer();
 
+  private static class RingBuffer {
+    private static final int RING_SIZE = 6;
+    private int length = 0;
+    private char[] ring = new char[RING_SIZE];
+
+    public void append(char c) {
+      ring[length++ % RING_SIZE] = c;
+    }
+
+    public void clear() {
+      length = 0;
+    }
+
+    public boolean compare(String s, boolean exact) {
+      int len = s.length();
+      if (exact && len != length) return false;
+      if (len > RING_SIZE) {
+        l.warning("Too long to compare: " + s);
+        return false;
+      }
+      if (length >= len) {
+        int j = 0;
+        int position = length % RING_SIZE;
+        for (int i = position - len; i < position; i++) {
+          char c;
+          if (i < 0) {
+            c = ring[RING_SIZE + i];
+          } else {
+            c = ring[i];
+          }
+          if (s.charAt(j++) != c) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+  }
+
+  // Buffer for tracking things
   public Context getState() {
     return state;
   }
@@ -61,22 +102,23 @@ public class HTMLAwareWriter extends Writer {
 
   @Override
   public void write(char[] cbuf, int off, int len) throws IOException {
+    transition(cbuf, off, len);
+    writer.write(cbuf, off, len);
+  }
+
+  private void transition(char[] cbuf, int off, int len) {
     int end = off + len;
     for (int i = off; i < end; i++) {
-      char c = cbuf[i];
-      nextState(c);
+      nextState(cbuf[i]);
       if (state == TAG_NAME || state == PRAGMA || state == COMMENT) {
-        buffer.append(c);
+        ringBuffer.append(cbuf[i]);
       }
     }
-    writer.write(cbuf, off, len);
   }
 
   public void s(Context c) {
     state = c;
-    if (buffer.length() > 0) {
-      buffer = new StringBuilder();
-    }
+    ringBuffer.clear();
   }
 
   private void nextState(char c) {
@@ -153,7 +195,7 @@ public class HTMLAwareWriter extends Writer {
 
   private void pragma(char c) {
     if (c == '-') {
-      if (buffer.toString().equals("!-")) {
+      if (ringBuffer.compare("!-", false)) {
         s(COMMENT);
       }
     } else if (c == '>') {
@@ -220,8 +262,7 @@ public class HTMLAwareWriter extends Writer {
 
   private void comment(char c) {
     if (c == '>') {
-      int length = buffer.length();
-      if (buffer.substring(length - 2, length).equals("--")) {
+      if (ringBuffer.compare("--", false)) {
         s(bodyState);
       }
     }
@@ -302,10 +343,10 @@ public class HTMLAwareWriter extends Writer {
   private void tagName(char c) {
     if (namePart(c)) {
     } else if (ws(c)) {
-      setBodyTag(buffer.toString());
+      setBodyTag();
       s(ATTRIBUTES);
     } else if (c == '>') {
-      setBodyTag(buffer.toString());
+      setBodyTag();
       s(bodyState);
     }
   }
@@ -314,8 +355,8 @@ public class HTMLAwareWriter extends Writer {
     return Character.isJavaIdentifierPart(c) || c == '-';
   }
 
-  private void setBodyTag(String tag) {
-    if (tag.equalsIgnoreCase("script")) {
+  private void setBodyTag() {
+    if (ringBuffer.compare("script", true)) {
       bodyState = SCRIPT;
     } else bodyState = BODY;
   }
@@ -332,8 +373,7 @@ public class HTMLAwareWriter extends Writer {
   }
 
   private void error(char c) {
-    buffer.append(c);
-    l.warning("Invalid: " + buffer + " (" + state + ")");
+    l.warning("Invalid: " + new StringBuilder().append(c) + " (" + state + ")");
     s(bodyState);
   }
 
