@@ -24,7 +24,7 @@ public class HTMLAwareWriter extends Writer {
   // Ringbuffer for comments and script tags
   private RingBuffer ringBuffer = new RingBuffer(6);
 
-  // Buffer for tracking things
+  // Ask the writer for the current state
   public Context getState() {
     return state;
   }
