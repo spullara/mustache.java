@@ -29,25 +29,25 @@ public class HTMLAwareWriter extends Writer {
   }
 
   public enum Context {
-    PRAGMA,
-    COMMENT,
+    ATTRIBUTES,
+    BODY,
     TAG,
+    ATTR_NAME,
+    ATTR_EQUAL,
+    DQ_VALUE,
+    SCRIPT_DQ_VALUE,
     TAG_NAME,
     END_TAG,
     END_TAG_NAME,
-    AFTER_END_TAG_NAME,
-    ATTRIBUTES,
-    ATTR_EQUAL,
-    ATTR_NAME,
-    NQ_VALUE,
     ESCAPE,
-    SQ_VALUE,
-    DQ_VALUE,
-    BODY,
     SCRIPT,
     SCRIPT_SQ_VALUE,
-    SCRIPT_DQ_VALUE,
     SCRIPT_CHECK,
+    AFTER_END_TAG_NAME,
+    SQ_VALUE,
+    NQ_VALUE,
+    PRAGMA,
+    COMMENT,
   }
 
   public HTMLAwareWriter(Writer writer) {
@@ -80,44 +80,64 @@ public class HTMLAwareWriter extends Writer {
   }
 
   private void nextState(char c) {
-    if (state == ATTRIBUTES) {
-      attr(c);
-    } else if (state == BODY) {
-      body(c);
-    } else if (state == TAG) {
-      tag(c);
-    } else if (state == ATTR_NAME) {
-      attrName(c);
-    } else if (state == ATTR_EQUAL) {
-      attrEqual(c);
-    } else if (state == DQ_VALUE) {
-      dqValue(c);
-    } else if (state == SCRIPT_DQ_VALUE) {
-      scriptDqValue(c);
-    } else if (state == TAG_NAME) {
-      tagName(c);
-    } else if (state == END_TAG) {
-      endTag(c);
-    } else if (state == END_TAG_NAME) {
-      endTagName(c);
-    } else if (state == ESCAPE) {
-      escape();
-    } else if (state == SCRIPT) {
-      script(c);
-    } else if (state == SCRIPT_SQ_VALUE) {
-      scriptSqValue(c);
-    } else if (state == SCRIPT_CHECK) {
-      scriptCheck(c);
-    } else if (state == AFTER_END_TAG_NAME) {
-      afterEndTagName(c);
-    } else if (state == SQ_VALUE) {
-      sqValue(c);
-    } else if (state == NQ_VALUE) {
-      nqValue(c);
-    } else if (state == PRAGMA) {
-      pragma(c);
-    } else if (state == COMMENT) {
-      comment(c);
+    switch (state) {
+      case ATTRIBUTES:
+        attr(c);
+        break;
+      case BODY:
+        body(c);
+        break;
+      case TAG:
+        tag(c);
+        break;
+      case ATTR_NAME:
+        attrName(c);
+        break;
+      case ATTR_EQUAL:
+        attrEqual(c);
+        break;
+      case DQ_VALUE:
+        dqValue(c);
+        break;
+      case SCRIPT_DQ_VALUE:
+        scriptDqValue(c);
+        break;
+      case TAG_NAME:
+        tagName(c);
+        break;
+      case END_TAG:
+        endTag(c);
+        break;
+      case END_TAG_NAME:
+        endTagName(c);
+        break;
+      case ESCAPE:
+        escape();
+        break;
+      case SCRIPT:
+        script(c);
+        break;
+      case SCRIPT_SQ_VALUE:
+        scriptSqValue(c);
+        break;
+      case SCRIPT_CHECK:
+        scriptCheck(c);
+        break;
+      case AFTER_END_TAG_NAME:
+        afterEndTagName(c);
+        break;
+      case SQ_VALUE:
+        sqValue(c);
+        break;
+      case NQ_VALUE:
+        nqValue(c);
+        break;
+      case PRAGMA:
+        pragma(c);
+        break;
+      case COMMENT:
+        comment(c);
+        break;
     }
   }
 
