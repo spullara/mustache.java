@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.logging.Logger;
 
-import static com.github.mustachejava.util.HTMLAwareWriter.Context.*;
+import static com.github.mustachejava.util.HtmlAwareWriter.Context.*;
 
 /**
  * Manages a state machine that knows the context in an HTML document it is writing.
  */
-public class HTMLAwareWriter extends Writer {
+public class HtmlAwareWriter extends Writer {
 
   private static Logger l = Logger.getLogger("HTMLAwareWriter");
 
@@ -51,11 +51,11 @@ public class HTMLAwareWriter extends Writer {
     COMMENT,
   }
 
-  public HTMLAwareWriter(Writer writer) {
+  public HtmlAwareWriter(Writer writer) {
     this(writer, BODY);
   }
 
-  public HTMLAwareWriter(Writer writer, Context state) {
+  public HtmlAwareWriter(Writer writer, Context state) {
     this.state = state;
     this.writer = writer;
   }

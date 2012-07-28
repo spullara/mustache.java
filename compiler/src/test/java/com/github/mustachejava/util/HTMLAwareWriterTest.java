@@ -6,20 +6,20 @@ import org.junit.Test;
 
 import java.io.*;
 
-import static com.github.mustachejava.util.HTMLAwareWriter.Context.*;
+import static com.github.mustachejava.util.HtmlAwareWriter.Context.*;
 import static junit.framework.Assert.assertEquals;
 
-public class HTMLAwareWriterTest {
+public class HtmlAwareWriterTest {
 
-  private HTMLAwareWriter w;
+  private HtmlAwareWriter w;
 
-  private void c(HTMLAwareWriter.Context expected) {
+  private void c(HtmlAwareWriter.Context expected) {
     assertEquals(expected, w.getState());
   }
 
   @Before
   public void setup() {
-    w = new HTMLAwareWriter(new StringWriter());
+    w = new HtmlAwareWriter(new StringWriter());
   }
 
   @Test
@@ -159,7 +159,7 @@ public class HTMLAwareWriterTest {
 
   public static void main(String[] args) throws IOException {
     StringWriter sw = new StringWriter();
-    HTMLAwareWriter writer = new HTMLAwareWriter(sw);
+    HtmlAwareWriter writer = new HtmlAwareWriter(sw);
     BufferedReader reader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemClassLoader().getResourceAsStream("twitter.html"), "UTF-8"));
     char[] chars = new char[32768];
     int read;
@@ -173,7 +173,7 @@ public class HTMLAwareWriterTest {
     for (int j = 0; j < 10; j++) {
       long start = System.currentTimeMillis();
       for (int i = 0; i < ITERATIONS; i++) {
-        Writer hawriter = new HTMLAwareWriter(new NullWriter());
+        Writer hawriter = new HtmlAwareWriter(new NullWriter());
         hawriter.write(value);
         hawriter.close();
       }
