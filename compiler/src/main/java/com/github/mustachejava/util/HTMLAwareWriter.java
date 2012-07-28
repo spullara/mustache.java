@@ -21,48 +21,8 @@ public class HTMLAwareWriter extends Writer {
   private Context quoteState;
   private Context bodyState;
 
-  // Ringbuffer
-  private RingBuffer ringBuffer = new RingBuffer();
-
-  private static class RingBuffer {
-    private static final int RING_SIZE = 6;
-    private int length = 0;
-    private char[] ring = new char[RING_SIZE];
-
-    public void append(char c) {
-      ring[length++ % RING_SIZE] = c;
-    }
-
-    public void clear() {
-      length = 0;
-    }
-
-    public boolean compare(String s, boolean exact) {
-      int len = s.length();
-      if (exact && len != length) return false;
-      if (len > RING_SIZE) {
-        l.warning("Too long to compare: " + s);
-        return false;
-      }
-      if (length >= len) {
-        int j = 0;
-        int position = length % RING_SIZE;
-        for (int i = position - len; i < position; i++) {
-          char c;
-          if (i < 0) {
-            c = ring[RING_SIZE + i];
-          } else {
-            c = ring[i];
-          }
-          if (s.charAt(j++) != c) {
-            return false;
-          }
-        }
-      }
-      return true;
-    }
-
-  }
+  // Ringbuffer for comments and script tags
+  private RingBuffer ringBuffer = new RingBuffer(6);
 
   // Buffer for tracking things
   public Context getState() {
@@ -110,9 +70,6 @@ public class HTMLAwareWriter extends Writer {
     int end = off + len;
     for (int i = off; i < end; i++) {
       nextState(cbuf[i]);
-      if (state == TAG_NAME || state == PRAGMA || state == COMMENT) {
-        ringBuffer.append(cbuf[i]);
-      }
     }
   }
 
@@ -180,6 +137,9 @@ public class HTMLAwareWriter extends Writer {
       case COMMENT:
         comment(c);
         break;
+    }
+    if (state == TAG_NAME || state == PRAGMA || state == COMMENT) {
+      ringBuffer.append(c);
     }
   }
 
