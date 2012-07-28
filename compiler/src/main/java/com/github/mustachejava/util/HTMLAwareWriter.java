@@ -24,10 +24,6 @@ public class HTMLAwareWriter extends Writer {
   // Buffer for tracking things
   private StringBuilder buffer = new StringBuilder();
 
-  // Debugging
-  private boolean debug = true;
-  private StringBuilder error = debug ? new StringBuilder() : null;
-
   public Context getState() {
     return state;
   }
@@ -67,16 +63,20 @@ public class HTMLAwareWriter extends Writer {
   public void write(char[] cbuf, int off, int len) throws IOException {
     int end = off + len;
     for (int i = off; i < end; i++) {
-      if (debug) error.append(cbuf[i]);
-      nextState(cbuf[i]);
-      buffer.append(cbuf[i]);
+      char c = cbuf[i];
+      nextState(c);
+      if (state == TAG_NAME || state == PRAGMA || state == COMMENT) {
+        buffer.append(c);
+      }
     }
     writer.write(cbuf, off, len);
   }
 
   public void s(Context c) {
     state = c;
-    buffer.delete(0, buffer.length());
+    if (buffer.length() > 0) {
+      buffer = new StringBuilder();
+    }
   }
 
   private void nextState(char c) {
@@ -333,21 +333,14 @@ public class HTMLAwareWriter extends Writer {
 
   private void error(char c) {
     buffer.append(c);
-    if (debug) {
-      l.warning("Invalid: " + buffer + " (" + state + ")");
-      int length = error.length();
-      int start = length < 100 ? 0 : length - 100;
-      l.warning("Context: " + error.substring(start, length));
-    }
+    l.warning("Invalid: " + buffer + " (" + state + ")");
     s(bodyState);
   }
 
   private void body(char c) {
-    switch (c) {
-      case '<':
-        bodyState = state;
-        s(TAG);
-        break;
+    if (c == '<') {
+      bodyState = state;
+      s(TAG);
     }
   }
 

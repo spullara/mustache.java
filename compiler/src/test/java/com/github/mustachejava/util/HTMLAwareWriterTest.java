@@ -1,12 +1,10 @@
 package com.github.mustachejava.util;
 
+import com.github.mustachejavabenchmarks.NullWriter;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
+import java.io.*;
 
 import static com.github.mustachejava.util.HTMLAwareWriter.Context.*;
 import static junit.framework.Assert.assertEquals;
@@ -157,5 +155,38 @@ public class HTMLAwareWriterTest {
       w.write(chars, 0, read);
     }
     c(BODY);
+  }
+
+  public static void main(String[] args) throws IOException {
+    StringWriter sw = new StringWriter();
+    HTMLAwareWriter writer = new HTMLAwareWriter(sw);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemClassLoader().getResourceAsStream("twitter.html"), "UTF-8"));
+    char[] chars = new char[32768];
+    int read;
+    while ((read = reader.read(chars, 0, chars.length)) != -1) {
+      writer.write(chars, 0, read);
+    }
+
+    String value = sw.toString();
+    int ITERATIONS = 1000;
+
+    for (int j = 0; j < 3; j++) {
+      long start = System.currentTimeMillis();
+      for (int i = 0; i < ITERATIONS; i++) {
+        Writer hawriter = new HTMLAwareWriter(new NullWriter());
+        hawriter.write(value);
+      }
+      long end = System.currentTimeMillis();
+      System.out.println(end - start);
+      start = end;
+
+      for (int i = 0; i < ITERATIONS; i++) {
+        Writer hawriter = new StringWriter();
+        hawriter.write(value);
+      }
+
+      end = System.currentTimeMillis();
+      System.out.println(end - start);
+    }
   }
 }
