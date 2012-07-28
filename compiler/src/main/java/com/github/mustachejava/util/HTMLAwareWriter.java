@@ -80,43 +80,43 @@ public class HTMLAwareWriter extends Writer {
   }
 
   private void nextState(char c) {
-    if (state == Context.ATTRIBUTES) {
+    if (state == ATTRIBUTES) {
       attr(c);
-    } else if (state == Context.BODY) {
+    } else if (state == BODY) {
       body(c);
-    } else if (state == Context.TAG) {
+    } else if (state == TAG) {
       tag(c);
-    } else if (state == Context.ATTR_NAME) {
+    } else if (state == ATTR_NAME) {
       attrName(c);
-    } else if (state == Context.ATTR_EQUAL) {
+    } else if (state == ATTR_EQUAL) {
       attrEqual(c);
-    } else if (state == Context.DQ_VALUE) {
+    } else if (state == DQ_VALUE) {
       dqValue(c);
-    } else if (state == Context.SCRIPT_DQ_VALUE) {
+    } else if (state == SCRIPT_DQ_VALUE) {
       scriptDqValue(c);
-    } else if (state == Context.TAG_NAME) {
+    } else if (state == TAG_NAME) {
       tagName(c);
-    } else if (state == Context.END_TAG) {
+    } else if (state == END_TAG) {
       endTag(c);
-    } else if (state == Context.END_TAG_NAME) {
+    } else if (state == END_TAG_NAME) {
       endTagName(c);
-    } else if (state == Context.ESCAPE) {
+    } else if (state == ESCAPE) {
       escape();
-    } else if (state == Context.SCRIPT) {
+    } else if (state == SCRIPT) {
       script(c);
-    } else if (state == Context.SCRIPT_SQ_VALUE) {
+    } else if (state == SCRIPT_SQ_VALUE) {
       scriptSqValue(c);
-    } else if (state == Context.SCRIPT_CHECK) {
+    } else if (state == SCRIPT_CHECK) {
       scriptCheck(c);
-    } else if (state == Context.AFTER_END_TAG_NAME) {
+    } else if (state == AFTER_END_TAG_NAME) {
       afterEndTagName(c);
-    } else if (state == Context.SQ_VALUE) {
+    } else if (state == SQ_VALUE) {
       sqValue(c);
-    } else if (state == Context.NQ_VALUE) {
+    } else if (state == NQ_VALUE) {
       nqValue(c);
-    } else if (state == Context.PRAGMA) {
+    } else if (state == PRAGMA) {
       pragma(c);
-    } else if (state == Context.COMMENT) {
+    } else if (state == COMMENT) {
       comment(c);
     }
   }
