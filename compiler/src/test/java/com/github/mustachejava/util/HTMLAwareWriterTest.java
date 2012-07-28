@@ -175,14 +175,16 @@ public class HTMLAwareWriterTest {
       for (int i = 0; i < ITERATIONS; i++) {
         Writer hawriter = new HTMLAwareWriter(new NullWriter());
         hawriter.write(value);
+        hawriter.close();
       }
       long end = System.currentTimeMillis();
       System.out.println(end - start);
       start = end;
 
       for (int i = 0; i < ITERATIONS; i++) {
-        Writer hawriter = new StringWriter();
-        hawriter.write(value);
+        Writer w = new StringWriter();
+        w.write(value);
+        w.close();
       }
 
       end = System.currentTimeMillis();

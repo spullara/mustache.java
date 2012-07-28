@@ -80,64 +80,44 @@ public class HTMLAwareWriter extends Writer {
   }
 
   private void nextState(char c) {
-    switch (state) {
-      case BODY:
-        body(c);
-        break;
-      case SCRIPT:
-        script(c);
-        break;
-      case SCRIPT_SQ_VALUE:
-        scriptSqValue(c);
-        break;
-      case SCRIPT_DQ_VALUE:
-        scriptDqValue(c);
-        break;
-      case SCRIPT_CHECK:
-        scriptCheck(c);
-        break;
-      case TAG:
-        tag(c);
-        break;
-      case TAG_NAME:
-        tagName(c);
-        break;
-      case END_TAG:
-        endTag(c);
-        break;
-      case END_TAG_NAME:
-        endTagName(c);
-        break;
-      case AFTER_END_TAG_NAME:
-        afterEndTagName(c);
-        break;
-      case ATTRIBUTES:
-        attr(c);
-        break;
-      case ATTR_NAME:
-        attrName(c);
-        break;
-      case ATTR_EQUAL:
-        attrEqual(c);
-        break;
-      case SQ_VALUE:
-        sqValue(c);
-        break;
-      case DQ_VALUE:
-        dqValue(c);
-        break;
-      case NQ_VALUE:
-        nqValue(c);
-        break;
-      case ESCAPE:
-        escape();
-        break;
-      case PRAGMA:
-        pragma(c);
-        break;
-      case COMMENT:
-        comment(c);
-        break;
+    if (state == Context.ATTRIBUTES) {
+      attr(c);
+    } else if (state == Context.BODY) {
+      body(c);
+    } else if (state == Context.TAG) {
+      tag(c);
+    } else if (state == Context.ATTR_NAME) {
+      attrName(c);
+    } else if (state == Context.ATTR_EQUAL) {
+      attrEqual(c);
+    } else if (state == Context.DQ_VALUE) {
+      dqValue(c);
+    } else if (state == Context.SCRIPT_DQ_VALUE) {
+      scriptDqValue(c);
+    } else if (state == Context.TAG_NAME) {
+      tagName(c);
+    } else if (state == Context.END_TAG) {
+      endTag(c);
+    } else if (state == Context.END_TAG_NAME) {
+      endTagName(c);
+    } else if (state == Context.ESCAPE) {
+      escape();
+    } else if (state == Context.SCRIPT) {
+      script(c);
+    } else if (state == Context.SCRIPT_SQ_VALUE) {
+      scriptSqValue(c);
+    } else if (state == Context.SCRIPT_CHECK) {
+      scriptCheck(c);
+    } else if (state == Context.AFTER_END_TAG_NAME) {
+      afterEndTagName(c);
+    } else if (state == Context.SQ_VALUE) {
+      sqValue(c);
+    } else if (state == Context.NQ_VALUE) {
+      nqValue(c);
+    } else if (state == Context.PRAGMA) {
+      pragma(c);
+    } else if (state == Context.COMMENT) {
+      comment(c);
     }
   }
 
