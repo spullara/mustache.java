@@ -1,35 +1,38 @@
 package com.github.mustachejava.util;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.logging.Logger;
 
-import static com.github.mustachejava.util.HtmlAwareWriter.Context.*;
+import static com.github.mustachejava.util.HtmlState.HTML.*;
 
 /**
- * Manages a state machine that knows the context in an HTML document it is writing.
+ * Stores the HTML state while parsing.
  */
-public class HtmlAwareWriter extends Writer {
+public class HtmlState implements State<HtmlState.HTML> {
 
   private static Logger l = Logger.getLogger("HTMLAwareWriter");
 
-  // Delegate
-  private Writer writer;
-
   // Current state of the document
-  private Context state;
-  private Context quoteState;
-  private Context bodyState;
+  private HTML state;
+  private HTML quoteState;
+  private HTML bodyState;
 
   // Ringbuffer for comments and script tags
   private RingBuffer ringBuffer = new RingBuffer(6);
 
   // Ask the writer for the current state
-  public Context getState() {
+  public HTML getState() {
     return state;
   }
 
-  public enum Context {
+  public HtmlState() {
+    this(BODY);
+  }
+
+  public HtmlState(HTML state) {
+    this.state = state;
+  }
+
+  public enum HTML {
     ATTRIBUTES,
     BODY,
     TAG,
@@ -51,31 +54,16 @@ public class HtmlAwareWriter extends Writer {
     COMMENT,
   }
 
-  public HtmlAwareWriter(Writer writer) {
-    this(writer, BODY);
+  private void s(HTML c) {
+    state = c;
+    ringBuffer.clear();
   }
 
-  public HtmlAwareWriter(Writer writer, Context state) {
-    this.state = state;
-    this.writer = writer;
-  }
-
-  @Override
-  public void write(char[] cbuf, int off, int len) throws IOException {
-    transition(cbuf, off, len);
-    writer.write(cbuf, off, len);
-  }
-
-  private void transition(char[] cbuf, int off, int len) {
+  public void nextState(char[] cbuf, int off, int len) {
     int end = off + len;
     for (int i = off; i < end; i++) {
       nextState(cbuf[i]);
     }
-  }
-
-  public void s(Context c) {
-    state = c;
-    ringBuffer.clear();
   }
 
   private void nextState(char c) {
@@ -344,15 +332,4 @@ public class HtmlAwareWriter extends Writer {
     }
   }
 
-  @Override
-  public void flush() throws IOException {
-    writer.flush();
-  }
-
-  @Override
-  public void close() throws IOException {
-    flush();
-    writer.close();
-  }
 }
-
