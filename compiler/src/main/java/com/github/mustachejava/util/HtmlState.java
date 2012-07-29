@@ -17,7 +17,7 @@ public class HtmlState implements State<HtmlState.HTML> {
   private HTML bodyState;
 
   // Ringbuffer for comments and script tags
-  private RingBuffer ringBuffer = new RingBuffer(6);
+  private final RingBuffer ringBuffer = new RingBuffer(6);
 
   // Ask the writer for the current state
   public HTML getState() {
@@ -52,11 +52,6 @@ public class HtmlState implements State<HtmlState.HTML> {
     NQ_VALUE,
     PRAGMA,
     COMMENT,
-  }
-
-  private void s(HTML c) {
-    state = c;
-    ringBuffer.clear();
   }
 
   public void nextState(char[] cbuf, int off, int len) {
@@ -131,73 +126,74 @@ public class HtmlState implements State<HtmlState.HTML> {
   private void scriptCheck(char c) {
     if (c == '/') {
       bodyState = BODY;
-      s(END_TAG);
+      state = END_TAG;
     } else if (ws(c)) {
     } else {
-      s(SCRIPT);
+      state = SCRIPT;
     }
   }
 
   private void pragma(char c) {
     if (c == '-') {
       if (ringBuffer.compare("!-", false)) {
-        s(COMMENT);
+        state = COMMENT;
+        ringBuffer.clear();
       }
     } else if (c == '>') {
-      s(bodyState);
+      state = bodyState;
     }
   }
 
   private void scriptSqValue(char c) {
     if (c == '\\') {
       quoteState = state;
-      s(ESCAPE);
+      state = ESCAPE;
     } else if (c == '\'') {
-      s(SCRIPT);
+      state = SCRIPT;
     }
   }
 
   private void scriptDqValue(char c) {
     if (c == '\\') {
       quoteState = state;
-      s(ESCAPE);
+      state = ESCAPE;
     } else if (c == '"') {
-      s(SCRIPT);
+      state = SCRIPT;
     }
   }
 
   private void script(char c) {
     if (c == '"') {
-      s(SCRIPT_DQ_VALUE);
+      state = SCRIPT_DQ_VALUE;
     } else if (c == '\'') {
-      s(SCRIPT_SQ_VALUE);
+      state = SCRIPT_SQ_VALUE;
     } else if (c == '<') {
-      s(SCRIPT_CHECK);
+      state = SCRIPT_CHECK;
     }
   }
 
   private void afterEndTagName(char c) {
     if (ws(c)) {
     } else if (c == '>') {
-      s(bodyState);
+      state = bodyState;
     } else error(c);
   }
 
   private void endTagName(char c) {
     if (namePart(c)) {
     } else if (c == '>') {
-      s(bodyState);
+      state = bodyState;
     } else if (ws(c)) {
-      s(AFTER_END_TAG_NAME);
+      state = AFTER_END_TAG_NAME;
     } else error(c);
   }
 
   private void endTag(char c) {
     if (nameStart(c)) {
-      s(END_TAG_NAME);
+      state = END_TAG_NAME;
     } else if (Character.isWhitespace(c)) {
     } else if (c == '>') {
-      s(bodyState);
+      state = bodyState;
     } else error(c);
   }
 
@@ -208,31 +204,31 @@ public class HtmlState implements State<HtmlState.HTML> {
   private void comment(char c) {
     if (c == '>') {
       if (ringBuffer.compare("--", false)) {
-        s(bodyState);
+        state = bodyState;
       }
     }
   }
 
   private void nqValue(char c) {
     if (ws(c)) {
-      s(ATTRIBUTES);
+      state = ATTRIBUTES;
     } else if (c == '<') {
       error(c);
     } else if (c == '>') {
-      s(bodyState);
+      state = bodyState;
     }
   }
 
   private void escape() {
-    s(quoteState);
+    state = quoteState;
   }
 
   private void sqValue(char c) {
     if (c == '\\') {
-      s(ESCAPE);
+      state = ESCAPE;
       quoteState = SQ_VALUE;
     } else if (c == '\'') {
-      s(ATTRIBUTES);
+      state = ATTRIBUTES;
     } else if (c == '<' || c == '>') {
       error(c);
     }
@@ -240,10 +236,10 @@ public class HtmlState implements State<HtmlState.HTML> {
 
   private void dqValue(char c) {
     if (c == '\\') {
-      s(ESCAPE);
+      state = ESCAPE;
       quoteState = DQ_VALUE;
     } else if (c == '\"') {
-      s(ATTRIBUTES);
+      state = ATTRIBUTES;
     } else if (c == '<' || c == '>') {
       error(c);
     }
@@ -251,12 +247,12 @@ public class HtmlState implements State<HtmlState.HTML> {
 
   private void attrEqual(char c) {
     if (c == '"') {
-      s(DQ_VALUE);
+      state = DQ_VALUE;
     } else if (c == '\'') {
-      s(SQ_VALUE);
+      state = SQ_VALUE;
     } else if (ws(c)) {
     } else {
-      s(NQ_VALUE);
+      state = NQ_VALUE;
     }
   }
 
@@ -267,20 +263,20 @@ public class HtmlState implements State<HtmlState.HTML> {
   private void attrName(char c) {
     if (namePart(c)) {
     } else if (c == '=') {
-      s(ATTR_EQUAL);
+      state = ATTR_EQUAL;
     } else if (ws(c)) {
     } else if (c == '>') {
-      s(bodyState);
+      state = bodyState;
     } else error(c);
   }
 
   private void attr(char c) {
     if (nameStart(c)) {
-      s(ATTR_NAME);
+      state = ATTR_NAME;
     } else if (c == '>') {
-      s(bodyState);
+      state = bodyState;
     } else if (c == '/') {
-      s(AFTER_END_TAG_NAME);
+      state = AFTER_END_TAG_NAME;
     } else if (ws(c)) {
     } else error(c);
   }
@@ -289,10 +285,10 @@ public class HtmlState implements State<HtmlState.HTML> {
     if (namePart(c)) {
     } else if (ws(c)) {
       setBodyTag();
-      s(ATTRIBUTES);
+      state = ATTRIBUTES;
     } else if (c == '>') {
       setBodyTag();
-      s(bodyState);
+      state = bodyState;
     }
   }
 
@@ -308,24 +304,26 @@ public class HtmlState implements State<HtmlState.HTML> {
 
   private void tag(char c) {
     if (nameStart(c)) {
-      s(TAG_NAME);
+      state = TAG_NAME;
+      ringBuffer.clear();
     } else if (c == '/') {
-      s(END_TAG);
+      state = END_TAG;
     } else if (c == '!') {
-      s(PRAGMA);
+      state = PRAGMA;
+      ringBuffer.clear();
     } else if (ws(c)) {
     } else error(c);
   }
 
   private void error(char c) {
     l.warning("Invalid: " + new StringBuilder().append(c) + " (" + state + ")");
-    s(bodyState);
+    state = bodyState;
   }
 
   private void body(char c) {
     if (c == '<') {
       bodyState = state;
-      s(TAG);
+      state = TAG;
     }
   }
 
