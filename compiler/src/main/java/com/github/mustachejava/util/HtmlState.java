@@ -62,72 +62,69 @@ public class HtmlState implements State<HtmlState.HTML> {
   public void nextState(char[] cbuf, int off, int len) {
     int end = off + len;
     for (int i = off; i < end; i++) {
-      nextState(cbuf[i]);
-    }
-  }
-
-  private void nextState(char c) {
-    switch (state) {
-      case ATTRIBUTES:
-        attr(c);
-        break;
-      case BODY:
-        body(c);
-        break;
-      case TAG:
-        tag(c);
-        break;
-      case ATTR_NAME:
-        attrName(c);
-        break;
-      case ATTR_EQUAL:
-        attrEqual(c);
-        break;
-      case DQ_VALUE:
-        dqValue(c);
-        break;
-      case SCRIPT_DQ_VALUE:
-        scriptDqValue(c);
-        break;
-      case TAG_NAME:
-        tagName(c);
-        break;
-      case END_TAG:
-        endTag(c);
-        break;
-      case END_TAG_NAME:
-        endTagName(c);
-        break;
-      case ESCAPE:
-        escape();
-        break;
-      case SCRIPT:
-        script(c);
-        break;
-      case SCRIPT_SQ_VALUE:
-        scriptSqValue(c);
-        break;
-      case SCRIPT_CHECK:
-        scriptCheck(c);
-        break;
-      case AFTER_END_TAG_NAME:
-        afterEndTagName(c);
-        break;
-      case SQ_VALUE:
-        sqValue(c);
-        break;
-      case NQ_VALUE:
-        nqValue(c);
-        break;
-      case PRAGMA:
-        pragma(c);
-        break;
-      case COMMENT:
-        comment(c);
-        break;
-    }
-    if (state == TAG_NAME || state == PRAGMA || state == COMMENT) {
-      ringBuffer.append(c);
+      char c = cbuf[i];
+      switch (state) {
+        case ATTRIBUTES:
+          attr(c);
+          break;
+        case BODY:
+          body(c);
+          break;
+        case TAG:
+          tag(c);
+          break;
+        case ATTR_NAME:
+          attrName(c);
+          break;
+        case ATTR_EQUAL:
+          attrEqual(c);
+          break;
+        case DQ_VALUE:
+          dqValue(c);
+          break;
+        case SCRIPT_DQ_VALUE:
+          scriptDqValue(c);
+          break;
+        case TAG_NAME:
+          tagName(c);
+          break;
+        case END_TAG:
+          endTag(c);
+          break;
+        case END_TAG_NAME:
+          endTagName(c);
+          break;
+        case ESCAPE:
+          escape();
+          break;
+        case SCRIPT:
+          script(c);
+          break;
+        case SCRIPT_SQ_VALUE:
+          scriptSqValue(c);
+          break;
+        case SCRIPT_CHECK:
+          scriptCheck(c);
+          break;
+        case AFTER_END_TAG_NAME:
+          afterEndTagName(c);
+          break;
+        case SQ_VALUE:
+          sqValue(c);
+          break;
+        case NQ_VALUE:
+          nqValue(c);
+          break;
+        case PRAGMA:
+          pragma(c);
+          break;
+        case COMMENT:
+          comment(c);
+          break;
+      }
+      if (state == TAG_NAME || state == PRAGMA || state == COMMENT) {
+        ringBuffer.append(c);
+      }
     }
   }
 

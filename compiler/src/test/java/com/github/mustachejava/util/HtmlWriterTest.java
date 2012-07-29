@@ -10,7 +10,7 @@ import static com.github.mustachejava.util.HtmlState.HTML.*;
 
 import static junit.framework.Assert.assertEquals;
 
-public class HtmlAwareWriterTest {
+public class HtmlWriterTest {
 
   private HtmlState state;
   private StateAwareWriter w;
