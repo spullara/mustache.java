@@ -5,16 +5,22 @@ package com.github.mustachejava.util;
 */
 public class RingBuffer {
   private final int ringSize;
+  private final int ringHash;
   private final char[] ring;
   private int length = 0;
 
   public RingBuffer(int ringSize) {
-    this.ringSize = ringSize;
-    ring = new char[ringSize];
+    int i = 1;
+    while (i < ringSize) {
+      i *= 2;
+    }
+    this.ringSize = i;
+    this.ringHash = i - 1;
+    ring = new char[i];
   }
 
   public void append(char c) {
-    ring[length++ % ringSize] = c;
+    ring[length++ & ringHash] = c;
   }
 
   public void clear() {
@@ -29,7 +35,7 @@ public class RingBuffer {
     }
     if (length >= len) {
       int j = 0;
-      int position = length % ringSize;
+      int position = length & ringHash;
       for (int i = position - len; i < position; i++) {
         char c;
         if (i < 0) {
