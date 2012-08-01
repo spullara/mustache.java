@@ -43,6 +43,8 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
       throw new AssertionError(e);
     }
   }
+  
+  private boolean mapMethodsAccessible;
 
   @SuppressWarnings("unchecked")
   @Override
@@ -110,12 +112,12 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
     // to see if it contains a value named name.
     if (scope instanceof Map) {
       Map map = (Map) scope;
-      if (!map.containsKey(name)) {
-        guards.add(new MapGuard(this, scopeIndex, name, false, wrappers));
-        return null;
-      } else {
+      if (map.containsKey(name)) {
         guards.add(new MapGuard(this, scopeIndex, name, true, wrappers));
         return createWrapper(scopeIndex, wrappers, guards, MAP_METHOD, new Object[]{name});
+      } else if (!mapMethodsAccessible) {
+        guards.add(new MapGuard(this, scopeIndex, name, false, wrappers));
+        return null;
       }
     }
     AccessibleObject member = findMember(scope.getClass(), name);
@@ -130,5 +132,15 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
   @Override
   public Binding createBinding(String name, TemplateContext tc, Code code) {
     return new GuardedBinding(this, name, tc, code);
+  }
+
+  @Override
+  public void setMapMethodsAccessible(boolean mapMethodsAccessible) {
+    this.mapMethodsAccessible = mapMethodsAccessible;
+  }
+
+  @Override
+  public boolean isMapMethodsAccessible() {
+    return mapMethodsAccessible;
   }
 }

@@ -53,4 +53,20 @@ public interface ObjectHandler {
    * @return
    */
   Binding createBinding(String name, TemplateContext tc, Code code);
+  
+  /**
+   * Sets whether or not {@link Map} methods other than get(key) are
+   * accessible to templates.
+   * @param mapMethodsAccessible true if methods other than get(key) should
+   * be accessible, false otherwise.
+   */
+  void setMapMethodsAccessible(boolean mapMethodsAccessible);
+  
+  /**
+   * Indicates whether or not methods other than get(key) are accessible in
+   * templates
+   * @return true of methods other than get(key) will be resolved, false
+   * otherwise
+   */
+  boolean isMapMethodsAccessible();
 }
