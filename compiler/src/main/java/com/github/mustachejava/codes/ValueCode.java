@@ -57,7 +57,7 @@ public class ValueCode extends DefaultCode {
         } else if (object instanceof Callable) {
           return handleCallable(writer, (Callable) object, scopes);
         } else {
-          execute(writer, object.toString());
+          execute(writer, oh.stringify(object));
         }
       } catch (Exception e) {
         throw new MustacheException("Failed to get value for " + name + " at line " + tc.file() + ":" + tc.line(), e);
@@ -68,7 +68,7 @@ public class ValueCode extends DefaultCode {
 
   protected Writer handleCallable(Writer writer, final Callable callable, final Object[] scopes) throws Exception {
     if (les == null) {
-      execute(writer, callable.call().toString());
+      execute(writer, oh.stringify(callable.call()));
       return super.execute(writer, scopes);
     } else {
       // Flush the current writer
@@ -84,7 +84,7 @@ public class ValueCode extends DefaultCode {
         public void run() {
           try {
             Object call = callable.call();
-            execute(finalWriter, call == null ? null : call.toString());
+            execute(finalWriter, call == null ? null : oh.stringify(call));
             latchedWriter.done();
           } catch (Throwable e) {
             latchedWriter.failed(e);
@@ -123,4 +123,5 @@ public class ValueCode extends DefaultCode {
       writer.write(value);
     }
   }
+  
 }

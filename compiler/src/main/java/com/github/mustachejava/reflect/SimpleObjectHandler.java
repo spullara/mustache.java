@@ -128,4 +128,9 @@ public class SimpleObjectHandler extends BaseObjectHandler {
     }
     return ao == NONE ? null : ao;
   }
+
+  @Override
+  public String stringify(Object object) {
+    return object.toString();
+  }
 }
