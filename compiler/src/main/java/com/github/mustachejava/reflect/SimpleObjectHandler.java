@@ -44,6 +44,8 @@ public class SimpleObjectHandler extends BaseObjectHandler {
                 Map map = (Map) scope;
                 if (map.containsKey(name)) {
                   return map.get(name);
+                } else if (!areMethodsAccessible(map)) {
+                  continue; //don't check methods, move to next scope
                 }
               }
               // Check to see if there is a method or field that matches
@@ -127,5 +129,9 @@ public class SimpleObjectHandler extends BaseObjectHandler {
       cache.put(key, ao == null ? NONE : ao);
     }
     return ao == NONE ? null : ao;
+  }
+
+  protected boolean areMethodsAccessible(Map<?, ?> map) {
+    return false;
   }
 }
