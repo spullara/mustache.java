@@ -131,4 +131,9 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
   public Binding createBinding(String name, TemplateContext tc, Code code) {
     return new GuardedBinding(this, name, tc, code);
   }
+
+  @Override
+  public String stringify(Object object) {
+    return object.toString();
+  }
 }
