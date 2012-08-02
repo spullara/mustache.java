@@ -1,8 +1,9 @@
 package com.github.mustachejava;
 
-import com.github.mustachejava.util.Wrapper;
-
 import java.io.Writer;
+import java.util.Map;
+
+import com.github.mustachejava.util.Wrapper;
 
 /**
  * The ObjectHandler is responsible for creating wrappers to find values
@@ -54,19 +55,4 @@ public interface ObjectHandler {
    */
   Binding createBinding(String name, TemplateContext tc, Code code);
   
-  /**
-   * Sets whether or not {@link Map} methods other than get(key) are
-   * accessible to templates.
-   * @param mapMethodsAccessible true if methods other than get(key) should
-   * be accessible, false otherwise.
-   */
-  void setMapMethodsAccessible(boolean mapMethodsAccessible);
-  
-  /**
-   * Indicates whether or not methods other than get(key) are accessible in
-   * templates
-   * @return true of methods other than get(key) will be resolved, false
-   * otherwise
-   */
-  boolean isMapMethodsAccessible();
 }

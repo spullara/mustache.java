@@ -9,11 +9,29 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.reflect.SimpleObjectHandler;
 
 import static org.junit.Assert.assertEquals;
 
 public class MapNonGetMethodsTest {
+  
+  /**
+   * Extended reflection handler that can access map methods.
+   */
+  private class MapMethodReflectionHandler extends ReflectionObjectHandler {
+    @Override
+    protected boolean areMethodsAccessible(Map<?, ?> map) {
+      return true;
+    }
+  }
+  
+  private class SimpleMapMethodHandler extends SimpleObjectHandler {
+    @Override
+    protected boolean areMethodsAccessible(Map<?, ?> map) {
+      return true;
+    }
+  }
 
   private static final String TEMPLATE = "{{empty}}";
   
@@ -31,24 +49,31 @@ public class MapNonGetMethodsTest {
     Reader reader = new StringReader(TEMPLATE);
     Mustache mustache = factory.compile(reader, "template");
     
-    StringWriter writer = new StringWriter();
-    mustache.execute(writer, model);
-    
-    assertEquals("", writer.toString());
+    verifyOutput("", model, mustache);
   }
   
   @Test
   public void testMethodAccessAllowed() {
     Map<String, Object> model = new HashMap<String, Object>();
     
-    factory.getObjectHandler().setMapMethodsAccessible(true);
+    factory.setObjectHandler(new MapMethodReflectionHandler());
     Reader reader = new StringReader(TEMPLATE);
     Mustache mustache = factory.compile(reader, "template");
     
-    StringWriter writer = new StringWriter();
-    mustache.execute(writer, model);
+    verifyOutput("true", model, mustache);
+  }
+  
+  @Test
+  public void testWrapperCaching() {
+    factory.setObjectHandler(new MapMethodReflectionHandler());
+    Reader reader = new StringReader(TEMPLATE);
+    Mustache mustache = factory.compile(reader, "template");
     
-    assertEquals("true", writer.toString());
+    Map<String, String> model = new HashMap<String, String>();
+    verifyOutput("true", model, mustache);
+    
+    model.put("empty", "data");
+    verifyOutput("data", model, mustache);
   }
   
 
@@ -60,25 +85,25 @@ public class MapNonGetMethodsTest {
     Reader reader = new StringReader(TEMPLATE);
     Mustache mustache = factory.compile(reader, "template");
     
-    StringWriter writer = new StringWriter();
-    mustache.execute(writer, model);
-    
-    assertEquals("", writer.toString());
+    verifyOutput("", model, mustache);
   }
   
   @Test
   public void testSimpleHandlerMethodAccessAllowed() {
     Map<String, Object> model = new HashMap<String, Object>();
     
-    factory.setObjectHandler(new SimpleObjectHandler());
-    factory.getObjectHandler().setMapMethodsAccessible(true);
+    factory.setObjectHandler(new SimpleMapMethodHandler());
     Reader reader = new StringReader(TEMPLATE);
     Mustache mustache = factory.compile(reader, "template");
     
+    verifyOutput("true", model, mustache);
+  }
+  
+  private void verifyOutput(String expected, Object model, Mustache mustache) {
     StringWriter writer = new StringWriter();
     mustache.execute(writer, model);
     
-    assertEquals("true", writer.toString());
+    assertEquals(expected, writer.toString());
   }
 
 }

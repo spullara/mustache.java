@@ -16,8 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SimpleObjectHandler extends BaseObjectHandler {
 
-  private boolean mapMethodsAccessible;
-  
   @Override
   public Binding createBinding(final String name, TemplateContext tc, Code code) {
     return new Binding() {
@@ -46,7 +44,7 @@ public class SimpleObjectHandler extends BaseObjectHandler {
                 Map map = (Map) scope;
                 if (map.containsKey(name)) {
                   return map.get(name);
-                } else if (!mapMethodsAccessible) {
+                } else if (!areMethodsAccessible(map)) {
                   continue; //don't check methods, move to next scope
                 }
               }
@@ -133,13 +131,7 @@ public class SimpleObjectHandler extends BaseObjectHandler {
     return ao == NONE ? null : ao;
   }
 
-  @Override
-  public void setMapMethodsAccessible(boolean mapMethodsAccessible) {
-    this.mapMethodsAccessible = mapMethodsAccessible;
-  }
-
-  @Override
-  public boolean isMapMethodsAccessible() {
-    return mapMethodsAccessible;
+  protected boolean areMethodsAccessible(Map<?, ?> map) {
+    return false;
   }
 }
