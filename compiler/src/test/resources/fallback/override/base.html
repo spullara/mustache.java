@@ -1,0 +1,28 @@
+<html>
+<head>
+<title>{{$meta_title}}Override page{{/meta_title}} @ Override</title>
+{{$head_extra}}{{/head_extra}}
+</head>
+<body>
+
+{{$header_base}}
+<div id="header">
+	<h1>{{title}} @ Override</h1>
+{{>menu}}
+</div>
+{{/header_base}}
+
+{{$content_base}}
+<div id="content">
+	{{$content}}{{/content}}
+</div>
+{{/content_base}}
+
+{{$footer_base}}
+<div id="footer">
+	<p>Override footer</p>
+</div>
+{{/footer_base}}
+
+</body>
+</html>
