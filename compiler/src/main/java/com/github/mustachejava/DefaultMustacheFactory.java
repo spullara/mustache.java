@@ -3,6 +3,7 @@ package com.github.mustachejava;
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.util.HtmlEscaper;
 
+import com.google.common.base.Charsets;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -79,7 +80,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
     if (is == null) {
       throw new MustacheException("Template '" + resourceName + "' not found");
     } else {
-      return new BufferedReader(new InputStreamReader(is, "UTF-8"));
+      return new BufferedReader(new InputStreamReader(is, Charsets.UTF_8));
     }
   }
 
