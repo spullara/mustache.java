@@ -109,6 +109,19 @@ public class ExtensionTest {
     assertEquals(getContents(root, "client.txt"), sw.toString());
   }
 
+  public void testSubSubCaching() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("subsubchild1.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {});
+    assertEquals(getContents(root, "subsubchild1.txt"), sw.toString());
+    
+    m = c.compile("subsubchild2.html");
+    sw = new StringWriter();
+    m.execute(sw,  new Object() {});
+    assertEquals(getContents(root, "subsubchild2.txt"), sw.toString());
+  }
+
   protected String getContents(File root, String file) throws IOException {
     BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(root, file)),"UTF-8"));
     StringWriter capture = new StringWriter();
