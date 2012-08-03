@@ -157,4 +157,9 @@ public abstract class BaseObjectHandler implements ObjectHandler {
       throw new NoSuchFieldException("Only public, protected and package members allowed");
     }
   }
+
+  @Override
+  public String stringify(Object object) {
+    return object.toString();
+  }
 }
