@@ -8,7 +8,6 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -69,14 +68,16 @@ public class DefaultMustacheFactory implements MustacheFactory {
       File file = fileRoot == null ? new File(resourceName) : new File(fileRoot, resourceName);
       if (file.exists() && file.isFile()) {
         try {
-          return new BufferedReader(new FileReader(file));
+          is = new FileInputStream(file);
         } catch (FileNotFoundException e) {
           throw new MustacheException("Found file, could not open: " + file, e);
         }
       }
-      throw new MustacheException("Template " + resourceName + " not found");
+    }
+    if (is == null) {
+      throw new MustacheException("Template '" + resourceName + "' not found");
     } else {
-      return new BufferedReader(new InputStreamReader(is, Charset.forName("utf-8")));
+      return new BufferedReader(new InputStreamReader(is, "UTF-8"));
     }
   }
 
