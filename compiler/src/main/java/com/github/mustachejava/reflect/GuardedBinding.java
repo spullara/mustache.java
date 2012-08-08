@@ -112,7 +112,17 @@ public class GuardedBinding implements Binding {
                   .append("in");
           for (Object scope : scopes) {
             if (scope != null) {
-              sb.append(" ").append(scope.getClass().getSimpleName());
+              Class aClass = scope.getClass();
+              try {
+                sb.append(" ").append(aClass.getSimpleName());
+              } catch (Exception e) {
+                // Some generated classes don't have simple names
+                try {
+                  sb.append(" ").append(aClass.getName());
+                } catch (Exception e1) {
+                  // Some generated classes have proper names at all
+                }
+              }
             }
           }
           logger.warning(sb.toString());

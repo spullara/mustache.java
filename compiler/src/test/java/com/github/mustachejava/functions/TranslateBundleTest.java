@@ -16,14 +16,15 @@ import static org.junit.Assert.assertEquals;
 public class TranslateBundleTest {
 
   private static File root;
+  private static final String BUNDLE = "com.github.mustachejava.functions.translatebundle";
 
   @Test
   public void testTranslation() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("translatebundle.html");
     StringWriter sw = new StringWriter();
-    Map scope = new HashMap();
-	scope.put("trans", new TranslateBundleFunction("com.github.mustachejava.functions.translatebundle", Locale.US));
+    Map<String, Object> scope = new HashMap<String, Object>();
+	  scope.put("trans", new TranslateBundleFunction(BUNDLE, Locale.US));
     m.execute(sw, scope);
     assertEquals(getContents(root, "translatebundle.txt"), sw.toString());
   }

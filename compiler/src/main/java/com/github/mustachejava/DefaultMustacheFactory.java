@@ -9,7 +9,15 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.Writer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
@@ -36,8 +44,11 @@ public class DefaultMustacheFactory implements MustacheFactory {
    */
   protected final MustacheParser mc = new MustacheParser(this);
 
-  // New templates that are generated at runtime are cached here. The String
-  // key is the actual text of the templates, not a name.
+  /**
+   * New templates that are generated at runtime are cached here. The template key
+   * includes the text of the template and the context so we get proper error
+   * messages and debugging information.
+  */
   protected final LoadingCache<FragmentKey, Mustache> templateCache = createLambdaCache();
 
   private final String resourceRoot;
@@ -197,9 +208,9 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   protected class FragmentCacheLoader extends CacheLoader<FragmentKey, Mustache> {
     @Override
-    public Mustache load(FragmentKey templateKey) throws Exception {
-      StringReader reader = new StringReader(templateKey.templateText);
-      TemplateContext tc = templateKey.tc;
+    public Mustache load(FragmentKey fragmentKey) throws Exception {
+      StringReader reader = new StringReader(fragmentKey.templateText);
+      TemplateContext tc = fragmentKey.tc;
       return compile(reader, tc.file(), tc.startChars(), tc.endChars());
     }
   }
