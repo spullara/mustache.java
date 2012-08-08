@@ -101,14 +101,8 @@ public class ValueCode extends DefaultCode {
     Object newtemplate = function.apply(null);
     if (newtemplate != null) {
       String templateText = newtemplate.toString();
-      Mustache mustache = cf.getTemplate(templateText);
-      if (mustache == null) {
-        mustache = cf.compile(new StringReader(templateText), name,
-                MustacheParser.DEFAULT_SM, MustacheParser.DEFAULT_EM);
-        cf.putTemplate(templateText, mustache);
-      }
       StringWriter sw = new StringWriter();
-      mustache.execute(sw, scopes);
+      cf.getFragment(new FragmentKey(new TemplateContext(MustacheParser.DEFAULT_SM, MustacheParser.DEFAULT_EM, tc.file(), tc.line()), templateText)).execute(sw, scopes).close();
       value = sw.toString();
     } else {
       value = "";

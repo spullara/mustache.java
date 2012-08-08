@@ -5,7 +5,6 @@ import com.github.mustachejava.util.LatchedWriter;
 import com.google.common.base.Function;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.concurrent.Callable;
@@ -105,13 +104,7 @@ public class IterableCode extends DefaultCode implements Iteration {
   }
 
   protected Writer writeTemplate(Writer writer, String templateText, Object[] scopes) {
-    Mustache mustache = cf.getTemplate(templateText);
-    if (mustache == null) {
-      mustache = cf.compile(new StringReader(templateText), tc.file(), tc.startChars(), tc.endChars());
-      cf.putTemplate(templateText, mustache);
-    }
-    writer = mustache.execute(writer, scopes);
-    return writer;
+    return cf.getFragment(new FragmentKey(tc, templateText)).execute(writer, scopes);
   }
 
   protected Writer execute(Writer writer, Object resolve, Object[] scopes) {
@@ -123,5 +116,4 @@ public class IterableCode extends DefaultCode implements Iteration {
     writer = runCodes(writer, iteratorScopes);
     return writer;
   }
-
 }

@@ -41,7 +41,8 @@ public class TranslateBundleTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    File file = new File("compiler/src/test/resources/functions");
+    File compiler = new File("compiler").exists() ? new File("compiler") : new File(".");
+    File file = new File(compiler, "src/test/resources/functions");
     root = new File(file, "translatebundle.html").exists() ? file : new File("src/test/resources/functions");
   }
 }
