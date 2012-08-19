@@ -68,7 +68,7 @@ public class ExtendCode extends PartialCode {
                 "Illegal code in extend section: " + code.getClass().getName());
       }
     }
-    Mustache original = mf.compile(partialName());
+    Mustache original = mf.compile(mf.getReader(partialName()), partialName());
     partial = (Mustache) original.clone();
     Code[] supercodes = partial.getCodes();
     // recursively replace named sections with replacements

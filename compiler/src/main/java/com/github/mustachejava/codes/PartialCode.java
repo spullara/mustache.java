@@ -39,7 +39,7 @@ public class PartialCode extends DefaultCode {
 
   @Override
   public Code[] getCodes() {
-    return partial.getCodes();
+    return partial == null ? null : partial.getCodes();
   }
 
   @Override
