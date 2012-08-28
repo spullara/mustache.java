@@ -85,6 +85,9 @@ public class Handlebar {
     Handler handler = new AbstractHandler() {
       public void handle(String s, Request r, HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
         String pathInfo = req.getPathInfo();
+
+        if (pathInfo.endsWith("/")) pathInfo += "index.html";
+        
         String extension = pathInfo.substring(pathInfo.lastIndexOf(".") + 1);
         String base = pathInfo.substring(0, pathInfo.lastIndexOf("."));
         String mimeType = mimeTypes.get(extension);
@@ -92,7 +95,7 @@ public class Handlebar {
         res.setCharacterEncoding("utf-8");
         if (mimeType == null || mimeType.equals("text/html")) {
           // Handle like a template
-          String filename = pathInfo.endsWith("/") ? pathInfo + "index.html" : pathInfo.substring(1);
+          String filename = pathInfo.substring(1);
           try {
             MustacheFactory mc = new DefaultMustacheFactory(new File("."));
             Mustache mustache = mc.compile(filename);
