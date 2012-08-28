@@ -27,43 +27,53 @@ import java.util.Map;
 /**
  * Run a local server and merge .js and .html files using mustache.
  * <p/>
- * User: sam
- * Date: Jun 15, 2010
- * Time: 4:25:31 PM
+ * User: sam Date: Jun 15, 2010 Time: 4:25:31 PM
  */
 public class Handlebar {
 
   @Argument(alias = "p")
   private static Integer port = 8000;
 
-  @Argument(alias = "m", required = true)
+  @Argument(alias = "d", required = true)
+  private static String dir;
+
+  @Argument(alias = "m")
   private static String mocks;
+
+  private static File rootDir;
+
+  private static final JsonFactory JSON_FACTORY = new MappingJsonFactory();
+
 
   private static Map<String, String> mimeTypes = new HashMap<String, String>();
   static {
     mimeTypes.put("html", "text/html");
-    mimeTypes.put("png" , "image/png");
-    mimeTypes.put("gif" , "image/gif");
-    mimeTypes.put("jpg" , "image/jpg");
-    mimeTypes.put("js"  , "text/javascript");
-    mimeTypes.put("css" , "text/css");
+    mimeTypes.put("png", "image/png");
+    mimeTypes.put("gif", "image/gif");
+    mimeTypes.put("jpg", "image/jpg");
+    mimeTypes.put("js", "text/javascript");
+    mimeTypes.put("css", "text/css");
   }
 
   public static Object toObject(final JsonNode node) {
     if (node.isArray()) {
-      return new ArrayList() {{
-        for (JsonNode jsonNodes : node) {
-          add(toObject(jsonNodes));
+      return new ArrayList() {
+        {
+          for (JsonNode jsonNodes : node) {
+            add(toObject(jsonNodes));
+          }
         }
-      }};
+      };
     } else if (node.isObject()) {
-      return new HashMap() {{
-        for (Iterator<Map.Entry<String, JsonNode>> i = node.getFields(); i.hasNext(); ) {
-          Map.Entry<String, JsonNode> next = i.next();
-          Object o = toObject(next.getValue());
-          put(next.getKey(), o);
+      return new HashMap() {
+        {
+          for (Iterator<Map.Entry<String, JsonNode>> i = node.getFields(); i.hasNext();) {
+            Map.Entry<String, JsonNode> next = i.next();
+            Object o = toObject(next.getValue());
+            put(next.getKey(), o);
+          }
         }
-      }};
+      };
     } else if (node.isBoolean()) {
       return node.getBooleanValue();
     } else if (node.isNull()) {
@@ -81,16 +91,24 @@ public class Handlebar {
       Args.usage(Handlebar.class);
       System.exit(1);
     }
-    final JsonFactory jf = new MappingJsonFactory();
+
+    rootDir = new File(dir);
+    if (null == mocks) mocks = dir;
+
     Handler handler = new AbstractHandler() {
-      public void handle(String s, Request r, HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+      public void handle(String s, Request r, HttpServletRequest req, HttpServletResponse res)
+          throws IOException, ServletException {
         String pathInfo = req.getPathInfo();
 
         if (pathInfo.endsWith("/")) pathInfo += "index.html";
-        
+
         String extension = pathInfo.substring(pathInfo.lastIndexOf(".") + 1);
         String base = pathInfo.substring(0, pathInfo.lastIndexOf("."));
         String mimeType = mimeTypes.get(extension);
+
+        // create a handle to the resource
+        File staticres = new File(rootDir, pathInfo.substring(1));
+
         res.setContentType(mimeType == null ? "text/html" : mimeType);
         res.setCharacterEncoding("utf-8");
         if (mimeType == null || mimeType.equals("text/html")) {
@@ -104,7 +122,8 @@ public class Handlebar {
             Map parameters = new HashMap<Object, Object>(req.getParameterMap()) {
               @Override
               public Object get(Object o) {
-                Object result = super.get(o);    //To change body of overridden methods use File | Settings | File Templates.
+                Object result = super.get(o); // To change body of overridden methods use File |
+                                              // Settings | File Templates.
                 if (result instanceof String[]) {
                   String[] strings = (String[]) result;
                   if (strings.length == 1) {
@@ -117,10 +136,10 @@ public class Handlebar {
 
             if (file.exists()) {
               BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-              JsonParser parser = jf.createJsonParser(br);
+              JsonParser parser = JSON_FACTORY.createJsonParser(br);
               JsonNode json = parser.readValueAsTree();
               br.close();
-              mustache.execute(res.getWriter(), new Object[] { toObject(json), parameters });
+              mustache.execute(res.getWriter(), new Object[] {toObject(json), parameters});
             } else {
               mustache.execute(res.getWriter(), parameters);
             }
@@ -135,9 +154,10 @@ public class Handlebar {
           res.setStatus(HttpServletResponse.SC_OK);
           OutputStream os = res.getOutputStream();
           byte[] bytes = new byte[8192];
-          BufferedInputStream bis = new BufferedInputStream(new FileInputStream(pathInfo.substring(1)));
+          BufferedInputStream bis =
+              new BufferedInputStream(new FileInputStream(pathInfo.substring(1)));
           int read;
-          while((read = bis.read(bytes)) != -1) {
+          while ((read = bis.read(bytes)) != -1) {
             os.write(bytes, 0, read);
           }
           os.close();
