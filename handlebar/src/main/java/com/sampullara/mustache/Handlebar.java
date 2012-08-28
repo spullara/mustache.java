@@ -1,6 +1,5 @@
 package com.sampullara.mustache;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,9 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +18,7 @@ import java.util.Map;
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,6 +36,8 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+import com.google.common.base.Throwables;
+import com.google.common.io.Files;
 import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
 
@@ -156,24 +155,15 @@ public class Handlebar {
 
             // Handle like a file
             res.setStatus(HttpServletResponse.SC_OK);
-            OutputStream os = res.getOutputStream();
-            byte[] bytes = new byte[8192];
-            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(staticres));
-            int read;
-            while ((read = bis.read(bytes)) != -1) {
-              os.write(bytes, 0, read);
-            }
-            os.close();
+            ServletOutputStream out = res.getOutputStream();
+            Files.copy(staticres, out);
+            out.close();
+            r.setHandled(true);
           }
         } catch (Exception e) {
-          // building stacktrace string
-          StringWriter str = new StringWriter();
-          e.printStackTrace(new PrintWriter(str));
-          String stack = simpleEscape(str.toString());
-
           // params
           Map<String, String> params = new HashMap<String, String>();
-          params.put("stacktrace", stack);
+          params.put("stacktrace", Throwables.getStackTraceAsString(e));
 
           // render template
           res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
