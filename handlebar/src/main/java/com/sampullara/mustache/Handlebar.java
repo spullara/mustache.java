@@ -1,28 +1,46 @@
 package com.sampullara.mustache;
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.MustacheFactory;
-import com.sampullara.cli.Args;
-import com.sampullara.cli.Argument;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.activation.FileTypeMap;
+import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.MappingJsonFactory;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 
 /**
  * Run a local server and merge .js and .html files using mustache.
@@ -42,17 +60,21 @@ public class Handlebar {
 
   private static File rootDir;
 
+  private static final FileTypeMap FILE_TYPE_MAP;
+
   private static final JsonFactory JSON_FACTORY = new MappingJsonFactory();
 
-
-  private static Map<String, String> mimeTypes = new HashMap<String, String>();
   static {
-    mimeTypes.put("html", "text/html");
-    mimeTypes.put("png", "image/png");
-    mimeTypes.put("gif", "image/gif");
-    mimeTypes.put("jpg", "image/jpg");
-    mimeTypes.put("js", "text/javascript");
-    mimeTypes.put("css", "text/css");
+    FILE_TYPE_MAP = loadFileTypeMapFromContextSupportModule();
+  }
+
+  private static FileTypeMap loadFileTypeMapFromContextSupportModule() {
+    // see if we can find the extended mime.types from the context-support module
+    InputStream is = ClassLoader.getSystemResourceAsStream("com/sampullara/mustache/mimes.txt");
+    if (null != is) {
+      return new MimetypesFileTypeMap(is);
+    }
+    return FileTypeMap.getDefaultFileTypeMap();
   }
 
   public static Object toObject(final JsonNode node) {
@@ -98,70 +120,115 @@ public class Handlebar {
     Handler handler = new AbstractHandler() {
       public void handle(String s, Request r, HttpServletRequest req, HttpServletResponse res)
           throws IOException, ServletException {
-        String pathInfo = req.getPathInfo();
+        try {
+          String pathInfo = req.getPathInfo();
+          if (pathInfo.endsWith("/")) pathInfo += "index.html";
 
-        if (pathInfo.endsWith("/")) pathInfo += "index.html";
+          // obtain mime type
+          String mimeType = FILE_TYPE_MAP.getContentType(pathInfo);
+          System.out.println(String.format("%s: %s", mimeType, pathInfo));
 
-        String extension = pathInfo.substring(pathInfo.lastIndexOf(".") + 1);
-        String base = pathInfo.substring(0, pathInfo.lastIndexOf("."));
-        String mimeType = mimeTypes.get(extension);
+          // create a handle to the resource
+          File staticres = new File(rootDir, pathInfo.substring(1));
 
-        // create a handle to the resource
-        File staticres = new File(rootDir, pathInfo.substring(1));
+          res.setContentType(mimeType == null ? "text/html" : mimeType);
+          res.setCharacterEncoding("utf-8");
+          if (mimeType == null || mimeType.equals("text/html")) {
 
-        res.setContentType(mimeType == null ? "text/html" : mimeType);
-        res.setCharacterEncoding("utf-8");
-        if (mimeType == null || mimeType.equals("text/html")) {
-          // Handle like a template
-          String filename = pathInfo.substring(1);
-          try {
-            MustacheFactory mc = new DefaultMustacheFactory(new File("."));
-            Mustache mustache = mc.compile(filename);
-            File file = new File(mocks, base + ".json");
-            res.setStatus(HttpServletResponse.SC_OK);
-            Map parameters = new HashMap<Object, Object>(req.getParameterMap()) {
-              @Override
-              public Object get(Object o) {
-                Object result = super.get(o); // To change body of overridden methods use File |
-                                              // Settings | File Templates.
-                if (result instanceof String[]) {
-                  String[] strings = (String[]) result;
-                  if (strings.length == 1) {
-                    return strings[0];
-                  }
-                }
-                return result;
-              }
-            };
+            // Handle like a template
+            String filename = pathInfo.substring(1);
 
-            if (file.exists()) {
-              BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-              JsonParser parser = JSON_FACTORY.createJsonParser(br);
-              JsonNode json = parser.readValueAsTree();
-              br.close();
-              mustache.execute(res.getWriter(), new Object[] {toObject(json), parameters});
+            // check if file exists
+            if (!staticres.exists()) {
+              res.setStatus(HttpServletResponse.SC_NOT_FOUND);
+              processTemplate(req, res, "404.html");
             } else {
-              mustache.execute(res.getWriter(), parameters);
+              res.setStatus(HttpServletResponse.SC_OK);
+              processTemplate(req, res, filename);
             }
+
             r.setHandled(true);
-          } catch (MustacheException e) {
-            e.printStackTrace(res.getWriter());
-            r.setHandled(true);
-            res.setStatus(500);
+          } else {
+            if (!staticres.exists()) {
+              res.setStatus(HttpServletResponse.SC_NOT_FOUND);
+              return;
+            }
+
+            // Handle like a file
+            res.setStatus(HttpServletResponse.SC_OK);
+            OutputStream os = res.getOutputStream();
+            byte[] bytes = new byte[8192];
+            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(staticres));
+            int read;
+            while ((read = bis.read(bytes)) != -1) {
+              os.write(bytes, 0, read);
+            }
+            os.close();
           }
-        } else {
-          // Handle like a file
-          res.setStatus(HttpServletResponse.SC_OK);
-          OutputStream os = res.getOutputStream();
-          byte[] bytes = new byte[8192];
-          BufferedInputStream bis =
-              new BufferedInputStream(new FileInputStream(pathInfo.substring(1)));
-          int read;
-          while ((read = bis.read(bytes)) != -1) {
-            os.write(bytes, 0, read);
-          }
-          os.close();
+        } catch (Exception e) {
+          // building stacktrace string
+          StringWriter str = new StringWriter();
+          e.printStackTrace(new PrintWriter(str));
+          String stack = simpleEscape(str.toString());
+
+          // params
+          Map<String, String> params = new HashMap<String, String>();
+          params.put("stacktrace", stack);
+
+          // render template
+          res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+          processTemplate(req, res, "500.html", params);
+
+          r.setHandled(true);
         }
+      }
+
+      private void processTemplate(HttpServletRequest req, HttpServletResponse res,
+          String filename, Object... scopes) throws UnsupportedEncodingException,
+          FileNotFoundException, IOException, JsonParseException, JsonProcessingException {
+
+        if (!new File(rootDir, filename).exists()) {
+          System.out.println("template not found, skipping: " + filename);
+          return;
+        }
+
+        MustacheFactory mc = new DefaultMustacheFactory(rootDir);
+        Mustache mustache = mc.compile(filename);
+
+        String base = filename.substring(0, filename.lastIndexOf("."));
+        File file = new File(mocks, base + ".json");
+        Map parameters = new HashMap<Object, Object>(req.getParameterMap()) {
+          @Override
+          public Object get(Object o) {
+            Object result = super.get(o); // To change body of overridden methods use File |
+                                          // Settings | File Templates.
+            if (result instanceof String[]) {
+              String[] strings = (String[]) result;
+              if (strings.length == 1) {
+                return strings[0];
+              }
+            }
+            return result;
+          }
+        };
+
+        List<Object> scs = new ArrayList<Object>();
+        if (null != scopes) scs.addAll(Arrays.<Object>asList(scopes));
+        scs.add(parameters);
+
+        if (file.exists()) {
+          BufferedReader br =
+              new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+          JsonParser parser = JSON_FACTORY.createJsonParser(br);
+          JsonNode json = parser.readValueAsTree();
+          br.close();
+          scs.add(0, toObject(json));
+        }
+        mustache.execute(res.getWriter(), scs.toArray());
+      }
+
+      private String simpleEscape(String string) {
+        return string.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
       }
     };
 
