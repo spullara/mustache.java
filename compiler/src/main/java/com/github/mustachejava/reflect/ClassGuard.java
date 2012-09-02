@@ -6,6 +6,8 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.objectweb.asm.commons.GeneratorAdapter.LE;
 import static org.objectweb.asm.commons.GeneratorAdapter.NE;
 
@@ -46,7 +48,9 @@ public class ClassGuard implements CompilableGuard {
   }
 
   @Override
-  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter sm, ClassWriter cw, int id, String className) {
+  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter sm, ClassWriter cw, AtomicInteger atomicId, String className) {
+    int id = atomicId.incrementAndGet();
+
     // Add the field for the class guard
     cw.visitField(ACC_PUBLIC | ACC_STATIC, "classGuard" + id, "Ljava/lang/Class;", null, null);
 

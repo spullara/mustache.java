@@ -4,6 +4,8 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Guard dot notation references.
  */
@@ -39,7 +41,7 @@ public class DotGuard implements CompilableGuard {
   }
 
   @Override
-  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, ClassWriter cw, int id, String className) {
+  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, ClassWriter cw, AtomicInteger id, String className) {
     // do nothing and it is assumed true
   }
 }

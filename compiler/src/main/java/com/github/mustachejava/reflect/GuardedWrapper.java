@@ -19,12 +19,15 @@ public class GuardedWrapper implements Wrapper {
 
   // Array of guards that must be satisfied
   protected final Guard[] guards;
+  protected final Guard[] optimized;
 
   // Hashcode cache
   private int hashCode;
 
   public GuardedWrapper(Guard[] guards) {
     this.guards = guards;
+    Guard[] optimized = CompilableGuard.Compiler.compile(guards);
+    this.optimized = optimized.length < guards.length ? optimized : guards;
   }
 
   @Override
@@ -34,7 +37,7 @@ public class GuardedWrapper implements Wrapper {
   }
 
   protected void guardCall(Object[] scopes) throws GuardException {
-    for (Guard predicate : guards) {
+    for (Guard predicate : optimized) {
       if (!predicate.apply(scopes)) {
         throw guardException;
       }

@@ -5,6 +5,7 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import javax.annotation.Nullable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Check that there are the same number of scope levels.
@@ -36,7 +37,7 @@ public class DepthGuard implements CompilableGuard {
   }
 
   @Override
-  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter sm, ClassWriter cw, int id, String className) {
+  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter sm, ClassWriter cw, AtomicInteger id, String className) {
     // If objects is null return false
     gm.loadArg(0);
     gm.ifNull(returnFalse);
