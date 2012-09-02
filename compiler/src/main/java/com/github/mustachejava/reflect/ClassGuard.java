@@ -33,6 +33,6 @@ public class ClassGuard implements Predicate<Object[]> {
   public boolean apply(Object[] scopes) {
     if (scopes == null || scopes.length <= scopeIndex) return false;
     Object scope = scopes[scopeIndex];
-    return (scope != null && classGuard.equals(scope.getClass())) || (scope == null && classGuard == null);
+    return (scope == null && classGuard == null) || (scope != null && classGuard == scope.getClass());
   }
 }
