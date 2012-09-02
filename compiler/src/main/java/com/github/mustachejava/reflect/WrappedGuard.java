@@ -2,7 +2,6 @@ package com.github.mustachejava.reflect;
 
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.util.Wrapper;
-import com.google.common.base.Predicate;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -16,13 +15,13 @@ import static com.github.mustachejava.reflect.ReflectionObjectHandler.unwrap;
  * Date: 6/26/12
  * Time: 9:09 PM
  */
-public class WrappedGuard implements Predicate<Object[]> {
+public class WrappedGuard implements Guard {
   private final ObjectHandler oh;
   private final int index;
   private final Wrapper[] wrappers;
-  private final List<Predicate<Object[]>> wrapperGuard;
+  private final List<Guard> wrapperGuard;
 
-  public WrappedGuard(ObjectHandler oh, int index, List<Wrapper> wrappers, List<Predicate<Object[]>> wrapperGuard) {
+  public WrappedGuard(ObjectHandler oh, int index, List<Wrapper> wrappers, List<Guard> wrapperGuard) {
     this.oh = oh;
     this.index = index;
     this.wrappers = wrappers.toArray(new Wrapper[wrappers.size()]);
@@ -32,7 +31,7 @@ public class WrappedGuard implements Predicate<Object[]> {
   @Override
   public boolean apply(@Nullable Object[] objects) {
     Object scope = unwrap(oh, index, wrappers, objects);
-    for (Predicate<Object[]> predicate : wrapperGuard) {
+    for (Guard predicate : wrapperGuard) {
       if (!predicate.apply(new Object[]{scope})) {
         return false;
       }

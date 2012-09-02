@@ -5,7 +5,7 @@ import com.google.common.base.Predicate;
 /**
  * Guard dot notation references.
  */
-public class DotGuard implements Predicate<Object[]> {
+public class DotGuard implements Guard {
 
   private final String lookup;
   private final int scopeIndex;

@@ -1,16 +1,13 @@
 package com.github.mustachejava.jruby;
 
 import com.github.mustachejava.TemplateFunction;
+import com.github.mustachejava.reflect.Guard;
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.util.Wrapper;
-import com.google.common.base.Predicate;
 import org.jruby.*;
 import org.jruby.embed.ScriptingContainer;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.Method;
-import java.util.List;
-
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -47,12 +44,12 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
   }
 
   @Override
-  protected Wrapper findWrapper(final int scopeIndex, final Wrapper[] wrappers, final List<Predicate<Object[]>> guards, final Object scope, final String name) {
+  protected Wrapper findWrapper(final int scopeIndex, final Wrapper[] wrappers, final List<Guard> guards, final Object scope, final String name) {
     if (scope instanceof RubyHash) {
       RubyHash hash = (RubyHash) scope;
       final RubySymbol rs = RubySymbol.newSymbol(hash.getRuntime(), name);
       if (hash.containsKey(rs)) {
-        guards.add(new Predicate<Object[]>() {
+        guards.add(new Guard() {
           @Override
           public boolean apply(@Nullable Object[] input) {
             return ((RubyHash) input[scopeIndex]).containsKey(rs);
@@ -60,7 +57,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
         });
         return createWrapper(scopeIndex, wrappers, guards, MAP_METHOD, new Object[]{rs});
       } else {
-        guards.add(new Predicate<Object[]>() {
+        guards.add(new Guard() {
           @Override
           public boolean apply(@Nullable Object[] input) {
             return !((RubyHash) input[scopeIndex]).containsKey(rs);
@@ -71,7 +68,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
     if (scope instanceof RubyObject) {
       RubyObject ro = (RubyObject) scope;
       if (ro.respondsTo(name)) {
-        guards.add(new Predicate<Object[]>() {
+        guards.add(new Guard() {
           @Override
           public boolean apply(@Nullable Object[] objects) {
             RubyObject scope = (RubyObject) objects[scopeIndex];
@@ -80,7 +77,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
         });
         return createWrapper(scopeIndex, wrappers, guards, CALL_METHOD, new Object[]{name});
       } else {
-        guards.add(new Predicate<Object[]>() {
+        guards.add(new Guard() {
           @Override
           public boolean apply(@Nullable Object[] objects) {
             RubyObject scope = (RubyObject) objects[scopeIndex];

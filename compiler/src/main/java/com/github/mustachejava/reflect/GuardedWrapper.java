@@ -2,7 +2,6 @@ package com.github.mustachejava.reflect;
 
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
-import com.google.common.base.Predicate;
 
 import java.util.Arrays;
 
@@ -19,13 +18,13 @@ public class GuardedWrapper implements Wrapper {
   }
 
   // Array of guards that must be satisfied
-  protected final Predicate<Object[]>[] guard;
+  protected final Guard[] guards;
 
   // Hashcode cache
   private int hashCode;
 
-  public GuardedWrapper(Predicate<Object[]>[] guard) {
-    this.guard = guard;
+  public GuardedWrapper(Guard[] guards) {
+    this.guards = guards;
   }
 
   @Override
@@ -35,7 +34,7 @@ public class GuardedWrapper implements Wrapper {
   }
 
   protected void guardCall(Object[] scopes) throws GuardException {
-    for (Predicate<Object[]> predicate : guard) {
+    for (Guard predicate : guards) {
       if (!predicate.apply(scopes)) {
         throw guardException;
       }
@@ -45,7 +44,7 @@ public class GuardedWrapper implements Wrapper {
   @Override
   public int hashCode() {
     if (hashCode == 0) {
-      for (Predicate predicate : guard) {
+      for (Guard predicate : guards) {
         hashCode += hashCode * 43 + predicate.hashCode();
       }
       if (hashCode == 0) hashCode = 1;
@@ -57,7 +56,7 @@ public class GuardedWrapper implements Wrapper {
   public boolean equals(Object o) {
     if (o instanceof GuardedWrapper) {
       GuardedWrapper other = (GuardedWrapper) o;
-      return (guard == null && other.guard == null) || Arrays.equals(other.guard, guard);
+      return (guards == null && other.guards == null) || Arrays.equals(other.guards, guards);
     }
     return false;
   }

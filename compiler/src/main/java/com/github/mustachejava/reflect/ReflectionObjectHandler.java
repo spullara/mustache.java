@@ -6,7 +6,6 @@ import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
-import com.google.common.base.Predicate;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
@@ -49,7 +48,7 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
   public Wrapper find(String name, final Object[] scopes) {
     Wrapper wrapper = null;
     final int length = scopes.length;
-    List<Predicate<Object[]>> guards = new ArrayList<Predicate<Object[]>>(scopes.length);
+    List<Guard> guards = new ArrayList<Guard>(scopes.length);
     // Simple guard to break if the number of scopes at this call site have changed
     guards.add(new DepthGuard(length));
     NEXT:
@@ -67,7 +66,7 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
         subname = subname.substring(dotIndex + 1);
         // This is used for lookups but otherwise always succeeds
         guards.add(new DotGuard(lookup, i, scope));
-        List<Predicate<Object[]>> wrapperGuard = new ArrayList<Predicate<Object[]>>(1);
+        List<Guard> wrapperGuard = new ArrayList<Guard>(1);
         wrapper = findWrapper(0, null, wrapperGuard, scope, lookup);
         if (wrappers == null) wrappers = new ArrayList<Wrapper>();
         if (wrapper != null) {
@@ -100,10 +99,10 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
         break;
       }
     }
-    return wrapper == null ? new MissingWrapper(guards.toArray(new Predicate[guards.size()])) : wrapper;
+    return wrapper == null ? new MissingWrapper(guards.toArray(new Guard[guards.size()])) : wrapper;
   }
 
-  protected Wrapper findWrapper(final int scopeIndex, Wrapper[] wrappers, List<Predicate<Object[]>> guards, Object scope, final String name) {
+  protected Wrapper findWrapper(final int scopeIndex, Wrapper[] wrappers, List<Guard> guards, Object scope, final String name) {
     scope = coerce(scope);
     if (scope == null) return null;
     // If the scope is a map, then we use the get() method
@@ -125,8 +124,8 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
   }
 
   @SuppressWarnings("unchecked")
-  protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, List<? extends Predicate<Object[]>> guard, AccessibleObject member, Object[] arguments) {
-    return new ReflectionWrapper(scopeIndex, wrappers, guard.toArray(new Predicate[guard.size()]), member, arguments, this);
+  protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, List<? extends Guard> guard, AccessibleObject member, Object[] arguments) {
+    return new ReflectionWrapper(scopeIndex, wrappers, guard.toArray(new Guard[guard.size()]), member, arguments, this);
   }
 
   @Override

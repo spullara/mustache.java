@@ -25,16 +25,15 @@ public class CompiledGuard implements Opcodes {
     assertFalse("integer is not ok", stringClassGuard.apply(new Object[]{1}));
   }
 
-  public interface TestGuard {
-    boolean test(Object[] scopes);
-  }
-
   @Test
   public void testCompiledGuard() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
-    ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
     String className = "Test";
-    cw.visit(V1_6, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", new String[]{TestGuard.class.getName().replace(".", "/")});
-    cw.visitSource("Test.java", null);
+    String source = "Test.java";
+    ClassGuard stringClassGuard = new ClassGuard(0, "");
+
+    ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+    cw.visit(V1_6, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", new String[]{Guard.class.getName().replace(".", "/")});
+    cw.visitSource(source, null);
 
     GeneratorAdapter cm = new GeneratorAdapter(ACC_PUBLIC, getMethod("void <init> ()"), null, null, cw);
     cm.loadThis();
@@ -42,13 +41,11 @@ public class CompiledGuard implements Opcodes {
     cm.returnValue();
     cm.endMethod();
 
-
     GeneratorAdapter sm = new GeneratorAdapter(ACC_PUBLIC | ACC_STATIC, getMethod("void <clinit> ()"), null, null, cw);
 
     {
-      GeneratorAdapter gm = new GeneratorAdapter(ACC_PUBLIC, getMethod("boolean test(Object[])"), null, null, cw);
+      GeneratorAdapter gm = new GeneratorAdapter(ACC_PUBLIC, getMethod("boolean apply(Object[])"), null, null, cw);
       Label returnFalse = new Label();
-      ClassGuard stringClassGuard = new ClassGuard(0, "");
       stringClassGuard.addGuard(returnFalse, gm, sm, cw, 0, className);
       // Makes it through the guard, success
       gm.push(true);
@@ -65,9 +62,9 @@ public class CompiledGuard implements Opcodes {
 
     cw.visitEnd();
     Class<?> aClass = defineClass(className, cw.toByteArray());
-    TestGuard testGuard = (TestGuard) aClass.getConstructor().newInstance();
-    assertTrue("string is ok", testGuard.test(new Object[]{"test"}));
-    assertFalse("integer is not ok", testGuard.test(new Object[]{1}));
+    Guard testGuard = (Guard) aClass.getConstructor().newInstance();
+    assertTrue("string is ok", testGuard.apply(new Object[]{"test", 1}));
+    assertFalse("integer is not ok", testGuard.apply(new Object[]{1, "test"}));
   }
 
   private static final DefiningClassLoader cl = new DefiningClassLoader();

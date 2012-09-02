@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 /**
  * Check that there are the same number of scope levels.
  */
-public class DepthGuard implements Predicate<Object[]> {
+public class DepthGuard implements Guard {
   private final int length;
 
   public DepthGuard(int length) {

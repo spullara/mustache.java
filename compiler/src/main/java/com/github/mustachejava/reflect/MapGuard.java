@@ -11,7 +11,7 @@ import static com.github.mustachejava.reflect.ReflectionObjectHandler.unwrap;
 /**
  * Guards whether or not a name was present in the map.
  */
-public class MapGuard implements Predicate<Object[]> {
+public class MapGuard implements Guard {
   private final ObjectHandler oh;
   private final int scopeIndex;
   private final String name;

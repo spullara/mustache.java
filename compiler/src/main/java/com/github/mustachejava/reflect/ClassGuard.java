@@ -15,7 +15,7 @@ import static org.objectweb.asm.commons.GeneratorAdapter.*;
  * Time: 9:23 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ClassGuard implements Guard {
+public class ClassGuard implements CompilableGuard {
   private final Class classGuard;
   private final int scopeIndex;
 
@@ -54,17 +54,17 @@ public class ClassGuard implements Guard {
     sm.invokeStatic(Type.getType(Class.class), Method.getMethod("Class forName(String)"));
     sm.putStatic(Type.getType(className), "classGuard" + id, Type.getType(Class.class));
 
-    Label next = new Label();
-    Label scopeIsNull = new Label();
-
+    // Check that the scopes are not null
     gm.loadArg(0); // scopes
     gm.ifNull(returnFalse); // if scopes == null return false
 
+    // Check that we have enough scopes to satisfy
     gm.loadArg(0); // scopes
     gm.arrayLength(); // scopes.length
     gm.push(scopeIndex);
     gm.ifICmp(LE, returnFalse); // scopes.length <= scopeIndex return false
 
+    // Initialize local variables
     gm.loadArg(0); // scopes
     gm.push(scopeIndex);
     gm.arrayLoad(Type.getType(Object.class)); // Object[]
@@ -74,20 +74,26 @@ public class ClassGuard implements Guard {
     gm.getStatic(Type.getType(className), "classGuard" + id, Type.getType(Class.class));
     gm.storeLocal(classGuardLocal);
 
+    // Check to see if the scope is null
     gm.loadLocal(scopeLocal);
+    Label scopeIsNull = new Label();
     gm.ifNull(scopeIsNull); // after here scope is not null
 
+    // Check to see if the scopes class matches the guard
     gm.loadLocal(scopeLocal);
     gm.invokeVirtual(Type.getType(Object.class), Method.getMethod("Class getClass()")); // scope.getClass()
     gm.loadLocal(classGuardLocal);
     gm.ifCmp(Type.getType(Class.class), NE, returnFalse); // if they are not equal return false
 
+    Label next = new Label();
     gm.goTo(next); // next guard
 
+    // Check to see if the class guard itself is null
     gm.visitLabel(scopeIsNull); // after here scope is null
     gm.loadLocal(classGuardLocal);
     gm.ifNonNull(returnFalse); // if there is a class guard, return false
 
+    // Successfully passed the guard
     gm.visitLabel(next); // end of method
   }
 

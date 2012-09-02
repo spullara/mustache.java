@@ -4,7 +4,6 @@ import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
-import com.google.common.base.Predicate;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
@@ -25,7 +24,7 @@ public class ReflectionWrapper extends GuardedWrapper {
   protected final Field field;
   protected final Object[] arguments;
 
-  public ReflectionWrapper(int scopeIndex, Wrapper[] wrappers, Predicate<Object[]>[] guard, AccessibleObject method, Object[] arguments, ObjectHandler oh) {
+  public ReflectionWrapper(int scopeIndex, Wrapper[] wrappers, Guard[] guard, AccessibleObject method, Object[] arguments, ObjectHandler oh) {
     super(guard);
     this.wrappers = wrappers;
     this.oh = oh;
@@ -41,7 +40,7 @@ public class ReflectionWrapper extends GuardedWrapper {
   }
 
   public ReflectionWrapper(ReflectionWrapper rw) {
-    this(rw.scopeIndex, rw.wrappers, rw.guard, rw.method == null ? rw.field : rw.method, rw.arguments, rw.oh);
+    this(rw.scopeIndex, rw.wrappers, rw.guards, rw.method == null ? rw.field : rw.method, rw.arguments, rw.oh);
   }
 
   protected Object unwrap(Object[] scopes) {
