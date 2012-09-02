@@ -1,6 +1,12 @@
 package com.github.mustachejava.reflect;
 
-import com.google.common.base.Predicate;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.commons.Method;
+
+import static org.objectweb.asm.commons.GeneratorAdapter.*;
 
 /**
  * Ensure that the class of the current scope is that same as when this wrapper was generated.
@@ -9,7 +15,7 @@ import com.google.common.base.Predicate;
  * Time: 9:23 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ClassGuard implements Predicate<Object[]> {
+public class ClassGuard implements Guard {
   private final Class classGuard;
   private final int scopeIndex;
 
@@ -33,6 +39,56 @@ public class ClassGuard implements Predicate<Object[]> {
   public boolean apply(Object[] scopes) {
     if (scopes == null || scopes.length <= scopeIndex) return false;
     Object scope = scopes[scopeIndex];
-    return (scope == null && classGuard == null) || (scope != null && classGuard == scope.getClass());
+    if (scope != null && classGuard != scope.getClass()) return false;
+    if (scope == null && classGuard != null) return false;
+    return true;
   }
+
+  @Override
+  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter sm, ClassWriter cw, int id, String className) {
+    // Add the field for the class guard
+    cw.visitField(ACC_PUBLIC | ACC_STATIC, "classGuard" + id, "Ljava/lang/Class;", null, null);
+
+    // Initialize the field
+    sm.push(classGuard.getName());
+    sm.invokeStatic(Type.getType(Class.class), Method.getMethod("Class forName(String)"));
+    sm.putStatic(Type.getType(className), "classGuard" + id, Type.getType(Class.class));
+
+    Label next = new Label();
+    Label scopeIsNull = new Label();
+
+    gm.loadArg(0); // scopes
+    gm.ifNull(returnFalse); // if scopes == null return false
+
+    gm.loadArg(0); // scopes
+    gm.arrayLength(); // scopes.length
+    gm.push(scopeIndex);
+    gm.ifICmp(LE, returnFalse); // scopes.length <= scopeIndex return false
+
+    gm.loadArg(0); // scopes
+    gm.push(scopeIndex);
+    gm.arrayLoad(Type.getType(Object.class)); // Object[]
+    int scopeLocal = gm.newLocal(Type.getType(Object.class));
+    gm.storeLocal(scopeLocal);
+    int classGuardLocal = gm.newLocal(Type.getType(Class.class));
+    gm.getStatic(Type.getType(className), "classGuard" + id, Type.getType(Class.class));
+    gm.storeLocal(classGuardLocal);
+
+    gm.loadLocal(scopeLocal);
+    gm.ifNull(scopeIsNull); // after here scope is not null
+
+    gm.loadLocal(scopeLocal);
+    gm.invokeVirtual(Type.getType(Object.class), Method.getMethod("Class getClass()")); // scope.getClass()
+    gm.loadLocal(classGuardLocal);
+    gm.ifCmp(Type.getType(Class.class), NE, returnFalse); // if they are not equal return false
+
+    gm.goTo(next); // next guard
+
+    gm.visitLabel(scopeIsNull); // after here scope is null
+    gm.loadLocal(classGuardLocal);
+    gm.ifNonNull(returnFalse); // if there is a class guard, return false
+
+    gm.visitLabel(next); // end of method
+  }
+
 }
