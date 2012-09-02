@@ -60,16 +60,16 @@ class ObjectHandlerTest {
     val writer = m.execute(sw, new {
       val list = Seq(new {
         lazy val optionalHello = Some("Hello")
-        val futureWorld = pool.submit(new Callable[String] {
+        val futureWorld = new Callable[String] {
           def call(): String = "world"
-        })
+        }
         val test = true
         val num = 0
       }, new {
         val optionalHello = Some("Goodbye")
-        val futureWorld = pool.submit(new Callable[String] {
+        val futureWorld = new Callable[String] {
           def call(): String = "thanks for all the fish"
-        })
+        }
         lazy val test = false
         val map = Map(("value", "test"))
         val num = 1
