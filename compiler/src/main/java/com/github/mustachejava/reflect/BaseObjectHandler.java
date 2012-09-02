@@ -1,10 +1,6 @@
 package com.github.mustachejava.reflect;
 
-import com.github.mustachejava.Binding;
-import com.github.mustachejava.Code;
-import com.github.mustachejava.Iteration;
-import com.github.mustachejava.ObjectHandler;
-import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.*;
 
 import java.io.Writer;
 import java.lang.reflect.AccessibleObject;

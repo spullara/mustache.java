@@ -2,9 +2,6 @@ package com.github.mustachejava;
 
 import java.io.*;
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.MustacheException;
-
 /**
  * Mustache.java factory with a fallback mechanism for locating resources.
  * 

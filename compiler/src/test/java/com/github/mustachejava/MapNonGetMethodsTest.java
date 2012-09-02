@@ -1,16 +1,15 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.reflect.ReflectionObjectHandler;
+import com.github.mustachejava.reflect.SimpleObjectHandler;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import com.github.mustachejava.reflect.ReflectionObjectHandler;
-import com.github.mustachejava.reflect.SimpleObjectHandler;
 
 import static org.junit.Assert.assertEquals;
 

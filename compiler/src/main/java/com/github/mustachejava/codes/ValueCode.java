@@ -5,7 +5,6 @@ import com.github.mustachejava.util.LatchedWriter;
 import com.google.common.base.Function;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.concurrent.Callable;

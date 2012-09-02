@@ -1,13 +1,5 @@
 package com.github.mustachejavabenchmarks;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.io.Writer;
-
 import com.github.mustachejava.ComplexObject;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
@@ -16,6 +8,8 @@ import com.github.mustachejava.jruby.JRubyObjectHandler;
 import org.jruby.embed.ScriptingContainer;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.io.*;
 
 import static com.github.mustachejavabenchmarks.BenchmarkTest.skip;
 import static junit.framework.Assert.assertEquals;

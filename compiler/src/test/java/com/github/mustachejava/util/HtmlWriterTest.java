@@ -7,7 +7,6 @@ import org.junit.Test;
 import java.io.*;
 
 import static com.github.mustachejava.util.HtmlState.HTML.*;
-
 import static junit.framework.Assert.assertEquals;
 
 public class HtmlWriterTest {

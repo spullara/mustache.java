@@ -1,7 +1,9 @@
 package com.github.mustachejava.functions;
 
-import com.github.mustachejava.*;
-
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.MustacheFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

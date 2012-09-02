@@ -4,7 +4,6 @@ import com.github.mustachejava.*;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.logging.Logger;
 
 /**
  * Simplest possible code implementaion with some default shared behavior

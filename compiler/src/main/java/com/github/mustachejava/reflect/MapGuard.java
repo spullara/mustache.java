@@ -2,7 +2,6 @@ package com.github.mustachejava.reflect;
 
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.util.Wrapper;
-import com.google.common.base.Predicate;
 
 import java.util.Map;
 

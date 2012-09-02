@@ -1,12 +1,12 @@
 package com.github.mustachejavabenchmarks;
 
+import com.github.mustachejava.util.CapturingMustacheVisitor;
+import org.codehaus.jackson.JsonGenerator;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
-
-import com.github.mustachejava.util.CapturingMustacheVisitor;
-import org.codehaus.jackson.JsonGenerator;
 
 /**
  * Flawed implementation -- doesn't handle the case when you do a negative compare and then

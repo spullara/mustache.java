@@ -9,5 +9,5 @@ import org.objectweb.asm.commons.GeneratorAdapter;
  * Optimize guards
  */
 public interface CompilableGuard extends Guard, Opcodes {
-  void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, ClassWriter cw, int id, String className);
+  void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter sm, ClassWriter cw, int id, String className);
 }

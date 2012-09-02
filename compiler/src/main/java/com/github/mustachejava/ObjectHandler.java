@@ -1,9 +1,8 @@
 package com.github.mustachejava;
 
-import java.io.Writer;
-import java.util.Map;
-
 import com.github.mustachejava.util.Wrapper;
+
+import java.io.Writer;
 
 /**
  * The ObjectHandler is responsible for creating wrappers to find values

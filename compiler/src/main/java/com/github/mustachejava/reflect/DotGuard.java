@@ -1,11 +1,13 @@
 package com.github.mustachejava.reflect;
 
-import com.google.common.base.Predicate;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.commons.GeneratorAdapter;
 
 /**
  * Guard dot notation references.
  */
-public class DotGuard implements Guard {
+public class DotGuard implements CompilableGuard {
 
   private final String lookup;
   private final int scopeIndex;
@@ -34,5 +36,10 @@ public class DotGuard implements Guard {
   @Override
   public boolean apply(Object[] objects) {
     return true;
+  }
+
+  @Override
+  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, ClassWriter cw, int id, String className) {
+    // do nothing and it is assumed true
   }
 }

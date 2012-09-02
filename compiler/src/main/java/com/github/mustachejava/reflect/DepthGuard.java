@@ -1,13 +1,15 @@
 package com.github.mustachejava.reflect;
 
-import com.google.common.base.Predicate;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.commons.GeneratorAdapter;
 
 import javax.annotation.Nullable;
 
 /**
  * Check that there are the same number of scope levels.
  */
-public class DepthGuard implements Guard {
+public class DepthGuard implements CompilableGuard {
   private final int length;
 
   public DepthGuard(int length) {
@@ -31,5 +33,18 @@ public class DepthGuard implements Guard {
   @Override
   public boolean apply(@Nullable Object[] objects) {
     return objects != null && length == objects.length;
+  }
+
+  @Override
+  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter sm, ClassWriter cw, int id, String className) {
+    // If objects is null return false
+    gm.loadArg(0);
+    gm.ifNull(returnFalse);
+
+    // If they are not equal return false
+    gm.loadArg(0);
+    gm.arrayLength();
+    gm.push(length);
+    gm.ifICmp(GeneratorAdapter.NE, returnFalse);
   }
 }

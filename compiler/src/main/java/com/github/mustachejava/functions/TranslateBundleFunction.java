@@ -1,9 +1,9 @@
 package com.github.mustachejava.functions;
 
+import com.github.mustachejava.TemplateFunction;
+
 import java.util.Locale;
 import java.util.ResourceBundle;
-
-import com.github.mustachejava.TemplateFunction;
 
 /**
  * Mustache.java translation function based on localized ResourceBundles.

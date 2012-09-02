@@ -6,7 +6,8 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
-import static org.objectweb.asm.commons.GeneratorAdapter.*;
+import static org.objectweb.asm.commons.GeneratorAdapter.LE;
+import static org.objectweb.asm.commons.GeneratorAdapter.NE;
 
 /**
  * Ensure that the class of the current scope is that same as when this wrapper was generated.
