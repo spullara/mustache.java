@@ -6,10 +6,10 @@ import com.github.mustachejava.util.GuardException;
 
 import java.util.List;
 
-public class CompiledMissingWrapper extends MissingWrapper {
+public class CodegenMissingWrapper extends MissingWrapper {
   final Guard compiledGuards;
 
-  public CompiledMissingWrapper(List<Guard> guards) {
+  public CodegenMissingWrapper(List<Guard> guards) {
     super(guards.toArray(new Guard[guards.size()]));
     compiledGuards = GuardCompiler.compile(guards);
   }

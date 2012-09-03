@@ -1,5 +1,6 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.codegen.CodegenMustacheFactory;
 import com.github.mustachejava.indy.IndyObjectHandler;
 import com.github.mustachejavabenchmarks.JsonInterpreterTest;
 
@@ -13,7 +14,7 @@ import com.github.mustachejavabenchmarks.JsonInterpreterTest;
 public class IndyJsonInterpreterTest extends JsonInterpreterTest {
   @Override
   protected DefaultMustacheFactory createMustacheFactory() {
-    DefaultMustacheFactory mustacheFactory = super.createMustacheFactory();
+    DefaultMustacheFactory mustacheFactory = new CodegenMustacheFactory(root);
     mustacheFactory.setObjectHandler(new IndyObjectHandler());
     return mustacheFactory;
   }

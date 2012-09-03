@@ -62,4 +62,8 @@ public class GuardedWrapper implements Wrapper {
     }
     return false;
   }
+
+  public Guard[] getGuards() {
+    return guards;
+  }
 }

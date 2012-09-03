@@ -1,6 +1,7 @@
 package com.github.mustachejava.indy;
 
 import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.codegen.CodegenReflectionWrapper;
 import com.github.mustachejava.reflect.ReflectionWrapper;
 import com.github.mustachejava.util.GuardException;
 import org.objectweb.asm.*;
@@ -15,7 +16,7 @@ import java.util.UUID;
 /**
  * Creates wrappers using ASM and Invokedynamic.
  */
-public abstract class IndyWrapper extends ReflectionWrapper implements Opcodes {
+public abstract class IndyWrapper extends CodegenReflectionWrapper implements Opcodes {
 
   public static final Handle BOOTSTRAP_METHOD =
           new Handle(Opcodes.H_INVOKESTATIC, "com/github/mustachejava/indy/IndyWrapper",

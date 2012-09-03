@@ -48,12 +48,12 @@ public class CodegenObjectHandler extends ReflectionObjectHandler {
 
   @Override
   protected MissingWrapper createMissingWrapper(List<Guard> guards) {
-    return new CompiledMissingWrapper(guards);
+    return new CodegenMissingWrapper(guards);
   }
 
   @Override
   protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, List<? extends Guard> guards, AccessibleObject member, Object[] arguments) {
-    return new CompiledReflectionWrapper(this, scopeIndex, wrappers, guards, member, arguments);
+    return new CodegenReflectionWrapper(this, scopeIndex, wrappers, guards, member, arguments);
   }
 
 }

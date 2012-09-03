@@ -6,14 +6,20 @@ import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
 import java.lang.reflect.AccessibleObject;
+import java.util.Arrays;
 import java.util.List;
 
-public class CompiledReflectionWrapper extends ReflectionWrapper {
+public class CodegenReflectionWrapper extends ReflectionWrapper {
   final Guard compiledGuards;
 
-  public CompiledReflectionWrapper(CodegenObjectHandler codegenObjectHandler, int scopeIndex, Wrapper[] wrappers, List<? extends Guard> guards, AccessibleObject member, Object[] arguments) {
+  public CodegenReflectionWrapper(CodegenObjectHandler codegenObjectHandler, int scopeIndex, Wrapper[] wrappers, List<? extends Guard> guards, AccessibleObject member, Object[] arguments) {
     super(scopeIndex, wrappers, guards.toArray(new Guard[guards.size()]), member, arguments, codegenObjectHandler);
     compiledGuards = GuardCompiler.compile(guards);
+  }
+
+  public CodegenReflectionWrapper(ReflectionWrapper rw) {
+    super(rw);
+    compiledGuards = GuardCompiler.compile(Arrays.asList(rw.getGuards()));
   }
 
   @Override
