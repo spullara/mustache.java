@@ -58,4 +58,12 @@ public interface Mustache extends Code {
    * @param codes
    */
   void setCodes(Code[] codes);
+
+  /**
+   * Only executes the codes. Does not append the text.
+   * @param writer
+   * @param scopes
+   * @return
+   */
+  Writer runCodes(Writer writer, Object[] scopes);
 }

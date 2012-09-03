@@ -137,13 +137,7 @@ public class DefaultCode implements Code, Cloneable {
   }
 
   protected Writer runCodes(Writer writer, Object[] scopes) {
-    Code[] codes = getCodes();
-    if (codes != null) {
-      for (Code code : codes) {
-        writer = code.execute(writer, scopes);
-      }
-    }
-    return writer;
+    return mustache == null ? writer : mustache.runCodes(writer, scopes);
   }
 
   @Override
