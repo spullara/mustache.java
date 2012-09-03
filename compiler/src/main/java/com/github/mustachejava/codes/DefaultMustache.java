@@ -21,6 +21,7 @@ import static org.objectweb.asm.commons.Method.getMethod;
  * Default Mustache
  */
 public class DefaultMustache extends DefaultCode implements Mustache, Opcodes {
+  private static boolean compile = Boolean.getBoolean("mustache.compile");
   private static AtomicInteger id = new AtomicInteger(0);
   private static final Method EXECUTE_METHOD = Method.getMethod("java.io.Writer execute(java.io.Writer, Object[])");
 
@@ -39,14 +40,23 @@ public class DefaultMustache extends DefaultCode implements Mustache, Opcodes {
 
   private CompiledCodes compiledCodes = null;
 
-  public Writer runCodes(Writer writer, Object[] scopes) {
-    return compiledCodes == null ? writer : compiledCodes.runCodes(writer, scopes);
+  public Writer run(Writer writer, Object[] scopes) {
+    if (compiledCodes == null) {
+      if (codes != null) {
+        for (Code code : codes) {
+          writer = code.execute(writer, scopes);
+        }
+      }
+      return writer;
+    } else {
+      return compiledCodes.runCodes(writer, scopes);
+    }
   }
 
   @Override
   public final void setCodes(Code[] newcodes) {
     codes = newcodes;
-    if (codes == null) {
+    if (!compile || codes == null) {
       compiledCodes = null;
     } else {
       ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);

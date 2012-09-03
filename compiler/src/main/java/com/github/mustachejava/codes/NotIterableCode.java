@@ -23,6 +23,6 @@ public class NotIterableCode extends DefaultCode implements Iteration {
 
   @Override
   public Writer next(Writer writer, Object object, Object[] scopes) {
-    return runCodes(writer, scopes);
+    return run(writer, scopes);
   }
 }

@@ -92,7 +92,7 @@ public class DefaultCode implements Code, Cloneable {
    */
   @Override
   public Writer execute(Writer writer, Object[] scopes) {
-    return appendText(runCodes(writer, scopes));
+    return appendText(run(writer, scopes));
   }
 
   @Override
@@ -136,8 +136,8 @@ public class DefaultCode implements Code, Cloneable {
     return writer;
   }
 
-  protected Writer runCodes(Writer writer, Object[] scopes) {
-    return mustache == null ? writer : mustache.runCodes(writer, scopes);
+  protected Writer run(Writer writer, Object[] scopes) {
+    return mustache == null ? writer : mustache.run(writer, scopes);
   }
 
   @Override

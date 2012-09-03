@@ -11,7 +11,9 @@ import java.util.Arrays;
 public class GuardedWrapper implements Wrapper {
   // We only need a single guard exception -- don't fill stack trace
   // and don't reallocate it.
-  private static final GuardException guardException = new GuardException();
+  protected static final GuardException guardException = new GuardException();
+
+  private static boolean compile = Boolean.getBoolean("mustache.compile");
 
   static {
     guardException.setStackTrace(new StackTraceElement[0]);
@@ -26,8 +28,12 @@ public class GuardedWrapper implements Wrapper {
 
   public GuardedWrapper(Guard[] guards) {
     this.guards = guards;
-    Guard[] optimized = CompilableGuard.Compiler.compile(guards);
-    this.optimized = optimized.length < guards.length ? optimized : guards;
+    if (compile) {
+      Guard[] optimized = CompilableGuard.Compiler.compile(guards);
+      this.optimized = optimized.length < guards.length ? optimized : guards;
+    } else {
+      this.optimized = guards;
+    }
   }
 
   @Override

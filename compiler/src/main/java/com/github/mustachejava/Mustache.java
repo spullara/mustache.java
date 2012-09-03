@@ -65,5 +65,5 @@ public interface Mustache extends Code {
    * @param scopes
    * @return
    */
-  Writer runCodes(Writer writer, Object[] scopes);
+  Writer run(Writer writer, Object[] scopes);
 }
