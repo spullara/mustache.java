@@ -1,12 +1,13 @@
 package com.github.mustachejava.reflect;
 
-import com.github.mustachejava.compile.CompilableGuard;
+import com.github.mustachejava.asm.CompilableGuard;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.objectweb.asm.commons.GeneratorAdapter.LE;
@@ -49,16 +50,17 @@ public class ClassGuard implements CompilableGuard {
   }
 
   @Override
-  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter sm, ClassWriter cw, AtomicInteger atomicId, String className) {
+  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, GeneratorAdapter sm, ClassWriter cw, AtomicInteger atomicId, String className, List<Object> cargs) {
     int id = atomicId.incrementAndGet();
 
     // Add the field for the class guard
-    cw.visitField(ACC_PUBLIC | ACC_STATIC, "classGuard" + id, "Ljava/lang/Class;", null, null);
+    String fieldName = "classGuard" + id;
+    cw.visitField(ACC_PUBLIC | ACC_STATIC, fieldName, "Ljava/lang/Class;", null, null);
 
     // Initialize the field
     sm.push(classGuard.getName());
     sm.invokeStatic(Type.getType(Class.class), Method.getMethod("Class forName(String)"));
-    sm.putStatic(Type.getType(className), "classGuard" + id, Type.getType(Class.class));
+    sm.putStatic(Type.getType(className), fieldName, Type.getType(Class.class));
 
     // Check that the scopes are not null
     gm.loadArg(0); // scopes
@@ -77,7 +79,7 @@ public class ClassGuard implements CompilableGuard {
     int scopeLocal = gm.newLocal(Type.getType(Object.class));
     gm.storeLocal(scopeLocal);
     int classGuardLocal = gm.newLocal(Type.getType(Class.class));
-    gm.getStatic(Type.getType(className), "classGuard" + id, Type.getType(Class.class));
+    gm.getStatic(Type.getType(className), fieldName, Type.getType(Class.class));
     gm.storeLocal(classGuardLocal);
 
     // Check to see if the scope is null

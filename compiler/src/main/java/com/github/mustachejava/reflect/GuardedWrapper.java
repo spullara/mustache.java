@@ -1,6 +1,6 @@
 package com.github.mustachejava.reflect;
 
-import com.github.mustachejava.compile.GuardCompiler;
+import com.github.mustachejava.asm.GuardCompiler;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 

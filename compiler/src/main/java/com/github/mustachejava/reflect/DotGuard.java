@@ -1,10 +1,11 @@
 package com.github.mustachejava.reflect;
 
-import com.github.mustachejava.compile.CompilableGuard;
+import com.github.mustachejava.asm.CompilableGuard;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -42,7 +43,7 @@ public class DotGuard implements CompilableGuard {
   }
 
   @Override
-  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, ClassWriter cw, AtomicInteger id, String className) {
+  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, GeneratorAdapter sm, ClassWriter cw, AtomicInteger atomicId, String className, List<Object> cargs) {
     // do nothing and it is assumed true
   }
 }

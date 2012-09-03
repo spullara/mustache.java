@@ -1,4 +1,4 @@
-package com.github.mustachejava.compile;
+package com.github.mustachejava.asm;
 
 import com.github.mustachejava.Code;
 import org.objectweb.asm.ClassWriter;

@@ -1,4 +1,4 @@
-package com.github.mustachejava.compile;
+package com.github.mustachejava.asm;
 
 import com.github.mustachejava.reflect.Guard;
 import org.objectweb.asm.ClassWriter;
@@ -48,37 +48,44 @@ public class GuardCompiler {
     cw.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, internalClassName, null, "java/lang/Object", new String[]{Guard.class.getName().replace(".", "/")});
     cw.visitSource(source, null);
 
-    GeneratorAdapter cm = new GeneratorAdapter(Opcodes.ACC_PUBLIC, getMethod("void <init> ()"), null, null, cw);
+    // Constructor
+    GeneratorAdapter cm = new GeneratorAdapter(Opcodes.ACC_PUBLIC, getMethod("void <init> (Object[])"), null, null, cw);
     cm.loadThis();
     cm.invokeConstructor(Type.getType(Object.class), getMethod("void <init> ()"));
+
+    // Static initializer
+    GeneratorAdapter sm = new GeneratorAdapter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, getMethod("void <clinit> ()"), null, null, cw);
+
+    // Method implementation
+    GeneratorAdapter gm = new GeneratorAdapter(Opcodes.ACC_PUBLIC, getMethod("boolean apply(Object[])"), null, null, cw);
+    Label returnFalse = new Label();
+
+    // Add each guard in the list
+    List<Object> cargs = new ArrayList<Object>();
+    for (CompilableGuard guard : guards) {
+      guard.addGuard(returnFalse, gm, cm, sm, cw, id, internalClassName, cargs);
+    }
+
+    // Makes it through the guard, success
+    gm.push(true);
+    gm.returnValue();
+    // Jumps to returnFalse, failure
+    gm.visitLabel(returnFalse);
+    gm.push(false);
+    gm.returnValue();
+    gm.endMethod();
+
+    // Close the constructor
     cm.returnValue();
     cm.endMethod();
 
-    GeneratorAdapter sm = new GeneratorAdapter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, getMethod("void <clinit> ()"), null, null, cw);
-
-    {
-      GeneratorAdapter gm = new GeneratorAdapter(Opcodes.ACC_PUBLIC, getMethod("boolean apply(Object[])"), null, null, cw);
-      Label returnFalse = new Label();
-      for (CompilableGuard guard : guards) {
-        guard.addGuard(returnFalse, gm, sm, cw, id, internalClassName);
-      }
-
-      // Makes it through the guard, success
-      gm.push(true);
-      gm.returnValue();
-      // Jumps to returnFalse, failure
-      gm.visitLabel(returnFalse);
-      gm.push(false);
-      gm.returnValue();
-      gm.endMethod();
-    }
-
+    // Close the static initializer
     sm.returnValue();
     sm.endMethod();
 
     cw.visitEnd();
     Class<?> aClass = defineClass(className, cw.toByteArray());
-    return (Guard) aClass.getConstructor().newInstance();
+    return (Guard) aClass.getConstructor(Object[].class).newInstance((Object) cargs.toArray(new Object[cargs.size()]));
   }
 
   private static final DefiningClassLoader cl = new DefiningClassLoader();

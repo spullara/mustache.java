@@ -4,8 +4,8 @@ import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.github.mustachejava.TemplateContext;
-import com.github.mustachejava.compile.CodeCompiler;
-import com.github.mustachejava.compile.CompiledCodes;
+import com.github.mustachejava.asm.CodeCompiler;
+import com.github.mustachejava.asm.CompiledCodes;
 import org.objectweb.asm.Opcodes;
 
 import java.io.Writer;

@@ -1,6 +1,6 @@
 package com.github.mustachejava.reflect;
 
-import com.github.mustachejava.compile.CompilableGuard;
+import com.github.mustachejava.asm.CompilableGuard;
 import org.junit.Test;
 import org.objectweb.asm.Opcodes;
 
@@ -8,7 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.mustachejava.compile.GuardCompiler.compile;
+import static com.github.mustachejava.asm.GuardCompiler.compile;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
