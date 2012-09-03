@@ -5,7 +5,6 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
-import org.objectweb.asm.commons.Method;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,7 +49,7 @@ public class ClassGuard implements CompilableGuard {
   }
 
   @Override
-  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, GeneratorAdapter sm, ClassWriter cw, AtomicInteger atomicId, String className, List<Object> cargs) {
+  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, GeneratorAdapter sm, ClassWriter cw, AtomicInteger atomicId, List<Object> cargs, Type thisType) {
     int id = atomicId.incrementAndGet();
 
     // Add the field for the class guard
@@ -59,8 +58,8 @@ public class ClassGuard implements CompilableGuard {
 
     // Initialize the field
     sm.push(classGuard.getName());
-    sm.invokeStatic(Type.getType(Class.class), Method.getMethod("Class forName(String)"));
-    sm.putStatic(Type.getType(className), fieldName, Type.getType(Class.class));
+    sm.invokeStatic(CLASS_TYPE, CLASS_FORNAME);
+    sm.putStatic(thisType, fieldName, CLASS_TYPE);
 
     // Check that the scopes are not null
     gm.loadArg(0); // scopes
@@ -75,11 +74,11 @@ public class ClassGuard implements CompilableGuard {
     // Initialize local variables
     gm.loadArg(0); // scopes
     gm.push(scopeIndex);
-    gm.arrayLoad(Type.getType(Object.class)); // Object[]
-    int scopeLocal = gm.newLocal(Type.getType(Object.class));
+    gm.arrayLoad(OBJECT_TYPE); // Object[]
+    int scopeLocal = gm.newLocal(OBJECT_TYPE);
     gm.storeLocal(scopeLocal);
-    int classGuardLocal = gm.newLocal(Type.getType(Class.class));
-    gm.getStatic(Type.getType(className), fieldName, Type.getType(Class.class));
+    int classGuardLocal = gm.newLocal(CLASS_TYPE);
+    gm.getStatic(thisType, fieldName, CLASS_TYPE);
     gm.storeLocal(classGuardLocal);
 
     // Check to see if the scope is null
@@ -89,9 +88,9 @@ public class ClassGuard implements CompilableGuard {
 
     // Check to see if the scopes class matches the guard
     gm.loadLocal(scopeLocal);
-    gm.invokeVirtual(Type.getType(Object.class), Method.getMethod("Class getClass()")); // scope.getClass()
+    gm.invokeVirtual(OBJECT_TYPE, OBJECT_GETCLASS); // scope.getClass()
     gm.loadLocal(classGuardLocal);
-    gm.ifCmp(Type.getType(Class.class), NE, returnFalse); // if they are not equal return false
+    gm.ifCmp(CLASS_TYPE, NE, returnFalse); // if they are not equal return false
 
     Label next = new Label();
     gm.goTo(next); // next guard
@@ -104,5 +103,6 @@ public class ClassGuard implements CompilableGuard {
     // Successfully passed the guard
     gm.visitLabel(next); // end of method
   }
+
 
 }

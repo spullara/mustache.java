@@ -7,7 +7,6 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
-import org.objectweb.asm.commons.Method;
 
 import java.util.List;
 import java.util.Map;
@@ -49,16 +48,11 @@ public class MapGuard implements CompilableGuard {
 
   @Override
   public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, GeneratorAdapter sm,
-                               ClassWriter cw, AtomicInteger atomicId, String className, List<Object> cargs) {
+                       ClassWriter cw, AtomicInteger atomicId, List<Object> cargs, Type thisType) {
     int id = atomicId.incrementAndGet();
 
     String wrappersFieldName = "wrappers" + id;
     String ohFieldName = "oh" + id;
-    Type objectType = Type.getType(Object.class);
-    Type thisType = Type.getType(className);
-    Type mapType = Type.getType(Map.class);
-    Type ohType = Type.getType(ObjectHandler.class);
-    Type wrappersType = Type.getType(Wrapper[].class);
 
     // Add the two fields we need
     cw.visitField(ACC_PRIVATE, ohFieldName, "Lcom/github/mustachejava/ObjectHandler;", null, null);
@@ -70,45 +64,44 @@ public class MapGuard implements CompilableGuard {
     cm.loadThis();
     cm.loadArg(0);
     cm.push(ohArg);
-    cm.arrayLoad(objectType);
-    cm.checkCast(ohType);
-    cm.putField(thisType, ohFieldName, ohType);
+    cm.arrayLoad(OBJECT_TYPE);
+    cm.checkCast(OH_TYPE);
+    cm.putField(thisType, ohFieldName, OH_TYPE);
 
     int wrappersArg = cargs.size();
     cargs.add(wrappers);
     cm.loadThis();
     cm.loadArg(0);
     cm.push(wrappersArg);
-    cm.arrayLoad(objectType);
-    cm.checkCast(wrappersType);
-    cm.putField(thisType, wrappersFieldName, wrappersType);
+    cm.arrayLoad(OBJECT_TYPE);
+    cm.checkCast(WRAPPERS_TYPE);
+    cm.putField(thisType, wrappersFieldName, WRAPPERS_TYPE);
 
     // Unwrap the scope
     gm.loadThis();
-    gm.getField(thisType, ohFieldName, ohType);
+    gm.getField(thisType, ohFieldName, OH_TYPE);
     gm.push(scopeIndex);
     gm.loadThis();
-    gm.getField(thisType, wrappersFieldName, wrappersType);
+    gm.getField(thisType, wrappersFieldName, WRAPPERS_TYPE);
     gm.loadArg(0);
-    gm.invokeStatic(Type.getType(ReflectionObjectHandler.class),
-            Method.getMethod("Object unwrap(com.github.mustachejava.ObjectHandler, int, com.github.mustachejava.util.Wrapper[], Object[])"));
-    int scopeLocal = gm.newLocal(objectType);
+    gm.invokeStatic(ROH_TYPE, ROH_UNWRAP);
+    int scopeLocal = gm.newLocal(OBJECT_TYPE);
     gm.storeLocal(scopeLocal);
 
     // Check to see if it is a map
     gm.loadLocal(scopeLocal);
-    gm.instanceOf(mapType);
+    gm.instanceOf(MAP_TYPE);
     gm.ifZCmp(GeneratorAdapter.EQ, returnFalse);
 
     // It is a map
     gm.loadLocal(scopeLocal);
-    gm.checkCast(mapType);
+    gm.checkCast(MAP_TYPE);
     gm.push(name);
     if (contains) {
-      gm.invokeInterface(mapType, Method.getMethod("boolean containsKey(Object)"));
+      gm.invokeInterface(MAP_TYPE, MAP_CONTAINSKEY);
       gm.ifZCmp(GeneratorAdapter.EQ, returnFalse);
     } else {
-      gm.invokeInterface(mapType, Method.getMethod("boolean containsKey(Object)"));
+      gm.invokeInterface(MAP_TYPE, MAP_CONTAINSKEY);
       gm.ifZCmp(GeneratorAdapter.NE, returnFalse);
     }
   }

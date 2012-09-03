@@ -3,6 +3,7 @@ package com.github.mustachejava.reflect;
 import com.github.mustachejava.asm.CompilableGuard;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import javax.annotation.Nullable;
@@ -39,7 +40,7 @@ public class DepthGuard implements CompilableGuard {
   }
 
   @Override
-  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, GeneratorAdapter sm, ClassWriter cw, AtomicInteger atomicId, String className, List<Object> cargs) {
+  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, GeneratorAdapter sm, ClassWriter cw, AtomicInteger atomicId, List<Object> cargs, Type thisType) {
     // If objects is null return false
     gm.loadArg(0);
     gm.ifNull(returnFalse);

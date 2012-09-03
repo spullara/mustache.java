@@ -63,7 +63,7 @@ public class GuardCompiler {
     // Add each guard in the list
     List<Object> cargs = new ArrayList<Object>();
     for (CompilableGuard guard : guards) {
-      guard.addGuard(returnFalse, gm, cm, sm, cw, id, internalClassName, cargs);
+      guard.addGuard(returnFalse, gm, cm, sm, cw, id, cargs, Type.getType(internalClassName));
     }
 
     // Makes it through the guard, success

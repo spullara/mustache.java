@@ -12,12 +12,11 @@ public class IndyDemo {
     IndyDemo indyDemo = new IndyDemo();
     for (int i = 0; i < 10; i++) {
       timeReflectionOH(indyDemo);
-//      timeReflectionOH(indyDemo);
-//      timeIndyOH(indyDemo);
-//      timeIndyOHNoGuard(indyDemo);
-//      timeReflection(indyDemo);
-//      timeReflectionCached(indyDemo);
-//      timeDirect(indyDemo);
+      timeIndyOH(indyDemo);
+      timeIndyOHNoGuard(indyDemo);
+      timeReflection(indyDemo);
+      timeReflectionCached(indyDemo);
+      timeDirect(indyDemo);
     }
   }
 
