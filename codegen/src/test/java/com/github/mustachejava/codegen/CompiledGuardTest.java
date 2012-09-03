@@ -33,7 +33,7 @@ public class CompiledGuardTest implements Opcodes {
     List<CompilableGuard> guards = new ArrayList<CompilableGuard>();
     guards.add(stringClassGuard);
 
-    Guard testGuard = compile(source, guards);
+    Guard testGuard = compile(guards);
     assertTrue("string is ok", testGuard.apply(new Object[]{"test", 1}));
     assertFalse("integer is not ok", testGuard.apply(new Object[]{1, "test"}));
   }

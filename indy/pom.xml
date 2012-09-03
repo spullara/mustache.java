@@ -19,20 +19,8 @@
   <dependencies>
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
-      <artifactId>compiler</artifactId>
+      <artifactId>codegen</artifactId>
       <version>0.8.5-SNAPSHOT</version>
-    </dependency>
-
-    <!-- ASM -->
-    <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm-commons</artifactId>
-      <version>4.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm-util</artifactId>
-      <version>4.0</version>
     </dependency>
 
     <!-- JRuby -->

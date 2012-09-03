@@ -1,6 +1,5 @@
 package com.github.mustachejava.codegen.guards;
 
-import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.codegen.CompilableGuard;
 import com.github.mustachejava.codegen.GuardCompiler;
@@ -26,12 +25,7 @@ public class CompilableWrappedGuard extends WrappedGuard implements CompilableGu
   @SuppressWarnings("unchecked")
   public CompilableWrappedGuard(ObjectHandler oh, int index, List<Wrapper> wrappers, List<Guard> wrapperGuard) {
     super(oh, index, wrappers, wrapperGuard);
-    Guard[] guards = GuardCompiler.compile(wrapperGuard.toArray(new Guard[wrapperGuard.size()]));
-    if (guards.length != 1) {
-      throw new MustacheException("Invalid guard in wrappers: " + wrapperGuard);
-    } else {
-      guard = guards[0];
-    }
+    guard = GuardCompiler.compile(wrapperGuard);
   }
 
   @Override

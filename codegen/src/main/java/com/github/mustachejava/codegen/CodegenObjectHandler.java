@@ -1,10 +1,10 @@
 package com.github.mustachejava.codegen;
 
-import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.codegen.guards.*;
-import com.github.mustachejava.reflect.*;
+import com.github.mustachejava.reflect.Guard;
+import com.github.mustachejava.reflect.MissingWrapper;
+import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.reflect.guards.*;
-import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
 import java.lang.reflect.AccessibleObject;
@@ -48,33 +48,12 @@ public class CodegenObjectHandler extends ReflectionObjectHandler {
 
   @Override
   protected MissingWrapper createMissingWrapper(List<Guard> guards) {
-    final Guard compiledGuards = compile(guards);
-    return new MissingWrapper(guards.toArray(new Guard[guards.size()])) {
-      @Override
-      protected void guardCall(Object[] scopes) throws GuardException {
-        if (!compiledGuards.apply(scopes)) {
-          throw guardException;
-        }
-      }
-    };
+    return new CompiledMissingWrapper(guards);
   }
 
   @Override
   protected Wrapper createWrapper(int scopeIndex, Wrapper[] wrappers, List<? extends Guard> guards, AccessibleObject member, Object[] arguments) {
-    final Guard compiledGuards = compile(guards);
-    return new ReflectionWrapper(scopeIndex, wrappers, guards.toArray(new Guard[guards.size()]), member, arguments, this) {
-      @Override
-      protected void guardCall(Object[] scopes) throws GuardException {
-        if (!compiledGuards.apply(scopes)) {
-          throw guardException;
-        }
-      }
-    };
+    return new CompiledReflectionWrapper(this, scopeIndex, wrappers, guards, member, arguments);
   }
 
-  private Guard compile(List<? extends Guard> guard) {
-    Guard[] compiled = GuardCompiler.compile(guard.toArray(new Guard[guard.size()]));
-    if (compiled.length != 1) throw new MustacheException("Failed to compile all guards: " + guard);
-    return compiled[0];
-  }
 }

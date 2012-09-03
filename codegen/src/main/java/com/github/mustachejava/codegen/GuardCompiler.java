@@ -1,5 +1,6 @@
 package com.github.mustachejava.codegen;
 
+import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.reflect.Guard;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -20,27 +21,23 @@ import static org.objectweb.asm.commons.Method.getMethod;
 public class GuardCompiler {
   private static AtomicInteger id = new AtomicInteger(0);
 
-  public static Guard[] compile(Guard[] guards) {
-    List<Guard> finalGuards = new ArrayList<Guard>();
+  public static Guard compile(List<? extends Guard> guards) {
     List<CompilableGuard> compilableGuards = new ArrayList<CompilableGuard>();
     for (Guard guard : guards) {
       if (guard instanceof CompilableGuard) {
         compilableGuards.add((CompilableGuard) guard);
       } else {
-        finalGuards.add(guard);
+        throw new MustacheException("Invalid guard for compilation: " + guard);
       }
     }
     try {
-      Guard compiledGuard = compile("compiledguards", compilableGuards);
-      finalGuards.add(0, compiledGuard);
-      return finalGuards.toArray(new Guard[finalGuards.size()]);
+      return compile("compiledguards:" + guards.size(), compilableGuards);
     } catch (Exception e) {
-      e.printStackTrace();
-      return guards;
+      throw new MustacheException("Compilation failure", e);
     }
   }
 
-  public static Guard compile(String source, Iterable<CompilableGuard> guards) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+  private static Guard compile(String source, Iterable<CompilableGuard> guards) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
     ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
     int classId = id.incrementAndGet();
     String className = "com.github.mustachejava.codegen.CompiledGuards" + classId;

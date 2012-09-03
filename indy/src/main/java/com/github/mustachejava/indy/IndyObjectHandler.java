@@ -1,16 +1,15 @@
 package com.github.mustachejava.indy;
 
-import com.github.mustachejava.reflect.ReflectionObjectHandler;
+import com.github.mustachejava.codegen.CodegenObjectHandler;
 import com.github.mustachejava.reflect.ReflectionWrapper;
 import com.github.mustachejava.util.Wrapper;
-import org.objectweb.asm.Opcodes;
 
 /**
  * Creates custom classes instead of using reflection for handling objects. Leverages
  * the ReflectionObjectHandler to create the original wrappers and converts them to
  * new versions.
  */
-public class IndyObjectHandler extends ReflectionObjectHandler implements Opcodes {
+public class IndyObjectHandler extends CodegenObjectHandler {
 
   @Override
   public Wrapper find(String name, Object[] scopes) {
