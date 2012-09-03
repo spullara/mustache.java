@@ -9,8 +9,8 @@
   <modules>
     <module>compiler</module>
     <module>handlebar</module>
-    <module>indy</module>
     <module>codegen</module>
+    <module>indy</module>
   </modules>
   <packaging>pom</packaging>
 

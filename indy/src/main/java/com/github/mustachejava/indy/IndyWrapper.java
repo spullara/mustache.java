@@ -54,11 +54,11 @@ public abstract class IndyWrapper extends CodegenReflectionWrapper implements Op
 
   public abstract Object call(Object[] scopes) throws GuardException; // {
 
-  public static IndyWrapper create(ReflectionWrapper rw) {
+  public static IndyWrapper create(CodegenReflectionWrapper rw) {
     return create(rw, true);
   }
 
-  public static IndyWrapper create(ReflectionWrapper rw, boolean guard) {
+  public static IndyWrapper create(CodegenReflectionWrapper rw, boolean guard) {
     String name;
     Method method = rw.getMethod();
     if (method == null) {

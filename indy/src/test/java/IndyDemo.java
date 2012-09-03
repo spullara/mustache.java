@@ -1,6 +1,7 @@
+import com.github.mustachejava.codegen.CodegenObjectHandler;
+import com.github.mustachejava.codegen.CodegenReflectionWrapper;
 import com.github.mustachejava.indy.IndyWrapper;
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
-import com.github.mustachejava.reflect.ReflectionWrapper;
 import com.github.mustachejava.util.Wrapper;
 import org.junit.Test;
 
@@ -14,6 +15,7 @@ public class IndyDemo {
     IndyDemo indyDemo = new IndyDemo();
     for (int i = 0; i < 10; i++) {
       timeReflectionOH(indyDemo);
+      timeCodegenReflectionOH(indyDemo);
       timeIndyOH(indyDemo);
       timeIndyOHNoGuard(indyDemo);
       timeReflection(indyDemo);
@@ -29,6 +31,15 @@ public class IndyDemo {
       REFLECTED.call(scopes);
     }
     System.out.println("reflection OH: " + (System.currentTimeMillis() - start));
+  }
+
+  public static void timeCodegenReflectionOH(IndyDemo indyDemo) throws Throwable {
+    long start = System.currentTimeMillis();
+    Object[] scopes = {indyDemo};
+    for (int i = 0; i < TIMES; i++) {
+      CODEGEN_REFLECTED.call(scopes);
+    }
+    System.out.println("codegen reflection OH: " + (System.currentTimeMillis() - start));
   }
 
   @Test
@@ -95,11 +106,14 @@ public class IndyDemo {
   private static Wrapper INDY;
   private static IndyWrapper INDY_NOGUARD;
 
+  private static Wrapper CODEGEN_REFLECTED;
+
   static {
     IndyDemo indyDemo = new IndyDemo();
     REFLECTED = new ReflectionObjectHandler().find("someMethod", new Object[] { indyDemo });
-    INDY = IndyWrapper.create((ReflectionWrapper) REFLECTED);
-    INDY_NOGUARD = IndyWrapper.create((ReflectionWrapper) REFLECTED, false);
+    CODEGEN_REFLECTED = new CodegenObjectHandler().find("someMethod", new Object[] { indyDemo });
+    INDY = IndyWrapper.create((CodegenReflectionWrapper) CODEGEN_REFLECTED);
+    INDY_NOGUARD = IndyWrapper.create((CodegenReflectionWrapper) CODEGEN_REFLECTED, false);
   }
 
   private int length = 0;
