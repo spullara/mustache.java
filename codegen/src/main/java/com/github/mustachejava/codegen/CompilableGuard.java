@@ -1,4 +1,4 @@
-package com.github.mustachejava.asm;
+package com.github.mustachejava.codegen;
 
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.reflect.Guard;

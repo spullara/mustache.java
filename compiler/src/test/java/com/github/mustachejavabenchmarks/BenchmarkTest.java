@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
  */
 public class BenchmarkTest extends TestCase {
   private static final int TIME = 2000;
-  private File root;
+  protected File root;
 
   protected void setUp() throws Exception {
     super.setUp();

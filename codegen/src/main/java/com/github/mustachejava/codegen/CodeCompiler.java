@@ -1,4 +1,4 @@
-package com.github.mustachejava.asm;
+package com.github.mustachejava.codegen;
 
 import com.github.mustachejava.Code;
 import org.objectweb.asm.ClassWriter;
@@ -20,10 +20,10 @@ public class CodeCompiler {
   private static AtomicInteger id = new AtomicInteger(0);
   private static final Method EXECUTE_METHOD = Method.getMethod("java.io.Writer execute(java.io.Writer, Object[])");
 
-  public static CompiledCodes compile(Code[] codes, Code[] newcodes) {
+  public static CompiledCodes compile(Code[] newcodes) {
     ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
     int classId = id.incrementAndGet();
-    String className = "com.github.mustachejava.asm.RunCodes" + classId;
+    String className = "com.github.mustachejava.codegen.RunCodes" + classId;
     String internalClassName = className.replace(".", "/");
     cw.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, internalClassName, null, "java/lang/Object", new String[]{CompiledCodes.class.getName().replace(".", "/")});
     cw.visitSource("runCodes", null);
@@ -90,7 +90,7 @@ public class CodeCompiler {
     cw.visitEnd();
     Class<?> aClass = GuardCompiler.defineClass(className, cw.toByteArray());
     try {
-      return (CompiledCodes) aClass.getConstructor(Code[].class).newInstance(new Object[] {codes});
+      return (CompiledCodes) aClass.getConstructor(Code[].class).newInstance(new Object[] {newcodes});
     } catch (Exception e) {
       e.printStackTrace();
       return null;

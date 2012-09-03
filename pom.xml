@@ -10,6 +10,7 @@
     <module>compiler</module>
     <module>handlebar</module>
     <module>indy</module>
+    <module>codegen</module>
   </modules>
   <packaging>pom</packaging>
 

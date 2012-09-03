@@ -1,9 +1,9 @@
-package com.github.mustachejava.asm.guards;
+package com.github.mustachejava.codegen.guards;
 
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
-import com.github.mustachejava.asm.CompilableGuard;
-import com.github.mustachejava.asm.GuardCompiler;
+import com.github.mustachejava.codegen.CompilableGuard;
+import com.github.mustachejava.codegen.GuardCompiler;
 import com.github.mustachejava.reflect.Guard;
 import com.github.mustachejava.reflect.guards.WrappedGuard;
 import com.github.mustachejava.util.Wrapper;
@@ -45,7 +45,7 @@ public class CompilableWrappedGuard extends WrappedGuard implements CompilableGu
     // Add the two fields we need
     cw.visitField(ACC_PRIVATE, ohFieldName, "Lcom/github/mustachejava/ObjectHandler;", null, null);
     cw.visitField(ACC_PRIVATE, wrappersFieldName, "[Lcom/github/mustachejava/util/Wrapper;", null, null);
-    cw.visitField(ACC_PRIVATE, guardFieldName, "[Lcom/github/mustachejava/reflect/Guard;", null, null);
+    cw.visitField(ACC_PRIVATE, guardFieldName, "Lcom/github/mustachejava/reflect/Guard;", null, null);
 
     // Initialize them in the constructor
     int ohArg = cargs.size();
@@ -86,9 +86,6 @@ public class CompilableWrappedGuard extends WrappedGuard implements CompilableGu
     int scopeLocal = gm.newLocal(OBJECT_TYPE);
     gm.storeLocal(scopeLocal);
 
-    // Put the guard on the stack
-    gm.loadLocal(guardArg);
-
     // Create the object array
     gm.push(1);
     gm.newArray(OBJECT_TYPE);
@@ -96,12 +93,15 @@ public class CompilableWrappedGuard extends WrappedGuard implements CompilableGu
     gm.storeLocal(arrayLocal);
 
     // Put the scope in the array
+    gm.loadLocal(arrayLocal);
     gm.push(0);
     gm.loadLocal(scopeLocal);
-    gm.loadLocal(arrayLocal);
     gm.arrayStore(OBJECT_TYPE);
 
     // Call the apply method on the guard
+    gm.loadThis();
+    gm.getField(thisType, guardFieldName, GUARD_TYPE);
+    gm.loadLocal(arrayLocal);
     gm.invokeInterface(GUARD_TYPE, GUARD_APPLY);
 
     // If this is false, return false

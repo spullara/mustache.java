@@ -1,6 +1,6 @@
-package com.github.mustachejava.asm.guards;
+package com.github.mustachejava.codegen.guards;
 
-import com.github.mustachejava.asm.CompilableGuard;
+import com.github.mustachejava.codegen.CompilableGuard;
 import com.github.mustachejava.reflect.guards.DotGuard;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;

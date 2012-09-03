@@ -1,4 +1,4 @@
-package com.github.mustachejava.asm;
+package com.github.mustachejava.codegen;
 
 import com.github.mustachejava.reflect.Guard;
 import org.objectweb.asm.ClassWriter;
@@ -43,7 +43,7 @@ public class GuardCompiler {
   public static Guard compile(String source, Iterable<CompilableGuard> guards) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
     ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
     int classId = id.incrementAndGet();
-    String className = "com.github.mustachejava.asm.CompiledGuards" + classId;
+    String className = "com.github.mustachejava.codegen.CompiledGuards" + classId;
     String internalClassName = className.replace(".", "/");
     cw.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, internalClassName, null, "java/lang/Object", new String[]{Guard.class.getName().replace(".", "/")});
     cw.visitSource(source, null);

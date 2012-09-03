@@ -27,7 +27,7 @@ import java.util.concurrent.Executors;
  * Time: 10:23:54 AM
  */
 public class InterpreterTest extends TestCase {
-  private File root;
+  protected File root;
 
   public void testSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheFactory c = createMustacheFactory();

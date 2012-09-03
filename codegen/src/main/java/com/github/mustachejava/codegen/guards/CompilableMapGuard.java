@@ -1,7 +1,7 @@
-package com.github.mustachejava.asm.guards;
+package com.github.mustachejava.codegen.guards;
 
 import com.github.mustachejava.ObjectHandler;
-import com.github.mustachejava.asm.CompilableGuard;
+import com.github.mustachejava.codegen.CompilableGuard;
 import com.github.mustachejava.reflect.guards.MapGuard;
 import com.github.mustachejava.util.Wrapper;
 import org.objectweb.asm.ClassWriter;

@@ -1,7 +1,7 @@
-package com.github.mustachejava.reflect;
+package com.github.mustachejava.codegen;
 
-import com.github.mustachejava.asm.CompilableGuard;
-import com.github.mustachejava.asm.guards.CompilableClassGuard;
+import com.github.mustachejava.codegen.guards.CompilableClassGuard;
+import com.github.mustachejava.reflect.Guard;
 import com.github.mustachejava.reflect.guards.ClassGuard;
 import org.junit.Test;
 import org.objectweb.asm.Opcodes;
@@ -10,7 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.mustachejava.asm.GuardCompiler.compile;
+import static com.github.mustachejava.codegen.GuardCompiler.compile;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 

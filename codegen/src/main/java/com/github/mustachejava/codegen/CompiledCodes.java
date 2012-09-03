@@ -1,4 +1,4 @@
-package com.github.mustachejava.asm;
+package com.github.mustachejava.codegen;
 
 import java.io.Writer;
 

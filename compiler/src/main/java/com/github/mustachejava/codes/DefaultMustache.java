@@ -35,7 +35,7 @@ public class DefaultMustache extends DefaultCode implements Mustache, Opcodes {
   }
 
   @Override
-  public final void setCodes(Code[] newcodes) {
+  public void setCodes(Code[] newcodes) {
     codes = newcodes;
   }
 

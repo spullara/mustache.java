@@ -29,7 +29,7 @@ import static com.github.mustachejavabenchmarks.BenchmarkTest.skip;
 public class JsonInterpreterTest extends TestCase {
   private static final int TIME = 2;
 
-  private File root;
+  protected File root;
 
   public static Object toObject(final JsonNode node) {
     if (node.isArray()) {
