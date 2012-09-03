@@ -96,4 +96,8 @@ public class ReflectionWrapper extends GuardedWrapper {
     }
     return sb.toString();
   }
+
+  public Wrapper[] getWrappers() {
+    return wrappers;
+  }
 }

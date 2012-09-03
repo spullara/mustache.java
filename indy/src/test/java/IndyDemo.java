@@ -8,6 +8,8 @@ import java.lang.reflect.Method;
 
 public class IndyDemo {
 
+  public static final int TIMES = 100000000;
+
   public static void main(String[] args) throws Throwable {
     IndyDemo indyDemo = new IndyDemo();
     for (int i = 0; i < 10; i++) {
@@ -20,19 +22,10 @@ public class IndyDemo {
     }
   }
 
-  private static final String[] strings;
-
-  static {
-    strings = new String[100];
-    for (int i = 0; i < 100; i++) {
-      strings[i] = "string" + i;
-    }
-  }
-
   public static void timeReflectionOH(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
     Object[] scopes = {indyDemo};
-    for (int i = 0; i < 100000000; i++) {
+    for (int i = 0; i < TIMES; i++) {
       REFLECTED.call(scopes);
     }
     System.out.println("reflection OH: " + (System.currentTimeMillis() - start));
@@ -55,7 +48,7 @@ public class IndyDemo {
   public static void timeIndyOH(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
     Object[] scopes = {indyDemo};
-    for (int i = 0; i < 100000000; i++) {
+    for (int i = 0; i < TIMES; i++) {
       INDY.call(scopes);
     }
     System.out.println("indy OH: " + (System.currentTimeMillis() - start));
@@ -64,7 +57,7 @@ public class IndyDemo {
   public static void timeIndyOHNoGuard(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
     Object[] scopes = {indyDemo};
-    for (int i = 0; i < 100000000; i++) {
+    for (int i = 0; i < TIMES; i++) {
       INDY_NOGUARD.call(scopes);
     }
     System.out.println("indy OH no guard: " + (System.currentTimeMillis() - start));
@@ -83,7 +76,7 @@ public class IndyDemo {
     long start = System.currentTimeMillis();
     Object[] scopes = {indyDemo};
     Method someMethod = IndyDemo.class.getDeclaredMethod("someMethod");
-    for (int i = 0; i < 100000000; i++) {
+    for (int i = 0; i < TIMES; i++) {
       someMethod.invoke(scopes[0]);
     }
     System.out.println("reflection cached: " + (System.currentTimeMillis() - start));
@@ -92,7 +85,7 @@ public class IndyDemo {
   public static void timeDirect(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
     Object[] scopes = {indyDemo};
-    for (int i = 0; i < 100000000; i++) {
+    for (int i = 0; i < TIMES; i++) {
       ((IndyDemo)scopes[0]).someMethod();
     }
     System.out.println("direct: " + (System.currentTimeMillis() - start));

@@ -3,11 +3,7 @@ package com.github.mustachejava.indy;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.reflect.ReflectionWrapper;
 import com.github.mustachejava.util.GuardException;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
+import org.objectweb.asm.*;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import java.lang.invoke.*;
@@ -56,10 +52,6 @@ public abstract class IndyWrapper extends ReflectionWrapper implements Opcodes {
   }
 
   public abstract Object call(Object[] scopes) throws GuardException; // {
-//    guardCall(scopes);
-//    Object scope = unwrap(scopes);
-//    if (scope == null) return null;
-//    return indy(scope);
 
   public static IndyWrapper create(ReflectionWrapper rw) {
     return create(rw, true);
