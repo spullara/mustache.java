@@ -23,7 +23,7 @@ public class CodeCompiler {
   public static CompiledCodes compile(Code[] codes, Code[] newcodes) {
     ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
     int classId = id.incrementAndGet();
-    String className = "com.github.mustachejava.codes.RunCodes" + classId;
+    String className = "com.github.mustachejava.asm.RunCodes" + classId;
     String internalClassName = className.replace(".", "/");
     cw.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, internalClassName, null, "java/lang/Object", new String[]{CompiledCodes.class.getName().replace(".", "/")});
     cw.visitSource("runCodes", null);

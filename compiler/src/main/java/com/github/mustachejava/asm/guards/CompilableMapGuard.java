@@ -1,7 +1,8 @@
-package com.github.mustachejava.reflect;
+package com.github.mustachejava.asm.guards;
 
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.asm.CompilableGuard;
+import com.github.mustachejava.reflect.guards.MapGuard;
 import com.github.mustachejava.util.Wrapper;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -9,41 +10,18 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.github.mustachejava.reflect.ReflectionObjectHandler.unwrap;
+import static org.objectweb.asm.commons.GeneratorAdapter.EQ;
+import static org.objectweb.asm.commons.GeneratorAdapter.NE;
 
 /**
- * Guards whether or not a name was present in the map.
+ * Compiled version of map guard.
  */
-public class MapGuard implements CompilableGuard {
-  private final ObjectHandler oh;
-  private final int scopeIndex;
-  private final String name;
-  private final boolean contains;
-  private final Wrapper[] wrappers;
+public class CompilableMapGuard extends MapGuard implements CompilableGuard {
 
-  public MapGuard(ObjectHandler oh, int scopeIndex, String name, boolean contains, Wrapper[] wrappers) {
-    this.oh = oh;
-    this.scopeIndex = scopeIndex;
-    this.name = name;
-    this.contains = contains;
-    this.wrappers = wrappers;
-  }
-
-  @Override
-  public boolean apply(Object[] objects) {
-    Object scope = unwrap(oh, scopeIndex, wrappers, objects);
-    if (scope instanceof Map) {
-      Map map = (Map) scope;
-      if (contains) {
-        return map.containsKey(name);
-      } else {
-        return !map.containsKey(name);
-      }
-    }
-    return false;
+  public CompilableMapGuard(ObjectHandler oh, int scopeIndex, String name, boolean contains, Wrapper[] wrappers) {
+    super(oh, scopeIndex, name, contains, wrappers);
   }
 
   @Override
@@ -91,18 +69,14 @@ public class MapGuard implements CompilableGuard {
     // Check to see if it is a map
     gm.loadLocal(scopeLocal);
     gm.instanceOf(MAP_TYPE);
-    gm.ifZCmp(GeneratorAdapter.EQ, returnFalse);
+    gm.ifZCmp(EQ, returnFalse);
 
     // It is a map
     gm.loadLocal(scopeLocal);
     gm.checkCast(MAP_TYPE);
     gm.push(name);
-    if (contains) {
-      gm.invokeInterface(MAP_TYPE, MAP_CONTAINSKEY);
-      gm.ifZCmp(GeneratorAdapter.EQ, returnFalse);
-    } else {
-      gm.invokeInterface(MAP_TYPE, MAP_CONTAINSKEY);
-      gm.ifZCmp(GeneratorAdapter.NE, returnFalse);
-    }
+    gm.invokeInterface(MAP_TYPE, MAP_CONTAINSKEY);
+    gm.ifZCmp(contains ? EQ : NE, returnFalse);
   }
+
 }

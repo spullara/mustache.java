@@ -4,8 +4,6 @@ import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.github.mustachejava.TemplateContext;
-import com.github.mustachejava.asm.CodeCompiler;
-import com.github.mustachejava.asm.CompiledCodes;
 import org.objectweb.asm.Opcodes;
 
 import java.io.Writer;
@@ -14,8 +12,6 @@ import java.io.Writer;
  * Default Mustache
  */
 public class DefaultMustache extends DefaultCode implements Mustache, Opcodes {
-  private static boolean compile = Boolean.getBoolean("mustache.compile");
-
   private Code[] codes;
   private boolean inited = false;
 
@@ -29,29 +25,18 @@ public class DefaultMustache extends DefaultCode implements Mustache, Opcodes {
     return codes;
   }
 
-  private CompiledCodes compiledCodes = null;
-
   public Writer run(Writer writer, Object[] scopes) {
-    if (compiledCodes == null) {
-      if (codes != null) {
-        for (Code code : codes) {
-          writer = code.execute(writer, scopes);
-        }
+    if (codes != null) {
+      for (Code code : codes) {
+        writer = code.execute(writer, scopes);
       }
-      return writer;
-    } else {
-      return compiledCodes.runCodes(writer, scopes);
     }
+    return writer;
   }
 
   @Override
   public final void setCodes(Code[] newcodes) {
     codes = newcodes;
-    if (!compile || codes == null) {
-      compiledCodes = null;
-    } else {
-      compiledCodes = CodeCompiler.compile(codes, newcodes);
-    }
   }
 
   @Override

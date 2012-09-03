@@ -4,6 +4,7 @@ import com.github.mustachejava.Binding;
 import com.github.mustachejava.Code;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.reflect.guards.*;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
@@ -50,13 +51,13 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
     final int length = scopes.length;
     List<Guard> guards = new ArrayList<Guard>(scopes.length);
     // Simple guard to break if the number of scopes at this call site have changed
-    guards.add(new DepthGuard(length));
+    guards.add(createDepthGuard(length));
     NEXT:
     for (int i = length - 1; i >= 0; i--) {
       Object scope = scopes[i];
       if (scope == null) continue;
       // Make sure that the current scope is the same class
-      guards.add(new ClassGuard(i, scope));
+      guards.add(createClassGuard(i, scope));
       List<Wrapper> wrappers = null;
       int dotIndex;
       String subname = name;
@@ -65,7 +66,7 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
         final String lookup = subname.substring(0, dotIndex);
         subname = subname.substring(dotIndex + 1);
         // This is used for lookups but otherwise always succeeds
-        guards.add(new DotGuard(lookup, i, scope));
+        guards.add(createDotGuard(i, scope, lookup));
         List<Guard> wrapperGuard = new ArrayList<Guard>(1);
         wrapper = findWrapper(0, null, wrapperGuard, scope, lookup);
         if (wrappers == null) wrappers = new ArrayList<Wrapper>();
@@ -80,14 +81,14 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
           }
         } else {
           // Failed to find a wrapper for the next dot
-          wrapperGuard.add(new ClassGuard(0, scope));
-          guards.add(new WrappedGuard(this, i, wrappers, wrapperGuard));
+          wrapperGuard.add(createClassGuard(0, scope));
+          guards.add(createWrappedGuard(i, wrappers, wrapperGuard));
           continue NEXT;
         }
         if (scope == null) {
           // Found a wrapper, but the result of was null
-          wrapperGuard.add(new NullGuard());
-          guards.add(new WrappedGuard(this, i, wrappers, wrapperGuard));
+          wrapperGuard.add(createNullGuard());
+          guards.add(createWrappedGuard(i, wrappers, wrapperGuard));
           // Break here to allow the wrapper to be returned with the partial evaluation of the dot notation
           break;
         }
@@ -99,7 +100,7 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
         break;
       }
     }
-    return wrapper == null ? new MissingWrapper(guards.toArray(new Guard[guards.size()])) : wrapper;
+    return wrapper == null ? createMissingWrapper(guards) : wrapper;
   }
 
   protected Wrapper findWrapper(final int scopeIndex, Wrapper[] wrappers, List<Guard> guards, Object scope, final String name) {
@@ -110,10 +111,10 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
     if (scope instanceof Map) {
       Map map = (Map) scope;
       if (map.containsKey(name)) {
-        guards.add(new MapGuard(this, scopeIndex, name, true, wrappers));
+        guards.add(createMapGuard(scopeIndex, wrappers, name, true));
         return createWrapper(scopeIndex, wrappers, guards, MAP_METHOD, new Object[]{name});
       } else {
-        guards.add(new MapGuard(this, scopeIndex, name, false, wrappers));
+        guards.add(createMapGuard(scopeIndex, wrappers, name, false));
         if (!areMethodsAccessible(map)) {
           return null;
         }
@@ -121,6 +122,36 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
     }
     AccessibleObject member = findMember(scope.getClass(), name);
     return member == null ? null : createWrapper(scopeIndex, wrappers, guards, member, null);
+  }
+
+  // Factories
+
+  protected MissingWrapper createMissingWrapper(List<Guard> guards) {
+    return new MissingWrapper(guards.toArray(new Guard[guards.size()]));
+  }
+
+  protected DotGuard createDotGuard(int i, Object scope, String lookup) {
+    return new DotGuard(lookup, i, scope);
+  }
+
+  protected WrappedGuard createWrappedGuard(int i, List<Wrapper> wrappers, List<Guard> wrapperGuard) {
+    return new WrappedGuard(this, i, wrappers, wrapperGuard);
+  }
+
+  protected NullGuard createNullGuard() {
+    return new NullGuard();
+  }
+
+  protected DepthGuard createDepthGuard(int length) {
+    return new DepthGuard(length);
+  }
+
+  protected ClassGuard createClassGuard(int i, Object scope) {
+    return new ClassGuard(i, scope);
+  }
+
+  protected MapGuard createMapGuard(int scopeIndex, Wrapper[] wrappers, String name, boolean contains) {
+    return new MapGuard(this, scopeIndex, name, contains, wrappers);
   }
 
   @SuppressWarnings("unchecked")

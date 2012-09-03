@@ -1,6 +1,7 @@
-package com.github.mustachejava.reflect;
+package com.github.mustachejava.reflect.guards;
 
 import com.github.mustachejava.ObjectHandler;
+import com.github.mustachejava.reflect.Guard;
 import com.github.mustachejava.util.Wrapper;
 
 import javax.annotation.Nullable;
@@ -16,9 +17,9 @@ import static com.github.mustachejava.reflect.ReflectionObjectHandler.unwrap;
  * Time: 9:09 PM
  */
 public class WrappedGuard implements Guard {
-  private final ObjectHandler oh;
-  private final int index;
-  private final Wrapper[] wrappers;
+  protected final ObjectHandler oh;
+  protected final int index;
+  protected final Wrapper[] wrappers;
   private final List<Guard> wrapperGuard;
 
   public WrappedGuard(ObjectHandler oh, int index, List<Wrapper> wrappers, List<Guard> wrapperGuard) {

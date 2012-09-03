@@ -1,42 +1,22 @@
-package com.github.mustachejava.reflect;
+package com.github.mustachejava.asm.guards;
 
 import com.github.mustachejava.asm.CompilableGuard;
+import com.github.mustachejava.reflect.guards.DepthGuard;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Check that there are the same number of scope levels.
+ * Compiled version of the depth guard.
  */
-public class DepthGuard implements CompilableGuard {
-  private final int length;
+public class CompilableDepthGuard extends DepthGuard implements CompilableGuard {
 
-  public DepthGuard(int length) {
-    this.length = length;
-  }
-
-  @Override
-  public int hashCode() {
-    return length;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (o instanceof DepthGuard) {
-      DepthGuard depthGuard = (DepthGuard) o;
-      return length == depthGuard.length;
-    }
-    return false;
-  }
-
-  @Override
-  public boolean apply(@Nullable Object[] objects) {
-    return objects != null && length == objects.length;
+  public CompilableDepthGuard(int length) {
+    super(length);
   }
 
   @Override
@@ -51,4 +31,5 @@ public class DepthGuard implements CompilableGuard {
     gm.push(length);
     gm.ifICmp(GeneratorAdapter.NE, returnFalse);
   }
+
 }

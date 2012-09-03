@@ -1,18 +1,11 @@
-package com.github.mustachejava.reflect;
+package com.github.mustachejava.reflect.guards;
 
-import com.github.mustachejava.asm.CompilableGuard;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.GeneratorAdapter;
-
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.github.mustachejava.reflect.Guard;
 
 /**
  * Guard dot notation references.
  */
-public class DotGuard implements CompilableGuard {
+public class DotGuard implements Guard {
 
   private final String lookup;
   private final int scopeIndex;
@@ -41,10 +34,5 @@ public class DotGuard implements CompilableGuard {
   @Override
   public boolean apply(Object[] objects) {
     return true;
-  }
-
-  @Override
-  public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, GeneratorAdapter sm, ClassWriter cw, AtomicInteger atomicId, List<Object> cargs, Type thisType) {
-    // do nothing and it is assumed true
   }
 }

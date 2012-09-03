@@ -1,4 +1,4 @@
-package com.github.mustachejava.simple;
+package com.github.mustachejavabenchmarks.simple;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.reflect.SimpleObjectHandler;

@@ -1,6 +1,8 @@
 package com.github.mustachejava.reflect;
 
 import com.github.mustachejava.asm.CompilableGuard;
+import com.github.mustachejava.asm.guards.CompilableClassGuard;
+import com.github.mustachejava.reflect.guards.ClassGuard;
 import org.junit.Test;
 import org.objectweb.asm.Opcodes;
 
@@ -27,7 +29,7 @@ public class CompiledGuardTest implements Opcodes {
   @Test
   public void testCompiledGuard() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
     String source = "Test.java";
-    ClassGuard stringClassGuard = new ClassGuard(0, "");
+    CompilableClassGuard stringClassGuard = new CompilableClassGuard(0, "");
     List<CompilableGuard> guards = new ArrayList<CompilableGuard>();
     guards.add(stringClassGuard);
 

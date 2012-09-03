@@ -1,4 +1,6 @@
-package com.github.mustachejava.reflect;
+package com.github.mustachejava.reflect.guards;
+
+import com.github.mustachejava.reflect.Guard;
 
 public class NullGuard implements Guard {
   @Override

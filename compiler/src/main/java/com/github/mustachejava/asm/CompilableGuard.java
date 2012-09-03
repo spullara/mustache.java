@@ -25,10 +25,12 @@ public interface CompilableGuard extends Guard, Opcodes {
   Type OH_TYPE = Type.getType(ObjectHandler.class);
   Type WRAPPERS_TYPE = Type.getType(Wrapper[].class);
   Type ROH_TYPE = Type.getType(ReflectionObjectHandler.class);
+  Type GUARD_TYPE = Type.getType(Guard.class);
   Method CLASS_FORNAME = Method.getMethod("Class forName(String)");
   Method OBJECT_GETCLASS = Method.getMethod("Class getClass()");
   Method ROH_UNWRAP = Method.getMethod("Object unwrap(com.github.mustachejava.ObjectHandler, int, com.github.mustachejava.util.Wrapper[], Object[])");
   Method MAP_CONTAINSKEY = Method.getMethod("boolean containsKey(Object)");
+  Method GUARD_APPLY = Method.getMethod("boolean apply(Object[])");
 
   public abstract void addGuard(Label returnFalse,
                                 GeneratorAdapter gm,

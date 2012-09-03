@@ -1,6 +1,5 @@
 package com.github.mustachejava.reflect;
 
-import com.github.mustachejava.asm.GuardCompiler;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
@@ -22,19 +21,12 @@ public class GuardedWrapper implements Wrapper {
 
   // Array of guards that must be satisfied
   protected final Guard[] guards;
-  protected final Guard[] optimized;
 
   // Hashcode cache
   private int hashCode;
 
   public GuardedWrapper(Guard[] guards) {
     this.guards = guards;
-    if (compile) {
-      Guard[] optimized = GuardCompiler.compile(guards);
-      this.optimized = optimized.length < guards.length ? optimized : guards;
-    } else {
-      this.optimized = guards;
-    }
   }
 
   @Override
@@ -44,7 +36,7 @@ public class GuardedWrapper implements Wrapper {
   }
 
   protected void guardCall(Object[] scopes) throws GuardException {
-    for (Guard predicate : optimized) {
+    for (Guard predicate : guards) {
       if (!predicate.apply(scopes)) {
         throw guardException;
       }
@@ -69,9 +61,5 @@ public class GuardedWrapper implements Wrapper {
       return (guards == null && other.guards == null) || Arrays.equals(other.guards, guards);
     }
     return false;
-  }
-
-  public Guard[] getGuards() {
-    return guards;
   }
 }
