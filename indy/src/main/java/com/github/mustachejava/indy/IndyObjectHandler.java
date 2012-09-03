@@ -1,7 +1,7 @@
 package com.github.mustachejava.indy;
 
 import com.github.mustachejava.codegen.CodegenObjectHandler;
-import com.github.mustachejava.reflect.ReflectionWrapper;
+import com.github.mustachejava.codegen.CodegenReflectionWrapper;
 import com.github.mustachejava.util.Wrapper;
 
 /**
@@ -14,8 +14,8 @@ public class IndyObjectHandler extends CodegenObjectHandler {
   @Override
   public Wrapper find(String name, Object[] scopes) {
     Wrapper wrapper = super.find(name, scopes);
-    if (wrapper instanceof ReflectionWrapper) {
-      ReflectionWrapper rw = (ReflectionWrapper) wrapper;
+    if (wrapper instanceof CodegenReflectionWrapper) {
+      CodegenReflectionWrapper rw = (CodegenReflectionWrapper) wrapper;
       return IndyWrapper.create(rw);
     } else {
       return wrapper;
