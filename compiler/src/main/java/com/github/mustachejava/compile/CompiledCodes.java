@@ -1,4 +1,4 @@
-package com.github.mustachejava.codes;
+package com.github.mustachejava.compile;
 
 import java.io.Writer;
 

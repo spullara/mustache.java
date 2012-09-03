@@ -1,5 +1,6 @@
 package com.github.mustachejava.reflect;
 
+import com.github.mustachejava.compile.CompilableGuard;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.commons.GeneratorAdapter;

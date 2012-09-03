@@ -1,5 +1,6 @@
 package com.github.mustachejava.reflect;
 
+import com.github.mustachejava.compile.GuardCompiler;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
@@ -29,7 +30,7 @@ public class GuardedWrapper implements Wrapper {
   public GuardedWrapper(Guard[] guards) {
     this.guards = guards;
     if (compile) {
-      Guard[] optimized = CompilableGuard.Compiler.compile(guards);
+      Guard[] optimized = GuardCompiler.compile(guards);
       this.optimized = optimized.length < guards.length ? optimized : guards;
     } else {
       this.optimized = guards;
