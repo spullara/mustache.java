@@ -53,20 +53,6 @@
       <version>12.0</version>
     </dependency>
 
-    <!-- ASM -->
-    <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm-commons</artifactId>
-      <version>4.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm-util</artifactId>
-      <version>4.0</version>
-      <scope>provided</scope>
-    </dependency>
-
     <!-- Scala -->
     <dependency>
       <groupId>org.scala-lang</groupId>
