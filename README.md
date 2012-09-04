@@ -35,6 +35,7 @@ Performance:
 - See the `com.github.mustachejavabenchmarks` package in the `compiler` module
 - Compiles 4000+ timeline.html templates per second per core
 - Renders 3000+ of 50 tweet timelines per second per core on 2011 Macbook Pro / MacPro hardware
+- New codegen module generates code for guards and mustaches
 
 Maven dependency information (ie. for most common cases you will just need the `compiler` module):
 
@@ -42,7 +43,7 @@ Maven dependency information (ie. for most common cases you will just need the `
 <dependency>
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>compiler</artifactId>
-  <version>0.8.2</version>
+  <version>0.8.5</version>
 </dependency>
 ```
 
