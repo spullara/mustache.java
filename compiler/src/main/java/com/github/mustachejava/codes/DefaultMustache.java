@@ -4,14 +4,13 @@ import com.github.mustachejava.Code;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.github.mustachejava.TemplateContext;
-import org.objectweb.asm.Opcodes;
 
 import java.io.Writer;
 
 /**
  * Default Mustache
  */
-public class DefaultMustache extends DefaultCode implements Mustache, Opcodes {
+public class DefaultMustache extends DefaultCode implements Mustache {
   private Code[] codes;
   private boolean inited = false;
 
