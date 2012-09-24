@@ -15,38 +15,39 @@ public class HtmlEscaper {
       int length = value.length();
       for (int i = 0; i < length; i++) {
         char c = value.charAt(i);
-        switch (c) {
-          case '&':
-            // If we match an entity or char ref then keep it
-            // as is in the text. Otherwise, replace it.
-            if (!escapeEscaped && matchesEntityRef(i + 1, length, value)) {
-              // If we are at the beginning we can just keep going
-              if (position != 0) {
-                position = append(value, writer, position, i, "&");
-              }
-            } else {
-              position = append(value, writer, position, i, "&amp;");
-            }
-            break;
-          case '<':
-            position = append(value, writer, position, i, "&lt;");
-            break;
-          case '>':
-            position = append(value, writer, position, i, "&gt;");
-            break;
-          case '"':
-            position = append(value, writer, position, i, "&quot;");
-            break;
-          case '\'':
-            position = append(value, writer, position, i, "&#39;");
-            break;
-        }
         if (c <= 13) {
           writer.append(value, position, i);
           writer.append("&#");
           writer.append(String.valueOf((int)c));
           writer.append(";");
           position = i + 1;
+        } else {
+          switch (c) {
+            case '&':
+              // If we match an entity or char ref then keep it
+              // as is in the text. Otherwise, replace it.
+              if (!escapeEscaped && matchesEntityRef(i + 1, length, value)) {
+                // If we are at the beginning we can just keep going
+                if (position != 0) {
+                  position = append(value, writer, position, i, "&");
+                }
+              } else {
+                position = append(value, writer, position, i, "&amp;");
+              }
+              break;
+            case '<':
+              position = append(value, writer, position, i, "&lt;");
+              break;
+            case '>':
+              position = append(value, writer, position, i, "&gt;");
+              break;
+            case '"':
+              position = append(value, writer, position, i, "&quot;");
+              break;
+            case '\'':
+              position = append(value, writer, position, i, "&#39;");
+              break;
+          }
         }
       }
       writer.append(value, position, length);
