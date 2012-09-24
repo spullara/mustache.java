@@ -7,9 +7,6 @@ import java.io.Writer;
 
 /**
  * Escapes user data that you wish to include in HTML pages.
- *
- * Set
- * -Dmustache.escapeescaped if you want to reescape valid escaped HTML values
  */
 public class HtmlEscaper {
   public static void escape(String value, Writer writer, boolean escapeEscaped) {
@@ -43,9 +40,13 @@ public class HtmlEscaper {
           case '\'':
             position = append(value, writer, position, i, "&#39;");
             break;
-          case '\n':
-            position = append(value, writer, position, i, "&#10;");
-            break;
+        }
+        if (c <= 13) {
+          writer.append(value, position, i);
+          writer.append("&#");
+          writer.append(String.valueOf((int)c));
+          writer.append(";");
+          position = i + 1;
         }
       }
       writer.append(value, position, length);
