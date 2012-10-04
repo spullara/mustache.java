@@ -13,8 +13,6 @@ public class GuardedWrapper implements Wrapper {
   // and don't reallocate it.
   protected static final GuardException guardException = new GuardException();
 
-  private static boolean compile = Boolean.getBoolean("mustache.compile");
-
   static {
     guardException.setStackTrace(new StackTraceElement[0]);
   }
