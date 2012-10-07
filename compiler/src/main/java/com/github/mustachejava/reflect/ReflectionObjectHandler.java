@@ -11,6 +11,7 @@ import com.github.mustachejava.util.Wrapper;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -93,8 +94,10 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
           break;
         }
       }
-      Wrapper[] foundWrappers = wrappers == null ? null : wrappers.toArray(
-              new Wrapper[wrappers.size()]);
+      if (wrappers != null) {
+        guards.add(createWrappedGuard(i, wrappers, Arrays.asList((Guard)createClassGuard(0, scope))));
+      }
+      Wrapper[] foundWrappers = wrappers == null ? null : wrappers.toArray(new Wrapper[wrappers.size()]);
       wrapper = findWrapper(i, foundWrappers, guards, scope, subname);
       if (wrapper != null) {
         break;
