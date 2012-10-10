@@ -85,9 +85,13 @@ public class GuardCompiler {
     return (Guard) aClass.getConstructor(Object[].class).newInstance((Object) cargs.toArray(new Object[cargs.size()]));
   }
 
-  private static final DefiningClassLoader cl = new DefiningClassLoader();
+  private static final DefiningClassLoader cl = new DefiningClassLoader(Thread.currentThread().getContextClassLoader());
 
   private static class DefiningClassLoader extends ClassLoader {
+    public DefiningClassLoader(ClassLoader parent) {
+      super(parent);
+    }
+
     public Class<?> defineClass(final String name, final byte[] b) {
       return defineClass(name, b, 0, b.length);
     }

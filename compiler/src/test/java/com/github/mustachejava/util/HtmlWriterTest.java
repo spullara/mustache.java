@@ -149,7 +149,7 @@ public class HtmlWriterTest {
 
   @Test
   public void twitter() throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemClassLoader().getResourceAsStream("twitter.html"), "UTF-8"));
+    BufferedReader reader = new BufferedReader(new InputStreamReader(HtmlWriterTest.class.getResourceAsStream("/twitter.html"), "UTF-8"));
     char[] chars = new char[32768];
     int read;
     while ((read = reader.read(chars, 0, chars.length)) != -1) {

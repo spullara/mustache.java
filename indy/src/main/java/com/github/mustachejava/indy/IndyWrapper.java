@@ -124,8 +124,13 @@ public abstract class IndyWrapper extends CodegenReflectionWrapper implements Op
                             String uuid = UUID.randomUUID().toString().replace("-", "_");
                             return pkgName + "." + name + "_" + uuid;
                           }
-  private static final IndyClassLoader indyCL = new IndyClassLoader();
+  private static final IndyClassLoader indyCL = new IndyClassLoader(Thread.currentThread().getContextClassLoader());
   private static class IndyClassLoader extends ClassLoader {
+
+    public IndyClassLoader(ClassLoader parent) {
+      super(parent);
+    }
+
     public Class<?> defineClass(final String name, final byte[] b) {
       return defineClass(name, b, 0, b.length);
     }
