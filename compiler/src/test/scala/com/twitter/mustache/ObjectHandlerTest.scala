@@ -79,4 +79,16 @@ class ObjectHandlerTest {
     writer.close()
     Assert.assertEquals("Hello, world!?!\nGoodbye, thanks for all the fish!!?test\n", sw.toString)
   }
+
+  @Test
+  def testUnit() {
+    val mf = new DefaultMustacheFactory()
+    mf.setObjectHandler(new TwitterObjectHandler)
+    val m = mf.compile(new StringReader("{{test}}"), "unit")
+    val sw = new StringWriter
+    m.execute(sw, new {
+      val test = if (false) "test"
+    }).close()
+    Assert.assertEquals("", sw.toString)
+  }
 }

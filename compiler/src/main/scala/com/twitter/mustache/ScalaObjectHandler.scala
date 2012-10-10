@@ -5,6 +5,7 @@ import com.github.mustachejava.Iteration
 import com.github.mustachejava.reflect.ReflectionObjectHandler
 import java.io.Writer
 import java.lang.reflect.{Field, Method}
+import runtime.BoxedUnit
 
 /**
  * Plain old scala handler that doesn't depend on Twitter libraries.
@@ -19,6 +20,7 @@ class ScalaObjectHandler extends ReflectionObjectHandler {
   override def coerce(value: Object) = {
     value match {
       case m: Map[_, _] => asJavaMap(m)
+      case u: BoxedUnit => null
       case o: Option[_] => o match {
         case Some(some: Object) => coerce(some)
         case None => null

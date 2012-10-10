@@ -7,6 +7,7 @@ import java.io.Writer
 import java.lang.reflect.{Method, Field}
 import java.util.concurrent.Callable
 import scala.collection.JavaConversions.asJavaMap
+import runtime.BoxedUnit
 
 class TwitterObjectHandler extends ReflectionObjectHandler {
 
@@ -18,6 +19,7 @@ class TwitterObjectHandler extends ReflectionObjectHandler {
   override def coerce(value: Object) = {
     value match {
       case m: Map[_, _] => asJavaMap(m)
+      case u: BoxedUnit => null
       case o: Option[_] => o match {
         case Some(some: Object) => coerce(some)
         case None => null
