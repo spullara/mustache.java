@@ -63,6 +63,18 @@ public class InterpreterTest extends TestCase {
 
   }
 
+  public void testRecursionWithInheritance() throws IOException {
+    MustacheFactory c = createMustacheFactory();
+    Mustache m = c.compile("recursion_with_inheritance.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      Object value = new Object() {
+        boolean value = false;
+      };
+    });
+    assertEquals(getContents(root, "recursion.txt"), sw.toString());
+  }
+
   public void testSimplePragma() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheFactory c = createMustacheFactory();
     Mustache m = c.compile("simplepragma.html");
