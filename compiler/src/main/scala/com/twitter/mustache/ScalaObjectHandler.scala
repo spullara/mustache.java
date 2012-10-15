@@ -19,7 +19,7 @@ class ScalaObjectHandler extends ReflectionObjectHandler {
 
   override def coerce(value: Object) = {
     value match {
-      case m: Map[_, _] => asJavaMap(m)
+      case m: collection.Map[_, _] => asJavaMap(m)
       case u: BoxedUnit => null
       case o: Option[_] => o match {
         case Some(some: Object) => coerce(some)
@@ -33,7 +33,7 @@ class ScalaObjectHandler extends ReflectionObjectHandler {
     value match {
       case t: Traversable[AnyRef] => {
         var newWriter = writer
-        t map {
+        t foreach {
           next =>
             newWriter = iteration.next(newWriter, coerce(next), scopes)
         }
