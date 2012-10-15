@@ -81,6 +81,23 @@ class ObjectHandlerTest {
   }
 
   @Test
+  def testScalaStream() {
+    val pool = Executors.newCachedThreadPool()
+    val mf = new DefaultMustacheFactory()
+    mf.setObjectHandler(new ScalaObjectHandler)
+    mf.setExecutorService(pool)
+    val m = mf.compile(new StringReader("{{#stream}}{{value}}{{/stream}}"), "helloworld")
+    val sw = new StringWriter
+    val writer = m.execute(sw, new {
+      val stream = Stream(
+        new { val value = "hello" },
+        new { val value = "world" })
+    })
+    writer.close()
+    Assert.assertEquals("helloworld", sw.toString)
+  }
+
+  @Test
   def testUnit() {
     val mf = new DefaultMustacheFactory()
     mf.setObjectHandler(new TwitterObjectHandler)
