@@ -1,5 +1,6 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.reflect.SimpleObjectHandler;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
 import com.github.mustachejavabenchmarks.JsonCapturer;
 import com.github.mustachejavabenchmarks.JsonInterpreterTest;
@@ -96,6 +97,31 @@ public class InterpreterTest extends TestCase {
     });
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
+
+  private class OkGenerator {
+    public boolean isItOk() {
+      return true;
+    }
+  }
+
+  public void testNestedAccessWithSimpleObjectHandler() throws IOException {
+    assertEquals(getOutput(false), getOutput(true));
+  }
+
+  private String getOutput(final boolean setObjectHandler) {
+    final DefaultMustacheFactory mustacheFactory = new DefaultMustacheFactory();
+    if (setObjectHandler) {
+      mustacheFactory.setObjectHandler(new SimpleObjectHandler());
+    }
+    final Mustache defaultMustache = mustacheFactory.compile(new StringReader("{{#okGenerator.isItOk}}{{okGenerator.isItOk}}{{/okGenerator.isItOk}}"), "Test template");
+    final Map<String, Object> params = new HashMap<String, Object>();
+    params.put("okGenerator", new OkGenerator());
+    final Writer writer = new StringWriter();
+    defaultMustache.execute(writer, params);
+    return writer.toString();
+
+  }
+
 
   public void testMultipleWrappers() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheFactory c = createMustacheFactory();

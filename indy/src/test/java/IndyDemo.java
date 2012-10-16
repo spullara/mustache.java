@@ -21,6 +21,7 @@ public class IndyDemo {
       timeReflection(indyDemo);
       timeReflectionCached(indyDemo);
       timeDirect(indyDemo);
+      System.out.println("-----------------");
     }
   }
 
