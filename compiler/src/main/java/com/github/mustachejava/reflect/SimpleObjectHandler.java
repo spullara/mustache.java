@@ -67,6 +67,9 @@ public class SimpleObjectHandler extends BaseObjectHandler {
               Wrapper wrapper = find(name.substring(0, index), subscope);
               if (wrapper != null) {
                 scope = wrapper.call(subscope);
+                if (scope == null) {
+                  continue;
+                }
                 subscope = new Object[]{scope};
                 return find(name.substring(index + 1), new Object[]{subscope}).call(subscope);
               }
