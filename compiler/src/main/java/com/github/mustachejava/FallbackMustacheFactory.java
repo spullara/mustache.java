@@ -9,7 +9,7 @@ import java.io.*;
  * 
  * @author gw0 [http://gw.tnode.com/] <gw.2012@tnode.com>
  */
-public class FallbackMustacheFactory extends DefaultMustacheFactory {
+public class    FallbackMustacheFactory extends DefaultMustacheFactory {
 	
 	/** List of fallback resource roots to search through. */
 	private Object[] resourceRoots;
