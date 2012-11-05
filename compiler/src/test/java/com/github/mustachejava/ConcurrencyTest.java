@@ -1,5 +1,6 @@
 package com.github.mustachejava;
 
+import com.github.mustachejavabenchmarks.BenchmarkTest;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.github.mustachejavabenchmarks.BenchmarkTest.skip;
 import static junit.framework.Assert.assertEquals;
 
 /**
@@ -87,6 +89,7 @@ public class ConcurrencyTest {
 
   @Test
   public void testConcurrentExecution() throws InterruptedException {
+    if (skip()) return;
     String template = "{{aa}}:{{bb}}:{{cc}}";
     final Mustache test = new DefaultMustacheFactory().compile(new StringReader(template), "test");
     ExecutorService es = Executors.newCachedThreadPool();
@@ -121,6 +124,7 @@ public class ConcurrencyTest {
 
   @Test
   public void testConcurrentExecutionWithConcurrentTemplate() throws InterruptedException {
+    if (skip()) return;
     String template = "{{calla}}:{{callb}}:{{callc}}";
     ExecutorService es = Executors.newCachedThreadPool();
     DefaultMustacheFactory dmf = new DefaultMustacheFactory();

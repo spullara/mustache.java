@@ -4,7 +4,9 @@ import com.github.mustachejava.*;
 
 import java.io.Writer;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Extending a template through in-place replacement of the overridden codes.
@@ -22,25 +24,28 @@ public class ExtendCode extends PartialCode {
     this.mf = mf;
   }
 
-  private Code[] replaceCodes(Code[] supercodes, Map<String, ExtendNameCode> replaceMap) {
+  private Code[] replaceCodes(Code[] supercodes, Map<String, ExtendNameCode> replaceMap, Set<Code> seen) {
     Code[] newcodes = supercodes.clone();
     for (int i = 0; i < supercodes.length; i++) {
       Code code = supercodes[i];
-      if (code instanceof ExtendNameCode) {
-        ExtendNameCode enc = (ExtendNameCode) code;
-        ExtendNameCode extendReplaceCode = replaceMap.get(enc.getName());
-        if (extendReplaceCode != null) {
-          ExtendNameCode newcode = (ExtendNameCode) (newcodes[i] = (Code) extendReplaceCode.clone());
-          // We need to set the appended text of the new code to that of the old code
-          newcode.appended = enc.appended;
+      if (seen.add(code)) {
+        if (code instanceof ExtendNameCode) {
+          ExtendNameCode enc = (ExtendNameCode) code;
+          ExtendNameCode extendReplaceCode = replaceMap.get(enc.getName());
+          if (extendReplaceCode != null) {
+            ExtendNameCode newcode = (ExtendNameCode) (newcodes[i] = (Code) extendReplaceCode.clone());
+            // We need to set the appended text of the new code to that of the old code
+            newcode.appended = enc.appended;
+          } else {
+            enc.setCodes(replaceCodes(enc.getCodes(), replaceMap, seen));
+          }
         } else {
-          enc.setCodes(replaceCodes(enc.getCodes(), replaceMap));
+          Code[] codes = code.getCodes();
+          if (codes != null) {
+            code.setCodes(replaceCodes(codes, replaceMap, seen));
+          }
         }
-      } else {
-        Code[] codes = code.getCodes();
-        if (codes != null) {
-          code.setCodes(replaceCodes(codes, replaceMap));
-        }
+        seen.remove(code);
       }
     }
     return newcodes;
@@ -72,7 +77,9 @@ public class ExtendCode extends PartialCode {
     partial = (Mustache) original.clone();
     Code[] supercodes = partial.getCodes();
     // recursively replace named sections with replacements
-    partial.setCodes(replaceCodes(supercodes, replaceMap));
+    HashSet<Code> seen = new HashSet<Code>();
+    seen.add(partial);
+    partial.setCodes(replaceCodes(supercodes, replaceMap, seen));
   }
 
 }
