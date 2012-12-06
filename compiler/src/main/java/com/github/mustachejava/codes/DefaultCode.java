@@ -4,6 +4,8 @@ import com.github.mustachejava.*;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Simplest possible code implementaion with some default shared behavior
@@ -21,18 +23,30 @@ public class DefaultCode implements Code, Cloneable {
   protected final Binding binding;
 
   public Object clone() {
+    Set<Code> seen = new HashSet<Code>();
+    seen.add(this);
+    return clone(seen);
+  }
+
+  public Object clone(Set<Code> seen) {
     try {
       DefaultCode code = (DefaultCode) super.clone();
       Code[] codes = code.getCodes();
       if (codes != null) {
         codes = codes.clone();
         for (int i = 0; codes != null && i < codes.length; i++) {
-          codes[i] = (Code) codes[i].clone();
+          if (seen.add(codes[i])) {
+            codes[i] = (Code) codes[i].clone(seen);
+            seen.remove(codes[i]);
+          }
         }
         code.setCodes(codes);
       }
       if (mustache != null) {
-        code.mustache = (Mustache) mustache.clone();
+        if (seen.add(mustache)) {
+          code.mustache = (Mustache) mustache.clone(seen);
+          seen.remove(mustache);
+        }
       }
       return code;
     } catch (CloneNotSupportedException e) {

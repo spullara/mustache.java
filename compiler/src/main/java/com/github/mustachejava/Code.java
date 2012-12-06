@@ -1,6 +1,7 @@
 package com.github.mustachejava;
 
 import java.io.Writer;
+import java.util.Set;
 
 /**
  * Code objects that are executed in order to evaluate the template
@@ -21,4 +22,6 @@ public interface Code {
   void init();
 
   Object clone();
+
+  Object clone(Set<Code> seen);
 }
