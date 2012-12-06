@@ -4,6 +4,7 @@ import com.github.mustachejava.reflect.SimpleObjectHandler;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
 import com.github.mustachejavabenchmarks.JsonCapturer;
 import com.github.mustachejavabenchmarks.JsonInterpreterTest;
+import com.google.common.base.Function;
 import junit.framework.TestCase;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonNode;
@@ -337,6 +338,39 @@ public class InterpreterTest extends TestCase {
     });
     assertEquals("This is not interesting.", sw.toString());
   }
+
+  public void testFunctions() throws IOException {
+    MustacheFactory c = init();
+    Mustache m = c.compile(new StringReader("{{#f}}{{foo}}{{/f}}"), "test");
+    {
+      StringWriter sw = new StringWriter();
+      m.execute(sw, new Object() {
+        Function f = new Function<String, String>() {
+          @Override
+          public String apply(String s) {
+            return s.toUpperCase();
+          }
+        };
+        String foo = "bar";
+      }).flush();
+      assertEquals("BAR", sw.toString());
+    }
+    {
+      StringWriter sw = new StringWriter();
+      m.execute(sw, new Object() {
+        Function f = new TemplateFunction() {
+          @Override
+          public String apply(String s) {
+            return s.toUpperCase();
+          }
+        };
+        String foo = "bar";
+        String FOO = "baz";
+      }).flush();
+      assertEquals("baz", sw.toString());
+    }
+  }
+
 
   public void testComplex() throws MustacheException, IOException {
     StringWriter json = new StringWriter();
