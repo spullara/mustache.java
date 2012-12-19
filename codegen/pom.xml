@@ -3,7 +3,7 @@
   <parent>
     <artifactId>mustache.java</artifactId>
     <groupId>com.github.spullara.mustache.java</groupId>
-    <version>0.8.9</version>
+    <version>0.8.10-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -16,7 +16,7 @@
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>compiler</artifactId>
-      <version>0.8.9</version>
+      <version>0.8.10-SNAPSHOT</version>
     </dependency>
 
     <!-- ASM -->
@@ -35,7 +35,7 @@
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>compiler</artifactId>
-      <version>0.8.9</version>
+      <version>0.8.10-SNAPSHOT</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
