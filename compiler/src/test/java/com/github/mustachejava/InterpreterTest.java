@@ -19,6 +19,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Tests for the compiler.
@@ -117,6 +118,23 @@ public class InterpreterTest extends TestCase {
 
   }
 
+  public void testClosingReader() {
+    final AtomicBoolean closed = new AtomicBoolean();
+    StringReader reader = new StringReader("{{test") {
+      @Override
+      public void close() {
+        closed.set(true);
+      }
+    };
+    MustacheFactory mf = new DefaultMustacheFactory();
+    try {
+      mf.compile(reader, "test");
+      fail("Should have thrown an exception");
+    } catch (MustacheException me) {
+      // The reader should be closed now
+      assertEquals(true, closed.get());
+    }
+  }
 
   public void testMultipleWrappers() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheFactory c = createMustacheFactory();

@@ -49,181 +49,193 @@ public class MustacheParser {
     } else {
       br = new BufferedReader(reader);
     }
-    MustacheVisitor mv = cf.createMustacheVisitor();
-    // Now we grab the mustache template
-    boolean onlywhitespace = true;
-    boolean iterable = currentLine.get() != 0;
-    currentLine.compareAndSet(0, 1);
-    StringBuilder out = new StringBuilder();
     try {
-      int c;
-      while ((c = br.read()) != -1) {
-        if (c == '\r') {
-          continue;
-        }
-        // Increment the line
-        if (c == '\n') {
-          currentLine.incrementAndGet();
-          if (!iterable || (iterable && !onlywhitespace)) {
-            out.append("\n");
+      MustacheVisitor mv = cf.createMustacheVisitor();
+      // Now we grab the mustache template
+      boolean onlywhitespace = true;
+      boolean iterable = currentLine.get() != 0;
+      currentLine.compareAndSet(0, 1);
+      StringBuilder out = new StringBuilder();
+      try {
+        int c;
+        while ((c = br.read()) != -1) {
+          if (c == '\r') {
+            continue;
           }
-          out = write(mv, out, file, currentLine.intValue());
-
-          iterable = false;
-          onlywhitespace = true;
-          continue;
-        }
-        // Check for a mustache start
-        if (c == sm.charAt(0)) {
-          br.mark(1);
-          if (sm.length() == 1 || br.read() == sm.charAt(1)) {
-            // Two mustaches, now capture command
-            StringBuilder sb = new StringBuilder();
-            while ((c = br.read()) != -1) {
-              br.mark(1);
-              if (c == em.charAt(0)) {
-                if (em.length() > 1) {
-                  if (br.read() == em.charAt(1)) {
-                    // Matched end
-                    break;
-                  } else {
-                    // Only one
-                    br.reset();
-                  }
-                } else break;
-              }
-              sb.append((char) c);
+          // Increment the line
+          if (c == '\n') {
+            currentLine.incrementAndGet();
+            if (!iterable || (iterable && !onlywhitespace)) {
+              out.append("\n");
             }
-            final String command = cf.translate(sb.toString());
-            final char ch = command.charAt(0);
-            final String variable = command.substring(1).trim();
-            switch (ch) {
-              case '#':
-              case '^':
-              case '<':
-              case '$': {
-                int line = currentLine.get();
-                final Mustache mustache = compile(br, variable, currentLine, file, sm, em);
-                int lines = currentLine.get() - line;
-                if (!onlywhitespace || lines == 0) {
-                  write(mv, out, file, currentLine.intValue());
-                }
-                out = new StringBuilder();
-                switch (ch) {
-                  case '#':
-                    mv.iterable(new TemplateContext(sm, em, file, line), variable, mustache);
-                    break;
-                  case '^':
-                    mv.notIterable(new TemplateContext(sm, em, file, line), variable, mustache);
-                    break;
-                  case '<':
-                    mv.extend(new TemplateContext(sm, em, file, line), variable, mustache);
-                    break;
-                  case '$':
-                    mv.name(new TemplateContext(sm, em, file, line), variable, mustache);
-                    break;
-                }
-                iterable = lines != 0;
-                break;
-              }
-              case '/': {
-                // Tag end
-                if (!onlywhitespace) {
-                  write(mv, out, file, currentLine.intValue());
-                }
-                if (!variable.equals(tag)) {
-                  throw new MustacheException(
-                          "Mismatched start/end tags: " + tag + " != " + variable + " in " + file + ":" + currentLine);
-                }
+            out = write(mv, out, file, currentLine.intValue());
 
-                return mv.mustache(new TemplateContext(sm, em, file, 0));
+            iterable = false;
+            onlywhitespace = true;
+            continue;
+          }
+          // Check for a mustache start
+          if (c == sm.charAt(0)) {
+            br.mark(1);
+            if (sm.length() == 1 || br.read() == sm.charAt(1)) {
+              // Two mustaches, now capture command
+              StringBuilder sb = new StringBuilder();
+              while ((c = br.read()) != -1) {
+                br.mark(1);
+                if (c == em.charAt(0)) {
+                  if (em.length() > 1) {
+                    if (br.read() == em.charAt(1)) {
+                      // Matched end
+                      break;
+                    } else {
+                      // Only one
+                      br.reset();
+                    }
+                  } else break;
+                }
+                sb.append((char) c);
               }
-              case '>': {
-                out = write(mv, out, file, currentLine.intValue());
-                mv.partial(new TemplateContext(sm, em, file, currentLine.get()), variable);
-                break;
-              }
-              case '{': {
-                out = write(mv, out, file, currentLine.intValue());
-                // Not escaped
-                String name = variable;
-                if (em.charAt(1) != '}') {
-                  name = variable.substring(0, variable.length() - 1);
-                } else {
-                  if (br.read() != '}') {
+              final String command = cf.translate(sb.toString());
+              final char ch = command.charAt(0);
+              final String variable = command.substring(1).trim();
+              switch (ch) {
+                case '#':
+                case '^':
+                case '<':
+                case '$': {
+                  int line = currentLine.get();
+                  final Mustache mustache = compile(br, variable, currentLine, file, sm, em);
+                  int lines = currentLine.get() - line;
+                  if (!onlywhitespace || lines == 0) {
+                    write(mv, out, file, currentLine.intValue());
+                  }
+                  out = new StringBuilder();
+                  switch (ch) {
+                    case '#':
+                      mv.iterable(new TemplateContext(sm, em, file, line), variable, mustache);
+                      break;
+                    case '^':
+                      mv.notIterable(new TemplateContext(sm, em, file, line), variable, mustache);
+                      break;
+                    case '<':
+                      mv.extend(new TemplateContext(sm, em, file, line), variable, mustache);
+                      break;
+                    case '$':
+                      mv.name(new TemplateContext(sm, em, file, line), variable, mustache);
+                      break;
+                  }
+                  iterable = lines != 0;
+                  break;
+                }
+                case '/': {
+                  // Tag end
+                  if (!onlywhitespace) {
+                    write(mv, out, file, currentLine.intValue());
+                  }
+                  if (!variable.equals(tag)) {
+                    throw new MustacheException(
+                            "Mismatched start/end tags: " + tag + " != " + variable + " in " + file + ":" + currentLine);
+                  }
+
+                  return mv.mustache(new TemplateContext(sm, em, file, 0));
+                }
+                case '>': {
+                  out = write(mv, out, file, currentLine.intValue());
+                  mv.partial(new TemplateContext(sm, em, file, currentLine.get()), variable);
+                  break;
+                }
+                case '{': {
+                  out = write(mv, out, file, currentLine.intValue());
+                  // Not escaped
+                  String name = variable;
+                  if (em.charAt(1) != '}') {
+                    name = variable.substring(0, variable.length() - 1);
+                  } else {
+                    if (br.read() != '}') {
+                      throw new MustacheException(
+                              "Improperly closed variable in " + file + ":" + currentLine);
+                    }
+                  }
+                  final String finalName = name;
+                  mv.value(new TemplateContext(sm, em, file, currentLine.get()), finalName, false);
+                  break;
+                }
+                case '&': {
+                  // Not escaped
+                  out = write(mv, out, file, currentLine.intValue());
+                  mv.value(new TemplateContext(sm, em, file, currentLine.get()), variable, false);
+                  break;
+                }
+                case '%':
+                  // Pragmas
+                  if (!onlywhitespace) {
+                    out = write(mv, out, file, currentLine.intValue());
+                  }
+                  int index = variable.indexOf(" ");
+                  String pragma;
+                  String args;
+                  if (index == -1) {
+                    pragma = variable;
+                    args = null;
+                  } else {
+                    pragma = variable.substring(0, index);
+                    args = variable.substring(index + 1);
+                  }
+                  mv.pragma(new TemplateContext(sm, em, file, currentLine.get()), pragma, args);
+                  break;
+                case '!':
+                  // Comment
+                  out = write(mv, out, file, currentLine.intValue());
+                  break;
+                case '=':
+                  // Change delimiters
+                  out = write(mv, out, file, currentLine.intValue());
+                  String delimiters = command.replaceAll("\\s+", "");
+                  int length = delimiters.length();
+                  if (length > 6 || length / 2 * 2 != length) {
+                    throw new MustacheException("Invalid delimiter string");
+                  }
+                  sm = delimiters.substring(1, length / 2);
+                  em = delimiters.substring(length / 2, length - 1);
+                  break;
+                default: {
+                  if (c == -1) {
                     throw new MustacheException(
                             "Improperly closed variable in " + file + ":" + currentLine);
                   }
-                }
-                final String finalName = name;
-                mv.value(new TemplateContext(sm, em, file, currentLine.get()), finalName, false);
-                break;
-              }
-              case '&': {
-                // Not escaped
-                out = write(mv, out, file, currentLine.intValue());
-                mv.value(new TemplateContext(sm, em, file, currentLine.get()), variable, false);
-                break;
-              }
-              case '%':
-                // Pragmas
-                if (!onlywhitespace) {
+                  // Reference
                   out = write(mv, out, file, currentLine.intValue());
+                  mv.value(new TemplateContext(sm, em, file, currentLine.get()), command.trim(), true);
+                  break;
                 }
-                int index = variable.indexOf(" ");
-                String pragma;
-                String args;
-                if (index == -1) {
-                  pragma = variable;
-                  args = null;
-                } else {
-                  pragma = variable.substring(0, index);
-                  args = variable.substring(index + 1);
-                }
-                mv.pragma(new TemplateContext(sm, em, file, currentLine.get()), pragma, args);
-                break;
-              case '!':
-                // Comment
-                out = write(mv, out, file, currentLine.intValue());
-                break;
-              case '=':
-                // Change delimiters
-                out = write(mv, out, file, currentLine.intValue());
-                String delimiters = command.replaceAll("\\s+", "");
-                int length = delimiters.length();
-                if (length > 6 || length / 2 * 2 != length) {
-                  throw new MustacheException("Invalid delimiter string");
-                }
-                sm = delimiters.substring(1, length / 2);
-                em = delimiters.substring(length / 2, length - 1);
-                break;
-              default: {
-                if (c == -1) {
-                  throw new MustacheException(
-                          "Improperly closed variable in " + file + ":" + currentLine);
-                }
-                // Reference
-                out = write(mv, out, file, currentLine.intValue());
-                mv.value(new TemplateContext(sm, em, file, currentLine.get()), command.trim(), true);
-                break;
               }
+              continue;
+            } else {
+              // Only one
+              br.reset();
             }
-            continue;
-          } else {
-            // Only one
-            br.reset();
           }
+          onlywhitespace = onlywhitespace && (c == ' ' || c == '\t' || c == '\r');
+          out.append((char) c);
         }
-        onlywhitespace = onlywhitespace && (c == ' ' || c == '\t' || c == '\r');
-        out.append((char) c);
+        write(mv, out, file, currentLine.intValue());
+        br.close();
+      } catch (IOException e) {
+        throw new MustacheException("Failed to read", e);
       }
-      write(mv, out, file, currentLine.intValue());
-      br.close();
-    } catch (IOException e) {
-      throw new MustacheException("Failed to read", e);
+      mv.eof(new TemplateContext(sm, em, file, currentLine.get()));
+      return mv.mustache(new TemplateContext(sm, em, file, 0));
+    } catch (MustacheException me) {
+      try {
+        // We're going to blow the whole stack of compilation and
+        // close the readers on the way up.
+        br.close();
+      } catch (IOException e) {
+        // Ignore IOExceptions on close
+      }
+      throw me;
     }
-    mv.eof(new TemplateContext(sm, em, file, currentLine.get()));
-    return mv.mustache(new TemplateContext(sm, em, file, 0));
+
   }
 
   /**
