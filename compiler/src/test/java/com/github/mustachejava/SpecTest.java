@@ -108,7 +108,7 @@ public class SpecTest {
       });
       put("Section", new Object() {
         Function lambda() {
-          return new Function<String, String>() {
+          return new TemplateFunction() {
             @Override
             public String apply(String input) {
               return input.equals("{{x}}") ? "yes" : "no";

@@ -87,17 +87,22 @@ public class IterableCode extends DefaultCode implements Iteration {
   protected Writer handleFunction(Writer writer, Function function, Object[] scopes) {
     StringWriter sw = new StringWriter();
     runIdentity(sw);
-    Object newtemplate = function.apply(sw.toString());
-    if (newtemplate != null) {
-      if (function instanceof TemplateFunction) {
+    if (function instanceof TemplateFunction) {
+      Object newtemplate = function.apply(sw.toString());
+      if (newtemplate != null) {
         String templateText = newtemplate.toString();
         writer = writeTemplate(writer, templateText, scopes);
-      } else {
-        try {
-          writer.write(newtemplate.toString());
-        } catch (IOException e) {
-          throw new MustacheException("Failed to write function result", e);
+      }
+    } else {
+      try {
+        StringWriter capture = new StringWriter();
+        writeTemplate(capture, sw.toString(), scopes).close();
+        Object apply = function.apply(capture.toString());
+        if (apply != null) {
+          writer.write(apply.toString());
         }
+      } catch (IOException e) {
+        throw new MustacheException("Failed to write function result", e);
       }
     }
     return writer;
