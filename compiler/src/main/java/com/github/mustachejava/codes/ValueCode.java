@@ -79,7 +79,6 @@ public class ValueCode extends DefaultCode {
       final LatchedWriter latchedWriter = new LatchedWriter(writer);
       final Writer finalWriter = writer;
       les.execute(new Runnable() {
-        @Override
         public void run() {
           try {
             Object call = callable.call();

@@ -38,7 +38,6 @@ public class TranslateBundleFunction implements TemplateFunction {
 	}
 	
 	/** Return translation from the localized ResourceBundle. */
-	@Override
 	public String apply(String input) {
 		if(res.containsKey(input)) {
 			return res.getString(input);  // return translation

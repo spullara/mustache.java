@@ -27,7 +27,6 @@ public class GuardedWrapper implements Wrapper {
     this.guards = guards;
   }
 
-  @Override
   public Object call(Object[] scopes) throws GuardException {
     guardCall(scopes);
     return null;

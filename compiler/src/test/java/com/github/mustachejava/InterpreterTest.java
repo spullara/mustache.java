@@ -181,7 +181,6 @@ public class InterpreterTest extends TestCase {
     m.execute(sw, new Object() {
       Iterable list = Arrays.asList(
               new Callable<Object>() {
-                @Override
                 public Object call() throws Exception {
                   cdl1.await();
                   sb.append("How");
@@ -189,7 +188,6 @@ public class InterpreterTest extends TestCase {
                 }
               },
               new Callable<Object>() {
-                @Override
                 public Object call() throws Exception {
                   cdl2.await();
                   sb.append("are");
@@ -198,7 +196,6 @@ public class InterpreterTest extends TestCase {
                 }
               },
               new Callable<Object>() {
-                @Override
                 public Object call() throws Exception {
                   sb.append("you?");
                   cdl2.countDown();
@@ -218,21 +215,18 @@ public class InterpreterTest extends TestCase {
     StringWriter sw = new StringWriter();
     Writer execute = m.execute(sw, new Object() {
       Callable<Object> nest = new Callable<Object>() {
-        @Override
         public Object call() throws Exception {
           Thread.sleep(300);
           return "How";
         }
       };
       Callable<Object> nested = new Callable<Object>() {
-        @Override
         public Object call() throws Exception {
           Thread.sleep(200);
           return "are";
         }
       };
       Callable<Object> nestest = new Callable<Object>() {
-        @Override
         public Object call() throws Exception {
           Thread.sleep(100);
           return "you?";
@@ -348,7 +342,6 @@ public class InterpreterTest extends TestCase {
     m.execute(sw, new Object() {
       public TemplateFunction i() {
         return new TemplateFunction() {
-          @Override
           public String apply(String s) {
             return s;
           }
@@ -365,7 +358,6 @@ public class InterpreterTest extends TestCase {
       StringWriter sw = new StringWriter();
       m.execute(sw, new Object() {
         Function f = new Function<String, String>() {
-          @Override
           public String apply(String s) {
             return s.toUpperCase();
           }
@@ -378,7 +370,6 @@ public class InterpreterTest extends TestCase {
       StringWriter sw = new StringWriter();
       m.execute(sw, new Object() {
         Function f = new TemplateFunction() {
-          @Override
           public String apply(String s) {
             return s.toUpperCase();
           }
@@ -522,7 +513,6 @@ public class InterpreterTest extends TestCase {
 
       Callable<String> desc() throws InterruptedException {
         return new Callable<String>() {
-          @Override
           public String call() throws Exception {
             Thread.sleep(1000);
             return description;

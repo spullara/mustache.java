@@ -29,7 +29,6 @@ public class ClassGuard implements Guard {
     return o instanceof ClassGuard && (classGuard == null ? classGuard == other.classGuard : classGuard.equals(other.classGuard));
   }
 
-  @Override
   public boolean apply(Object[] scopes) {
     if (scopes == null || scopes.length <= scopeIndex) return false;
     Object scope = scopes[scopeIndex];

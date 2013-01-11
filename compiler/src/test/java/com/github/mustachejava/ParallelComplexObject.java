@@ -14,7 +14,6 @@ import java.util.concurrent.Callable;
 public class ParallelComplexObject {
   String header = "Colors";
   Callable<List<Color>> item = new Callable<List<Color>>() {
-    @Override
     public List<Color> call() throws Exception {
       return Arrays.asList(
               new Color("red", true, "#Red"),

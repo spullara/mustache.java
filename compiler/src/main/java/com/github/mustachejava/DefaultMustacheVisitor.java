@@ -20,7 +20,6 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
   protected final List<Code> list = new LinkedList<Code>();
   private final Map<String, PragmaHandler> handlers = new HashMap<String, PragmaHandler>() {{
     put("implicit-iterator", new PragmaHandler() {
-      @Override
       public Code handle(String pragma, String args) {
         return new DefaultCode() {
           @Override
@@ -42,38 +41,31 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
     handlers.put(pragma.toLowerCase(), handler);
   }
 
-  @Override
   public Mustache mustache(TemplateContext templateContext) {
     return new DefaultMustache(templateContext, cf, list.toArray(new Code[list.size()]), templateContext.file());
   }
 
-  @Override
   public void iterable(TemplateContext templateContext, String variable, Mustache mustache) {
     list.add(new IterableCode(templateContext, cf, mustache, variable));
   }
 
-  @Override
   public void notIterable(TemplateContext templateContext, String variable, Mustache mustache) {
     list.add(new NotIterableCode(templateContext, cf, mustache, variable));
   }
 
-  @Override
   public void name(TemplateContext templateContext, String variable, Mustache mustache) {
     list.add(new ExtendNameCode(templateContext, cf, mustache, variable));
   }
 
-  @Override
   public void partial(TemplateContext templateContext, final String variable) {
     TemplateContext partialTC = new TemplateContext("{{", "}}", templateContext.file(), templateContext.line());
     list.add(new PartialCode(partialTC, cf, variable));
   }
 
-  @Override
   public void value(TemplateContext templateContext, final String variable, boolean encoded) {
     list.add(new ValueCode(templateContext, cf, variable, encoded));
   }
 
-  @Override
   public void write(TemplateContext templateContext, final String text) {
     if (text.length() > 0) {
       int size = list.size();
@@ -86,7 +78,6 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
     }
   }
 
-  @Override
   public void pragma(TemplateContext templateContext, String pragma, String args) {
     PragmaHandler pragmaHandler = handlers.get(pragma.toLowerCase());
     if (pragmaHandler == null) {
@@ -100,12 +91,10 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
     }
   }
 
-  @Override
   public void eof(TemplateContext templateContext) {
     list.add(EOF);
   }
 
-  @Override
   public void extend(TemplateContext templateContext, String variable, Mustache mustache) {
     list.add(new ExtendCode(templateContext, cf, mustache, variable));
   }

@@ -24,7 +24,6 @@ import com.google.common.base.Function;
 public class CommentFunction implements Function<String, String> {
 	
 	/** Ignore contents of comment block. */
-	@Override
 	public String apply(String input) {
 		return "";
 	}

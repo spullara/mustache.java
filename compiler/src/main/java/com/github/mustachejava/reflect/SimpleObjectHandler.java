@@ -22,17 +22,14 @@ public class SimpleObjectHandler extends BaseObjectHandler {
       // We find the wrapper just once since only the name is needed
       private Wrapper wrapper = find(name, null);
 
-      @Override
       public Object get(Object[] scopes) {
         return wrapper.call(scopes);
       }
     };
   }
 
-  @Override
   public Wrapper find(final String name, final Object[] scopes) {
     return new Wrapper() {
-      @Override
       public Object call(Object[] scopes) throws GuardException {
         for (int i = scopes.length - 1; i >= 0; i--) {
           Object scope = scopes[i];

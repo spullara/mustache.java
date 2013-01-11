@@ -19,7 +19,6 @@ public class CompilableDotGuard extends DotGuard implements CompilableGuard {
     super(lookup, scopeIndex, classGuard);
   }
 
-  @Override
   public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, GeneratorAdapter sm, ClassWriter cw, AtomicInteger atomicId, List<Object> cargs, Type thisType) {
     // do nothing and it is assumed true
   }

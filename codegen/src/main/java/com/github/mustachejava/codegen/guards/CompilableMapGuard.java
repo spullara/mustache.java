@@ -24,7 +24,6 @@ public class CompilableMapGuard extends MapGuard implements CompilableGuard {
     super(oh, scopeIndex, name, contains, wrappers);
   }
 
-  @Override
   public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, GeneratorAdapter sm,
                        ClassWriter cw, AtomicInteger atomicId, List<Object> cargs, Type thisType) {
     int id = atomicId.incrementAndGet();

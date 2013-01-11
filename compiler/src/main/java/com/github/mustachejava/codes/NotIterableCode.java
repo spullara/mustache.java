@@ -21,7 +21,6 @@ public class NotIterableCode extends DefaultCode implements Iteration {
     return appendText(oh.falsey(this, writer, get(scopes), scopes));
   }
 
-  @Override
   public Writer next(Writer writer, Object object, Object[] scopes) {
     return run(writer, scopes);
   }

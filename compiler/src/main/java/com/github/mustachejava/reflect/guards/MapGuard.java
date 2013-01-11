@@ -26,7 +26,6 @@ public class MapGuard implements Guard {
     this.wrappers = wrappers;
   }
 
-  @Override
   public boolean apply(Object[] objects) {
     Object scope = unwrap(oh, scopeIndex, wrappers, objects);
     if (scope instanceof Map) {

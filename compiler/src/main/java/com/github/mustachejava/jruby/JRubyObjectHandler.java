@@ -36,7 +36,6 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
     if (object instanceof RubyProc) {
       final RubyProc proc = (RubyProc) object;
       return new TemplateFunction() {
-        @Override
         public String apply(String s) {
           TemplateFunction fun = sc.getInstance(proc, TemplateFunction.class);
           return fun.apply(s);
@@ -53,7 +52,6 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
       final RubySymbol rs = RubySymbol.newSymbol(hash.getRuntime(), name);
       if (hash.containsKey(rs)) {
         guards.add(new Guard() {
-          @Override
           public boolean apply(Object[] input) {
             return ((RubyHash) input[scopeIndex]).containsKey(rs);
           }
@@ -61,7 +59,6 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
         return createWrapper(scopeIndex, wrappers, guards, MAP_METHOD, new Object[]{rs});
       } else {
         guards.add(new Guard() {
-          @Override
           public boolean apply(Object[] input) {
             return !((RubyHash) input[scopeIndex]).containsKey(rs);
           }
@@ -72,7 +69,6 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
       RubyObject ro = (RubyObject) scope;
       if (ro.respondsTo(name)) {
         guards.add(new Guard() {
-          @Override
           public boolean apply(Object[] objects) {
             RubyObject scope = (RubyObject) objects[scopeIndex];
             return scope.respondsTo(name);
@@ -81,7 +77,6 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
         return createWrapper(scopeIndex, wrappers, guards, CALL_METHOD, new Object[]{name});
       } else {
         guards.add(new Guard() {
-          @Override
           public boolean apply(Object[] objects) {
             RubyObject scope = (RubyObject) objects[scopeIndex];
             return !scope.respondsTo(name);

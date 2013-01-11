@@ -87,12 +87,10 @@ public class DefaultMustacheFactory implements MustacheFactory {
     this.resourceRoot = null;
   }
 
-  @Override
   public MustacheVisitor createMustacheVisitor() {
     return new DefaultMustacheVisitor(this);
   }
 
-  @Override
   public Reader getReader(String resourceName) {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
     InputStream is = ccl.getResourceAsStream(
@@ -114,12 +112,10 @@ public class DefaultMustacheFactory implements MustacheFactory {
     }
   }
 
-  @Override
   public void encode(String value, Writer writer) {
     escape(value, writer, true);
   }
 
-  @Override
   public ObjectHandler getObjectHandler() {
     return oh;
   }
@@ -174,7 +170,6 @@ public class DefaultMustacheFactory implements MustacheFactory {
     return new MustacheException(cause);
   }
 
-  @Override
   public Mustache compile(String name) {
     try {
       Mustache mustache = mustacheCache.get(name);
@@ -185,7 +180,6 @@ public class DefaultMustacheFactory implements MustacheFactory {
     }
   }
 
-  @Override
   public Mustache compile(Reader reader, String name) {
     return compile(reader, name, "{{", "}}");
   }
@@ -197,7 +191,6 @@ public class DefaultMustacheFactory implements MustacheFactory {
     return compile;
   }
 
-  @Override
   public String translate(String from) {
     return from;
   }

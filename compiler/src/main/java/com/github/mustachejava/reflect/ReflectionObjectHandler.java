@@ -46,7 +46,6 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
   }
   
   @SuppressWarnings("unchecked")
-  @Override
   public Wrapper find(String name, final Object[] scopes) {
     Wrapper wrapper = null;
     final int length = scopes.length;

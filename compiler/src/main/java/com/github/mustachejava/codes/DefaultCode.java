@@ -72,7 +72,6 @@ public class DefaultCode implements Code, Cloneable {
     return mustache == null ? null : mustache.getCodes();
   }
 
-  @Override
   public synchronized void init() {
     Code[] codes = getCodes();
     if (codes != null) {
@@ -94,7 +93,6 @@ public class DefaultCode implements Code, Cloneable {
     return binding.get(scopes);
   }
 
-  @Override
   public Writer execute(Writer writer, Object scope) {
     return execute(writer, new Object[]{scope});
   }
@@ -105,12 +103,10 @@ public class DefaultCode implements Code, Cloneable {
    * @param writer The writer to write the output to
    * @param scopes The scopes to evaluate the embedded names against.
    */
-  @Override
   public Writer execute(Writer writer, Object[] scopes) {
     return appendText(run(writer, scopes));
   }
 
-  @Override
   public void identity(Writer writer) {
     try {
       if (name != null) {
@@ -155,7 +151,6 @@ public class DefaultCode implements Code, Cloneable {
     return mustache == null ? writer : mustache.run(writer, scopes);
   }
 
-  @Override
   public void append(String text) {
     if (appended == null) {
       appended = text;

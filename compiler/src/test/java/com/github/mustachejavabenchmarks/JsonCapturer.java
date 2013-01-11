@@ -24,7 +24,6 @@ public class JsonCapturer implements CapturingMustacheVisitor.Captured {
     seenit.add(new HashSet<String>());
   }
 
-  @Override
   public void value(String name, String value) {
     if (ignore > 0) return;
     try {
@@ -36,7 +35,6 @@ public class JsonCapturer implements CapturingMustacheVisitor.Captured {
     }
   }
 
-  @Override
   public void arrayStart(String name) {
     if (ignore > 0) return;
     try {
@@ -50,7 +48,6 @@ public class JsonCapturer implements CapturingMustacheVisitor.Captured {
     }
   }
 
-  @Override
   public void arrayEnd() {
     if (ignore > 0) {
       ignore--;
@@ -63,7 +60,6 @@ public class JsonCapturer implements CapturingMustacheVisitor.Captured {
     }
   }
 
-  @Override
   public void objectStart() {
     if (ignore > 0) return;
     try {
@@ -74,7 +70,6 @@ public class JsonCapturer implements CapturingMustacheVisitor.Captured {
     }
   }
 
-  @Override
   public void objectEnd() {
     try {
       jg.writeEndObject();

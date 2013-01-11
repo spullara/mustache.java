@@ -51,7 +51,6 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
       deferrals.add(deferral);
     }
 
-    @Override
     public String call() throws Exception {
       StringBuilder sb = new StringBuilder();
       for (Deferral deferral : deferrals) {
@@ -89,7 +88,6 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
               }
               deferredCallable.add(
                       new Deferral(divid, getExecutorService().submit(new Callable<Object>() {
-                        @Override
                         public Object call() {
                           try {
                             StringWriter writer = new StringWriter();

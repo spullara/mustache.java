@@ -19,7 +19,6 @@ public class CompilableDepthGuard extends DepthGuard implements CompilableGuard 
     super(length);
   }
 
-  @Override
   public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, GeneratorAdapter sm, ClassWriter cw, AtomicInteger atomicId, List<Object> cargs, Type thisType) {
     // If objects is null return false
     gm.loadArg(0);

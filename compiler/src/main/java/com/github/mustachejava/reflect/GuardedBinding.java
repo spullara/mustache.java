@@ -53,7 +53,6 @@ public class GuardedBinding implements Binding {
    * @param scopes An array of scopes to interrogate from right to left.
    * @return The value of the field or method
    */
-  @Override
   public Object get(Object[] scopes) {
     // Loop over the wrappers and find the one that matches
     // this set of scopes or get a new one

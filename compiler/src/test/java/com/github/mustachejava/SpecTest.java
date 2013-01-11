@@ -58,7 +58,6 @@ public class SpecTest {
       put("Interpolation", new Object() {
         Function lambda() {
           return new Function<String, String>() {
-            @Override
             public String apply(String input) {
               return "world";
             }
@@ -68,7 +67,6 @@ public class SpecTest {
       put("Interpolation - Expansion", new Object() {
         Function lambda() {
           return new TemplateFunction() {
-            @Override
             public String apply(String input) {
               return "{{planet}}";
             }
@@ -78,7 +76,6 @@ public class SpecTest {
       put("Interpolation - Alternate Delimiters", new Object() {
         Function lambda() {
           return new TemplateFunction() {
-            @Override
             public String apply(String input) {
               return "|planet| => {{planet}}";
             }
@@ -89,7 +86,6 @@ public class SpecTest {
         int calls = 0;
         Function lambda() {
           return new Function<String, String>() {
-            @Override
             public String apply(String input) {
               return String.valueOf(++calls);
             }
@@ -99,7 +95,6 @@ public class SpecTest {
       put("Escaping", new Object() {
         Function lambda() {
           return new Function<String, String>() {
-            @Override
             public String apply(String input) {
               return ">";
             }
@@ -109,7 +104,6 @@ public class SpecTest {
       put("Section", new Object() {
         Function lambda() {
           return new TemplateFunction() {
-            @Override
             public String apply(String input) {
               return input.equals("{{x}}") ? "yes" : "no";
             }
@@ -119,7 +113,6 @@ public class SpecTest {
       put("Section - Expansion", new Object() {
         Function lambda() {
           return new TemplateFunction() {
-            @Override
             public String apply(String input) {
               return input + "{{planet}}" + input;
             }
@@ -129,7 +122,6 @@ public class SpecTest {
       put("Section - Alternate Delimiters", new Object() {
         Function lambda() {
           return new TemplateFunction() {
-            @Override
             public String apply(String input) {
               return input + "{{planet}} => |planet|" + input;
             }
@@ -139,7 +131,6 @@ public class SpecTest {
       put("Section - Multiple Calls", new Object() {
         Function lambda() {
           return new Function<String, String>() {
-            @Override
             public String apply(String input) {
               return "__" + input + "__";
             }
@@ -149,7 +140,6 @@ public class SpecTest {
       put("Inverted Section", new Object() {
         Function lambda() {
           return new Function<String, Object>() {
-            @Override
             public Object apply(String input) {
               return false;
             }
@@ -238,22 +228,18 @@ public class SpecTest {
         return value.asText();
       } else if (value.isArray()) {
         return new Iterable() {
-          @Override
           public Iterator iterator() {
             return new Iterator() {
               private Iterator<JsonNode> iterator = value.iterator();
 
-              @Override
               public boolean hasNext() {
                 return iterator.hasNext();
               }
 
-              @Override
               public Object next() {
                 return convert(iterator.next());
               }
 
-              @Override
               public void remove() {
               }
             };

@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class CompilableNullGuard extends NullGuard implements CompilableGuard {
 
-  @Override
   public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, GeneratorAdapter sm, ClassWriter cw, AtomicInteger atomicId, List<Object> cargs, Type thisType) {
     gm.loadArg(0);
     gm.push(0);

@@ -28,7 +28,6 @@ public class WrappedGuard implements Guard {
     this.wrapperGuard = wrapperGuard;
   }
 
-  @Override
   public boolean apply(Object[] objects) {
     Object scope = unwrap(oh, index, wrappers, objects);
     for (Guard predicate : wrapperGuard) {

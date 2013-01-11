@@ -47,7 +47,6 @@ public class ConcurrencyTest {
 
     Callable<Integer> calla() throws InterruptedException {
       return new Callable<Integer>() {
-        @Override
         public Integer call() throws Exception {
           Thread.sleep(r.nextInt(10));
           return a;
@@ -57,7 +56,6 @@ public class ConcurrencyTest {
 
     Callable<Integer> callb() throws InterruptedException {
       return new Callable<Integer>() {
-        @Override
         public Integer call() throws Exception {
           Thread.sleep(r.nextInt(10));
           return b;
@@ -67,7 +65,6 @@ public class ConcurrencyTest {
 
     Callable<Integer> callc() throws InterruptedException {
       return new Callable<Integer>() {
-        @Override
         public Integer call() throws Exception {
           Thread.sleep(r.nextInt(10));
           return c;
@@ -98,7 +95,6 @@ public class ConcurrencyTest {
     for (int i = 0; i < 100000; i++) {
       semaphore.acquire();
       es.submit(new Runnable() {
-        @Override
         public void run() {
           try {
           TestObject testObject = new TestObject(r.nextInt(), r.nextInt(), r.nextInt());
@@ -135,7 +131,6 @@ public class ConcurrencyTest {
     for (int i = 0; i < 100000; i++) {
       semaphore.acquire();
       es.submit(new Runnable() {
-        @Override
         public void run() {
           try {
             TestObject testObject = new TestObject(r.nextInt(), r.nextInt(), r.nextInt());

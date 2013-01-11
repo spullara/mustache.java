@@ -31,7 +31,6 @@ public class DotGuard implements Guard {
     return false;
   }
 
-  @Override
   public boolean apply(Object[] objects) {
     return true;
   }

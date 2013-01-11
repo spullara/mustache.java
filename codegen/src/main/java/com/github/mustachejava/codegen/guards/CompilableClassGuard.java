@@ -22,7 +22,6 @@ public class CompilableClassGuard extends ClassGuard implements CompilableGuard 
     super(scopeIndex, scope);
   }
 
-  @Override
   public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, GeneratorAdapter sm, ClassWriter cw, AtomicInteger atomicId, List<Object> cargs, Type thisType) {
     int id = atomicId.incrementAndGet();
 

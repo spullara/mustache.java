@@ -53,7 +53,6 @@ public class BundleFunctions {
       super(bundle, locale, returnLabels);
     }
 
-    @Override
     public String apply(String input) {
       return super.lookup(input);
     }
@@ -64,7 +63,6 @@ public class BundleFunctions {
       super(bundle, locale, returnLabels);
     }
 
-    @Override
     public Object apply(Object input) {
       return super.lookup((String) input);
     }

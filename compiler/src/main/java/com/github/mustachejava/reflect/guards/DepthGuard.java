@@ -26,7 +26,6 @@ public class DepthGuard implements Guard {
     return false;
   }
 
-  @Override
   public boolean apply(Object[] objects) {
     return objects != null && length == objects.length;
   }

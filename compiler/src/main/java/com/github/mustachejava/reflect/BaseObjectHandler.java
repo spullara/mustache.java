@@ -11,12 +11,10 @@ import java.util.Iterator;
 import java.util.List;
 
 public abstract class BaseObjectHandler implements ObjectHandler {
-  @Override
   public Object coerce(Object object) {
     return object;
   }
 
-  @Override
   public Writer falsey(Iteration iteration, Writer writer, Object object, Object[] scopes) {
     if (object != null) {
       if (object instanceof Boolean) {
@@ -49,7 +47,6 @@ public abstract class BaseObjectHandler implements ObjectHandler {
     return iteration.next(writer, object, scopes);
   }
 
-  @Override
   public abstract Binding createBinding(String name, TemplateContext tc, Code code);
 
   public Writer iterate(Iteration iteration, Writer writer, Object object, Object[] scopes) {
@@ -154,7 +151,6 @@ public abstract class BaseObjectHandler implements ObjectHandler {
     }
   }
 
-  @Override
   public String stringify(Object object) {
     return object.toString();
   }

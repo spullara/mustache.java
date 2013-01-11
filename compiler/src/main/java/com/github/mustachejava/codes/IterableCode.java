@@ -63,7 +63,6 @@ public class IterableCode extends DefaultCode implements Iteration {
       // are thread locally reused
       final Object[] newScopes = scopes.clone();
       les.execute(new Runnable() {
-        @Override
         public void run() {
           try {
             Object call = callable.call();
