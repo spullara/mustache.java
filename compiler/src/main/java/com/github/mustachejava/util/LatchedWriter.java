@@ -55,7 +55,9 @@ public class LatchedWriter extends Writer {
       if (e instanceof IOException) {
         throw ((IOException) e);
       }
-      throw new IOException(e);
+      IOException ioe = new IOException(e.getMessage());
+      ioe.initCause(e);
+      throw ioe;
     }
   }
 

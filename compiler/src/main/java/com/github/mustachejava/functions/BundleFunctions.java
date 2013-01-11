@@ -1,6 +1,7 @@
 package com.github.mustachejava.functions;
 
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import com.github.mustachejava.TemplateFunction;
@@ -40,9 +41,9 @@ public class BundleFunctions {
     }
 
     final protected String lookup(String key) {
-      if (res.containsKey(key)) {
+      try {
         return res.getString(key);  // return translation
-      } else {
+      } catch (MissingResourceException e) {
         return returnLabels ? key : null;
       }
     }

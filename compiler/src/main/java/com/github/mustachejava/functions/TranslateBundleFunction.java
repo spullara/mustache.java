@@ -3,6 +3,7 @@ package com.github.mustachejava.functions;
 import com.github.mustachejava.TemplateFunction;
 
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /**
@@ -39,10 +40,10 @@ public class TranslateBundleFunction implements TemplateFunction {
 	
 	/** Return translation from the localized ResourceBundle. */
 	public String apply(String input) {
-		if(res.containsKey(input)) {
+		try {
 			return res.getString(input);  // return translation
 			
-		} else {
+		} catch (MissingResourceException e) {
 			return input;  // return untranslated label
 		}
 	}
