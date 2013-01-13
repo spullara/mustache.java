@@ -11,6 +11,7 @@
     <module>handlebar</module>
     <module>codegen</module>
     <module>indy</module>
+    <module>javascript</module>
   </modules>
   <packaging>pom</packaging>
 
