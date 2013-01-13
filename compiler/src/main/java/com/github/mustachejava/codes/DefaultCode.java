@@ -88,7 +88,8 @@ public class DefaultCode implements Code, Cloneable {
 
   public Object get(Object[] scopes) {
     if (returnThis) {
-      return scopes[scopes.length - 1];
+      int length = scopes == null ? 0 : scopes.length;
+      return length == 0 ? null : scopes[length - 1];
     }
     return binding.get(scopes);
   }

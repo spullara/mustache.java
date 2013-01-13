@@ -581,6 +581,16 @@ public class InterpreterTest extends TestCase {
     assertEquals("Value: something", sw.toString());
   }
 
+  public void testImplicitIteratorNoScope() throws IOException {
+    Mustache test = new DefaultMustacheFactory().compile(new StringReader("{{.}}"), "test");
+    StringWriter sw = new StringWriter();
+    test.execute(sw, null).close();
+    assertEquals("", sw.toString());
+    StringWriter sw2 = new StringWriter();
+    test.execute(sw2, new Object[0]).close();
+    assertEquals("", sw2.toString());
+  }
+
   public void testOutputDelimiters() {
     String template = "{{=## ##=}}{{##={{ }}=####";
     Mustache mustache = new DefaultMustacheFactory().compile(new StringReader(template), "test");

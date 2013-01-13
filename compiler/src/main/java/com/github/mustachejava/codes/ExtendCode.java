@@ -1,8 +1,12 @@
 package com.github.mustachejava.codes;
 
-import com.github.mustachejava.*;
+import com.github.mustachejava.Code;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.MustacheFactory;
+import com.github.mustachejava.TemplateContext;
 
-import java.io.Writer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -52,11 +56,6 @@ public class ExtendCode extends PartialCode {
   }
 
   @Override
-  public Writer execute(Writer writer, Object[] scopes) throws MustacheException {
-    return appendText(partial.execute(writer, scopes));
-  }
-
-  @Override
   public synchronized void init() {
     Map<String, ExtendNameCode> replaceMap = new HashMap<String, ExtendNameCode>();
     for (Code code : mustache.getCodes()) {
@@ -77,7 +76,7 @@ public class ExtendCode extends PartialCode {
     partial = (Mustache) original.clone();
     Code[] supercodes = partial.getCodes();
     // recursively replace named sections with replacements
-    HashSet<Code> seen = new HashSet<Code>();
+    Set<Code> seen = new HashSet<Code>();
     seen.add(partial);
     partial.setCodes(replaceCodes(supercodes, replaceMap, seen));
   }
