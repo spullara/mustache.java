@@ -4,10 +4,13 @@ import com.github.mustachejava.TemplateFunction;
 import com.github.mustachejava.reflect.Guard;
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.util.Wrapper;
-import org.jruby.*;
+import org.jruby.RubyBoolean;
+import org.jruby.RubyHash;
+import org.jruby.RubyObject;
+import org.jruby.RubyProc;
+import org.jruby.RubySymbol;
 import org.jruby.embed.ScriptingContainer;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -34,7 +37,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
       final RubyProc proc = (RubyProc) object;
       return new TemplateFunction() {
         @Override
-        public String apply(@Nullable String s) {
+        public String apply(String s) {
           TemplateFunction fun = sc.getInstance(proc, TemplateFunction.class);
           return fun.apply(s);
         }
@@ -51,7 +54,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
       if (hash.containsKey(rs)) {
         guards.add(new Guard() {
           @Override
-          public boolean apply(@Nullable Object[] input) {
+          public boolean apply(Object[] input) {
             return ((RubyHash) input[scopeIndex]).containsKey(rs);
           }
         });
@@ -59,7 +62,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
       } else {
         guards.add(new Guard() {
           @Override
-          public boolean apply(@Nullable Object[] input) {
+          public boolean apply(Object[] input) {
             return !((RubyHash) input[scopeIndex]).containsKey(rs);
           }
         });
@@ -70,7 +73,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
       if (ro.respondsTo(name)) {
         guards.add(new Guard() {
           @Override
-          public boolean apply(@Nullable Object[] objects) {
+          public boolean apply(Object[] objects) {
             RubyObject scope = (RubyObject) objects[scopeIndex];
             return scope.respondsTo(name);
           }
@@ -79,7 +82,7 @@ public class JRubyObjectHandler extends ReflectionObjectHandler {
       } else {
         guards.add(new Guard() {
           @Override
-          public boolean apply(@Nullable Object[] objects) {
+          public boolean apply(Object[] objects) {
             RubyObject scope = (RubyObject) objects[scopeIndex];
             return !scope.respondsTo(name);
           }

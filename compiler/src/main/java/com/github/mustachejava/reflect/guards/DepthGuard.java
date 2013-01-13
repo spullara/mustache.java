@@ -2,8 +2,6 @@ package com.github.mustachejava.reflect.guards;
 
 import com.github.mustachejava.reflect.Guard;
 
-import javax.annotation.Nullable;
-
 /**
  * Check that there are the same number of scope levels.
  */
@@ -29,7 +27,7 @@ public class DepthGuard implements Guard {
   }
 
   @Override
-  public boolean apply(@Nullable Object[] objects) {
+  public boolean apply(Object[] objects) {
     return objects != null && length == objects.length;
   }
 

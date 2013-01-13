@@ -4,7 +4,6 @@ import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.reflect.Guard;
 import com.github.mustachejava.util.Wrapper;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.github.mustachejava.reflect.ReflectionObjectHandler.unwrap;
@@ -30,7 +29,7 @@ public class WrappedGuard implements Guard {
   }
 
   @Override
-  public boolean apply(@Nullable Object[] objects) {
+  public boolean apply(Object[] objects) {
     Object scope = unwrap(oh, index, wrappers, objects);
     for (Guard predicate : wrapperGuard) {
       if (!predicate.apply(new Object[]{scope})) {
