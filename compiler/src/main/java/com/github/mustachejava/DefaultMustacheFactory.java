@@ -8,7 +8,15 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.Writer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
@@ -22,16 +30,16 @@ public class DefaultMustacheFactory implements MustacheFactory {
   /**
    * Create the default cache for mustache compilations. This is basically
    * required by the specification to handle recursive templates.
-  */
+   */
   protected final LoadingCache<String, Mustache> mustacheCache = createMustacheCache();
 
   /**
-   *  This is the default object handler.
+   * This is the default object handler.
    */
   protected ObjectHandler oh = new ReflectionObjectHandler();
 
   /**
-   *  This parser should work with any MustacheFactory
+   * This parser should work with any MustacheFactory
    */
   protected final MustacheParser mc = new MustacheParser(this);
 
@@ -39,7 +47,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
    * New templates that are generated at runtime are cached here. The template key
    * includes the text of the template and the context so we get proper error
    * messages and debugging information.
-  */
+   */
   protected final LoadingCache<FragmentKey, Mustache> templateCache = createLambdaCache();
 
   private final String resourceRoot;
@@ -54,6 +62,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   /**
    * Use the classpath to resolve mustache templates.
+   *
    * @param resourceRoot
    */
   public DefaultMustacheFactory(String resourceRoot) {
@@ -64,6 +73,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   /**
    * Use the file system to resolve mustache templates.
+   *
    * @param fileRoot
    */
   public DefaultMustacheFactory(File fileRoot) {
@@ -148,7 +158,12 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   public Mustache getFragment(FragmentKey templateKey) {
     try {
-      return templateCache.get(templateKey);
+      // There is a race condition between threads attempting to compile templates
+      synchronized (templateCache) {
+        Mustache mustache = templateCache.get(templateKey);
+        mustache.init();
+        return mustache;
+      }
     } catch (ExecutionException e) {
       throw handle(e);
     }
@@ -165,9 +180,12 @@ public class DefaultMustacheFactory implements MustacheFactory {
   @Override
   public Mustache compile(String name) {
     try {
-      Mustache mustache = mustacheCache.get(name);
-      mustache.init();
-      return mustache;
+      // There is a race condition between threads attempting to compile templates
+      synchronized (mustacheCache) {
+        Mustache mustache = mustacheCache.get(name);
+        mustache.init();
+        return mustache;
+      }
     } catch (ExecutionException e) {
       throw handle(e);
     }
@@ -202,7 +220,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
     public Mustache load(FragmentKey fragmentKey) throws Exception {
       StringReader reader = new StringReader(fragmentKey.templateText);
       TemplateContext tc = fragmentKey.tc;
-      return compile(reader, tc.file(), tc.startChars(), tc.endChars());
+      return mc.compile(reader, tc.file(), tc.startChars(), tc.endChars());
     }
   }
 
