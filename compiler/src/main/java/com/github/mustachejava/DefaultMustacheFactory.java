@@ -158,12 +158,9 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   public Mustache getFragment(FragmentKey templateKey) {
     try {
-      // There is a race condition between threads attempting to compile templates
-      synchronized (templateCache) {
-        Mustache mustache = templateCache.get(templateKey);
-        mustache.init();
-        return mustache;
-      }
+      Mustache mustache = templateCache.get(templateKey);
+      mustache.init();
+      return mustache;
     } catch (ExecutionException e) {
       throw handle(e);
     }
@@ -180,12 +177,9 @@ public class DefaultMustacheFactory implements MustacheFactory {
   @Override
   public Mustache compile(String name) {
     try {
-      // There is a race condition between threads attempting to compile templates
-      synchronized (mustacheCache) {
-        Mustache mustache = mustacheCache.get(name);
-        mustache.init();
-        return mustache;
-      }
+      Mustache mustache = mustacheCache.get(name);
+      mustache.init();
+      return mustache;
     } catch (ExecutionException e) {
       throw handle(e);
     }
