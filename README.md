@@ -37,13 +37,25 @@ Performance:
 - Renders 3000+ of 50 tweet timelines per second per core on 2011 Macbook Pro / MacPro hardware
 - New codegen module generates code for guards and mustaches
 
+Build suggestions:
+
+- Don't build, use Maven dependencies
+- If you must build but not test:
+  - git clone https://github.com/spullara/mustache.java.git
+  - set your JAVA_HOME to a JDK 7 JDK
+  - mvn -Dmaven.test.skip=true clean install
+- If you must build and test but not benchmark:
+  - CI=1 mvn clean install
+- If you must build, test and benchmark:
+  - mvn clean install
+
 Maven dependency information (ie. for most common cases you will just need the `compiler` module):
 
 ```xml
 <dependency>
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>compiler</artifactId>
-  <version>0.8.8</version>
+  <version>0.8.9</version>
 </dependency>
 ```
 
