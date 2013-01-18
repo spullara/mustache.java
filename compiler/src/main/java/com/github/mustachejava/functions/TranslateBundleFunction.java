@@ -33,7 +33,7 @@ public class TranslateBundleFunction implements TemplateFunction {
 	 * @param bundle resource bundle name
 	 * @param locale translation locale
 	 */
-	TranslateBundleFunction(String bundle, Locale locale) {
+	public TranslateBundleFunction(String bundle, Locale locale) {
 		this.res = ResourceBundle.getBundle(bundle, locale);
 	}
 	
