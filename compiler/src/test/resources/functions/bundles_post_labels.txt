@@ -1,0 +1,2 @@
+Translation bundles work!
+Post translate text works, too
