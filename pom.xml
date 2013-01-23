@@ -2,15 +2,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.github.spullara.mustache.java</groupId>
-  <artifactId>mustache.java</artifactId>
+  <artifactId>mustache.java-jdk5</artifactId>
   <version>0.8.10-SNAPSHOT</version>
   <description>Implementation of the Mustache language in Java.</description>
 
   <modules>
     <module>compiler</module>
-    <module>handlebar</module>
-    <module>codegen</module>
-    <module>indy</module>
   </modules>
   <packaging>pom</packaging>
 
@@ -75,8 +72,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
 		<version>2.5.1</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.5</source>
+          <target>1.5</target>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
