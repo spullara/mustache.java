@@ -322,3 +322,6 @@ application/iges			igs
 # Autocad WHIP vector drawings
 drawing/x-dwf				dwf
 
+# Common mustache extension
+text/html				mustache
+
