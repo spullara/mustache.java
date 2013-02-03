@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -87,26 +86,28 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testTypedSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    final Stack<Class<?>> current = new Stack<Class<?>>();
     final Object scope = new Object() {
       String name = "Chris";
       int value = 10000;
 
-      Object in_ca = new Object() {
+      class MyObject {
         int taxed_value() {
           return (int) (value - (value * 0.4));
         }
+
         String fred = "";
-      };
+      }
+
+      MyObject in_ca = new MyObject();
 
       boolean test = false;
     };
-    current.push(scope.getClass());
-    MustacheFactory c = new DefaultMustacheFactory(root);
+    DefaultMustacheFactory c = new DefaultMustacheFactory(root);
+    c.setObjectHandler(new TypeCheckingHandler());
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
-    m.execute(sw, scope);
-    assertEquals(getContents(root, "simple.txt"), sw.toString());
+    m.execute(sw, scope.getClass()).flush();
+    assertEquals(getContents(root, "simpletyped.txt"), sw.toString());
   }
 
   protected DefaultMustacheFactory createMustacheFactory() {
@@ -680,5 +681,4 @@ public class InterpreterTest extends TestCase {
     File file = new File("src/test/resources");
     root = new File(file, "simple.html").exists() ? file : new File("../src/test/resources");
   }
-
 }
