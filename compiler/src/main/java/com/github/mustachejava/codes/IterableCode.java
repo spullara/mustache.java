@@ -12,13 +12,11 @@ import java.util.concurrent.ExecutorService;
 
 public class IterableCode extends DefaultCode implements Iteration {
 
-  private final DefaultMustacheFactory cf;
   private final ExecutorService les;
 
-  public IterableCode(TemplateContext tc, DefaultMustacheFactory cf, Mustache mustache, String variable) {
-    super(tc, cf.getObjectHandler(), mustache, variable, "#");
-    this.cf = cf;
-    les = cf.getExecutorService();
+  public IterableCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String variable) {
+    super(tc, df, mustache, variable, "#");
+    les = df.getExecutorService();
   }
 
   @Override
@@ -109,7 +107,7 @@ public class IterableCode extends DefaultCode implements Iteration {
   }
 
   protected Writer writeTemplate(Writer writer, String templateText, Object[] scopes) {
-    return cf.getFragment(new FragmentKey(tc, templateText)).execute(writer, scopes);
+    return df.getFragment(new FragmentKey(tc, templateText)).execute(writer, scopes);
   }
 
   protected Writer execute(Writer writer, Object resolve, Object[] scopes) {

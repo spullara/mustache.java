@@ -8,8 +8,8 @@ import com.github.mustachejava.TemplateContext;
  * Name a section: {{$name}}...{{/name}}
  */
 public class ExtendNameCode extends DefaultCode {
-  public ExtendNameCode(TemplateContext templateContext, DefaultMustacheFactory cf, Mustache mustache, String variable) {
-    super(templateContext, cf.getObjectHandler(), mustache, variable, "$");
+  public ExtendNameCode(TemplateContext templateContext, DefaultMustacheFactory df, Mustache mustache, String variable) {
+    super(templateContext, df, mustache, variable, "$");
   }
 
   public String getName() {

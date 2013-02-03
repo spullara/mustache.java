@@ -21,6 +21,7 @@ public class DefaultCode implements Code, Cloneable {
   protected final String type;
   protected final boolean returnThis;
   protected final Binding binding;
+  protected final DefaultMustacheFactory df;
 
   public Object clone() {
     Set<Code> seen = new HashSet<Code>();
@@ -58,8 +59,9 @@ public class DefaultCode implements Code, Cloneable {
     this(null, null, null, null, null);
   }
 
-  public DefaultCode(TemplateContext tc, ObjectHandler oh, Mustache mustache, String name, String type) {
-    this.oh = oh;
+  public DefaultCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String name, String type) {
+    this.df = df;
+    this.oh = df == null ? null : df.getObjectHandler();
     this.mustache = mustache;
     this.type = type;
     this.name = name;

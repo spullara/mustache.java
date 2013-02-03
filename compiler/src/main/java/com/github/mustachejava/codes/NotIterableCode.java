@@ -12,8 +12,8 @@ import java.io.Writer;
  */
 public class NotIterableCode extends DefaultCode implements Iteration {
 
-  public NotIterableCode(TemplateContext templateContext, DefaultMustacheFactory cf, Mustache mustache, String variable) {
-    super(templateContext, cf.getObjectHandler(), mustache, variable, "^");
+  public NotIterableCode(TemplateContext templateContext, DefaultMustacheFactory df, Mustache mustache, String variable) {
+    super(templateContext, df, mustache, variable, "^");
   }
 
   @Override
