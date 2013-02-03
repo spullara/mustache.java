@@ -202,6 +202,16 @@ public class DefaultMustacheFactory implements MustacheFactory {
     return from;
   }
 
+  /**
+   * Override this method to apply any filtering to text that will appear
+   * verbatim in the output template.
+   * @param appended
+   * @return
+   */
+  public String filterText(String appended) {
+    return appended;
+  }
+
   protected class MustacheCacheLoader extends CacheLoader<String, Mustache> {
     @Override
     public Mustache load(String key) throws Exception {

@@ -164,6 +164,9 @@ public class DefaultCode implements Code, Cloneable {
     } else {
       appended = appended + text;
     }
+    if (df != null) {
+      appended = df.filterText(appended);
+    }
   }
 
   // Expand the current set of scopes

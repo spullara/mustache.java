@@ -32,10 +32,10 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
     });
   }};
 
-  protected DefaultMustacheFactory cf;
+  protected DefaultMustacheFactory df;
 
-  public DefaultMustacheVisitor(DefaultMustacheFactory cf) {
-    this.cf = cf;
+  public DefaultMustacheVisitor(DefaultMustacheFactory df) {
+    this.df = df;
   }
 
   public void addPragmaHandler(String pragma, PragmaHandler handler) {
@@ -44,33 +44,33 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
 
   @Override
   public Mustache mustache(TemplateContext templateContext) {
-    return new DefaultMustache(templateContext, cf, list.toArray(new Code[list.size()]), templateContext.file());
+    return new DefaultMustache(templateContext, df, list.toArray(new Code[list.size()]), templateContext.file());
   }
 
   @Override
   public void iterable(TemplateContext templateContext, String variable, Mustache mustache) {
-    list.add(new IterableCode(templateContext, cf, mustache, variable));
+    list.add(new IterableCode(templateContext, df, mustache, variable));
   }
 
   @Override
   public void notIterable(TemplateContext templateContext, String variable, Mustache mustache) {
-    list.add(new NotIterableCode(templateContext, cf, mustache, variable));
+    list.add(new NotIterableCode(templateContext, df, mustache, variable));
   }
 
   @Override
   public void name(TemplateContext templateContext, String variable, Mustache mustache) {
-    list.add(new ExtendNameCode(templateContext, cf, mustache, variable));
+    list.add(new ExtendNameCode(templateContext, df, mustache, variable));
   }
 
   @Override
   public void partial(TemplateContext templateContext, final String variable) {
     TemplateContext partialTC = new TemplateContext("{{", "}}", templateContext.file(), templateContext.line());
-    list.add(new PartialCode(partialTC, cf, variable));
+    list.add(new PartialCode(partialTC, df, variable));
   }
 
   @Override
   public void value(TemplateContext templateContext, final String variable, boolean encoded) {
-    list.add(new ValueCode(templateContext, cf, variable, encoded));
+    list.add(new ValueCode(templateContext, df, variable, encoded));
   }
 
   @Override
@@ -81,7 +81,7 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
         Code code = list.get(size - 1);
         code.append(text);
       } else {
-        list.add(new WriteCode(text));
+        list.add(new WriteCode(df, text));
       }
     }
   }
@@ -107,7 +107,7 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
 
   @Override
   public void extend(TemplateContext templateContext, String variable, Mustache mustache) {
-    list.add(new ExtendCode(templateContext, cf, mustache, variable));
+    list.add(new ExtendCode(templateContext, df, mustache, variable));
   }
 
 }
