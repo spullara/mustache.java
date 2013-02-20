@@ -5,16 +5,11 @@ import com.github.mustachejava.util.CapturingMustacheVisitor;
 import com.github.mustachejavabenchmarks.JsonCapturer;
 import com.github.mustachejavabenchmarks.JsonInterpreterTest;
 import com.google.common.base.Function;
-import junit.framework.TestCase;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.MappingJsonFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -35,11 +30,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Date: May 3, 2010
  * Time: 10:23:54 AM
  */
-public class InterpreterTest extends TestCase {
-  protected File root;
+public class InterpreterTest extends BaseTestCase {
 
   public void testSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheFactory c = createMustacheFactory();
+    MustacheFactory c = init();
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -102,7 +96,7 @@ public class InterpreterTest extends TestCase {
 
       boolean test = false;
     };
-    DefaultMustacheFactory c = new DefaultMustacheFactory(root);
+    DefaultMustacheFactory c = createMustacheFactory();
     c.setObjectHandler(new TypeCheckingHandler());
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
@@ -110,12 +104,8 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simpletyped.txt"), sw.toString());
   }
 
-  protected DefaultMustacheFactory createMustacheFactory() {
-    return new DefaultMustacheFactory(root);
-  }
-
   public void testRecurision() throws IOException {
-    MustacheFactory c = createMustacheFactory();
+    MustacheFactory c = init();
     Mustache m = c.compile("recursion.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -128,7 +118,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testRecursionWithInheritance() throws IOException {
-    MustacheFactory c = createMustacheFactory();
+    MustacheFactory c = init();
     Mustache m = c.compile("recursion_with_inheritance.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -140,7 +130,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testSimplePragma() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheFactory c = createMustacheFactory();
+    MustacheFactory c = init();
     Mustache m = c.compile("simplepragma.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -199,7 +189,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testMultipleWrappers() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheFactory c = createMustacheFactory();
+    MustacheFactory c = init();
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -225,8 +215,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testNestedLatchesIterable() throws IOException {
-    DefaultMustacheFactory c = createMustacheFactory();
-    c.setExecutorService(Executors.newCachedThreadPool());
+    DefaultMustacheFactory c = initParallel();
     Mustache m = c.compile("latchedtestiterable.html");
     StringWriter sw = new StringWriter();
     final StringBuffer sb = new StringBuffer();
@@ -267,8 +256,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testNestedLatches() throws IOException {
-    DefaultMustacheFactory c = createMustacheFactory();
-    c.setExecutorService(Executors.newCachedThreadPool());
+    DefaultMustacheFactory c = initParallel();
     Mustache m = c.compile("latchedtest.html");
     StringWriter sw = new StringWriter();
     Writer execute = m.execute(sw, new Object() {
@@ -654,31 +642,4 @@ public class InterpreterTest extends TestCase {
     assertEquals("{{##", sw.toString());
   }
 
-  private MustacheFactory init() {
-    return createMustacheFactory();
-  }
-
-  private DefaultMustacheFactory initParallel() {
-    DefaultMustacheFactory cf = createMustacheFactory();
-    cf.setExecutorService(Executors.newCachedThreadPool());
-    return cf;
-  }
-
-  protected String getContents(File root, String file) throws IOException {
-    BufferedReader br = new BufferedReader(
-            new InputStreamReader(new FileInputStream(new File(root, file)), "UTF-8"));
-    StringWriter capture = new StringWriter();
-    char[] buffer = new char[8192];
-    int read;
-    while ((read = br.read(buffer)) != -1) {
-      capture.write(buffer, 0, read);
-    }
-    return capture.toString();
-  }
-
-  protected void setUp() throws Exception {
-    super.setUp();
-    File file = new File("src/test/resources");
-    root = new File(file, "simple.html").exists() ? file : new File("../src/test/resources");
-  }
 }
