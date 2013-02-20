@@ -18,6 +18,9 @@ import java.util.concurrent.Executors;
  * Time: 6:36 PM
  */
 public class BaseTestCase extends TestCase {
+
+  public void testVoid() {}
+
   protected File root;
 
   protected DefaultMustacheFactory createMustacheFactory() {
