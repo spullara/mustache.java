@@ -15,7 +15,6 @@ import java.util.concurrent.ExecutorService;
  */
 public class ValueCode extends DefaultCode {
   private final boolean encoded;
-  private final DefaultMustacheFactory cf;
   private final ExecutorService les;
 
   @Override
@@ -39,11 +38,10 @@ public class ValueCode extends DefaultCode {
     }
   }
 
-  public ValueCode(TemplateContext tc, DefaultMustacheFactory cf, String variable, boolean encoded) {
-    super(tc, cf.getObjectHandler(), null, variable, "");
-    this.cf = cf;
+  public ValueCode(TemplateContext tc, DefaultMustacheFactory df, String variable, boolean encoded) {
+    super(tc, df, null, variable, "");
     this.encoded = encoded;
-    les = cf.getExecutorService();
+    les = df.getExecutorService();
   }
 
   @Override
@@ -101,7 +99,7 @@ public class ValueCode extends DefaultCode {
     if (newtemplate != null) {
       String templateText = newtemplate.toString();
       StringWriter sw = new StringWriter();
-      cf.getFragment(new FragmentKey(new TemplateContext(MustacheParser.DEFAULT_SM, MustacheParser.DEFAULT_EM, tc.file(), tc.line()), templateText)).execute(sw, scopes).close();
+      df.getFragment(new FragmentKey(new TemplateContext(MustacheParser.DEFAULT_SM, MustacheParser.DEFAULT_EM, tc.file(), tc.line()), templateText)).execute(sw, scopes).close();
       value = sw.toString();
     } else {
       value = "";
@@ -111,7 +109,7 @@ public class ValueCode extends DefaultCode {
 
   protected void execute(Writer writer, String value) throws IOException {
     if (encoded) {
-      cf.encode(value, writer);
+      df.encode(value, writer);
     } else {
       writer.write(value);
     }

@@ -140,6 +140,16 @@ public class HtmlWriterTest {
   }
 
   @Test
+  public void css() throws IOException {
+    w.write("<style>body { background-color: red; }");
+    c(CSS);
+    w.write("</sty");
+    c(END_TAG_NAME);
+    w.write("le>");
+    c(BODY);
+  }
+
+  @Test
   public void pragma() throws IOException {
     w.write("<!DOCTYPE");
     c(PRAGMA);

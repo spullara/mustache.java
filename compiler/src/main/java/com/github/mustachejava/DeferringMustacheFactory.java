@@ -73,7 +73,7 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
         TemplateContext partialTC = new TemplateContext("{{", "}}", templateContext.file(),
                 templateContext.line());
         final Long divid = id.incrementAndGet();
-        list.add(new PartialCode(partialTC, cf, variable) {
+        list.add(new PartialCode(partialTC, df, variable) {
           Wrapper deferredWrapper;
 
           @Override

@@ -12,7 +12,7 @@ public class CodegenMustacheVisitor extends DefaultMustacheVisitor {
 
   @Override
   public Mustache mustache(TemplateContext templateContext) {
-    return new DefaultMustache(templateContext, cf, list.toArray(new Code[list.size()]), templateContext.file()) {
+    return new DefaultMustache(templateContext, df, list.toArray(new Code[list.size()]), templateContext.file()) {
 
       private CompiledCodes compiledCodes;
 

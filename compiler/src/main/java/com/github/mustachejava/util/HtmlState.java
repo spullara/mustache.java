@@ -52,6 +52,8 @@ public class HtmlState implements State<HtmlState.HTML> {
     NQ_VALUE,
     PRAGMA,
     COMMENT,
+    CSS,
+    CSS_CHECK,
   }
 
   public void nextState(char[] cbuf, int off, int len) {
@@ -116,6 +118,12 @@ public class HtmlState implements State<HtmlState.HTML> {
         case COMMENT:
           comment(c);
           break;
+        case CSS:
+          css(c);
+          break;
+        case CSS_CHECK:
+          cssCheck(c);
+          break;
       }
       if (state == TAG_NAME || state == PRAGMA || state == COMMENT) {
         ringBuffer.append(c);
@@ -130,6 +138,16 @@ public class HtmlState implements State<HtmlState.HTML> {
     } else if (ws(c)) {
     } else {
       state = SCRIPT;
+    }
+  }
+
+  private void cssCheck(char c) {
+    if (c == '/') {
+      bodyState = BODY;
+      state = END_TAG;
+    } else if (ws(c)) {
+    } else {
+      state = CSS;
     }
   }
 
@@ -169,6 +187,12 @@ public class HtmlState implements State<HtmlState.HTML> {
       state = SCRIPT_SQ_VALUE;
     } else if (c == '<') {
       state = SCRIPT_CHECK;
+    }
+  }
+
+  private void css(char c) {
+    if (c == '<') {
+      state = CSS_CHECK;
     }
   }
 
@@ -299,6 +323,8 @@ public class HtmlState implements State<HtmlState.HTML> {
   private void setBodyTag() {
     if (ringBuffer.compare("script", true)) {
       bodyState = SCRIPT;
+    } else if (ringBuffer.compare("style", true)) {
+      bodyState = CSS;
     } else bodyState = BODY;
   }
 

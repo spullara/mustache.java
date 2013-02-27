@@ -55,6 +55,61 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
+  public void testSimpleFiltered() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheFactory c = new DefaultMustacheFactory(root) {
+      /**
+       * Override this method to apply any filtering to text that will appear
+       * verbatim in the output template.
+       *
+       * @param appended
+       * @return
+       */
+      @Override
+      public String filterText(String appended) {
+        // Remove duplicate spaces, leading spaces and trailing spaces
+        return appended.replaceAll("[ ]+", " ").replaceAll("[ ]?\n[ ]?", "\n");
+      }
+    };
+    Mustache m = c.compile("simple.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      String name = "Chris";
+      int value = 10000;
+
+      int taxed_value() {
+        return (int) (this.value - (this.value * 0.4));
+      }
+
+      boolean in_ca = true;
+    });
+    assertEquals(getContents(root, "simplefiltered.txt"), sw.toString());
+  }
+
+  public void testTypedSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    final Object scope = new Object() {
+      String name = "Chris";
+      int value = 10000;
+
+      class MyObject {
+        int taxed_value() {
+          return (int) (value - (value * 0.4));
+        }
+
+        String fred = "";
+      }
+
+      MyObject in_ca = new MyObject();
+
+      boolean test = false;
+    };
+    DefaultMustacheFactory c = new DefaultMustacheFactory(root);
+    c.setObjectHandler(new TypeCheckingHandler());
+    Mustache m = c.compile("simple.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, scope.getClass()).flush();
+    assertEquals(getContents(root, "simpletyped.txt"), sw.toString());
+  }
+
   protected DefaultMustacheFactory createMustacheFactory() {
     return new DefaultMustacheFactory(root);
   }
@@ -626,5 +681,4 @@ public class InterpreterTest extends TestCase {
     File file = new File("src/test/resources");
     root = new File(file, "simple.html").exists() ? file : new File("../src/test/resources");
   }
-
 }
