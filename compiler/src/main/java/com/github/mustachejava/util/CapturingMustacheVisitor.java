@@ -36,7 +36,7 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
 
   @Override
   public void value(TemplateContext tc, String variable, boolean encoded) {
-    list.add(new ValueCode(tc, cf, variable, encoded) {
+    list.add(new ValueCode(tc, df, variable, encoded) {
       @Override
       public Object get(Object[] scopes) {
         Object o = super.get(scopes);
@@ -50,7 +50,7 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
 
   @Override
   public void iterable(TemplateContext tc, String variable, Mustache mustache) {
-    list.add(new IterableCode(tc, cf, mustache, variable) {
+    list.add(new IterableCode(tc, df, mustache, variable) {
 
       @Override
       public Writer execute(Writer writer, Object[] scopes) {
@@ -78,7 +78,7 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
 
   @Override
   public void notIterable(TemplateContext tc, String variable, Mustache mustache) {
-    list.add(new NotIterableCode(tc, cf, mustache, variable) {
+    list.add(new NotIterableCode(tc, df, mustache, variable) {
       boolean called;
 
       @Override

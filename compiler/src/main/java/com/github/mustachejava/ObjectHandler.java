@@ -57,6 +57,8 @@ public interface ObjectHandler {
   /**
    * Turns an object into the string representation that should be displayed
    * in templates.
+   *
+   *
    * @param object the object to be displayed
    * @return a string representation of the object.
    */

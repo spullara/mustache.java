@@ -1,0 +1,4 @@
+Hello [String]
+  You have just won $[int]!
+
+Well, $[int],  after taxes.[String]

@@ -1,24 +1,23 @@
 package com.github.mustachejava.codes;
 
-import com.github.mustachejava.*;
+import com.github.mustachejava.Code;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.TemplateContext;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.concurrent.ExecutorService;
 
 public class PartialCode extends DefaultCode {
-  private final DefaultMustacheFactory cf;
-  private final ExecutorService les;
   protected final String extension;
   protected Mustache partial;
 
-  protected PartialCode(TemplateContext tc, DefaultMustacheFactory cf, Mustache mustache, String type, String variable) {
-    super(tc, cf.getObjectHandler(), mustache, variable, type);
-    this.cf = cf;
+  protected PartialCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String type, String variable) {
+    super(tc, df, mustache, variable, type);
     // Use the  name of the parent to get the name of the partial
     int index = tc.file().lastIndexOf(".");
     extension = index == -1 ? "" : tc.file().substring(index);
-    les = cf.getExecutorService();
   }
 
   public PartialCode(TemplateContext tc, DefaultMustacheFactory cf, String variable) {
@@ -54,7 +53,7 @@ public class PartialCode extends DefaultCode {
 
   @Override
   public synchronized void init() {
-    partial = cf.compile(partialName());
+    partial = df.compile(partialName());
     if (partial == null) {
       throw new MustacheException("Failed to compile partial: " + name);
     }
