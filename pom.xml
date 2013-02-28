@@ -3,7 +3,7 @@
 
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>mustache.java-jdk5</artifactId>
-  <version>0.8.10-SNAPSHOT</version>
+  <version>0.8.10</version>
   <description>Implementation of the Mustache language in Java.</description>
 
   <modules>
