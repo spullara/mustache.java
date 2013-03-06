@@ -7,6 +7,9 @@ There is a Google Group for support and questions: <http://groups.google.com/gro
 
 Travis CI: https://travis-ci.org/spullara/mustache.java
 
+Largest production deployment of Mustache.java:
+- Twitter (the web site, email, syndicated widgets, etc)
+
 Request for contributions:
 
 - Real world benchmarks that matter - currently benchmarking based on Twitter templates
@@ -24,13 +27,14 @@ Documentation:
 - Any `Iterable` can be used for list-like behaviors
 - Returning a `Callable` allows for concurrent evaluation if an `ExecutorService` is configured
 - Template inheritance is supported by this implementation, see <https://github.com/mustache/spec/issues/38> (eg. `{{<super}}{{$content}}...{{/content}}{{/super}}`)
-- Additional functions/lambdas (eg. `{{#func1}}...{{/func1}}`) are implemented using `Function` from Google Guava
-- Use `TemplateFunction` if you want mustache.java to reparse the results of your function/lambda
+- Additional functions/lambdas (eg. `{{#func1}}...{{/func1}}`) are implemented using `Function` from Google Guava (post-substitution)
+- Use `TemplateFunction` if you want mustache.java to reparse the results of your function/lambda (pre-substitution)
 - Both default and manually configured classpath based and file system based template roots are supported
 - An invokedynamic version is in development but currently is no faster than the default reflection based system
 - The `handlebar` server will render templates + json data for quick mockups of templates by designers
 - Completely pluggable system for overriding almost all the behavior in the compilation and rendering process
 - You can pull out sample data from live systems using the `CapturingMustacheVisitor` for mocks and tests
+- The DecoratedCollection can provide first / last / index for elements in a collection
 
 Performance:
 
