@@ -67,10 +67,12 @@ public class InterpreterTest extends TestCase {
       @Override
       public String filterText(String appended) {
         // Remove duplicate spaces, leading spaces and trailing spaces
-        return appended.replaceAll("[ ]+", " ").replaceAll("[ ]?\n[ ]?", "\n");
+        return appended
+                .replaceAll("[ ]+", " ")
+                .replaceAll("[ ]?\n[ ]?", "\n");
       }
     };
-    Mustache m = c.compile("simple.html");
+    Mustache m = c.compile("simplefiltered.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
       String name = "Chris";

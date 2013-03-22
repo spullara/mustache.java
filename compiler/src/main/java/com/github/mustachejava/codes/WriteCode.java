@@ -9,7 +9,7 @@ import java.io.Writer;
  */
 public class WriteCode extends DefaultCode {
   public WriteCode(DefaultMustacheFactory df, String text) {
-    super.append(text);
+    appended = df.filterText(text);
   }
 
   @Override

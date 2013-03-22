@@ -76,6 +76,9 @@ public class DefaultCode implements Code, Cloneable {
 
   @Override
   public synchronized void init() {
+    if (df != null && appended != null) {
+      appended = df.filterText(appended);
+    }
     Code[] codes = getCodes();
     if (codes != null) {
       for (Code code : codes) {
@@ -163,9 +166,6 @@ public class DefaultCode implements Code, Cloneable {
       appended = text;
     } else {
       appended = appended + text;
-    }
-    if (df != null) {
-      appended = df.filterText(appended);
     }
   }
 
