@@ -57,6 +57,7 @@ public class ExtendCode extends PartialCode {
 
   @Override
   public synchronized void init() {
+    filterText();
     Map<String, ExtendNameCode> replaceMap = new HashMap<String, ExtendNameCode>();
     for (Code code : mustache.getCodes()) {
       if (code instanceof ExtendNameCode) {

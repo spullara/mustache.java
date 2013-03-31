@@ -68,8 +68,8 @@ public class InterpreterTest extends TestCase {
       public String filterText(String appended) {
         // Remove duplicate spaces, leading spaces and trailing spaces
         return appended
-                .replaceAll("[ ]+", " ")
-                .replaceAll("[ ]?\n[ ]?", "\n");
+                .replaceAll("[ \t]+", " ")
+                .replaceAll("[ \n\t]*\n[ \n\t]*", "\n");
       }
     };
     Mustache m = c.compile("simplefiltered.html");

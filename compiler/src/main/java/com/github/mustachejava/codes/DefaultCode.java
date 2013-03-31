@@ -76,14 +76,18 @@ public class DefaultCode implements Code, Cloneable {
 
   @Override
   public synchronized void init() {
-    if (df != null && appended != null) {
-      appended = df.filterText(appended);
-    }
+    filterText();
     Code[] codes = getCodes();
     if (codes != null) {
       for (Code code : codes) {
         code.init();
       }
+    }
+  }
+
+  protected void filterText() {
+    if (df != null && appended != null) {
+      appended = df.filterText(appended);
     }
   }
 

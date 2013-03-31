@@ -53,6 +53,7 @@ public class PartialCode extends DefaultCode {
 
   @Override
   public synchronized void init() {
+    filterText();
     partial = df.compile(partialName());
     if (partial == null) {
       throw new MustacheException("Failed to compile partial: " + name);
