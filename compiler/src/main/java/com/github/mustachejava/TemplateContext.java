@@ -5,12 +5,18 @@ public final class TemplateContext {
   private final String em;
   private final String file;
   private final int line;
+  private final boolean startOfLine;
 
-  public TemplateContext(String sm, String em, String file, int line) {
+  public TemplateContext(String sm, String em, String file, int line, boolean startOfLine) {
     this.sm = sm;
     this.em = em;
     this.file = file;
     this.line = line;
+    this.startOfLine = startOfLine;
+  }
+
+  public boolean startOfLine() {
+    return startOfLine;
   }
 
   public String startChars() {

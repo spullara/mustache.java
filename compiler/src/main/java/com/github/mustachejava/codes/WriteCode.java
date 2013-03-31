@@ -1,6 +1,7 @@
 package com.github.mustachejava.codes;
 
 import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.TemplateContext;
 
 import java.io.Writer;
 
@@ -8,8 +9,8 @@ import java.io.Writer;
  * Write template text.
  */
 public class WriteCode extends DefaultCode {
-  public WriteCode(DefaultMustacheFactory df, String text) {
-    super(null, df, null, null, null);
+  public WriteCode(TemplateContext tc, DefaultMustacheFactory df, String text) {
+    super(tc, df, null, null, null);
     super.append(text);
   }
 

@@ -87,7 +87,7 @@ public class DefaultCode implements Code, Cloneable {
 
   protected void filterText() {
     if (df != null && appended != null) {
-      appended = df.filterText(appended);
+      appended = df.filterText(appended, tc.startOfLine());
     }
   }
 

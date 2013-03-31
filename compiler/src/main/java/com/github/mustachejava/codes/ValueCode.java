@@ -10,6 +10,9 @@ import java.io.Writer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
+import static com.github.mustachejava.MustacheParser.DEFAULT_EM;
+import static com.github.mustachejava.MustacheParser.DEFAULT_SM;
+
 /**
  * Output a value
  */
@@ -99,7 +102,8 @@ public class ValueCode extends DefaultCode {
     if (newtemplate != null) {
       String templateText = newtemplate.toString();
       StringWriter sw = new StringWriter();
-      df.getFragment(new FragmentKey(new TemplateContext(MustacheParser.DEFAULT_SM, MustacheParser.DEFAULT_EM, tc.file(), tc.line()), templateText)).execute(sw, scopes).close();
+      TemplateContext newTC = new TemplateContext(DEFAULT_SM, DEFAULT_EM, tc.file(), tc.line(), tc.startOfLine());
+      df.getFragment(new FragmentKey(newTC, templateText)).execute(sw, scopes).close();
       value = sw.toString();
     } else {
       value = "";

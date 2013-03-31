@@ -61,12 +61,18 @@ public class InterpreterTest extends TestCase {
        * Override this method to apply any filtering to text that will appear
        * verbatim in the output template.
        *
+       *
+       *
        * @param appended
+       * @param startOfLine
        * @return
        */
       @Override
-      public String filterText(String appended) {
+      public String filterText(String appended, boolean startOfLine) {
         // Remove duplicate spaces, leading spaces and trailing spaces
+        if (startOfLine) {
+          appended = appended.replaceAll("^[\t ]+", "");
+        }
         return appended
                 .replaceAll("[ \t]+", " ")
                 .replaceAll("[ \n\t]*\n[ \n\t]*", "\n");

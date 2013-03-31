@@ -205,10 +205,13 @@ public class DefaultMustacheFactory implements MustacheFactory {
   /**
    * Override this method to apply any filtering to text that will appear
    * verbatim in the output template.
+   *
+   *
    * @param appended
+   * @param b
    * @return
    */
-  public String filterText(String appended) {
+  public String filterText(String appended, boolean b) {
     return appended;
   }
 

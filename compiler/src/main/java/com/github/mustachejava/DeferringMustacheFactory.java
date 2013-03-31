@@ -69,9 +69,8 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
     final AtomicLong id = new AtomicLong(0);
     return new DefaultMustacheVisitor(this) {
       @Override
-      public void partial(TemplateContext templateContext, final String variable) {
-        TemplateContext partialTC = new TemplateContext("{{", "}}", templateContext.file(),
-                templateContext.line());
+      public void partial(TemplateContext tc, final String variable) {
+        TemplateContext partialTC = new TemplateContext("{{", "}}", tc.file(), tc.line(), tc.startOfLine());
         final Long divid = id.incrementAndGet();
         list.add(new PartialCode(partialTC, df, variable) {
           Wrapper deferredWrapper;

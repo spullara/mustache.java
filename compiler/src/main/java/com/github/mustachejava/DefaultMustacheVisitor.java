@@ -63,31 +63,31 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
   }
 
   @Override
-  public void partial(TemplateContext templateContext, final String variable) {
-    TemplateContext partialTC = new TemplateContext("{{", "}}", templateContext.file(), templateContext.line());
+  public void partial(TemplateContext tc, final String variable) {
+    TemplateContext partialTC = new TemplateContext("{{", "}}", tc.file(), tc.line(), tc.startOfLine());
     list.add(new PartialCode(partialTC, df, variable));
   }
 
   @Override
-  public void value(TemplateContext templateContext, final String variable, boolean encoded) {
-    list.add(new ValueCode(templateContext, df, variable, encoded));
+  public void value(TemplateContext tc, final String variable, boolean encoded) {
+    list.add(new ValueCode(tc, df, variable, encoded));
   }
 
   @Override
-  public void write(TemplateContext templateContext, final String text) {
+  public void write(TemplateContext tc, final String text) {
     if (text.length() > 0) {
       int size = list.size();
       if (size > 0) {
         Code code = list.get(size - 1);
         code.append(text);
       } else {
-        list.add(new WriteCode(df, text));
+        list.add(new WriteCode(tc, df, text));
       }
     }
   }
 
   @Override
-  public void pragma(TemplateContext templateContext, String pragma, String args) {
+  public void pragma(TemplateContext tc, String pragma, String args) {
     PragmaHandler pragmaHandler = handlers.get(pragma.toLowerCase());
     if (pragmaHandler == null) {
       // By default, warn that no pragmas are understood
