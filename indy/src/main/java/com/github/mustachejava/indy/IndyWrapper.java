@@ -11,6 +11,7 @@ import java.lang.invoke.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.UUID;
 
 /**
@@ -161,13 +162,22 @@ public abstract class IndyWrapper extends CodegenReflectionWrapper implements Op
     } else {
       MethodHandle unreflect = MethodHandles.lookup().unreflect(method);
       unreflect = MethodHandles.dropArguments(unreflect, 0, IndyWrapper.class);
+      Object[] arguments = iw.getArguments();
       if (method.getParameterTypes().length != 0) {
-        for (int i = 0; i < iw.getArguments().length; i++) {
-          unreflect = MethodHandles.insertArguments(unreflect, i + 2, iw.getArguments()[i]);
+        for (int i = 0; i < arguments.length; i++) {
+          unreflect = MethodHandles.insertArguments(unreflect, i + 2, arguments[i]);
         }
       }
       setCallsite(callSite, unreflect);
-      return method.invoke(scope, iw.getArguments());
+      if ((method.getModifiers() & Modifier.STATIC) != 0) {
+        // Static methods will need the scope as the first argument
+        Object[] staticArguments = new Object[arguments.length + 1];
+        System.arraycopy(arguments, 0, staticArguments, 1, arguments.length);
+        staticArguments[0] = scope;
+        return method.invoke(null, staticArguments);
+      } else {
+        return method.invoke(scope, arguments);
+      }
     }
   }
 

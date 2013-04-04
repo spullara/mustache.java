@@ -7,10 +7,8 @@ import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,6 +44,17 @@ public class SimpleObjectHandler extends BaseObjectHandler {
                   return map.get(name);
                 } else if (!areMethodsAccessible(map)) {
                   continue; //don't check methods, move to next scope
+                }
+              } else if (scope.getClass().isArray()) {
+                int arrayIndex = Integer.parseInt(name);
+                return Array.get(scope, arrayIndex);
+              } else if (scope instanceof List) {
+                try {
+                  int arrayIndex = Integer.parseInt(name);
+                  List list = (List) scope;
+                  return list.get(arrayIndex);
+                } catch (NumberFormatException nfe) {
+                  // Fall through to look at list methods
                 }
               }
               // Check to see if there is a method or field that matches
@@ -115,6 +124,7 @@ public class SimpleObjectHandler extends BaseObjectHandler {
 
   // Used to cache misses
   private static AccessibleObject NONE;
+
   static {
     try {
       NONE = SimpleObjectHandler.class.getDeclaredField("NONE");

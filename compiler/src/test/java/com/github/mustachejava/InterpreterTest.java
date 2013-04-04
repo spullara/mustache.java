@@ -153,6 +153,26 @@ public class InterpreterTest extends TestCase {
     }
   }
 
+  public void testSimpleArraysAndLists() throws IOException {
+    DefaultMustacheFactory c = createMustacheFactory();
+    c.setObjectHandler(new SimpleObjectHandler());
+    Mustache m = c.compile("list.html");
+    {
+      StringWriter sw = new StringWriter();
+      m.execute(sw, new Object() {
+        int[] test = { 0, 1, 2, 3};
+      });
+      assertEquals(getContents(root, "list.txt"), sw.toString());
+    }
+    {
+      StringWriter sw = new StringWriter();
+      m.execute(sw, new Object() {
+        List<Integer> test = Arrays.asList(0, 1, 2, 3);
+      });
+      assertEquals(getContents(root, "list.txt"), sw.toString());
+    }
+  }
+
   public void testRecursionWithInheritance() throws IOException {
     MustacheFactory c = createMustacheFactory();
     Mustache m = c.compile("recursion_with_inheritance.html");
