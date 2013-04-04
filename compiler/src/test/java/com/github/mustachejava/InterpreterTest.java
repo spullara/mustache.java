@@ -132,7 +132,25 @@ public class InterpreterTest extends TestCase {
       };
     });
     assertEquals(getContents(root, "recursion.txt"), sw.toString());
+  }
 
+  public void testArraysAndLists() throws IOException {
+    MustacheFactory c = createMustacheFactory();
+    Mustache m = c.compile("list.html");
+    {
+      StringWriter sw = new StringWriter();
+      m.execute(sw, new Object() {
+        int[] test = { 0, 1, 2, 3};
+      });
+      assertEquals(getContents(root, "list.txt"), sw.toString());
+    }
+    {
+      StringWriter sw = new StringWriter();
+      m.execute(sw, new Object() {
+        List<Integer> test = Arrays.asList(0, 1, 2, 3);
+      });
+      assertEquals(getContents(root, "list.txt"), sw.toString());
+    }
   }
 
   public void testRecursionWithInheritance() throws IOException {

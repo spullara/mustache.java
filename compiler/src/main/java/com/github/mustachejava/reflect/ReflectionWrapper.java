@@ -5,10 +5,7 @@ import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 
 /**
  * Used for evaluating values at a callsite
@@ -60,7 +57,15 @@ public class ReflectionWrapper extends GuardedWrapper {
       if (method == null) {
         return field.get(scope);
       } else {
-        return method.invoke(scope, arguments);
+        if ((method.getModifiers() & Modifier.STATIC) != 0) {
+          // Static methods will need the scope as the first argument
+          Object[] staticArguments = new Object[arguments.length + 1];
+          System.arraycopy(arguments, 0, staticArguments, 1, arguments.length);
+          staticArguments[0] = scope;
+          return method.invoke(null, staticArguments);
+        } else {
+          return method.invoke(scope, arguments);
+        }
       }
     } catch (InvocationTargetException e) {
       throw new MustacheException("Failed to execute method: " + method, e.getTargetException());

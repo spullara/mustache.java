@@ -1,19 +1,14 @@
 package com.github.mustachejava.reflect;
 
-import com.github.mustachejava.Binding;
-import com.github.mustachejava.Code;
-import com.github.mustachejava.ObjectHandler;
-import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.*;
 import com.github.mustachejava.reflect.guards.*;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
 import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Lookup objects using reflection and execute them the same way.
@@ -25,6 +20,8 @@ import java.util.Map;
 public class ReflectionObjectHandler extends BaseObjectHandler {
 
   protected static final Method MAP_METHOD;
+  protected static final Method ARRAY_METHOD;
+  protected static final Method LIST_METHOD;
 
   public static Object unwrap(ObjectHandler oh, int scopeIndex, Wrapper[] wrappers, Object[] scopes) throws GuardException {
     Object scope = oh.coerce(scopes[scopeIndex]);
@@ -40,11 +37,13 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
   static {
     try {
       MAP_METHOD = Map.class.getMethod("get", Object.class);
+      ARRAY_METHOD = Array.class.getMethod("get", Object.class, Integer.TYPE);
+      LIST_METHOD = List.class.getMethod("get", Integer.TYPE);
     } catch (NoSuchMethodException e) {
       throw new AssertionError(e);
     }
   }
-  
+
   @SuppressWarnings("unchecked")
   @Override
   public Wrapper find(String name, final Object[] scopes) {
@@ -95,7 +94,7 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
         }
       }
       if (wrappers != null) {
-        guards.add(createWrappedGuard(i, wrappers, Arrays.asList((Guard)createClassGuard(0, scope))));
+        guards.add(createWrappedGuard(i, wrappers, Arrays.asList((Guard) createClassGuard(0, scope))));
       }
       Wrapper[] foundWrappers = wrappers == null ? null : wrappers.toArray(new Wrapper[wrappers.size()]);
       wrapper = findWrapper(i, foundWrappers, guards, scope, subname);
@@ -121,6 +120,20 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
         if (!areMethodsAccessible(map)) {
           return null;
         }
+      }
+    } else if (scope.getClass().isArray()) {
+      try {
+        int index = Integer.parseInt(name);
+        return createWrapper(scopeIndex, wrappers, guards, ARRAY_METHOD, new Object[]{index});
+      } catch (NumberFormatException nfe) {
+        throw new MustacheException("Found array but index is not an integer");
+      }
+    } else if (scope instanceof List) {
+      try {
+        int index = Integer.parseInt(name);
+        return createWrapper(scopeIndex, wrappers, guards, LIST_METHOD, new Object[]{index});
+      } catch (NumberFormatException nfe) {
+        // Fall through to look for methods on List
       }
     }
     AccessibleObject member = findMember(scope.getClass(), name);
