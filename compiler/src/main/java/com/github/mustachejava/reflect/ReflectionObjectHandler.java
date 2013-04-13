@@ -106,6 +106,16 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
     return wrapper == null ? createMissingWrapper(guards) : wrapper;
   }
 
+  /**
+   * Find a wrapper given the current context. If not found, return null.
+   *
+   * @param scopeIndex the index into the scope array
+   * @param wrappers the current set of wrappers to get here
+   * @param guards the list of guards used to find this
+   * @param scope the current scope
+   * @param name the name in the scope
+   * @return null if not found, otherwise a wrapper for this scope and name
+   */
   protected Wrapper findWrapper(final int scopeIndex, Wrapper[] wrappers, List<Guard> guards, Object scope, final String name) {
     scope = coerce(scope);
     if (scope == null) return null;
