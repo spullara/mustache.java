@@ -5,4 +5,7 @@ Well, $6000, after taxes.
 With padding!
 </partial>
 This is a test
-Test
+Test space
+Test <partial>
+With padding!
+</partial> Test

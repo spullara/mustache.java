@@ -227,7 +227,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
     public Mustache load(FragmentKey fragmentKey) throws Exception {
       StringReader reader = new StringReader(fragmentKey.templateText);
       TemplateContext tc = fragmentKey.tc;
-      return mc.compile(reader, tc.file(), tc.startChars(), tc.endChars());
+      return mc.compile(reader, tc.file(), tc.startChars(), tc.endChars(), tc.startOfLine());
     }
   }
 

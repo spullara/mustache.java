@@ -36,10 +36,14 @@ public class MustacheParser {
   }
 
   public Mustache compile(Reader reader, String file, String sm, String em) {
-    return compile(reader, null, new AtomicInteger(0), file, sm, em);
+    return compile(reader, null, new AtomicInteger(0), file, sm, em, true);
   }
 
-  protected Mustache compile(final Reader reader, String tag, final AtomicInteger currentLine, String file, String sm, String em) throws MustacheException {
+  public Mustache compile(Reader reader, String file, String sm, String em, boolean startOfLine) {
+    return compile(reader, null, new AtomicInteger(0), file, sm, em, startOfLine);
+  }
+
+  protected Mustache compile(final Reader reader, String tag, final AtomicInteger currentLine, String file, String sm, String em, boolean startOfLine) throws MustacheException {
     if (reader == null) {
       throw new MustacheException("Reader is null");
     }
@@ -54,7 +58,6 @@ public class MustacheParser {
       // Now we grab the mustache template
       boolean onlywhitespace = true;
       // Starting a new line
-      boolean startOfLine = true;
       boolean iterable = currentLine.get() != 0;
       currentLine.compareAndSet(0, 1);
       StringBuilder out = new StringBuilder();
@@ -107,7 +110,7 @@ public class MustacheParser {
                 case '<':
                 case '$': {
                   int line = currentLine.get();
-                  final Mustache mustache = compile(br, variable, currentLine, file, sm, em);
+                  final Mustache mustache = compile(br, variable, currentLine, file, sm, em, onlywhitespace);
                   int lines = currentLine.get() - line;
                   if (!onlywhitespace || lines == 0) {
                     write(mv, out, file, currentLine.intValue(), startOfLine);
@@ -115,16 +118,16 @@ public class MustacheParser {
                   out = new StringBuilder();
                   switch (ch) {
                     case '#':
-                      mv.iterable(new TemplateContext(sm, em, file, line, startOfLine), variable, mustache);
+                      mv.iterable(new TemplateContext(sm, em, file, line, onlywhitespace), variable, mustache);
                       break;
                     case '^':
-                      mv.notIterable(new TemplateContext(sm, em, file, line, startOfLine), variable, mustache);
+                      mv.notIterable(new TemplateContext(sm, em, file, line, onlywhitespace), variable, mustache);
                       break;
                     case '<':
-                      mv.extend(new TemplateContext(sm, em, file, line, startOfLine), variable, mustache);
+                      mv.extend(new TemplateContext(sm, em, file, line, onlywhitespace), variable, mustache);
                       break;
                     case '$':
-                      mv.name(new TemplateContext(sm, em, file, line, startOfLine), variable, mustache);
+                      mv.name(new TemplateContext(sm, em, file, line, onlywhitespace), variable, mustache);
                       break;
                   }
                   iterable = lines != 0;
@@ -144,7 +147,7 @@ public class MustacheParser {
                 }
                 case '>': {
                   out = write(mv, out, file, currentLine.intValue(), startOfLine);
-                  mv.partial(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable);
+                  mv.partial(new TemplateContext(sm, em, file, currentLine.get(), onlywhitespace), variable);
                   break;
                 }
                 case '{': {
