@@ -1,5 +1,6 @@
 import com.github.mustachejava.codegen.CodegenObjectHandler;
 import com.github.mustachejava.codegen.CodegenReflectionWrapper;
+import com.github.mustachejava.indy.IndyObjectHandler;
 import com.github.mustachejava.indy.IndyWrapper;
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.util.Wrapper;
@@ -78,10 +79,11 @@ public class IndyDemo {
   public static void timeReflection(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
     Object[] scopes = {indyDemo};
-    for (int i = 0; i < 10000000; i++) {
+    int REFLECTION_TIMES = 10000000;
+    for (int i = 0; i < REFLECTION_TIMES; i++) {
       IndyDemo.class.getDeclaredMethod("someMethod").invoke(scopes[0]);
     }
-    System.out.println("reflection: " + 10*(System.currentTimeMillis() - start));
+    System.out.println("reflection: " + (TIMES/ REFLECTION_TIMES)*(System.currentTimeMillis() - start));
   }
 
   public static void timeReflectionCached(IndyDemo indyDemo) throws Throwable {
