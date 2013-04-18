@@ -109,25 +109,27 @@ public class MustacheParser {
                 case '^':
                 case '<':
                 case '$': {
+                  boolean oldStartOfLine = startOfLine;
+                  startOfLine = startOfLine & onlywhitespace;
                   int line = currentLine.get();
-                  final Mustache mustache = compile(br, variable, currentLine, file, sm, em, onlywhitespace);
+                  final Mustache mustache = compile(br, variable, currentLine, file, sm, em, startOfLine);
                   int lines = currentLine.get() - line;
                   if (!onlywhitespace || lines == 0) {
-                    write(mv, out, file, currentLine.intValue(), startOfLine);
+                    write(mv, out, file, currentLine.intValue(), oldStartOfLine);
                   }
                   out = new StringBuilder();
                   switch (ch) {
                     case '#':
-                      mv.iterable(new TemplateContext(sm, em, file, line, onlywhitespace), variable, mustache);
+                      mv.iterable(new TemplateContext(sm, em, file, line, startOfLine), variable, mustache);
                       break;
                     case '^':
-                      mv.notIterable(new TemplateContext(sm, em, file, line, onlywhitespace), variable, mustache);
+                      mv.notIterable(new TemplateContext(sm, em, file, line, startOfLine), variable, mustache);
                       break;
                     case '<':
-                      mv.extend(new TemplateContext(sm, em, file, line, onlywhitespace), variable, mustache);
+                      mv.extend(new TemplateContext(sm, em, file, line, startOfLine), variable, mustache);
                       break;
                     case '$':
-                      mv.name(new TemplateContext(sm, em, file, line, onlywhitespace), variable, mustache);
+                      mv.name(new TemplateContext(sm, em, file, line, startOfLine), variable, mustache);
                       break;
                   }
                   iterable = lines != 0;
@@ -147,7 +149,8 @@ public class MustacheParser {
                 }
                 case '>': {
                   out = write(mv, out, file, currentLine.intValue(), startOfLine);
-                  mv.partial(new TemplateContext(sm, em, file, currentLine.get(), onlywhitespace), variable);
+                  startOfLine = startOfLine & onlywhitespace;
+                  mv.partial(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable);
                   break;
                 }
                 case '{': {
@@ -163,13 +166,13 @@ public class MustacheParser {
                     }
                   }
                   final String finalName = name;
-                  mv.value(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), finalName, false);
+                  mv.value(new TemplateContext(sm, em, file, currentLine.get(), false), finalName, false);
                   break;
                 }
                 case '&': {
                   // Not escaped
                   out = write(mv, out, file, currentLine.intValue(), startOfLine);
-                  mv.value(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable, false);
+                  mv.value(new TemplateContext(sm, em, file, currentLine.get(), false), variable, false);
                   break;
                 }
                 case '%':
@@ -211,7 +214,7 @@ public class MustacheParser {
                   }
                   // Reference
                   out = write(mv, out, file, currentLine.intValue(), startOfLine);
-                  mv.value(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), command.trim(), true);
+                  mv.value(new TemplateContext(sm, em, file, currentLine.get(), false), command.trim(), true);
                   break;
                 }
               }
