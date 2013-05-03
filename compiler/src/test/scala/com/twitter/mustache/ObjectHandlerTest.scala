@@ -1,7 +1,7 @@
 package com.twitter.mustache
 
 import com.github.mustachejava.DefaultMustacheFactory
-import com.twitter.util.FuturePool
+import com.twitter.util.{Future, FuturePool}
 import java.io.{StringWriter, StringReader}
 import java.util.concurrent.{Callable, Executors}
 import org.junit.{Assert, Test}
@@ -34,7 +34,7 @@ class ObjectHandlerTest {
         val futureWorld = futurePool {
           "thanks for all the fish"
         }
-        lazy val test = false
+        lazy val test = Future { false }
         val map = Map(("value", "test"))
         val num = 1
       })

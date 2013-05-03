@@ -14,9 +14,13 @@ public class IterableCode extends DefaultCode implements Iteration {
 
   private final ExecutorService les;
 
-  public IterableCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String variable) {
-    super(tc, df, mustache, variable, "#");
+  public IterableCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String variable, String type) {
+    super(tc, df, mustache, variable, type);
     les = df.getExecutorService();
+  }
+
+  public IterableCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String variable) {
+    this(tc, df, mustache, variable, "#");
   }
 
   @Override
@@ -27,7 +31,7 @@ public class IterableCode extends DefaultCode implements Iteration {
     return writer;
   }
 
-  private Writer handle(Writer writer, Object resolved, Object[] scopes) {
+  protected Writer handle(Writer writer, Object resolved, Object[] scopes) {
     if (resolved != null) {
       if (resolved instanceof Function) {
         writer = handleFunction(writer, (Function) resolved, scopes);
