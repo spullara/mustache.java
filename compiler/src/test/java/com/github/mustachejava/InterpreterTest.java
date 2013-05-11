@@ -1,5 +1,6 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.reflect.SimpleObjectHandler;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
 import com.github.mustachejavabenchmarks.JsonCapturer;
@@ -642,6 +643,29 @@ public class InterpreterTest extends TestCase {
     mustache.execute(sw, map);
 
     assertEquals("Value: something", sw.toString());
+  }
+
+  public void testOverrideExtension() throws IOException {
+    MustacheFactory mf = new DefaultMustacheFactory(root) {
+      @Override
+      public MustacheVisitor createMustacheVisitor() {
+        return new DefaultMustacheVisitor(this) {
+          @Override
+          public void partial(TemplateContext tc, String variable) {
+            TemplateContext partialTC = new TemplateContext("{{", "}}", tc.file(), tc.line(), tc.startOfLine());
+            list.add(new PartialCode(partialTC, df, variable) {
+              @Override
+              protected String partialName() {
+                return name;
+              }
+            });
+          }
+        };
+      }
+    };
+    StringWriter sw = new StringWriter();
+    mf.compile("overrideextension.html").execute(sw, null).close();
+    assertEquals("not interesting.", sw.toString());
   }
 
   public void testImplicitIteratorNoScope() throws IOException {
