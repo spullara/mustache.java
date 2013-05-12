@@ -673,6 +673,21 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "relative/paths.txt"), sw.toString());
   }
 
+  public void testRelativePathsTemplateFunction() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    Mustache compile = mf.compile("relative/functionpaths.html");
+    StringWriter sw = new StringWriter();
+    compile.execute(sw, new Object() {
+      Function i = new TemplateFunction() {
+        @Override
+        public String apply(String s) {
+          return s;
+        }
+      };
+    }).close();
+    assertEquals(getContents(root, "relative/paths.txt"), sw.toString());
+  }
+
   public void testRelativePathFail() throws IOException {
     MustacheFactory mf = createMustacheFactory();
     try {
