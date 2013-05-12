@@ -18,10 +18,11 @@ public class PartialCode extends DefaultCode {
   protected PartialCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String type, String variable) {
     super(tc, df, mustache, variable, type);
     // Use the  name of the parent to get the name of the partial
-    int dotindex = tc.file().lastIndexOf(".");
-    extension = dotindex == -1 ? "" : tc.file().substring(dotindex);
-    int slashindex = tc.file().lastIndexOf("/");
-    dir = tc.file().substring(0, slashindex + 1);
+    String file = tc.file();
+    int dotindex = file.lastIndexOf(".");
+    extension = dotindex == -1 ? "" : file.substring(dotindex);
+    int slashindex = file.lastIndexOf("/");
+    dir = file.substring(0, slashindex + 1);
   }
 
   public PartialCode(TemplateContext tc, DefaultMustacheFactory cf, String variable) {
