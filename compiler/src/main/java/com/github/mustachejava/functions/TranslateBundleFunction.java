@@ -28,7 +28,8 @@ public class TranslateBundleFunction implements TemplateFunction {
 
 	private ResourceBundle res;
 	
-	/** Constructor for a Mustache.java translation function.
+	/**
+   * Constructor for a Mustache.java translation function.
 	 * 
 	 * @param bundle resource bundle name
 	 * @param locale translation locale
@@ -42,7 +43,6 @@ public class TranslateBundleFunction implements TemplateFunction {
 	public String apply(String input) {
 		if(res.containsKey(input)) {
 			return res.getString(input);  // return translation
-			
 		} else {
 			return input;  // return untranslated label
 		}

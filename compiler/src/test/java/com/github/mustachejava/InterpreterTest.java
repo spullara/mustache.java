@@ -1,6 +1,7 @@
 package com.github.mustachejava;
 
 import com.github.mustachejava.codes.PartialCode;
+import com.github.mustachejava.functions.CommentFunction;
 import com.github.mustachejava.reflect.SimpleObjectHandler;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
 import com.github.mustachejavabenchmarks.JsonCapturer;
@@ -21,6 +22,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -679,6 +681,177 @@ public class InterpreterTest extends TestCase {
     } catch (MustacheException e) {
       // Success
     }
+  }
+
+  public void testIterator() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    Mustache m = mf.compile(new StringReader("{{#values}}{{.}}{{/values}}{{^values}}Test2{{/values}}"), "testIterator");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      Iterator values() { return Arrays.asList(1, 2, 3).iterator(); }
+    }).close();
+    assertEquals("123", sw.toString());
+  }
+
+  public void testObjectArray() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    Mustache m = mf.compile(new StringReader("{{#values}}{{.}}{{/values}}{{^values}}Test2{{/values}}"), "testObjectArray");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      Integer[] values = new Integer[] {1, 2, 3};
+    }).close();
+    assertEquals("123", sw.toString());
+  }
+
+  public void testBaseArray() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    Mustache m = mf.compile(new StringReader("{{#values}}{{.}}{{/values}}{{^values}}Test2{{/values}}"), "testBaseArray");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      int[] values = new int[] {1, 2, 3};
+    }).close();
+    assertEquals("123", sw.toString());
+  }
+
+  public void testEmptyString() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    Mustache m = mf.compile(new StringReader("{{#values}}Test1{{/values}}{{^values}}Test2{{/values}}"), "testEmptyString");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      String values = "";
+    }).close();
+    assertEquals("Test2", sw.toString());
+  }
+
+  public void testPrivate() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    Mustache m = mf.compile(new StringReader("{{#values}}Test1{{/values}}{{^values}}Test2{{/values}}"), "testPrivate");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      private String values = "value";
+      private String values() { return "value"; }
+    }).close();
+    // Values ignored as if it didn't exist at all
+    assertEquals("Test2", sw.toString());
+  }
+
+  public void testSingleCurly() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    Mustache m = mf.compile(new StringReader("{{value } }}"), "testSingleCurly");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new HashMap() {{
+      put("value }", "test");
+    }}).close();
+    // Values ignored as if it didn't exist at all
+    assertEquals("test", sw.toString());
+  }
+
+  public void testPragma() throws IOException {
+    final AtomicBoolean found = new AtomicBoolean();
+    DefaultMustacheFactory mf = new DefaultMustacheFactory() {
+      @Override
+      public MustacheVisitor createMustacheVisitor() {
+        DefaultMustacheVisitor visitor = new DefaultMustacheVisitor(this);
+        visitor.addPragmaHandler("pragma", new PragmaHandler() {
+          @Override
+          public Code handle(String pragma, String args) {
+            if (pragma.equals("pragma") && args.equals("1 2 3")) {
+              found.set(true);
+            }
+            return null;
+          }
+        });
+        return visitor;
+      }
+    };
+    Mustache m = mf.compile(new StringReader("Pragma: {{% pragma 1 2 3 }}"), "testPragma");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, null).close();
+    // Values ignored as if it didn't exist at all
+    assertEquals("Pragma: ", sw.toString());
+    assertTrue(found.get());
+  }
+
+  public void testNotIterableCallable() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    Mustache m = mf.compile(new StringReader("{{^value}}test{{/value}}"), "testNotIterableCallable");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      Callable value = new Callable() {
+        @Override
+        public Object call() throws Exception {
+          return null;
+        }
+      };
+    }).close();
+    // Values ignored as if it didn't exist at all
+    assertEquals("test", sw.toString());
+  }
+
+  public void testMismatch() {
+    try {
+      MustacheFactory mf = createMustacheFactory();
+      Mustache m = mf.compile(new StringReader("{{#value}}"), "testMismatch");
+      fail("Not mismatched");
+    } catch (MustacheException e) {
+      // Success
+      try {
+        MustacheFactory mf = createMustacheFactory();
+        Mustache m = mf.compile(new StringReader("{{#value}}{{/values}}"), "testMismatch");
+        fail("Not mismatched");
+      } catch (MustacheException e2) {
+        // Success
+      }
+    }
+  }
+
+  public void testInvalidDelimiters() {
+    try {
+      MustacheFactory mf = createMustacheFactory();
+      Mustache m = mf.compile(new StringReader("{{=toolong}}"), "testInvalidDelimiters");
+      fail("Not invalid");
+    } catch (MustacheException e) {
+      // Success
+    }
+  }
+
+  public void testTemplateFunction() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    Mustache m = mf.compile(new StringReader("{{#i}}{{{test}}}{{f}}{{/i}}" +
+            "{{#comment}}comment{{/comment}}"), "testTemplateFunction");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      Function i = new TemplateFunction() {
+        @Override
+        public String apply(String s) {
+          return s.replace("test", "test2");
+        }
+      };
+      String test2 = "test";
+      Function f = new Function() {
+        @Override
+        public Object apply(Object o) {
+          return null;
+        }
+      };
+      CommentFunction comment = new CommentFunction();
+    }).close();
+    // Values ignored as if it didn't exist at all
+    assertEquals("test", sw.toString());
+  }
+
+  static class SuperClass {
+    String values = "value";
+  }
+
+  public void testSuperField() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    Mustache m = mf.compile(new StringReader("{{#values}}Test1{{/values}}{{^values}}Test2{{/values}}"), "testIterator");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new SuperClass() {
+    }).close();
+    // Values ignored as if it didn't exist at all
+    assertEquals("Test1", sw.toString());
   }
 
   public void testRelativePathsDotDotDir() throws IOException {

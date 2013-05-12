@@ -99,14 +99,14 @@ public class ValueCode extends DefaultCode {
   protected void handleFunction(Writer writer, Function function, Object[] scopes) throws IOException {
     String value;
     Object newtemplate = function.apply(null);
-    if (newtemplate != null) {
+    if (newtemplate == null) {
+      value = "";
+    } else {
       String templateText = newtemplate.toString();
       StringWriter sw = new StringWriter();
       TemplateContext newTC = new TemplateContext(DEFAULT_SM, DEFAULT_EM, tc.file(), tc.line(), tc.startOfLine());
       df.getFragment(new FragmentKey(newTC, templateText)).execute(sw, scopes).close();
       value = sw.toString();
-    } else {
-      value = "";
     }
     execute(writer, value);
   }
