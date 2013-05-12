@@ -56,6 +56,16 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
+  public void testRootCheck() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheFactory c = createMustacheFactory();
+    try {
+      Mustache m = c.compile("../../../pom.xml");
+      fail("Should have failed to compile");
+    } catch (MustacheException e) {
+      // Success
+    }
+  }
+
   public void testSimpleFiltered() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheFactory c = new DefaultMustacheFactory(root) {
       /**
@@ -643,6 +653,40 @@ public class InterpreterTest extends TestCase {
     mustache.execute(sw, map);
 
     assertEquals("Value: something", sw.toString());
+  }
+
+  public void testRelativePathsSameDir() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    Mustache compile = mf.compile("relative/paths.html");
+    StringWriter sw = new StringWriter();
+    compile.execute(sw, null).close();
+    assertEquals(getContents(root, "relative/paths.txt"), sw.toString());
+  }
+
+  public void testRelativePathsRootDir() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    Mustache compile = mf.compile("relative/rootpath.html");
+    StringWriter sw = new StringWriter();
+    compile.execute(sw, null).close();
+    assertEquals(getContents(root, "relative/paths.txt"), sw.toString());
+  }
+
+  public void testRelativePathFail() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    try {
+      Mustache compile = mf.compile("relative/pathfail.html");
+      fail("Should have failed to compile");
+    } catch (MustacheException e) {
+      // Success
+    }
+  }
+
+  public void testRelativePathsDotDotDir() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    Mustache compile = mf.compile("relative/dotdot.html");
+    StringWriter sw = new StringWriter();
+    compile.execute(sw, null).close();
+    assertEquals(getContents(root, "uninterestingpartial.html"), sw.toString());
   }
 
   public void testOverrideExtension() throws IOException {

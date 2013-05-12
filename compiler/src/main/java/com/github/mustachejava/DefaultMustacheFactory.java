@@ -7,11 +7,12 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -101,8 +102,19 @@ public class DefaultMustacheFactory implements MustacheFactory {
       File file = fileRoot == null ? new File(resourceName) : new File(fileRoot, resourceName);
       if (file.exists() && file.isFile()) {
         try {
+          // Check to make sure that the file is under the file root or current directory.
+          // Without this check you might accidentally open a security whole when exposing
+          // mustache templates to end users.
+          File checkRoot = fileRoot == null ? new File("").getCanonicalFile() : fileRoot.getCanonicalFile();
+          File parent = file.getCanonicalFile();
+          while ((parent = parent.getParentFile()) != null) {
+            if (parent.equals(checkRoot)) break;
+          }
+          if (parent == null) {
+            throw new MustacheException("File not under root: " + checkRoot.getAbsolutePath());
+          }
           is = new FileInputStream(file);
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
           throw new MustacheException("Found file, could not open: " + file, e);
         }
       }
@@ -166,7 +178,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
     }
   }
 
-  private MustacheException handle(ExecutionException e) {
+  private MustacheException handle(Exception e) {
     Throwable cause = e.getCause();
     if (cause instanceof MustacheException) {
       return (MustacheException) cause;
@@ -180,6 +192,8 @@ public class DefaultMustacheFactory implements MustacheFactory {
       Mustache mustache = mustacheCache.get(name);
       mustache.init();
       return mustache;
+    } catch (UncheckedExecutionException e) {
+      throw handle(e);
     } catch (ExecutionException e) {
       throw handle(e);
     }

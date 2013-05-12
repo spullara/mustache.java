@@ -17,14 +17,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MustacheParser {
   public static final String DEFAULT_SM = "{{";
   public static final String DEFAULT_EM = "}}";
-  private MustacheFactory cf;
+  private MustacheFactory mf;
 
-  protected MustacheParser(MustacheFactory cf) {
-    this.cf = cf;
+  protected MustacheParser(MustacheFactory mf) {
+    this.mf = mf;
   }
 
   public Mustache compile(String file) {
-    Reader reader = cf.getReader(file);
+    Reader reader = mf.getReader(file);
     if (reader == null) {
       throw new MustacheException("Failed to find: " + file);
     }
@@ -54,7 +54,7 @@ public class MustacheParser {
       br = new BufferedReader(reader);
     }
     try {
-      MustacheVisitor mv = cf.createMustacheVisitor();
+      MustacheVisitor mv = mf.createMustacheVisitor();
       // Now we grab the mustache template
       boolean onlywhitespace = true;
       // Starting a new line
@@ -101,7 +101,7 @@ public class MustacheParser {
                 }
                 sb.append((char) c);
               }
-              final String command = cf.translate(sb.toString());
+              final String command = mf.translate(sb.toString());
               final char ch = command.charAt(0);
               final String variable = command.substring(1).trim();
               switch (ch) {

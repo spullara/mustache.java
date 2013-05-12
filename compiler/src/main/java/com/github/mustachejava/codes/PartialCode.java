@@ -6,18 +6,22 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.TemplateContext;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 
 public class PartialCode extends DefaultCode {
   protected final String extension;
+  protected final String dir;
   protected Mustache partial;
 
   protected PartialCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String type, String variable) {
     super(tc, df, mustache, variable, type);
     // Use the  name of the parent to get the name of the partial
-    int index = tc.file().lastIndexOf(".");
-    extension = index == -1 ? "" : tc.file().substring(index);
+    int dotindex = tc.file().lastIndexOf(".");
+    extension = dotindex == -1 ? "" : tc.file().substring(dotindex);
+    int slashindex = tc.file().lastIndexOf("/");
+    dir = tc.file().substring(0, slashindex + 1);
   }
 
   public PartialCode(TemplateContext tc, DefaultMustacheFactory cf, String variable) {
@@ -67,7 +71,13 @@ public class PartialCode extends DefaultCode {
    * @return The filename to be included by this partial tag
    */
   protected String partialName() {
-    return name + extension;
+    String path;
+    if (name.startsWith("/")) {
+      path = new File(name + extension).getPath();
+    } else {
+      path = new File(dir + name + extension).getPath();
+    }
+    return path;
   }
 
 }
