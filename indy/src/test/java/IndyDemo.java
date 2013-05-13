@@ -84,20 +84,18 @@ public class IndyDemo {
 
   public static void timeReflection(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
-    Object[] scopes = {indyDemo};
     int REFLECTION_TIMES = 10000000;
     for (int i = 0; i < REFLECTION_TIMES; i++) {
-      IndyDemo.class.getDeclaredMethod("someMethod").invoke(scopes[0]);
+      IndyDemo.class.getDeclaredMethod("someMethod").invoke(indyDemo);
     }
     System.out.println("reflection: " + (TIMES/ REFLECTION_TIMES)*(System.currentTimeMillis() - start));
   }
 
   public static void timeReflectionCached(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
-    Object[] scopes = {indyDemo};
     Method someMethod = IndyDemo.class.getDeclaredMethod("someMethod");
     for (int i = 0; i < TIMES; i++) {
-      someMethod.invoke(scopes[0]);
+      someMethod.invoke(indyDemo);
     }
     System.out.println("reflection cached: " + (System.currentTimeMillis() - start));
   }
