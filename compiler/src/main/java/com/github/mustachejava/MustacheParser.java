@@ -54,6 +54,7 @@ public class MustacheParser {
       br = new BufferedReader(reader);
     }
     try {
+      int startLine = currentLine.get();
       MustacheVisitor mv = mf.createMustacheVisitor();
       // Now we grab the mustache template
       boolean onlywhitespace = true;
@@ -230,7 +231,11 @@ public class MustacheParser {
           out.append((char) c);
         }
         write(mv, out, file, currentLine.intValue(), startOfLine);
-        br.close();
+        if (tag == null) {
+          br.close();
+        } else {
+          throw new MustacheException("Failed to close '" + tag + "' tag at line " + startLine);
+        }
       } catch (IOException e) {
         throw new MustacheException("Failed to read", e);
       }

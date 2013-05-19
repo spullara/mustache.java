@@ -703,7 +703,9 @@ public class InterpreterTest extends TestCase {
     Mustache m = mf.compile(new StringReader("{{#values}}{{.}}{{/values}}{{^values}}Test2{{/values}}"), "testIterator");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      Iterator values() { return Arrays.asList(1, 2, 3).iterator(); }
+      Iterator values() {
+        return Arrays.asList(1, 2, 3).iterator();
+      }
     }).close();
     assertEquals("123", sw.toString());
   }
@@ -713,7 +715,7 @@ public class InterpreterTest extends TestCase {
     Mustache m = mf.compile(new StringReader("{{#values}}{{.}}{{/values}}{{^values}}Test2{{/values}}"), "testObjectArray");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      Integer[] values = new Integer[] {1, 2, 3};
+      Integer[] values = new Integer[]{1, 2, 3};
     }).close();
     assertEquals("123", sw.toString());
   }
@@ -723,7 +725,7 @@ public class InterpreterTest extends TestCase {
     Mustache m = mf.compile(new StringReader("{{#values}}{{.}}{{/values}}{{^values}}Test2{{/values}}"), "testBaseArray");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      int[] values = new int[] {1, 2, 3};
+      int[] values = new int[]{1, 2, 3};
     }).close();
     assertEquals("123", sw.toString());
   }
@@ -744,7 +746,10 @@ public class InterpreterTest extends TestCase {
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
       private String values = "value";
-      private String values() { return "value"; }
+
+      private String values() {
+        return "value";
+      }
     }).close();
     // Values ignored as if it didn't exist at all
     assertEquals("Test2", sw.toString());
@@ -916,6 +921,18 @@ public class InterpreterTest extends TestCase {
     StringWriter sw = new StringWriter();
     mustache.execute(sw, new Object[0]);
     assertEquals("{{##", sw.toString());
+  }
+
+  public void testMalformedTag() {
+    try {
+      String template = "\n{{$value}}\n{/value}}";
+      Mustache mustache = new DefaultMustacheFactory().compile(new StringReader(template), "test");
+      StringWriter sw = new StringWriter();
+      mustache.execute(sw, new Object[0]);
+      fail("Should have failed to compile");
+    } catch (MustacheException e) {
+      assertEquals("Failed to close 'value' tag at line 2", e.getMessage());
+    }
   }
 
   private MustacheFactory init() {
