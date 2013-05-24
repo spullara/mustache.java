@@ -50,7 +50,7 @@ Build suggestions:
 - If you must build but not test:
   - git clone https://github.com/spullara/mustache.java.git
   - set your JAVA_HOME to a JDK 7 JDK
-  - mvn -Dmaven.test.skip=true clean install
+  - mvn -DskipTests clean install
 - If you must build and test but not benchmark:
   - CI=1 mvn clean install
 - If you must build, test and benchmark:
