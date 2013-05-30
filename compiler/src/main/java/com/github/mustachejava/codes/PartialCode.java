@@ -2,19 +2,24 @@ package com.github.mustachejava.codes;
 
 import com.github.mustachejava.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 
 public class PartialCode extends DefaultCode {
   protected final String extension;
+  protected final String dir;
   protected Mustache partial;
   protected int recrusionLimit;
 
   protected PartialCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String type, String variable) {
     super(tc, df, mustache, variable, type);
     // Use the  name of the parent to get the name of the partial
-    int index = tc.file().lastIndexOf(".");
-    extension = index == -1 ? "" : tc.file().substring(index);
+    String file = tc.file();
+    int dotindex = file.lastIndexOf(".");
+    extension = dotindex == -1 ? "" : file.substring(dotindex);
+    int slashindex = file.lastIndexOf("/");
+    dir = file.substring(0, slashindex + 1);
     recrusionLimit = df.getRecursionLimit();
   }
 
@@ -76,7 +81,13 @@ public class PartialCode extends DefaultCode {
    * @return The filename to be included by this partial tag
    */
   protected String partialName() {
-    return name + extension;
+    String path;
+    if (name.startsWith("/")) {
+      path = new File(name + extension).getPath();
+    } else {
+      path = new File(dir + name + extension).getPath();
+    }
+    return path;
   }
 
 }

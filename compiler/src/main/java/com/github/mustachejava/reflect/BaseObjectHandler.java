@@ -1,9 +1,14 @@
 package com.github.mustachejava.reflect;
 
-import com.github.mustachejava.*;
+import com.github.mustachejava.Binding;
+import com.github.mustachejava.Code;
+import com.github.mustachejava.Iteration;
+import com.github.mustachejava.ObjectHandler;
+import com.github.mustachejava.TemplateContext;
 
 import java.io.Writer;
 import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -37,9 +42,8 @@ public abstract class BaseObjectHandler implements ObjectHandler {
       } else if (object instanceof Iterator) {
         Iterator iterator = (Iterator) object;
         if (iterator.hasNext()) return writer;
-      } else if (object instanceof Object[]) {
-        Object[] array = (Object[]) object;
-        int length = array.length;
+      } else if (object.getClass().isArray()) {
+        int length = Array.getLength(object);
         if (length > 0) return writer;
       } else {
         // All other objects are truthy
@@ -73,10 +77,10 @@ public abstract class BaseObjectHandler implements ObjectHandler {
       while (iterator.hasNext()) {
         writer = iteration.next(writer, coerce(iterator.next()), scopes);
       }
-    } else if (object instanceof Object[]) {
-      Object[] array = (Object[]) object;
-      for (Object o : array) {
-        writer = iteration.next(writer, coerce(o), scopes);
+    } else if (object.getClass().isArray()) {
+      int length = Array.getLength(object);
+      for (int i = 0; i < length; i++) {
+        writer = iteration.next(writer, coerce(Array.get(object, i)), scopes);
       }
     } else {
       writer = iteration.next(writer, object, scopes);

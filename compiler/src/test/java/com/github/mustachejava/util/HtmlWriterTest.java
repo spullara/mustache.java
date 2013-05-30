@@ -1,6 +1,7 @@
 package com.github.mustachejava.util;
 
 import com.github.mustachejavabenchmarks.NullWriter;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,6 +22,11 @@ public class HtmlWriterTest {
   @Before
   public void setup() {
     w = new StateAwareWriter<HtmlState>(new StringWriter(), state = new HtmlState());
+  }
+
+  @After
+  public void tearDown() throws IOException {
+    w.close();
   }
 
   @Test

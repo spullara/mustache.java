@@ -1,11 +1,13 @@
 import com.github.mustachejava.codegen.CodegenObjectHandler;
 import com.github.mustachejava.codegen.CodegenReflectionWrapper;
-import com.github.mustachejava.indy.IndyObjectHandler;
 import com.github.mustachejava.indy.IndyWrapper;
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.util.Wrapper;
 import org.junit.Test;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 
 public class IndyDemo {
@@ -21,6 +23,10 @@ public class IndyDemo {
       timeIndyOHNoGuard(indyDemo);
       timeReflection(indyDemo);
       timeReflectionCached(indyDemo);
+      timeUnReflection(indyDemo);
+      timeUnReflectionCached(indyDemo);
+      timeMH(indyDemo);
+      timeMHCached(indyDemo);
       timeDirect(indyDemo);
       System.out.println("-----------------");
     }
@@ -78,29 +84,69 @@ public class IndyDemo {
 
   public static void timeReflection(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
-    Object[] scopes = {indyDemo};
     int REFLECTION_TIMES = 10000000;
     for (int i = 0; i < REFLECTION_TIMES; i++) {
-      IndyDemo.class.getDeclaredMethod("someMethod").invoke(scopes[0]);
+      IndyDemo.class.getDeclaredMethod("someMethod").invoke(indyDemo);
     }
     System.out.println("reflection: " + (TIMES/ REFLECTION_TIMES)*(System.currentTimeMillis() - start));
   }
 
   public static void timeReflectionCached(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
-    Object[] scopes = {indyDemo};
     Method someMethod = IndyDemo.class.getDeclaredMethod("someMethod");
     for (int i = 0; i < TIMES; i++) {
-      someMethod.invoke(scopes[0]);
+      someMethod.invoke(indyDemo);
     }
     System.out.println("reflection cached: " + (System.currentTimeMillis() - start));
   }
 
+  public static void timeUnReflection(IndyDemo indyDemo) throws Throwable {
+    long start = System.currentTimeMillis();
+    int REFLECTION_TIMES = 10000;
+    MethodHandles.Lookup lookup = MethodHandles.lookup();
+    for (int i = 0; i < REFLECTION_TIMES; i++) {
+      int result = (int) lookup.unreflect(IndyDemo.class.getDeclaredMethod("someMethod")).invokeExact(indyDemo);
+    }
+    System.out.println("unreflection: " + (TIMES/ REFLECTION_TIMES)*(System.currentTimeMillis() - start));
+  }
+
+  public static void timeUnReflectionCached(IndyDemo indyDemo) throws Throwable {
+    long start = System.currentTimeMillis();
+    MethodHandles.Lookup lookup = MethodHandles.lookup();
+    MethodHandle someMethod = lookup.unreflect(IndyDemo.class.getDeclaredMethod("someMethod"));
+    for (int i = 0; i < TIMES; i++) {
+      int result = (int) someMethod.invokeExact(indyDemo);
+    }
+    System.out.println("unreflection cached: " + (System.currentTimeMillis() - start));
+  }
+
+  public static void timeMH(IndyDemo indyDemo) throws Throwable {
+    long start = System.currentTimeMillis();
+    int REFLECTION_TIMES = 10000;
+    MethodHandles.Lookup lookup = MethodHandles.lookup();
+    MethodType type = MethodType.methodType(Integer.TYPE);
+    for (int i = 0; i < REFLECTION_TIMES; i++) {
+      MethodHandle someMethod = lookup.findVirtual(IndyDemo.class, "someMethod", type);
+      int result = (int) someMethod.invokeExact(indyDemo);
+    }
+    System.out.println("methodhandle: " + (TIMES/ REFLECTION_TIMES)*(System.currentTimeMillis() - start));
+  }
+
+  public static void timeMHCached(IndyDemo indyDemo) throws Throwable {
+    long start = System.currentTimeMillis();
+    MethodHandles.Lookup lookup = MethodHandles.lookup();
+    MethodType type = MethodType.methodType(Integer.TYPE);
+    MethodHandle someMethod = lookup.findVirtual(IndyDemo.class, "someMethod", type);
+    for (int i = 0; i < TIMES; i++) {
+      int result = (int) someMethod.invokeExact(indyDemo);
+    }
+    System.out.println("methodhandle cached: " + (System.currentTimeMillis() - start));
+  }
+
   public static void timeDirect(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
-    Object[] scopes = {indyDemo};
     for (int i = 0; i < TIMES; i++) {
-      ((IndyDemo)scopes[0]).someMethod();
+      indyDemo.someMethod();
     }
     System.out.println("direct: " + (System.currentTimeMillis() - start));
   }
