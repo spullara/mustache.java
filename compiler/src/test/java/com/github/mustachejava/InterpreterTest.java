@@ -662,6 +662,20 @@ public class InterpreterTest extends TestCase {
     assertEquals("{{##", sw.toString());
   }
 
+  public void testLimitedDepthRecursion() {
+    try {
+      MustacheFactory c = init();
+      Mustache m = c.compile("infiniteparent.html");
+      StringWriter sw = new StringWriter();
+      m.execute(sw, new Context());
+      fail("Should have failed");
+    } catch (StackOverflowError soe) {
+      fail("Should not have overflowed the stack");
+    } catch (MustacheException e) {
+      assertEquals("Maximum partial recursion limit reached: 100", e.getMessage());
+    }
+  }
+
   private MustacheFactory init() {
     return createMustacheFactory();
   }
