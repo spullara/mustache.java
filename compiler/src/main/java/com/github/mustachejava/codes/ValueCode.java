@@ -1,6 +1,9 @@
 package com.github.mustachejava.codes;
 
-import com.github.mustachejava.*;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.FragmentKey;
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.LatchedWriter;
 import com.google.common.base.Function;
 
@@ -68,7 +71,8 @@ public class ValueCode extends DefaultCode {
 
   protected Writer handleCallable(Writer writer, final Callable callable, final Object[] scopes) throws Exception {
     if (les == null) {
-      execute(writer, oh.stringify(callable.call()));
+      Object call = callable.call();
+      execute(writer, call == null ? null : oh.stringify(call));
       return super.execute(writer, scopes);
     } else {
       // Flush the current writer
@@ -112,11 +116,14 @@ public class ValueCode extends DefaultCode {
   }
 
   protected void execute(Writer writer, String value) throws IOException {
-    if (encoded) {
-      df.encode(value, writer);
-    } else {
-      writer.write(value);
+    // Treat null values as the empty string
+    if (value != null) {
+      if (encoded) {
+        df.encode(value, writer);
+      } else {
+        writer.write(value);
+      }
     }
   }
-  
+
 }
