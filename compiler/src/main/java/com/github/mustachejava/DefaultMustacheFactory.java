@@ -51,6 +51,8 @@ public class DefaultMustacheFactory implements MustacheFactory {
    */
   protected final LoadingCache<FragmentKey, Mustache> templateCache = createLambdaCache();
 
+  protected int recursionLimit = 100;
+
   private final String resourceRoot;
   private final File fileRoot;
 
@@ -226,6 +228,17 @@ public class DefaultMustacheFactory implements MustacheFactory {
    */
   public String filterText(String appended, boolean b) {
     return appended;
+  }
+
+  /**
+   * Maximum recursion limit for partials.
+   */
+  public void setRecursionLimit(int recursionLimit) {
+    this.recursionLimit = recursionLimit;
+  }
+
+  public int getRecursionLimit() {
+    return recursionLimit;
   }
 
   protected class MustacheCacheLoader extends CacheLoader<String, Mustache> {

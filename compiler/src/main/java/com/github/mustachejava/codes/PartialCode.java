@@ -1,10 +1,6 @@
 package com.github.mustachejava.codes;
 
-import com.github.mustachejava.Code;
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +10,7 @@ public class PartialCode extends DefaultCode {
   protected final String extension;
   protected final String dir;
   protected Mustache partial;
+  protected int recrusionLimit;
 
   protected PartialCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String type, String variable) {
     super(tc, df, mustache, variable, type);
@@ -23,6 +20,7 @@ public class PartialCode extends DefaultCode {
     extension = dotindex == -1 ? "" : file.substring(dotindex);
     int slashindex = file.lastIndexOf("/");
     dir = file.substring(0, slashindex + 1);
+    recrusionLimit = df.getRecursionLimit();
   }
 
   public PartialCode(TemplateContext tc, DefaultMustacheFactory cf, String variable) {
@@ -53,7 +51,18 @@ public class PartialCode extends DefaultCode {
 
   @Override
   public Writer execute(Writer writer, final Object[] scopes) {
-    return appendText(partial.execute(writer, scopes));
+    DepthLimitedWriter depthLimitedWriter;
+    if (writer instanceof DepthLimitedWriter) {
+      depthLimitedWriter = (DepthLimitedWriter) writer;
+    } else {
+      depthLimitedWriter = new DepthLimitedWriter(writer);
+    }
+    if (depthLimitedWriter.incr() > recrusionLimit) {
+      throw new MustacheException("Maximum partial recursion limit reached: " + recrusionLimit);
+    }
+    Writer execute = partial.execute(depthLimitedWriter, scopes);
+    depthLimitedWriter.decr();
+    return appendText(execute);
   }
 
   @Override
