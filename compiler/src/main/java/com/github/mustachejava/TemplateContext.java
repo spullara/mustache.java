@@ -58,4 +58,8 @@ public final class TemplateContext {
     result = 31 * result + line;
     return result;
   }
+
+  public String toString() {
+    return "[" + file + ":" + line + "]";
+  }
 }

@@ -5,4 +5,10 @@ package com.github.mustachejava.util;
  * caller to refind it.
  */
 public class GuardException extends RuntimeException {
+  public GuardException() {
+  }
+
+  public GuardException(String message) {
+    super(message);
+  }
 }

@@ -31,4 +31,7 @@ public class DepthGuard implements Guard {
     return objects != null && length == objects.length;
   }
 
+  public String toString() {
+    return "[DepthGuard: " + length + "]";
+  }
 }

@@ -103,7 +103,7 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
         break;
       }
     }
-    return wrapper == null ? createMissingWrapper(guards) : wrapper;
+    return wrapper == null ? createMissingWrapper(name, guards) : wrapper;
   }
 
   /**
@@ -139,8 +139,8 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
 
   // Factories
 
-  protected MissingWrapper createMissingWrapper(List<Guard> guards) {
-    return new MissingWrapper(guards.toArray(new Guard[guards.size()]));
+  protected MissingWrapper createMissingWrapper(String name, List<Guard> guards) {
+    return new MissingWrapper(name, guards.toArray(new Guard[guards.size()]));
   }
 
   protected DotGuard createDotGuard(int i, Object scope, String lookup) {

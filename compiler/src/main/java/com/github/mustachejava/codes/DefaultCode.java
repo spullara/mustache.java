@@ -1,6 +1,7 @@
 package com.github.mustachejava.codes;
 
 import com.github.mustachejava.*;
+import com.github.mustachejava.util.GuardException;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -100,7 +101,13 @@ public class DefaultCode implements Code, Cloneable {
       int length = scopes == null ? 0 : scopes.length;
       return length == 0 ? null : scopes[length - 1];
     }
-    return binding.get(scopes);
+    try {
+      return binding.get(scopes);
+    } catch (Exception e) {
+      throw new MustacheException(e.getMessage() + "@" + tc.toString(), e);
+    } catch (Error e) {
+      throw new MustacheException(e.getMessage() + "@" + tc.toString(), e);
+    }
   }
 
   @Override

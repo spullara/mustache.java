@@ -5,6 +5,8 @@ import com.github.mustachejava.util.Wrapper;
 
 import java.util.Arrays;
 
+import static java.util.Arrays.asList;
+
 /**
  * Wrapper that guards.
  */
@@ -64,4 +66,9 @@ public class GuardedWrapper implements Wrapper {
   public Guard[] getGuards() {
     return guards;
   }
+
+  public String toString() {
+    return "[GuardedWrapper: " + asList(guards) + "]";
+  }
+
 }

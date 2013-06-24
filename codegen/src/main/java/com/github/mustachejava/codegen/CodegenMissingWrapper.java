@@ -9,8 +9,8 @@ import java.util.List;
 public class CodegenMissingWrapper extends MissingWrapper {
   final Guard compiledGuards;
 
-  public CodegenMissingWrapper(List<Guard> guards) {
-    super(guards.toArray(new Guard[guards.size()]));
+  public CodegenMissingWrapper(String name, List<Guard> guards) {
+    super(name, guards.toArray(new Guard[guards.size()]));
     compiledGuards = GuardCompiler.compile(guards);
   }
 

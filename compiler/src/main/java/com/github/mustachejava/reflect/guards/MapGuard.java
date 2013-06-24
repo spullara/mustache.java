@@ -39,4 +39,9 @@ public class MapGuard implements Guard {
     }
     return false;
   }
+
+  public String toString() {
+    return "[MapGuard: " + scopeIndex + " " + name + " " + contains + "]";
+  }
+
 }

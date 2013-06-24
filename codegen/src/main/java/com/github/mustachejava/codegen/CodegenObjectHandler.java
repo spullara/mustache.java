@@ -47,8 +47,8 @@ public class CodegenObjectHandler extends ReflectionObjectHandler {
   }
 
   @Override
-  protected MissingWrapper createMissingWrapper(List<Guard> guards) {
-    return new CodegenMissingWrapper(guards);
+  protected MissingWrapper createMissingWrapper(String name, List<Guard> guards) {
+    return new CodegenMissingWrapper(name, guards);
   }
 
   @Override

@@ -38,4 +38,9 @@ public class WrappedGuard implements Guard {
     }
     return true;
   }
+
+  public String toString() {
+    return "[WrappedGuard: " + index + " " + wrapperGuard + "]";
+  }
+
 }

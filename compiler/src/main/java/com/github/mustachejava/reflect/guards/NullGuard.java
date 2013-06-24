@@ -7,4 +7,9 @@ public class NullGuard implements Guard {
   public boolean apply(Object[] objects) {
     return objects[0] == null;
   }
+
+  public String toString() {
+    return "[NullGuard]";
+  }
+
 }

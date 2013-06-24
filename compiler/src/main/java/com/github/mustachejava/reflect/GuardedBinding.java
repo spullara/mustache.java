@@ -85,8 +85,8 @@ public class GuardedBinding implements Binding {
     try {
       return oh.coerce(wrapper.call(scopes));
     } catch (GuardException e) {
-      throw new AssertionError(
-              "Unexpected guard failure: " + previousSet + " " + Arrays.asList(scopes));
+      throw new GuardException(
+              "BUG: Unexpected guard failure: " + name + " " + previousSet + " " + Arrays.asList(scopes));
     }
   }
 

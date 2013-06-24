@@ -35,4 +35,9 @@ public class DotGuard implements Guard {
   public boolean apply(Object[] objects) {
     return true;
   }
+
+  public String toString() {
+    return "[DotGuard: " + lookup + " " + scopeIndex + " " + classGuard.getName() + "]";
+  }
+
 }

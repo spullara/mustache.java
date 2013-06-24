@@ -35,4 +35,8 @@ public class ClassGuard implements Guard {
     Object scope = scopes[scopeIndex];
     return !(scope != null && classGuard != scope.getClass()) && !(scope == null && classGuard != null);
   }
+
+  public String toString() {
+    return "[ClassGuard: " + scopeIndex + " " + classGuard.getName() + "]";
+  }
 }
