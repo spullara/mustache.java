@@ -88,8 +88,7 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
         }
         if (scope == null) {
           // Found a wrapper, but the result of was null
-          wrapperGuard.add(createNullGuard());
-          guards.add(createWrappedGuard(i, wrappers, wrapperGuard));
+          guards.add(createWrappedGuard(i, wrappers, Arrays.<Guard>asList(createNullGuard())));
           // Break here to allow the wrapper to be returned with the partial evaluation of the dot notation
           break;
         }
