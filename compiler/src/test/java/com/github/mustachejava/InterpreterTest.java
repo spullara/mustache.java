@@ -905,6 +905,15 @@ public class InterpreterTest extends TestCase {
     assertEquals("not interesting.", sw.toString());
   }
 
+  public void testEmptyMustache() {
+    try {
+      new DefaultMustacheFactory().compile(new StringReader("{{}}"), "test");
+      fail("Didn't throw an exception");
+    } catch (MustacheException e) {
+      assertTrue(e.getMessage().startsWith("Empty mustache"));
+    }
+  }
+
   public void testImplicitIteratorNoScope() throws IOException {
     Mustache test = new DefaultMustacheFactory().compile(new StringReader("{{.}}"), "test");
     StringWriter sw = new StringWriter();

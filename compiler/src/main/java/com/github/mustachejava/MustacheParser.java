@@ -103,6 +103,9 @@ public class MustacheParser {
                 sb.append((char) c);
               }
               final String command = mf.translate(sb.toString());
+              if (command.length() == 0) {
+                throw new MustacheException("Empty mustache in " + file + ":" + currentLine);
+              }
               final char ch = command.charAt(0);
               final String variable = command.substring(1).trim();
               switch (ch) {
