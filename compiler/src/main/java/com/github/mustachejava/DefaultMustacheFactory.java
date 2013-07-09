@@ -98,7 +98,11 @@ public class DefaultMustacheFactory implements MustacheFactory {
   @Override
   public Reader getReader(String resourceName) {
     ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    InputStream is = ccl.getResourceAsStream((resourceRoot == null ? "" : resourceRoot) + resourceName);
+    String name = (resourceRoot == null ? "" : resourceRoot) + resourceName;
+    InputStream is = ccl.getResourceAsStream(name);
+    if (is == null) {
+      is = DefaultMustacheFactory.class.getClassLoader().getResourceAsStream(name);
+    }
     if (is == null) {
       File file = fileRoot == null ? new File(resourceName) : new File(fileRoot, resourceName);
       if (file.exists() && file.isFile()) {
