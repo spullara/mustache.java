@@ -90,6 +90,16 @@ public class DefaultMustacheFactory implements MustacheFactory {
     this.resourceRoot = null;
   }
 
+  public String resolvePartialPath(String dir, String name, String extension) {
+    String path;
+    if (name.startsWith("/")) {
+      path = new File(name + extension).getPath();
+    } else {
+      path = new File(dir + name + extension).getPath();
+    }
+    return path;
+  }
+
   @Override
   public MustacheVisitor createMustacheVisitor() {
     return new DefaultMustacheVisitor(this);

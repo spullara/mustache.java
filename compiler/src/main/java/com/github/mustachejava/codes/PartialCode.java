@@ -2,7 +2,6 @@ package com.github.mustachejava.codes;
 
 import com.github.mustachejava.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -81,13 +80,7 @@ public class PartialCode extends DefaultCode {
    * @return The filename to be included by this partial tag
    */
   protected String partialName() {
-    String path;
-    if (name.startsWith("/")) {
-      path = new File(name + extension).getPath();
-    } else {
-      path = new File(dir + name + extension).getPath();
-    }
-    return path;
+    return df.resolvePartialPath(dir, name, extension);
   }
 
 }

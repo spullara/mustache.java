@@ -882,6 +882,19 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "uninterestingpartial.html"), sw.toString());
   }
 
+  public void testRelativePathsDotDotDirOverride() throws IOException {
+    MustacheFactory mf = new DefaultMustacheFactory(root) {
+      @Override
+      public String resolvePartialPath(String dir, String name, String extension) {
+        return name + extension;
+      }
+    };
+    Mustache compile = mf.compile("relative/nonrelative.html");
+    StringWriter sw = new StringWriter();
+    compile.execute(sw, null).close();
+    assertEquals(getContents(root, "nonrelative.html"), sw.toString());
+  }
+
   public void testOverrideExtension() throws IOException {
     MustacheFactory mf = new DefaultMustacheFactory(root) {
       @Override
