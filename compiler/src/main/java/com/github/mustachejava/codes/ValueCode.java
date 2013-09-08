@@ -14,6 +14,8 @@ import java.io.Writer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.github.mustachejava.MustacheParser.DEFAULT_EM;
 import static com.github.mustachejava.MustacheParser.DEFAULT_SM;
@@ -129,16 +131,22 @@ public class ValueCode extends DefaultCode {
     }
   }
 
+  private Pattern compiledAppended;
+
   @Override
   public Node invert(Node node, String text, AtomicInteger position) {
-    int index = text.indexOf(appended, position.get());
-    if (index == -1) {
-      return null;
-    } else {
-      String value = text.substring(position.get(), index);
-      position.set(index + appended.length());
+    if (compiledAppended == null) {
+      compiledAppended = Pattern.compile(appended);
+    }
+    int start = position.get();
+    Matcher matcher = compiledAppended.matcher(text);
+    if (matcher.find(position.get())) {
+      String value = text.substring(start, matcher.start());
+      position.set(matcher.start() + matcher.group(0).length());
       node.put(name, value(value));
       return node;
+    } else {
+      return null;
     }
   }
 }

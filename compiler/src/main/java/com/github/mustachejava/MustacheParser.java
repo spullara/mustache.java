@@ -141,7 +141,7 @@ public class MustacheParser {
                 }
                 case '/': {
                   // Tag end
-                  if (!onlywhitespace) {
+                  if (!startOfLine || !onlywhitespace) {
                     write(mv, out, file, currentLine.intValue(), startOfLine);
                   }
                   if (!variable.equals(tag)) {

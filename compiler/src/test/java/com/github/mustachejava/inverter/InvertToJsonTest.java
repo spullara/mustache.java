@@ -48,12 +48,28 @@ public class InvertToJsonTest extends InvertUtils {
     System.out.println(out.toString());
   }
 
+  @Test
+  public void testToJson3() throws IOException {
+    DefaultMustacheFactory dmf = new DefaultMustacheFactory();
+    Mustache compile = dmf.compile("psauxwww.mustache");
+    Path file = getPath("src/test/resources/psauxwww.txt");
+    String txt = new String(Files.readAllBytes(file), "UTF-8");
+    Node invert = compile.invert(txt);
+
+    MappingJsonFactory jf = new MappingJsonFactory();
+    StringWriter out = new StringWriter();
+    JsonGenerator jg = jf.createJsonGenerator(out);
+    writeNode(jg, invert);
+    jg.flush();
+    System.out.println(out.toString());
+  }
+
   private void writeNode(final JsonGenerator jg, Node invert) throws IOException {
     jg.writeStartObject();
     for (final Map.Entry<String, NodeValue> entry : invert.entrySet()) {
-      jg.writeFieldName(entry.getKey());
       NodeValue nodeValue = entry.getValue();
-      if (nodeValue.isList()) {
+      if (nodeValue.isList() && nodeValue.list().size() > 0) {
+        jg.writeFieldName(entry.getKey());
         List<Node> list = nodeValue.list();
         boolean array = list.size() > 1;
         if (array) jg.writeStartArray();
@@ -63,11 +79,14 @@ public class InvertToJsonTest extends InvertUtils {
         if (array) jg.writeEndArray();
       } else {
         String value = nodeValue.value();
-        try {
-          double v = Double.parseDouble(value);
-          jg.writeNumber(v);
-        } catch (NumberFormatException e) {
-          jg.writeString(value);
+        if (value != null) {
+          jg.writeFieldName(entry.getKey());
+          try {
+            double v = Double.parseDouble(value);
+            jg.writeNumber(v);
+          } catch (NumberFormatException e) {
+            jg.writeString(value);
+          }
         }
       }
     }
