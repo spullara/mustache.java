@@ -7,8 +7,10 @@ import com.google.common.base.Function;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class IterableCode extends DefaultCode implements Iteration {
 
@@ -122,5 +124,16 @@ public class IterableCode extends DefaultCode implements Iteration {
     Object[] iteratorScopes = addScope(scopes, next);
     writer = run(writer, iteratorScopes);
     return writer;
+  }
+
+  @Override
+  public Node invert(Node node, String text, AtomicInteger position) throws IOException {
+    ArrayList<Node> nodes = new ArrayList<Node>();
+    Node invert;
+    while ((invert = mustache.invert(new Node(), text, position)) != null) {
+      nodes.add(invert);
+    }
+    node.put(name, nodes);
+    return node;
   }
 }

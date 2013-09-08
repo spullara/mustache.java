@@ -2,11 +2,13 @@ package com.github.mustachejava;
 
 import com.github.mustachejava.codes.*;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 /**
@@ -15,7 +17,12 @@ import java.util.logging.Logger;
 public class DefaultMustacheVisitor implements MustacheVisitor {
   protected static Logger logger = Logger.getLogger(DefaultMustacheVisitor.class.getSimpleName());
 
-  private static final Code EOF = new DefaultCode();
+  private static final Code EOF = new DefaultCode() {
+    @Override
+    public Node invert(Node node, String text, AtomicInteger position) throws IOException {
+      return text.length() == position.get() ? node : null;
+    }
+  };
 
   protected final List<Code> list = new LinkedList<Code>();
   private final Map<String, PragmaHandler> handlers = new HashMap<String, PragmaHandler>() {{

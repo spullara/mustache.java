@@ -1,0 +1,25 @@
+Using cluster file `/etc/foundationdb/fdb.cluster'.
+
+Configuration:
+  Redundancy mode        - double
+  Storage engine         - ssd
+  License                - See foundationdb.com
+  Coordinators           - 3
+
+Cluster:
+  FoundationDB processes - 6
+  Machines               - 3
+  Overall load           - 12%
+
+Data:
+  Replication health     - Healthy
+  Moving data            - 0.000 GB
+  Sum of key-value sizes - 0.267 GB (estimated)
+  Operating space        - 200.5 GB free on most full server
+
+Workload:
+  Read rate              -        10 Hz
+  Write rate             -         0 Hz
+  Transaction rate       -         5 Hz
+  Conflict rate          -         0 Hz
+

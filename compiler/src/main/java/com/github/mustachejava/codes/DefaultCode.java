@@ -1,12 +1,19 @@
 package com.github.mustachejava.codes;
 
-import com.github.mustachejava.*;
-import com.github.mustachejava.util.GuardException;
+import com.github.mustachejava.Binding;
+import com.github.mustachejava.Code;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.Node;
+import com.github.mustachejava.ObjectHandler;
+import com.github.mustachejava.TemplateContext;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Simplest possible code implementaion with some default shared behavior
@@ -54,6 +61,11 @@ public class DefaultCode implements Code, Cloneable {
     } catch (CloneNotSupportedException e) {
       throw new MustacheException("Clone not supported");
     }
+  }
+
+  @Override
+  public Node invert(Node node, String text, AtomicInteger position) throws IOException {
+    throw new MustacheException("Not implemented for " + this.getClass().getName());
   }
 
   public DefaultCode() {

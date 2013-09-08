@@ -3,6 +3,7 @@ package com.github.mustachejava.codes;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.FragmentKey;
 import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.Node;
 import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.LatchedWriter;
 import com.google.common.base.Function;
@@ -10,8 +11,10 @@ import com.google.common.base.Function;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.mustachejava.MustacheParser.DEFAULT_EM;
 import static com.github.mustachejava.MustacheParser.DEFAULT_SM;
@@ -126,4 +129,16 @@ public class ValueCode extends DefaultCode {
     }
   }
 
+  @Override
+  public Node invert(Node node, String text, AtomicInteger position) throws IOException {
+    int index = text.indexOf(appended, position.get());
+    if (index == -1) {
+      return null;
+    } else {
+      String value = text.substring(position.get(), index);
+      position.set(index + appended.length());
+      node.put(name, Arrays.asList(new Node(value)));
+      return node;
+    }
+  }
 }
