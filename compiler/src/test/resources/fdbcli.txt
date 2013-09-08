@@ -22,4 +22,3 @@ Workload:
   Write rate             -         0 Hz
   Transaction rate       -         5 Hz
   Conflict rate          -         0 Hz
-

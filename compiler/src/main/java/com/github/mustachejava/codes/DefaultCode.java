@@ -63,11 +63,6 @@ public class DefaultCode implements Code, Cloneable {
     }
   }
 
-  @Override
-  public Node invert(Node node, String text, AtomicInteger position) throws IOException {
-    throw new MustacheException("Not implemented for " + this.getClass().getName());
-  }
-
   public DefaultCode() {
     this(null, null, null, null, null);
   }
@@ -81,6 +76,30 @@ public class DefaultCode implements Code, Cloneable {
     this.tc = tc;
     this.binding = oh == null ? null : oh.createBinding(name, tc, this);
     this.returnThis = ".".equals(name);
+  }
+
+  @Override
+  public Node invert(Node node, String text, AtomicInteger position) throws IOException {
+    int start = position.get();
+    Code[] codes = getCodes();
+    if (codes != null) {
+      for (Code code : codes) {
+        Node invert = code.invert(node, text, position);
+        if (invert == null) {
+          position.set(start);
+          return null;
+        }
+      }
+    }
+    if (appended == null) {
+      return node;
+    } else if (text.substring(position.get()).startsWith(appended)) {
+      position.addAndGet(appended.length());
+      return node;
+    } else {
+      position.set(start);
+      return null;
+    }
   }
 
   public Code[] getCodes() {

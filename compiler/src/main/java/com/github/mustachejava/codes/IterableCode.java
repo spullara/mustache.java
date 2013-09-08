@@ -1,6 +1,13 @@
 package com.github.mustachejava.codes;
 
-import com.github.mustachejava.*;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.FragmentKey;
+import com.github.mustachejava.Iteration;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.Node;
+import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.TemplateFunction;
 import com.github.mustachejava.util.LatchedWriter;
 import com.google.common.base.Function;
 
@@ -8,6 +15,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -128,12 +136,21 @@ public class IterableCode extends DefaultCode implements Iteration {
 
   @Override
   public Node invert(Node node, String text, AtomicInteger position) throws IOException {
-    ArrayList<Node> nodes = new ArrayList<Node>();
+    int start = position.get();
+    List<Node> nodes = new ArrayList<Node>();
     Node invert;
     while ((invert = mustache.invert(new Node(), text, position)) != null) {
       nodes.add(invert);
     }
     node.put(name, nodes);
-    return node;
+    if (appended == null) {
+      return node;
+    } else if (text.substring(position.get()).startsWith(appended)) {
+      position.addAndGet(appended.length());
+      return node;
+    } else {
+      position.set(start);
+      return null;
+    }
   }
 }

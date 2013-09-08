@@ -7,6 +7,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Arrays.asList;
@@ -15,10 +18,13 @@ import static org.junit.Assert.assertEquals;
 public class InverterTest {
 
   @Test
-  public void testParser() {
+  public void testParser() throws IOException {
     DefaultMustacheFactory dmf = new DefaultMustacheFactory();
     Mustache compile = dmf.compile("fdbcli.mustache");
-
+    Path file = FileSystems.getDefault().getPath("src/test/resources/fdbcli.txt");
+    String txt = new String(Files.readAllBytes(file), "UTF-8");
+    Node invert = compile.invert(new Node(), txt, new AtomicInteger(0));
+    System.out.println(invert);
   }
 
   @Test

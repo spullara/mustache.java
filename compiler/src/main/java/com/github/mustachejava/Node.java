@@ -1,9 +1,9 @@
 package com.github.mustachejava;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
-public class Node extends HashMap<String, List<Node>> {
+public class Node extends LinkedHashMap<String, List<Node>> {
   public final String value;
 
   public Node() {
