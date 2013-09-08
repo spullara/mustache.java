@@ -32,4 +32,29 @@ public class NodeValue {
   public String value() {
     return value;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    NodeValue nodeValue = (NodeValue) o;
+
+    if (list != null ? !list.equals(nodeValue.list) : nodeValue.list != null) return false;
+    if (value != null ? !value.equals(nodeValue.value) : nodeValue.value != null) return false;
+
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = list != null ? list.hashCode() : 0;
+    result = 31 * result + (value != null ? value.hashCode() : 0);
+    return result;
+  }
+
+  @Override
+  public String toString() {
+    return isList ? list.toString() : value;
+  }
 }

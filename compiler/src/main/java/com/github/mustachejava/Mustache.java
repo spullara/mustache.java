@@ -1,5 +1,7 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.util.Node;
+
 import java.io.Writer;
 
 /**
@@ -66,4 +68,12 @@ public interface Mustache extends Code {
    * @return
    */
   Writer run(Writer writer, Object[] scopes);
+
+  /**
+   * Invert this mustache given output text.
+   *
+   * @param text
+   * @return
+   */
+  Node invert(String text);
 }

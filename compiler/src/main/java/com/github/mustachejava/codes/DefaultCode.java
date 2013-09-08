@@ -79,7 +79,7 @@ public class DefaultCode implements Code, Cloneable {
   }
 
   @Override
-  public Node invert(Node node, String text, AtomicInteger position) throws IOException {
+  public Node invert(Node node, String text, AtomicInteger position) {
     int start = position.get();
     Code[] codes = getCodes();
     if (codes != null) {

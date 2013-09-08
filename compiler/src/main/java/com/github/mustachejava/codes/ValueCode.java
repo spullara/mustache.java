@@ -130,7 +130,7 @@ public class ValueCode extends DefaultCode {
   }
 
   @Override
-  public Node invert(Node node, String text, AtomicInteger position) throws IOException {
+  public Node invert(Node node, String text, AtomicInteger position) {
     int index = text.indexOf(appended, position.get());
     if (index == -1) {
       return null;

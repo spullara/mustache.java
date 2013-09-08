@@ -37,5 +37,5 @@ public interface Code {
    * @param reader
    * @return
    */
-  Node invert(Node node, String text, AtomicInteger position) throws IOException;
+  Node invert(Node node, String text, AtomicInteger position);
 }

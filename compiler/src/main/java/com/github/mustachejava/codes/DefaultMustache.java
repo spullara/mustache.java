@@ -4,8 +4,10 @@ import com.github.mustachejava.Code;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.util.Node;
 
 import java.io.Writer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Default Mustache
@@ -31,6 +33,17 @@ public class DefaultMustache extends DefaultCode implements Mustache {
       }
     }
     return writer;
+  }
+
+  /**
+   * Invert this mustache given output text.
+   *
+   * @param text
+   * @return
+   */
+  @Override
+  public Node invert(String text) {
+    return invert(new Node(), text, new AtomicInteger(0));
   }
 
   @Override

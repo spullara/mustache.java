@@ -10,21 +10,19 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
-public class InvertToJsonTest {
+public class InvertToJsonTest extends InvertUtils {
   @Test
   public void testToJson() throws IOException {
     DefaultMustacheFactory dmf = new DefaultMustacheFactory();
     Mustache compile = dmf.compile("fdbcli.mustache");
-    Path file = FileSystems.getDefault().getPath("src/test/resources/fdbcli.txt");
+    Path file = getPath("src/test/resources/fdbcli.txt");
     String txt = new String(Files.readAllBytes(file), "UTF-8");
-    Node invert = compile.invert(new Node(), txt, new AtomicInteger(0));
+    Node invert = compile.invert(txt);
 
     MappingJsonFactory jf = new MappingJsonFactory();
     StringWriter out = new StringWriter();

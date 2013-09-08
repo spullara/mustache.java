@@ -1,9 +1,16 @@
 package com.github.mustachejava;
 
-import com.github.mustachejava.codes.*;
+import com.github.mustachejava.codes.DefaultCode;
+import com.github.mustachejava.codes.DefaultMustache;
+import com.github.mustachejava.codes.ExtendCode;
+import com.github.mustachejava.codes.ExtendNameCode;
+import com.github.mustachejava.codes.IterableCode;
+import com.github.mustachejava.codes.NotIterableCode;
+import com.github.mustachejava.codes.PartialCode;
+import com.github.mustachejava.codes.ValueCode;
+import com.github.mustachejava.codes.WriteCode;
 import com.github.mustachejava.util.Node;
 
-import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -20,7 +27,7 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
 
   private static final Code EOF = new DefaultCode() {
     @Override
-    public Node invert(Node node, String text, AtomicInteger position) throws IOException {
+    public Node invert(Node node, String text, AtomicInteger position) {
       return text.length() == position.get() ? node : null;
     }
   };

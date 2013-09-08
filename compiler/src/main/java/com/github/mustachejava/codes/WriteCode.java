@@ -1,10 +1,9 @@
 package com.github.mustachejava.codes;
 
 import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.util.Node;
 import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.util.Node;
 
-import java.io.IOException;
 import java.io.Writer;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,7 +22,7 @@ public class WriteCode extends DefaultCode {
   }
 
   @Override
-  public Node invert(Node node, String text, AtomicInteger position) throws IOException {
+  public Node invert(Node node, String text, AtomicInteger position) {
     if (text.substring(position.get()).startsWith(appended)) {
       position.addAndGet(appended.length());
       return node;

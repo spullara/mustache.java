@@ -137,7 +137,7 @@ public class IterableCode extends DefaultCode implements Iteration {
   }
 
   @Override
-  public Node invert(Node node, String text, AtomicInteger position) throws IOException {
+  public Node invert(Node node, String text, AtomicInteger position) {
     int start = position.get();
     List<Node> nodes = new ArrayList<Node>();
     Node invert;
