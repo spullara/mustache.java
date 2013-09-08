@@ -2,7 +2,8 @@ package com.github.mustachejava.inverter;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
-import com.github.mustachejava.Node;
+import com.github.mustachejava.util.Node;
+import com.github.mustachejava.util.NodeValue;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.MappingJsonFactory;
 import org.junit.Test;
@@ -33,28 +34,29 @@ public class InvertToJsonTest {
     System.out.println(out.toString());
   }
 
-  private void writeNode(JsonGenerator jg, Node invert) throws IOException {
-    String value = invert.value;
-    if (value == null) {
-      jg.writeStartObject();
-      for (Map.Entry<String, List<Node>> entry : invert.entrySet()) {
-        List<Node> list = entry.getValue();
+  private void writeNode(final JsonGenerator jg, Node invert) throws IOException {
+    jg.writeStartObject();
+    for (final Map.Entry<String, NodeValue> entry : invert.entrySet()) {
+      jg.writeFieldName(entry.getKey());
+      NodeValue nodeValue = entry.getValue();
+      if (nodeValue.isList()) {
+        List<Node> list = nodeValue.list();
         boolean array = list.size() > 1;
-        jg.writeFieldName(entry.getKey());
         if (array) jg.writeStartArray();
         for (Node node : list) {
           writeNode(jg, node);
         }
         if (array) jg.writeEndArray();
-      }
-      jg.writeEndObject();
-    } else {
-      try {
-        double v = Double.parseDouble(value);
-        jg.writeNumber(v);
-      } catch (NumberFormatException e) {
-        jg.writeString(value);
+      } else {
+        String value = nodeValue.value();
+        try {
+          double v = Double.parseDouble(value);
+          jg.writeNumber(v);
+        } catch (NumberFormatException e) {
+          jg.writeString(value);
+        }
       }
     }
+    jg.writeEndObject();
   }
 }

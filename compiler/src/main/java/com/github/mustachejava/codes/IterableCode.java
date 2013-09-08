@@ -5,10 +5,10 @@ import com.github.mustachejava.FragmentKey;
 import com.github.mustachejava.Iteration;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.Node;
 import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.TemplateFunction;
 import com.github.mustachejava.util.LatchedWriter;
+import com.github.mustachejava.util.Node;
 import com.google.common.base.Function;
 
 import java.io.IOException;
@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.github.mustachejava.util.NodeValue.list;
 
 public class IterableCode extends DefaultCode implements Iteration {
 
@@ -142,7 +144,7 @@ public class IterableCode extends DefaultCode implements Iteration {
     while ((invert = mustache.invert(new Node(), text, position)) != null) {
       nodes.add(invert);
     }
-    node.put(name, nodes);
+    node.put(name, list(nodes));
     if (appended == null) {
       return node;
     } else if (text.substring(position.get()).startsWith(appended)) {

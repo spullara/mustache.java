@@ -3,21 +3,21 @@ package com.github.mustachejava.codes;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.FragmentKey;
 import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.Node;
 import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.LatchedWriter;
+import com.github.mustachejava.util.Node;
 import com.google.common.base.Function;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.mustachejava.MustacheParser.DEFAULT_EM;
 import static com.github.mustachejava.MustacheParser.DEFAULT_SM;
+import static com.github.mustachejava.util.NodeValue.value;
 
 /**
  * Output a value
@@ -137,7 +137,7 @@ public class ValueCode extends DefaultCode {
     } else {
       String value = text.substring(position.get(), index);
       position.set(index + appended.length());
-      node.put(name, Arrays.asList(new Node(value)));
+      node.put(name, value(value));
       return node;
     }
   }

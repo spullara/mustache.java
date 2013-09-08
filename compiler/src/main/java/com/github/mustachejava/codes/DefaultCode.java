@@ -5,7 +5,7 @@ import com.github.mustachejava.Code;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.Node;
+import com.github.mustachejava.util.Node;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.TemplateContext;
 

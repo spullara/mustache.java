@@ -1,7 +1,7 @@
 package com.github.mustachejava.codes;
 
 import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Node;
+import com.github.mustachejava.util.Node;
 import com.github.mustachejava.TemplateContext;
 
 import java.io.IOException;
