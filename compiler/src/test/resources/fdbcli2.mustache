@@ -1,0 +1,48 @@
+{{#fdb}}
+Using cluster file `/etc/foundationdb/fdb.cluster'.
+
+{{#config}}
+Configuration:
+  Redundancy mode        - {{redundancy}}
+  Storage engine         - {{storage_engine}}
+  License                - See foundationdb.com
+  Coordinators           - {{coordinators}}
+{{/config}}
+
+{{#cluster}}
+Cluster:
+  FoundationDB processes - {{processes}}
+  Machines               - {{machines}}
+  Overall load           - {{load}}%
+{{/cluster}}
+
+{{#data}}
+Data:
+  Replication health     - {{health}}
+  Moving data            - {{moving}} GB
+  Sum of key-value sizes - {{total}} GB (estimated)
+  Operating space        - {{least_available}} GB free on most full server
+{{/data}}
+
+{{#workload}}
+Workload:
+  Read rate              - {{read_rate}} Hz
+  Write rate             - {{write_rate}} Hz
+  Transaction rate       - {{tx_rate}} Hz
+  Conflict rate          - {{conflict_rate}} Hz
+{{/workload}}
+
+{{#performance}}
+Process performance details:
+{{#process}}
+  {{ip}}:{{port}}({{cpu}}% cpu;{{machine_cpu}}% machine;{{network}} Gbps;{{disk}}% disk IO)
+{{/process}}
+{{/performance}}
+
+{{#coordinator}}
+Coordination servers:
+{{#server}}
+  {{ip}}:{{port}}
+{{/server}}
+{{/coordinator}}
+{{/fdb}}
