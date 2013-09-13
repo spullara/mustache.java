@@ -34,9 +34,12 @@ public class DefaultCode implements Code, Cloneable {
       DefaultCode code = (DefaultCode) super.clone();
       Code[] codes = code.getCodes();
       if (codes != null) {
+        // Create a new set of codes
         codes = codes.clone();
-        for (int i = 0; codes != null && i < codes.length; i++) {
-          if (seen.add(codes[i])) {
+        for (int i = 0; i < codes.length; i++) {
+          // If the code hasn't been seen before
+          // use this one, else clone it.
+          if (!seen.add(codes[i])) {
             codes[i] = (Code) codes[i].clone(seen);
             seen.remove(codes[i]);
           }
@@ -44,7 +47,7 @@ public class DefaultCode implements Code, Cloneable {
         code.setCodes(codes);
       }
       if (mustache != null) {
-        if (seen.add(mustache)) {
+        if (!seen.add(mustache)) {
           code.mustache = (Mustache) mustache.clone(seen);
           seen.remove(mustache);
         }
