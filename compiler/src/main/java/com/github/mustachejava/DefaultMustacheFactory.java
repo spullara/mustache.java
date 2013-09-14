@@ -5,6 +5,7 @@ import com.google.common.base.Charsets;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.io.Files;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.UncheckedExecutionException;
@@ -93,9 +94,9 @@ public class DefaultMustacheFactory implements MustacheFactory {
   public String resolvePartialPath(String dir, String name, String extension) {
     String path;
     if (name.startsWith("/")) {
-      path = new File(name + extension).getPath();
+      path = Files.simplifyPath(new File(name + extension).getPath());
     } else {
-      path = new File(dir + name + extension).getPath();
+      path = Files.simplifyPath(new File(dir + name + extension).getPath());
     }
     return path;
   }
