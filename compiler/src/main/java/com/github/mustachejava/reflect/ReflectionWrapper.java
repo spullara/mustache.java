@@ -53,15 +53,17 @@ public class ReflectionWrapper extends GuardedWrapper {
 
   @Override
   public Object call(Object[] scopes) throws GuardException {
+    guardCall(scopes);
+    Object scope = oh.coerce(unwrap(scopes));
     try {
-      guardCall(scopes);
-      Object scope = unwrap(scopes);
       if (scope == null) return null;
       if (method == null) {
         return field.get(scope);
       } else {
         return method.invoke(scope, arguments);
       }
+    } catch (IllegalArgumentException e) {
+      throw new MustacheException("Wrong method for object: " + method + " on " + scope, e);
     } catch (InvocationTargetException e) {
       throw new MustacheException("Failed to execute method: " + method, e.getTargetException());
     } catch (IllegalAccessException e) {

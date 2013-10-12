@@ -7,6 +7,20 @@ import java.util.concurrent.{Callable, Executors}
 import org.junit.{Assert, Test}
 
 class ObjectHandlerTest {
+
+  @Test
+  def testMap() {
+    val mf = new DefaultMustacheFactory()
+    mf.setObjectHandler(new ScalaObjectHandler)
+    val m = mf.compile(
+      new StringReader("{{#map}}{{test}}{{test2}}{{/map}}"),
+      "helloworld"
+    )
+    val sw = new StringWriter
+    val w = m.execute(sw, Map( "map" -> Map( "test" -> "fred" ) ) ).close()
+    Assert.assertEquals("fred", sw.toString())
+  }
+
   @Test
   def testTwitterHandler() {
     val pool = Executors.newCachedThreadPool()
