@@ -958,6 +958,15 @@ public class InterpreterTest extends TestCase {
     assertEquals("abc", sw.toString());
   }
 
+  public void testCR() {
+    Mustache m = new DefaultMustacheFactory().compile(new StringReader("{{test}}\r\n{{test}}\r\n"), "test");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      String test = "fred";
+    });
+    assertEquals("fred\r\nfred\r\n", sw.toString());
+  }
+
   public void testOutputDelimiters() {
     String template = "{{=## ##=}}{{##={{ }}=####";
     Mustache mustache = new DefaultMustacheFactory().compile(new StringReader(template), "test");

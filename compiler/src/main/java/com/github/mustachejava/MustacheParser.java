@@ -54,6 +54,7 @@ public class MustacheParser {
       br = new BufferedReader(reader);
     }
     try {
+      boolean sawCR = false;
       int startLine = currentLine.get();
       MustacheVisitor mv = mf.createMustacheVisitor();
       // Now we grab the mustache template
@@ -66,12 +67,14 @@ public class MustacheParser {
         int c;
         while ((c = br.read()) != -1) {
           if (c == '\r') {
+            sawCR = true;
             continue;
           }
           // Increment the line
           if (c == '\n') {
             currentLine.incrementAndGet();
             if (!iterable || (iterable && !onlywhitespace)) {
+              if (sawCR) out.append("\r");
               out.append("\n");
             }
             out = write(mv, out, file, currentLine.intValue(), startOfLine);
@@ -81,6 +84,7 @@ public class MustacheParser {
             startOfLine = true;
             continue;
           }
+          sawCR = false;
           // Check for a mustache start
           if (c == sm.charAt(0)) {
             br.mark(1);
