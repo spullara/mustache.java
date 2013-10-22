@@ -148,6 +148,15 @@ public class ExtensionTest {
     assertEquals(getContents(root, "subsubchild3.txt"), sw.toString());
   }
 
+  @Test
+  public void testNested() throws IOException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("nested_inheritance.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {});
+    assertEquals(getContents(root, "nested_inheritance.txt"), sw.toString());
+  }
+
   protected String getContents(File root, String file) throws IOException {
     BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(root, file)),"UTF-8"));
     StringWriter capture = new StringWriter();
