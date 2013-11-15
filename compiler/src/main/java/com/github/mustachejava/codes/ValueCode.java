@@ -61,7 +61,7 @@ public class ValueCode extends DefaultCode {
     try {
       if (object == null || object.equals("")) {
     	  
-    	if (cf.isExceptionProne())
+    	if (df.isExceptionProne())
     		throw new NoSuchFieldException();
     	
       } else if (object instanceof Function) {
