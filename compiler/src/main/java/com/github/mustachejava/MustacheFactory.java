@@ -30,6 +30,13 @@ public interface MustacheFactory {
    * @param writer where to encode the value
    */
   void encode(String value, Writer writer);
+  
+  /**
+   * Triggers exception on null and empty string.
+   * 
+   * @param boolean value
+  */
+  void setExceptionProne(boolean b);
 
   /**
    * The object handler knows how to transform names into fields and methods.

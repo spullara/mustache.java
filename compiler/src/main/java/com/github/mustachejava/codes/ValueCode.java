@@ -58,18 +58,21 @@ public class ValueCode extends DefaultCode {
   @Override
   public Writer execute(Writer writer, final Object[] scopes) {
     final Object object = get(scopes);
-    if (object != null) {
-      try {
-        if (object instanceof Function) {
-          handleFunction(writer, (Function) object, scopes);
-        } else if (object instanceof Callable) {
-          return handleCallable(writer, (Callable) object, scopes);
-        } else {
-          execute(writer, oh.stringify(object));
-        }
-      } catch (Exception e) {
-        throw new MustacheException("Failed to get value for " + name + " at line " + tc.file() + ":" + tc.line(), e);
+    try {
+      if (object == null || object.equals("")) {
+    	  
+    	if (cf.isExceptionProne())
+    		throw new NoSuchFieldException();
+    	
+      } else if (object instanceof Function) {
+        handleFunction(writer, (Function) object, scopes);
+      } else if (object instanceof Callable) {
+        return handleCallable(writer, (Callable) object, scopes);
+      } else {
+        execute(writer, oh.stringify(object));
       }
+    } catch (Exception e) {
+      throw new MustacheException("Failed to get value for " + name + " at line " + tc.file() + ":" + tc.line(), e);
     }
     return super.execute(writer, scopes);
   }
