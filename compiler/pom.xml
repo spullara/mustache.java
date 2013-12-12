@@ -3,7 +3,7 @@
   <parent>
     <artifactId>mustache.java</artifactId>
     <groupId>com.github.spullara.mustache.java</groupId>
-    <version>0.8.14-SNAPSHOT</version>
+    <version>0.8.14</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -25,6 +25,7 @@
   <scm>
     <connection>scm:git:git://github.com/spullara/mustache.java.git</connection>
     <url>http://github.com/spullara/mustache.java</url>
+    <tag>mustache.java-0.8.14</tag>
   </scm>
 
   <developers>
