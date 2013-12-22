@@ -29,6 +29,15 @@ import static com.github.mustachejava.util.HtmlEscaper.escape;
  */
 public class DefaultMustacheFactory implements MustacheFactory {
 
+  protected boolean exceptionProne = false;
+  public boolean isExceptionProne() {
+	  return exceptionProne;
+  }
+  @Override
+  public void setExceptionProne (boolean b) {
+    exceptionProne = b;
+  }
+  
   /**
    * Create the default cache for mustache compilations. This is basically
    * required by the specification to handle recursive templates.
