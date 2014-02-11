@@ -1,19 +1,27 @@
 {{#fdb}}
-Using cluster file `/etc/foundationdb/fdb.cluster'.
+Using cluster file `{{cluster_file}}'.
 
 {{#config}}
 Configuration:
   Redundancy mode        - {{redundancy}}
   Storage engine         - {{storage_engine}}
-  License                - See foundationdb.com
+  License                - {{license}}
   Coordinators           - {{coordinators}}
+  {{#excludes}}
+  Exclusions             - {{exclusions}} \(type `exclude' for details\)
+  {{/excludes}}
 {{/config}}
 
 {{#cluster}}
 Cluster:
   FoundationDB processes - {{processes}}
+  {{#note}}
+    Note: Production Use with more than 6 processes terminates
+          the Community License Agreement and requires an
+          Enterprise License Agreement.
+  {{/note}}
   Machines               - {{machines}}
-  Overall load           - {{load}}%
+  Overall load           - {{load}}% {{reason}}
 {{/cluster}}
 
 {{#data}}

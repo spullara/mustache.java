@@ -49,6 +49,25 @@ public class InvertToJsonTest extends InvertUtils {
   }
 
   @Test
+  public void testToJson4() throws IOException {
+    DefaultMustacheFactory dmf = new DefaultMustacheFactory();
+    Mustache compile = dmf.compile("fdbcli2.mustache");
+    Path file = getPath("src/test/resources/fdbcli3.txt");
+    String txt = new String(Files.readAllBytes(file), "UTF-8");
+    System.out.println("Input text:[");
+    System.out.print(txt);
+    System.out.println("]");
+    Node invert = compile.invert(txt);
+
+    MappingJsonFactory jf = new MappingJsonFactory();
+    StringWriter out = new StringWriter();
+    JsonGenerator jg = jf.createJsonGenerator(out);
+    writeNode(jg, invert);
+    jg.flush();
+    System.out.println(out.toString());
+  }
+
+  @Test
   public void testToJson3() throws IOException {
     DefaultMustacheFactory dmf = new DefaultMustacheFactory();
     Mustache compile = dmf.compile("psauxwww.mustache");
