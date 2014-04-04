@@ -10,6 +10,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
 
@@ -33,14 +34,31 @@ public class MapNonGetMethodsTest {
   }
 
   private static final String TEMPLATE = "{{empty}}";
-  
+  private static final String TEMPLATE2 = "{{#entrySet}}" +
+          "{{key}}={{value}}\n" +
+          "{{/entrySet}}";
+
   private DefaultMustacheFactory factory;
 
   @Before
   public void setUp() {
     factory = new DefaultMustacheFactory();
   }
-  
+
+  @Test
+  public void testKeyValues() {
+    Map<String, String> model = new TreeMap<String, String>() {{
+      put("test", "testvalue");
+      put("key", "keyvalue");
+    }};
+
+    Reader reader = new StringReader(TEMPLATE2);
+    factory.setObjectHandler(new MapMethodReflectionHandler());
+    Mustache mustache = factory.compile(reader, "template");
+
+    verifyOutput("key=keyvalue\ntest=testvalue\n", model, mustache);
+  }
+
   @Test
   public void testMethodAccessDisallowed() {
     Map<String, Object> model = new HashMap<String, Object>();
