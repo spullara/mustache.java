@@ -11,20 +11,10 @@ import junit.framework.TestCase;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.MappingJsonFactory;
+import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -249,8 +239,8 @@ public class InterpreterTest extends TestCase {
 
       Object in_ca = Arrays.asList(
               o, new Object() {
-        int taxed_value = (int) (value - (value * 0.2));
-      },
+                int taxed_value = (int) (value - (value * 0.2));
+              },
               o
       );
     });
@@ -1027,5 +1017,26 @@ public class InterpreterTest extends TestCase {
     super.setUp();
     File file = new File("src/test/resources");
     root = new File(file, "simple.html").exists() ? file : new File("../src/test/resources");
+  }
+
+  @Test
+  public void testMap() throws IOException {
+    ArrayList<Map<String, String>> fn = new ArrayList<Map<String, String>>();
+    Map<String, String> map1 = new HashMap<String, String>();
+    map1.put("name", "firstName");
+    map1.put("last", "lastName");
+    fn.add(map1);
+    Map<String, String> map2 = new HashMap<String, String>();
+    map2.put("name", "firstName 1");
+    map2.put("last", "lastName 1");
+    fn.add(map2);
+    Map map = new HashMap();
+    map.put("names", fn);
+
+    Writer writer = new OutputStreamWriter(System.out);
+    MustacheFactory mf = new DefaultMustacheFactory();
+    Mustache mustache = mf.compile(new StringReader("{{#names}}<h2>First Name : {{name}}</h2> <h2>Last Name : {{last}}</h2>{{/names}}"), "example");
+    mustache.execute(writer, map);
+    writer.flush();
   }
 }
