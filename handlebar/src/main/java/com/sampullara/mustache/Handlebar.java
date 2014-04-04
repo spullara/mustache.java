@@ -22,6 +22,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.github.mustachejava.TemplateFunction;
+import com.google.common.base.Function;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
@@ -205,6 +207,15 @@ public class Handlebar {
         List<Object> scs = new ArrayList<Object>();
         if (null != scopes) scs.addAll(Arrays.<Object>asList(scopes));
         scs.add(parameters);
+
+        scs.add(new Object() {
+          Function slots = new TemplateFunction() {
+            @Override
+            public String apply(String input) {
+              return "{{>" + input.trim() + "}}";
+            }
+          };
+        });
 
         if (file.exists()) {
           BufferedReader br =
