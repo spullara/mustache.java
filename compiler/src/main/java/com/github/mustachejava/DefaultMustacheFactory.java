@@ -98,7 +98,11 @@ public class DefaultMustacheFactory implements MustacheFactory {
     } else {
       path = Files.simplifyPath(new File(dir + name + extension).getPath());
     }
-    return path;
+    return ensureForwardSlash(path);
+  }
+
+  private static String ensureForwardSlash(String path) {
+    return path.replace('\\', '/');
   }
 
   @Override
