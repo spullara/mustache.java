@@ -10,15 +10,9 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.Writer;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
@@ -254,6 +248,35 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   public int getRecursionLimit() {
     return recursionLimit;
+  }
+
+  private final ThreadLocal<Map<String, Mustache>> partialCache = new ThreadLocal<Map<String, Mustache>>() {
+    @Override
+    protected Map<String, Mustache> initialValue() {
+      return new HashMap<String, Mustache>();
+    }
+  };
+
+  /**
+   * In order to handle recursion, we need a temporary thread local cache during compilation
+   * that is ultimately thrown away after the top level partial is complete.
+   *
+   * @param s
+   * @return
+   */
+  public Mustache compilePartial(String s) {
+    Map<String, Mustache> cache = partialCache.get();
+    try {
+      Mustache mustache = cache.get(s);
+      if (mustache == null) {
+        mustache = mc.compile(s);
+        cache.put(s, mustache);
+        mustache.init();
+      }
+      return mustache;
+    } finally {
+      cache.remove(s);
+    }
   }
 
   protected class MustacheCacheLoader extends CacheLoader<String, Mustache> {

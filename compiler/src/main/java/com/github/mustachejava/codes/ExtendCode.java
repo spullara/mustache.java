@@ -1,11 +1,6 @@
 package com.github.mustachejava.codes;
 
-import com.github.mustachejava.Code;
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.MustacheFactory;
-import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,7 +16,7 @@ import java.util.Set;
  */
 public class ExtendCode extends PartialCode {
 
-  private final MustacheFactory mf;
+  private final DefaultMustacheFactory mf;
 
   public ExtendCode(TemplateContext tc, DefaultMustacheFactory mf, Mustache codes, String name) throws MustacheException {
     super(tc, mf, codes, "<", name);
@@ -73,7 +68,7 @@ public class ExtendCode extends PartialCode {
                 "Illegal code in extend section: " + code.getClass().getName());
       }
     }
-    Mustache original = mf.compile(mf.getReader(partialName()), partialName());
+    Mustache original = mf.compilePartial(partialName());
     partial = (Mustache) original.clone();
     Code[] supercodes = partial.getCodes();
     // recursively replace named sections with replacements

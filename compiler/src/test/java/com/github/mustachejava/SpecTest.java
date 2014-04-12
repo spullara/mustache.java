@@ -50,6 +50,11 @@ public class SpecTest {
     run(getSpec("~lambdas.json"));
   }
 
+  // @Test — need this to appear in the spec repository to enable
+  public void inheritance() throws IOException {
+    run(getSpec("inheritance.json"));
+  }
+
   private void run(JsonNode spec) {
     int fail = 0;
     int success = 0;
