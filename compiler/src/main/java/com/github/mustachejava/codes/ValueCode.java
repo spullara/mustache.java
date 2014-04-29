@@ -136,7 +136,11 @@ public class ValueCode extends DefaultCode {
   @Override
   public Node invert(Node node, String text, AtomicInteger position) {
     if (compiledAppended == null) {
-      compiledAppended = Pattern.compile(appended);
+      if (appended == null) {
+        compiledAppended = Pattern.compile("$");
+      } else {
+        compiledAppended = Pattern.compile(appended);
+      }
     }
     int start = position.get();
     Matcher matcher = compiledAppended.matcher(text);

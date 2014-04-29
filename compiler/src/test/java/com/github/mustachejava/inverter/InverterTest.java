@@ -2,6 +2,7 @@ package com.github.mustachejava.inverter;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
 import com.github.mustachejava.util.Node;
 import org.junit.Test;
 
@@ -10,11 +11,13 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 
 import static com.github.mustachejava.util.NodeValue.list;
 import static com.github.mustachejava.util.NodeValue.value;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class InverterTest extends InvertUtils {
 
@@ -53,5 +56,14 @@ public class InverterTest extends InvertUtils {
     StringWriter sw = new StringWriter();
     test.execute(sw, invert).close();
     System.out.println(sw);
+  }
+
+  @Test
+  public void testCollectPoints() throws Exception {
+    MustacheFactory dmf = new DefaultMustacheFactory();
+    Mustache compile = dmf.compile(new StringReader("{{#page}}This is a {{test}}{{/page}}"),
+            UUID.randomUUID().toString());
+    Node node = compile.invert("This is a good day");
+    assertNotNull(node);
   }
 }
