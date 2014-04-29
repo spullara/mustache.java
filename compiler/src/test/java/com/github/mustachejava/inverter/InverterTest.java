@@ -66,4 +66,13 @@ public class InverterTest extends InvertUtils {
     Node node = compile.invert("This is a good day");
     assertNotNull(node);
   }
+
+  @Test
+  public void testNoNode() throws Exception {
+    MustacheFactory dmf = new DefaultMustacheFactory();
+    Mustache compile = dmf.compile(new StringReader("Using cluster file [^\\n]+\nHello World"),
+        UUID.randomUUID().toString());
+    Node node = compile.invert("Using cluster file `/etc/foundationdb/fdb.cluster'.\nHello World");
+    assertNotNull(node);
+  }
 }
