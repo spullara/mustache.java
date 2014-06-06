@@ -18,9 +18,7 @@ import org.codehaus.plexus.compiler.util.scan.mapping.SuffixMapping;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 @Mojo(name = "validate", defaultPhase = LifecyclePhase.PROCESS_RESOURCES)
@@ -32,16 +30,19 @@ public class MustacheValidationMojo extends AbstractMojo {
   @Parameter(defaultValue = "target/classes")
   private File outputDirectory;
 
+  @Parameter(defaultValue = "mustache")
+  private String extension;
+
   @Parameter(defaultValue = "false")
   private boolean includeStale;
 
   public void execute() throws MojoExecutionException, MojoFailureException {
 
     SourceInclusionScanner scanner = includeStale
-      ? new StaleSourceScanner(1024, Collections.singleton("**/*.mustache"), Collections.<String>emptySet())
-      : new SimpleSourceInclusionScanner(Collections.singleton("**/*.mustache"), Collections.<String>emptySet());
+            ? new StaleSourceScanner(1024, Collections.singleton("**/*." + extension), Collections.<String>emptySet())
+            : new SimpleSourceInclusionScanner(Collections.singleton("**/*." + extension), Collections.<String>emptySet());
 
-    scanner.addSourceMapping(new SuffixMapping(".mustache", new HashSet(Arrays.asList(".mustache"))));
+    scanner.addSourceMapping(new SuffixMapping("." + extension, "." + extension));
 
     MustacheFactory mustacheFactory = new DefaultMustacheFactory();
     try {
@@ -60,6 +61,5 @@ public class MustacheValidationMojo extends AbstractMojo {
     } catch (FileNotFoundException e) {
       throw new MojoExecutionException(e.getMessage());
     }
-
   }
 }
