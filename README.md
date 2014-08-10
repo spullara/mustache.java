@@ -71,7 +71,7 @@ Maven dependency information (ie. for most common cases you will just need the `
 <dependency>
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>compiler</artifactId>
-  <version>0.8.15</version>
+  <version>0.8.16</version>
 </dependency>
 ```
 
