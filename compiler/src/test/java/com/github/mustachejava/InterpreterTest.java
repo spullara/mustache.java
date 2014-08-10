@@ -1,5 +1,6 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.codes.IterableCode;
 import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.functions.CommentFunction;
 import com.github.mustachejava.reflect.SimpleObjectHandler;
@@ -7,14 +8,30 @@ import com.github.mustachejava.util.CapturingMustacheVisitor;
 import com.github.mustachejavabenchmarks.JsonCapturer;
 import com.github.mustachejavabenchmarks.JsonInterpreterTest;
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableMap;
 import junit.framework.TestCase;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.MappingJsonFactory;
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -135,7 +152,6 @@ public class InterpreterTest extends TestCase {
       };
     });
     assertEquals(getContents(root, "recursion.txt"), sw.toString());
-
   }
 
   public void testRecursionWithInheritance() throws IOException {
@@ -200,7 +216,6 @@ public class InterpreterTest extends TestCase {
     final Writer writer = new StringWriter();
     defaultMustache.execute(writer, params);
     return writer.toString();
-
   }
 
   public void testClosingReader() {
@@ -467,7 +482,6 @@ public class InterpreterTest extends TestCase {
       assertEquals("baz", sw.toString());
     }
   }
-
 
   public void testComplex() throws MustacheException, IOException {
     StringWriter json = new StringWriter();
@@ -989,6 +1003,75 @@ public class InterpreterTest extends TestCase {
     } catch (MustacheException e) {
       assertEquals("Failed to close 'value' tag at line 2", e.getMessage());
     }
+  }
+
+  public void testTemplateFunctionWithData() {
+    String template = "{{#parse}}\n" +
+            "{{replaceMe}}\n" +
+            "{{/parse}}";
+    Mustache mustache = new DefaultMustacheFactory().compile(new StringReader(template), "test");
+    StringWriter sw = new StringWriter();
+    mustache.execute(sw, new Object() {
+      public TemplateFunction parse() {
+        return new TemplateFunction() {
+          @Override
+          public String apply(String s){
+            return "blablabla {{anotherVar}}, blablabla {{yetAnotherVar}}";
+          }
+        };
+      }
+      String anotherVar = "banana";
+      String yetAnotherVar = "apple";
+    });
+    assertEquals("blablabla banana, blablabla apple", sw.toString());
+  }
+
+  public void testTemplateFunctionWithImplicitParams() {
+    String template = "{{#parse}}\n" +
+            "{{replaceMe}}\n" +
+            "{{/parse}}";
+    DefaultMustacheFactory mf = new DefaultMustacheFactory() {
+      public MustacheVisitor createMustacheVisitor() {
+        return new DefaultMustacheVisitor(this) {
+          public void iterable(final TemplateContext templateContext, String variable, Mustache mustache) {
+            list.add(new IterableCode(templateContext, df, mustache, variable) {
+              Binding binding = oh.createBinding("params", templateContext, this);
+              protected Writer handleFunction(Writer writer, Function function, Object[] scopes) {
+                return super.handleFunction(writer, function, addScope(scopes, binding.get(scopes)));
+              }
+            });
+          }
+        };
+      }
+    };
+    Mustache mustache = mf.compile(new StringReader(template), "test");
+    StringWriter sw = new StringWriter();
+    mustache.execute(sw, new Object() {
+      public TemplateFunction parse() {
+        return new TemplateFunction() {
+          @Override
+          public String apply(String s){
+            return "blablabla {{anotherVar}}, blablabla {{yetAnotherVar}}";
+          }
+        };
+      }
+      Map<String, Object> params = ImmutableMap.<String, Object>builder()
+          .put("anotherVar", "banana")
+          .put("yetAnotherVar", "apple")
+          .build();
+    });
+    assertEquals("blablabla banana, blablabla apple", sw.toString());
+  }
+
+  public void testPropertyWithDot() throws IOException {
+    DefaultMustacheFactory mustacheFactory = new DefaultMustacheFactory();
+    Reader reader = new StringReader("value=${some.value}");
+    Mustache mustache = mustacheFactory.compile(reader, "maven", "${", "}");
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("some.value", "some.value");
+    StringWriter writer = new StringWriter();
+    mustache.execute(writer, new Object[]{properties}).close();
+    Assert.assertEquals("value=some.value", writer.toString());
   }
 
   private MustacheFactory init() {
