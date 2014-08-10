@@ -26,12 +26,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -63,6 +58,67 @@ public class InterpreterTest extends TestCase {
       boolean in_ca = true;
     });
     assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
+  private static class LocalizedDefaultMustacheFactory extends DefaultMustacheFactory {
+    private final Locale locale;
+
+    LocalizedDefaultMustacheFactory(File root, Locale locale) {
+      super(root);
+      this.locale = locale;
+    }
+
+    @Override
+    public Reader getReader(String resourceName) {
+      try {
+        // First look with locale
+        int index = resourceName.lastIndexOf('.');
+        String newResourceName;
+        if (index == -1) {
+          newResourceName = resourceName;
+        } else {
+          newResourceName = resourceName.substring(0, index) + "_" + locale.toLanguageTag() + resourceName.substring(index);
+        }
+        return super.getReader(newResourceName);
+      } catch (MustacheException me) {
+        return super.getReader(resourceName);
+      }
+    }
+  }
+
+  public void testSimpleI18N() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    {
+      MustacheFactory c = new LocalizedDefaultMustacheFactory(root, Locale.KOREAN);
+      Mustache m = c.compile("simple.html");
+      StringWriter sw = new StringWriter();
+      m.execute(sw, new Object() {
+        String name = "Chris";
+        int value = 10000;
+
+        int taxed_value() {
+          return (int) (this.value - (this.value * 0.4));
+        }
+
+        boolean in_ca = true;
+      });
+      assertEquals(getContents(root, "simple_ko.txt"), sw.toString());
+    }
+    {
+      MustacheFactory c = new LocalizedDefaultMustacheFactory(root, Locale.JAPANESE);
+      Mustache m = c.compile("simple.html");
+      StringWriter sw = new StringWriter();
+      m.execute(sw, new Object() {
+        String name = "Chris";
+        int value = 10000;
+
+        int taxed_value() {
+          return (int) (this.value - (this.value * 0.4));
+        }
+
+        boolean in_ca = true;
+      });
+      assertEquals(getContents(root, "simple.txt"), sw.toString());
+    }
   }
 
   public void testRootCheck() throws MustacheException, IOException, ExecutionException, InterruptedException {
