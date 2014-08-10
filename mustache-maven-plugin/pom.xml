@@ -1,15 +1,13 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.github.spullara.mustache.java</groupId>
     <artifactId>mustache.java</artifactId>
-    <version>0.8.16-SNAPSHOT</version>
+    <version>0.8.16</version>
   </parent>
   <artifactId>mustache-maven-plugin</artifactId>
-  <version>0.8.16-SNAPSHOT</version>
+  <version>0.8.16</version>
   <packaging>maven-plugin</packaging>
   <name>mustache-maven-plugin Maven Mojo</name>
   <url>http://maven.apache.org</url>
@@ -61,7 +59,7 @@
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>compiler</artifactId>
-      <version>0.8.16-SNAPSHOT</version>
+      <version>0.8.16</version>
     </dependency>
   </dependencies>
 
