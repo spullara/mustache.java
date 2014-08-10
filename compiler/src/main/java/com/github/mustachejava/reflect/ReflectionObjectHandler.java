@@ -62,6 +62,11 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
       List<Wrapper> wrappers = null;
       int dotIndex;
       String subname = name;
+      // Try and find a wrapper using the simple name
+      wrapper = findWrapper(i, null, guards, scope, subname);
+      if (wrapper != null) {
+        break;
+      }
       // If there is dot notation, start evaluating it
       while ((dotIndex = subname.indexOf('.')) != -1) {
         final String lookup = subname.substring(0, dotIndex);
