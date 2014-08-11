@@ -39,7 +39,7 @@ class ScalaObjectHandler extends ReflectionObjectHandler {
         }
         newWriter
       }
-      case n: Number => if (n == 0) writer else iteration.next(writer, coerce(value), scopes)
+      case n: Number => if (n.intValue() == 0) writer else iteration.next(writer, coerce(value), scopes)
       case _ => super.iterate(iteration, writer, value, scopes)
     }
   }
@@ -53,7 +53,7 @@ class ScalaObjectHandler extends ReflectionObjectHandler {
           writer
         }
       }
-      case n: Number => if (n == 0) iteration.next(writer, coerce(value), scopes) else writer
+      case n: Number => if (n.intValue() == 0) iteration.next(writer, coerce(value), scopes) else writer
       case _ => super.falsey(iteration, writer, value, scopes)
     }
   }
