@@ -6,7 +6,7 @@
 
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>scala-extensions</artifactId>
-  <version>0.8.16-SNAPSHOT</version>
+  <version>0.8.17-SNAPSHOT</version>
   <description>Scala extensions parent module</description>
 
   <modules>
