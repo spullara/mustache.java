@@ -846,7 +846,7 @@ public class InterpreterTest extends TestCase {
         DefaultMustacheVisitor visitor = new DefaultMustacheVisitor(this);
         visitor.addPragmaHandler("pragma", new PragmaHandler() {
           @Override
-          public Code handle(String pragma, String args) {
+          public Code handle(TemplateContext tc, String pragma, String args) {
             if (pragma.equals("pragma") && args.equals("1 2 3")) {
               found.set(true);
             }
