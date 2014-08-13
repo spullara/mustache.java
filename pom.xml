@@ -13,6 +13,7 @@
     <module>codegen</module>
     <module>indy</module>
     <module>mustache-maven-plugin</module>
+    <module>scala-extensions</module>
   </modules>
   <packaging>pom</packaging>
 

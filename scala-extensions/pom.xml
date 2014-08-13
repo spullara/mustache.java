@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.github.spullara.mustache.java</groupId>
+  <artifactId>scala-extensions</artifactId>
+  <version>0.8.17-SNAPSHOT</version>
+  <description>Scala extensions parent module</description>
+
+  <modules>
+    <module>scala-extensions-2.8</module>
+    <module>scala-extensions-2.9</module>
+    <module>scala-extensions-2.10</module>
+<!--    <module>scala-extensions-2.11</module> -->
+  </modules>
+  <packaging>pom</packaging>
+</project>
