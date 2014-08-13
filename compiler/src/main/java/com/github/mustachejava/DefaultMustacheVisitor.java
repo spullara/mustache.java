@@ -36,7 +36,7 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
   private final Map<String, PragmaHandler> handlers = new HashMap<String, PragmaHandler>() {{
     put("implicit-iterator", new PragmaHandler() {
       @Override
-      public Code handle(String pragma, String args) {
+      public Code handle(TemplateContext tc, String pragma, String args) {
         return new DefaultCode() {
           @Override
           public Writer execute(Writer writer, Object[] scopes) {
@@ -108,7 +108,7 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
       // By default, warn that no pragmas are understood
       logger.warning("Unimplemented pragma: " + pragma);
     } else {
-      Code code = pragmaHandler.handle(pragma, args);
+      Code code = pragmaHandler.handle(tc, pragma, args);
       if (code != null) {
         list.add(code);
       }

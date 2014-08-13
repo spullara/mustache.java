@@ -1,5 +1,5 @@
 package com.github.mustachejava;
 
 public interface PragmaHandler {
-  Code handle(String pragma, String args);
+  Code handle(TemplateContext tc, String pragma, String args);
 }
