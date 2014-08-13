@@ -137,10 +137,11 @@ public class DefaultCode implements Code, Cloneable {
     }
     try {
       return binding.get(scopes);
-    } catch (Exception e) {
-      throw new MustacheException(e.getMessage() + "@" + tc.toString(), e);
-    } catch (Error e) {
-      throw new MustacheException(e.getMessage() + "@" + tc.toString(), e);
+    } catch (MustacheException e) {
+      e.setContext(tc);
+      throw e;
+    } catch (Throwable e) {
+      throw new MustacheException(e.getMessage(), e, tc);
     }
   }
 

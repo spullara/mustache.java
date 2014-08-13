@@ -57,9 +57,9 @@ public class ValueCode extends DefaultCode {
 
   @Override
   public Writer execute(Writer writer, final Object[] scopes) {
-    final Object object = get(scopes);
-    if (object != null) {
-      try {
+    try {
+      final Object object = get(scopes);
+      if (object != null) {
         if (object instanceof Function) {
           handleFunction(writer, (Function) object, scopes);
         } else if (object instanceof Callable) {
@@ -67,11 +67,11 @@ public class ValueCode extends DefaultCode {
         } else {
           execute(writer, oh.stringify(object));
         }
-      } catch (Exception e) {
-        throw new MustacheException("Failed to get value for " + name + " at line " + tc.file() + ":" + tc.line(), e);
       }
+      return super.execute(writer, scopes);
+    } catch (Exception e) {
+      throw new MustacheException("Failed to get value for " + name, e, tc);
     }
-    return super.execute(writer, scopes);
   }
 
   protected Writer handleCallable(Writer writer, final Callable callable, final Object[] scopes) throws Exception {
