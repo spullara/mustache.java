@@ -74,6 +74,7 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
         // This is used for lookups but otherwise always succeeds
         guards.add(createDotGuard(i, scope, lookup));
         List<Guard> wrapperGuard = new ArrayList<Guard>(1);
+        wrapperGuard.add(createClassGuard(0, scope));
         wrapper = findWrapper(0, null, wrapperGuard, scope, lookup);
         if (wrappers == null) wrappers = new ArrayList<Wrapper>();
         if (wrapper != null) {
@@ -87,7 +88,6 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
           }
         } else {
           // Failed to find a wrapper for the next dot
-          wrapperGuard.add(createClassGuard(0, scope));
           guards.add(createWrappedGuard(i, wrappers, wrapperGuard));
           continue NEXT;
         }
