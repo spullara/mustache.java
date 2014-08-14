@@ -9,6 +9,7 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * Used for evaluating values at a callsite
@@ -63,11 +64,15 @@ public class ReflectionWrapper extends GuardedWrapper {
         return method.invoke(scope, arguments);
       }
     } catch (IllegalArgumentException e) {
-      throw new MustacheException("Wrong method for object: " + method + " on " + scope, e);
-    } catch (InvocationTargetException e) {
-      throw new MustacheException("Failed to execute method: " + method, e.getTargetException());
+      throw new MustacheException("Error accessing " + getTargetDescription() + " on " + elementToString(scope)
+          + ", scope: [" + elementsToString(scopes, scopeIndex) + "]" + ", guards: " + Arrays.toString(guards), e);
     } catch (IllegalAccessException e) {
-      throw new MustacheException("Failed to execute method: " + method, e);
+      throw new MustacheException("Error accessing " + getTargetDescription() + " on " + elementToString(scope)
+          + ", scope: [" + elementsToString(scopes, scopeIndex) + "]" + ", guards: " + Arrays.toString(guards), e);
+    } catch (InvocationTargetException e) {
+      throw new MustacheException("Error invoking " + getTargetDescription() + " on " + elementToString(scope), e.getTargetException());
+    } catch (Exception e) {
+      throw new MustacheException("Error invoking " + getTargetDescription() + " on " + elementToString(scope), e);
     }
   }
 
@@ -102,4 +107,28 @@ public class ReflectionWrapper extends GuardedWrapper {
   public Wrapper[] getWrappers() {
     return wrappers;
   }
+
+  private String getTargetDescription() {
+    return method == null
+        ? "field " + field.getDeclaringClass() + "." + field.getName()
+        : "method " + method.getDeclaringClass().getCanonicalName() + "." + method.getName() + "(" + elementsToString(arguments, method.getParameterTypes().length - 1) + ")";
+  }
+  
+  private String elementsToString(Object[] objects, int showUpTo) {
+    if (objects == null || objects.length == 0 || showUpTo < 0) {
+      return "";
+    }
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i <= showUpTo && i < objects.length; i++) {
+      if (sb.length() > 0)
+        sb.append(",");
+      sb.append(elementToString(objects[i]));
+    }
+    return sb.toString();
+  }
+
+  private String elementToString(Object object) {
+    return object == null ? null : object.getClass().getCanonicalName() + '@' + object.hashCode();
+  }
+  
 }

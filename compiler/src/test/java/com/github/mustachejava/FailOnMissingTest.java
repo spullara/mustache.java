@@ -43,7 +43,7 @@ public class FailOnMissingTest {
       test.execute(new StringWriter(), new Object());
       fail("Should have failed");
     } catch (MustacheException me) {
-      assertEquals("test not found in [test:1]@[test:1]", me.getMessage());
+      assertEquals("test not found in [test:1] @[test:1]", me.getCause().getMessage());
     } catch (IOException e) {
       e.printStackTrace();
     }
