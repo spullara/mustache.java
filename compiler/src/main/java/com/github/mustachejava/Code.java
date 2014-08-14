@@ -29,6 +29,7 @@ public interface Code {
 
   Object clone(Set<Code> seen);
 
+  String getName();
 
   /**
    * If it returns a node, that means that it successfully parsed it

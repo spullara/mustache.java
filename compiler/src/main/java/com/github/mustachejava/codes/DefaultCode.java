@@ -227,4 +227,10 @@ public class DefaultCode implements Code, Cloneable {
       return newScopes;
     }
   }
+
+  @Override
+  public String getName() {
+    return name;
+  }
+
 }
