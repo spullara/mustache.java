@@ -111,7 +111,7 @@ public class FallbackMustacheFactory extends DefaultMustacheFactory {
         }
 
         if (is == null) {
-          throw new MustacheException("Template '" + resourceName + "' not found");
+          throw new MustacheNotFoundException(resourceName);
         } else {
           return new BufferedReader(new InputStreamReader(is, "UTF-8"));
         }
@@ -120,7 +120,7 @@ public class FallbackMustacheFactory extends DefaultMustacheFactory {
         lastException = e;
       }
     }
-    throw new MustacheException("Template " + resourceName + " not found", lastException);
+    throw new MustacheNotFoundException(resourceName, lastException);
   }
 
 }

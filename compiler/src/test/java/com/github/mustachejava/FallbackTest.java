@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertEquals;
 
 public class FallbackTest {
@@ -46,6 +47,18 @@ public class FallbackTest {
 	scope.put("title", "My title");
     m.execute(sw, scope);
     assertEquals(getContents(rootOverride, "page2.txt"), sw.toString());
+  }
+
+  @Test
+  public void testMustacheNotFoundException() {
+    String nonExistingMustache = "404";
+    try {
+      MustacheFactory c = new FallbackMustacheFactory(rootOverride, rootDefault);
+      c.compile(nonExistingMustache);
+      fail("Didn't throw an exception");
+    } catch (MustacheNotFoundException e) {
+      assertEquals(nonExistingMustache, e.getName());
+    }
   }
 
   protected String getContents(File root, String file) throws IOException {

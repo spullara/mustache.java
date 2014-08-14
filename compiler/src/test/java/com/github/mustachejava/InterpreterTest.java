@@ -999,6 +999,16 @@ public class InterpreterTest extends TestCase {
     }
   }
 
+  public void testMustacheNotFoundException() {
+    String nonExistingMustache = "404";
+    try {
+      new DefaultMustacheFactory().compile(nonExistingMustache);
+      fail("Didn't throw an exception");
+    } catch (MustacheNotFoundException e) {
+      assertEquals(nonExistingMustache, e.getName());
+    }
+  }
+
   public void testImplicitIteratorNoScope() throws IOException {
     Mustache test = new DefaultMustacheFactory().compile(new StringReader("{{.}}"), "test");
     StringWriter sw = new StringWriter();

@@ -26,7 +26,7 @@ public class MustacheParser {
   public Mustache compile(String file) {
     Reader reader = mf.getReader(file);
     if (reader == null) {
-      throw new MustacheException("Failed to find: " + file);
+      throw new MustacheNotFoundException(file);
     }
     return compile(reader, file);
   }

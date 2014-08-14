@@ -134,7 +134,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
       }
     }
     if (is == null) {
-      throw new MustacheException("Template '" + resourceName + "' not found");
+      throw new MustacheNotFoundException(resourceName);
     } else {
       return new BufferedReader(new InputStreamReader(is, Charsets.UTF_8));
     }

@@ -10,12 +10,12 @@ public class MustacheException extends RuntimeException {
     super();
   }
 
-  public MustacheException(String s) {
-    super(s);
+  public MustacheException(String message) {
+    super(message);
   }
 
-  public MustacheException(String s, Throwable throwable) {
-    super(s, throwable);
+  public MustacheException(String message, Throwable throwable) {
+    super(message, throwable);
   }
 
   public MustacheException(String s, Throwable throwable, TemplateContext context) {
