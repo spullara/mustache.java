@@ -4,6 +4,7 @@ import com.github.mustachejava.codes.IterableCode;
 import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.functions.CommentFunction;
 import com.github.mustachejava.reflect.SimpleObjectHandler;
+import com.github.mustachejava.resolver.DefaultResolver;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
 import com.github.mustachejavabenchmarks.JsonCapturer;
 import com.github.mustachejavabenchmarks.JsonInterpreterTest;
@@ -60,35 +61,41 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
-  private static class LocalizedDefaultMustacheFactory extends DefaultMustacheFactory {
+  private static class LocalizedMustacheResolver extends DefaultResolver {
     private final Locale locale;
 
-    LocalizedDefaultMustacheFactory(File root, Locale locale) {
+    LocalizedMustacheResolver(File root, Locale locale) {
       super(root);
       this.locale = locale;
     }
 
     @Override
     public Reader getReader(String resourceName) {
-      try {
-        // First look with locale
-        int index = resourceName.lastIndexOf('.');
-        String newResourceName;
-        if (index == -1) {
-          newResourceName = resourceName;
-        } else {
-          newResourceName = resourceName.substring(0, index) + "_" + locale.toLanguageTag() + resourceName.substring(index);
-        }
-        return super.getReader(newResourceName);
-      } catch (MustacheException me) {
-        return super.getReader(resourceName);
+
+      // Build resource name with locale suffix
+      int index = resourceName.lastIndexOf('.');
+      String newResourceName;
+      if (index == -1) {
+        newResourceName = resourceName;
+      } else {
+        newResourceName = resourceName.substring(0, index) + "_" + locale.toLanguageTag() + resourceName.substring(index);
       }
+
+      // First look with locale
+      Reader reader = super.getReader(newResourceName);
+
+      if(reader == null) {
+        // Fallback to non-localized resourceName
+        reader = super.getReader(resourceName);
+      }
+
+      return reader;
     }
   }
 
   public void testSimpleI18N() throws MustacheException, IOException, ExecutionException, InterruptedException {
     {
-      MustacheFactory c = new LocalizedDefaultMustacheFactory(root, Locale.KOREAN);
+      MustacheFactory c = new DefaultMustacheFactory(new LocalizedMustacheResolver(root, Locale.KOREAN));
       Mustache m = c.compile("simple.html");
       StringWriter sw = new StringWriter();
       m.execute(sw, new Object() {
@@ -104,7 +111,7 @@ public class InterpreterTest extends TestCase {
       assertEquals(getContents(root, "simple_ko.txt"), sw.toString());
     }
     {
-      MustacheFactory c = new LocalizedDefaultMustacheFactory(root, Locale.JAPANESE);
+      MustacheFactory c = new DefaultMustacheFactory(new LocalizedMustacheResolver(root, Locale.JAPANESE));
       Mustache m = c.compile("simple.html");
       StringWriter sw = new StringWriter();
       m.execute(sw, new Object() {

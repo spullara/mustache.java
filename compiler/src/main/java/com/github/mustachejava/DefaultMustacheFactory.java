@@ -1,6 +1,7 @@
 package com.github.mustachejava;
 
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
+import com.github.mustachejava.resolver.DefaultResolver;
 import com.google.common.base.Charsets;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -48,14 +49,16 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   protected int recursionLimit = 100;
 
-  private final String resourceRoot;
-  private final File fileRoot;
+  private final MustacheResolver mustacheResolver;
 
   protected ListeningExecutorService les;
 
   public DefaultMustacheFactory() {
-    this.resourceRoot = null;
-    this.fileRoot = null;
+    this.mustacheResolver = new DefaultResolver();
+  }
+
+  public DefaultMustacheFactory(MustacheResolver mustacheResolver) {
+    this.mustacheResolver = mustacheResolver;
   }
 
   /**
@@ -64,9 +67,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
    * @param resourceRoot
    */
   public DefaultMustacheFactory(String resourceRoot) {
-    if (!resourceRoot.endsWith("/")) resourceRoot += "/";
-    this.resourceRoot = resourceRoot;
-    this.fileRoot = null;
+    this.mustacheResolver = new DefaultResolver(resourceRoot);
   }
 
   /**
@@ -75,14 +76,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
    * @param fileRoot
    */
   public DefaultMustacheFactory(File fileRoot) {
-    if (!fileRoot.exists()) {
-      throw new MustacheException(fileRoot + " does not exist");
-    }
-    if (!fileRoot.isDirectory()) {
-      throw new MustacheException(fileRoot + " is not a directory");
-    }
-    this.fileRoot = fileRoot;
-    this.resourceRoot = null;
+    this.mustacheResolver = new DefaultResolver(fileRoot);
   }
 
   public String resolvePartialPath(String dir, String name, String extension) {
@@ -106,38 +100,11 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   @Override
   public Reader getReader(String resourceName) {
-    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    String name = (resourceRoot == null ? "" : resourceRoot) + resourceName;
-    InputStream is = ccl.getResourceAsStream(name);
-    if (is == null) {
-      is = DefaultMustacheFactory.class.getClassLoader().getResourceAsStream(name);
-    }
-    if (is == null) {
-      File file = fileRoot == null ? new File(resourceName) : new File(fileRoot, resourceName);
-      if (file.exists() && file.isFile()) {
-        try {
-          // Check to make sure that the file is under the file root or current directory.
-          // Without this check you might accidentally open a security whole when exposing
-          // mustache templates to end users.
-          File checkRoot = fileRoot == null ? new File("").getCanonicalFile() : fileRoot.getCanonicalFile();
-          File parent = file.getCanonicalFile();
-          while ((parent = parent.getParentFile()) != null) {
-            if (parent.equals(checkRoot)) break;
-          }
-          if (parent == null) {
-            throw new MustacheException("File not under root: " + checkRoot.getAbsolutePath());
-          }
-          is = new FileInputStream(file);
-        } catch (IOException e) {
-          throw new MustacheException("Found file, could not open: " + file, e);
-        }
-      }
-    }
-    if (is == null) {
+    Reader reader = mustacheResolver.getReader(resourceName);
+    if(reader == null) {
       throw new MustacheNotFoundException(resourceName);
-    } else {
-      return new BufferedReader(new InputStreamReader(is, Charsets.UTF_8));
     }
+    return reader;
   }
 
   @Override
