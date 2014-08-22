@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2014, Onedott, bart@onedott.nl
- * All rights reserved.
- */
-
 package nl.onedott.mustachejava.extension.springmvc.view;
 
 import com.github.mustachejava.MustacheFactory;
