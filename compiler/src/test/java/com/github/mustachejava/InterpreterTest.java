@@ -887,6 +887,57 @@ public class InterpreterTest extends TestCase {
     assertEquals("test", sw.toString());
   }
 
+  public static class AccessTrackingMap extends HashMap<String, String> {
+    Set<Object> accessed = new HashSet<Object>();
+
+    @Override
+    public String get(Object key) {
+      accessed.add(key);
+      return super.get(key);
+    }
+
+    public void check() {
+      Set<String> keyset = new HashSet<String>(keySet());
+      keyset.removeAll(accessed);
+      if (!keyset.isEmpty()) {
+        throw new MustacheException("All keys in the map were not accessed");
+      }
+    }
+  }
+
+  public void testAccessTracker() throws IOException {
+    {
+      Map<String, String> accessTrackingMap = createBaseMap();
+      DefaultMustacheFactory mf = createMustacheFactory();
+      Mustache test = mf.compile(new StringReader("{{first}} {{last}}"), "test");
+      StringWriter sw = new StringWriter();
+      test.execute(sw, accessTrackingMap).close();
+      assertEquals("Sam Pullara", sw.toString());
+    }
+    {
+      AccessTrackingMap accessTrackingMap = createBaseMap();
+      accessTrackingMap.put("notused", "shouldcauseanerror");
+      DefaultMustacheFactory mf = createMustacheFactory();
+      Mustache test = mf.compile(new StringReader("{{first}} {{last}}"), "test");
+      StringWriter sw = new StringWriter();
+      test.execute(sw, accessTrackingMap).close();
+      assertEquals("Sam Pullara", sw.toString());
+      try {
+        accessTrackingMap.check();
+        fail("Should have thrown an exception");
+      } catch (MustacheException me) {
+        // Succcess
+      }
+    }
+  }
+
+  private AccessTrackingMap createBaseMap() {
+    AccessTrackingMap accessTrackingMap = new AccessTrackingMap();
+    accessTrackingMap.put("first", "Sam");
+    accessTrackingMap.put("last", "Pullara");
+    return accessTrackingMap;
+  }
+
   public void testMismatch() {
     try {
       MustacheFactory mf = createMustacheFactory();
