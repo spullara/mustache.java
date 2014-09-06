@@ -752,6 +752,14 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "relative/paths.txt"), sw.toString());
   }
 
+  public void testPathsWithExtension() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    Mustache compile = mf.compile("relative/extension.html");
+    StringWriter sw = new StringWriter();
+    compile.execute(sw, null).close();
+    assertEquals(getContents(root, "relative/paths.txt"), sw.toString());
+  }
+
   public void testRelativePathsTemplateFunction() throws IOException {
     MustacheFactory mf = createMustacheFactory();
     Mustache compile = mf.compile("relative/functionpaths.html");

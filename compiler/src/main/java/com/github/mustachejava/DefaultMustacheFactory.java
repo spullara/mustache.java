@@ -80,12 +80,19 @@ public class DefaultMustacheFactory implements MustacheFactory {
   }
 
   public String resolvePartialPath(String dir, String name, String extension) {
-    String path;
-    if (name.startsWith("/")) {
-      path = Files.simplifyPath(new File(name + extension).getPath());
-    } else {
-      path = Files.simplifyPath(new File(dir + name + extension).getPath());
+    String filePath = name;
+
+    // Do not prepend directory if it is already defined
+    if (!name.startsWith("/")) {
+      filePath = dir + filePath;
     }
+
+    // Do not append extension if it is already defined
+    if (!name.endsWith(extension)) {
+      filePath = filePath + extension;
+    }
+
+    String path = Files.simplifyPath(new File(filePath).getPath());
     return ensureForwardSlash(path);
   }
 
