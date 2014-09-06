@@ -32,6 +32,10 @@ public abstract class BaseObjectHandler implements ObjectHandler {
         if (!object.toString().equals("")) {
           return writer;
         }
+      } else if (object instanceof Number) {
+        if (((Number) object).intValue() != 0) {
+          return writer;
+        }
       } else if (object instanceof List) {
         List list = (List) object;
         int length = list.size();
@@ -65,6 +69,11 @@ public abstract class BaseObjectHandler implements ObjectHandler {
     }
     if (object instanceof String) {
       if (object.toString().equals("")) {
+        return writer;
+      }
+    }
+    if (object instanceof Number) {
+      if (((Number) object).intValue() == 0) {
         return writer;
       }
     }
