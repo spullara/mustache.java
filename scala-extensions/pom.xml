@@ -4,9 +4,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.github.spullara.mustache.java</groupId>
+  <parent>
+    <groupId>com.github.spullara.mustache.java</groupId>
+    <artifactId>mustache.java</artifactId>
+    <version>0.8.17-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
   <artifactId>scala-extensions</artifactId>
-  <version>0.8.17-SNAPSHOT</version>
   <description>Scala extensions parent module</description>
 
   <modules>
