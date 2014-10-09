@@ -1,4 +1,4 @@
-package mustache;
+package com.twitter.mustache;
 
 /**
  * Created by sam on 10/8/14.
