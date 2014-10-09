@@ -4,7 +4,7 @@
 
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>mustache.java</artifactId>
-  <version>0.8.17-SNAPSHOT</version>
+  <version>0.8.17</version>
   <description>Implementation of the Mustache language in Java.</description>
 
   <modules>
@@ -48,7 +48,7 @@
     <connection>scm:git:git@github.com:spullara/mustache.java.git</connection>
     <developerConnection>scm:git:git@github.com:spullara/mustache.java.git</developerConnection>
     <url>scm:git:git@github.com:spullara/mustache.java.git</url>
-    <tag>HEAD</tag>
+    <tag>mustache.java-0.8.17</tag>
   </scm>
 
   <distributionManagement>
