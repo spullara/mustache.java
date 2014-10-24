@@ -370,7 +370,7 @@ public class InterpreterTest extends TestCase {
   public void testConcurrency() throws IOException {
     DefaultMustacheFactory c = createMustacheFactory();
     c.setExecutorService(Executors.newCachedThreadPool());
-    Mustache m = c.compile(new StringReader("{{a}} {{b}} {{c}}"), "concurrency");
+    Mustache m = c.compile(new StringReader("{{a}} {{#caps}}{{b}}{{/caps}} {{c}}"), "concurrency");
     StringWriter sw = new StringWriter();
     long start = System.currentTimeMillis();
     Writer execute = m.execute(sw, new Object() {
@@ -395,10 +395,21 @@ public class InterpreterTest extends TestCase {
           return "you?";
         }
       };
+      Callable<Function> caps = new Callable<Function>() {
+        @Override
+        public Function call() throws Exception {
+          return new Function() {
+            @Override
+            public Object apply(Object o) {
+              return o.toString().toUpperCase();
+            }
+          };
+        }
+      };
     });
     execute.close();
     assertTrue("Time < 600ms", System.currentTimeMillis() - start < 600);
-    assertEquals("How are you?", sw.toString());
+    assertEquals("How ARE you?", sw.toString());
   }
 
   public void testNestedLatches() throws IOException {
