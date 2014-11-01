@@ -46,7 +46,7 @@ public class MustacheConfiguration implements ImportAware {
     @Bean
     public ViewResolver viewResolver() throws Exception {
         MustacheViewResolver viewResolver = new MustacheViewResolver(mustacheFactory());
-
+        viewResolver.setExposeRequestAttributes(true);
         viewResolver.setViewClass(MustacheView.class);
         viewResolver.setSuffix(".mustache");
         return viewResolver;
