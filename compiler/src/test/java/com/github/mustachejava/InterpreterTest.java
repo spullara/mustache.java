@@ -3,6 +3,7 @@ package com.github.mustachejava;
 import com.github.mustachejava.codes.IterableCode;
 import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.functions.CommentFunction;
+import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.reflect.SimpleObjectHandler;
 import com.github.mustachejava.resolver.DefaultResolver;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
@@ -474,6 +475,38 @@ public class InterpreterTest extends TestCase {
       List people = Arrays.asList("Test");
     });
     assertEquals(getContents(root, "isempty.txt"), sw.toString());
+  }
+
+  public void testNumber0IsFalse() throws IOException {
+    DefaultMustacheFactory c = createMustacheFactory();
+    c.setObjectHandler(new ReflectionObjectHandler() {
+      @Override
+      public Writer falsey(Iteration iteration, Writer writer, Object object, Object[] scopes) {
+        if (object instanceof Number) {
+          if (((Number) object).intValue() == 0) {
+            return iteration.next(writer, object, scopes);
+          }
+        }
+        return super.falsey(iteration, writer, object, scopes);
+      }
+
+      @Override
+      public Writer iterate(Iteration iteration, Writer writer, Object object, Object[] scopes) {
+        if (object instanceof Number) {
+          if (((Number) object).intValue() == 0) {
+            return writer;
+          }
+        }
+        return super.iterate(iteration, writer, object, scopes);
+      }
+    });
+    StringWriter sw = new StringWriter();
+    Mustache m = c.compile(new StringReader("{{#zero}}zero{{/zero}}{{#one}}one{{/one}}{{^zero}}zero{{/zero}}{{^one}}one{{/one}}"), "zeroone");
+    m.execute(sw, new Object() {
+      int zero = 0;
+      int one = 1;
+    }).close();
+    assertEquals("onezero", sw.toString());
   }
 
   public void testSecurity() throws MustacheException, IOException, ExecutionException, InterruptedException {
