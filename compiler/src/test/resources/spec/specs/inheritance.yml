@@ -1,0 +1,182 @@
+overview: |
+  blah.
+tests:
+  - name: Recursion
+    desc: Recursion in inherited templates
+    data: {}
+    template: "{{<include}}{{$foo}}override{{/foo}}{{/include}}"
+    partials:
+      include: "{{$foo}}default content{{/foo}} {{$bar}}{{<include2}}{{/include2}}{{/bar}}"
+      include2: "{{$foo}}include2 default content{{/foo}} {{<include}}{{$bar}}don't recurse{{/bar}}{{/include}}"
+    expected: "override override override don't recurse"
+
+  - name: Default
+    desc: Default content should be rendered if the block isn't overridden
+    data: { }
+    template: |
+      {{$title}}Default title{{/title}}
+    expected: |
+      Default title
+
+  - name: Variable
+    desc: Default content renders variables
+    data: { bar: 'baz' }
+    template: |
+      {{$foo}}default {{bar}} content{{/foo}}
+    expected: |
+      default baz content
+
+  - name: Triple Mustache
+    desc: Default content renders triple mustache variables
+    data: { bar: '<baz>' } 
+    template: |
+      {{$foo}}default {{{bar}}} content{{/foo}}
+    expected: |
+      default <baz> content
+
+  - name: Sections
+    desc: Default content renders sections
+    data: { bar: {baz: 'qux'} }
+    template: |
+      {{$foo}}default {{#bar}}{{baz}}{{/bar}} content{{/foo}}
+    expected: |
+      default qux content
+
+  - name: Negative Sections
+    desc: Default content renders negative sections
+    data: { foo: {bar: 'qux'}, baz: 'three' }
+    template: |
+      {{$foo}}default {{^bar}}{{baz}}{{/bar}} content{{/foo}}
+    expected: |
+      default three content
+
+  - name: Mustache Injection
+    desc: Mustache injection in default content
+    data: {bar: {baz: '{{qux}}'} }
+    template: |
+      {{$foo}}default {{#bar}}{{baz}}{{/bar}} content{{/foo}}
+    expected: |
+      default {{qux}} content
+
+  - name: Inherit
+    desc: Default content rendered inside included templates
+    data: { }
+    template: |
+      {{<include}}{{/include}}
+    partials:
+      include: "{{$foo}}default content{{/foo}}"
+    expected: "default content"
+
+  - name: Overridden content
+    desc: Overridden content
+    data: { }
+    template: "{{<super}}{{$title}}sub template title{{/title}}{{/super}}"
+    partials:
+      super: "...{{$title}}Default title{{/title}}..."
+    expected: "...sub template title..."
+
+  - name: Data does not override block
+    desc: Provided data does not override data passed into parent
+    data: { var: 'var in data' }
+    template: "{{<include}}{{$var}}var in template{{/var}}{{/include}}"
+    partials:
+      include: "{{$var}}var in include{{/var}}"
+    expected: "var in template"
+
+  - name: Data does not override block default
+    desc: Provided data does not override default value of block
+    data: { var: 'var in data' }
+    template: "{{<include}}{{/include}}"
+    partials:
+      include: "{{$var}}var in include{{/var}}"
+    expected: "var in include"
+
+  - name: Overridden partial
+    desc: Overridden partial
+    data: { }
+    template: "test {{<partial}}{{$stuff}}override{{/stuff}}{{/partial}}"
+    partials:
+      partial: "{{$stuff}}...{{/stuff}}"
+    expected: "test override"
+
+  - name: Two overridden partials
+    desc: Two overridden partials with different content
+    data: { }
+    template: |
+      test {{<partial}}{{$stuff}}override1{{/stuff}}{{/partial}} {{<partial}}{{$stuff}}override2{{/stuff}}{{/partial}}
+    partials:
+      partial: "|{{$stuff}}...{{/stuff}}{{$default}} default{{/default}}|"
+    expected: |
+      test |override1 default| |override2 default|
+  - name: Override partial with newlines
+    desc: Override partial with newlines
+    data: { }
+    template: "{{<partial}}{{$ballmer}}\npeaked\n\n:(\n{{/ballmer}}{{/partial}}"
+    partials:
+      partial: "{{$ballmer}}peaking{{/ballmer}}"
+    expected: "peaked\n\n:(\n"
+    
+  - name: Inherit indentation
+    desc: Inherit indentation when overriding a partial
+    data: { }
+    template: "{{<partial}}{{$nineties}}hammer time{{/nineties}}{{/partial}}"
+    partials:
+      partial: |
+        stop:
+            {{$nineties}}collaborate and listen{{/nineties}}
+    expected: |
+      stop:
+          hammer time
+
+  - name: Only one override
+    desc: Override one substitution but not the other
+    data: { }
+    template: "{{<partial}}{{$stuff2}}override two{{/stuff2}}{{/partial}}"
+    partials:
+      partial: "{{$stuff}}new default one{{/stuff}}, {{$stuff2}}new default two{{/stuff2}}"
+    expected: "new default one, override two"
+
+  - name: Super template
+    desc: Super templates behave identically to partials when called with no parameters
+    data: { }
+    template: "{{>include}}|{{<include}}{{/include}}"
+    partials:
+      include: "{{$foo}}default content{{/foo}}"
+    expected: "default content|default content"
+
+  - name: Multi-level inheritance
+    desc: Top-level substitutions take precedence in multi-level inheritance
+    data: { }
+    template: "{{<parent}}{{$a}}c{{/a}}{{/parent}}"
+    partials:
+      parent: "{{<older}}{{$a}}p{{/a}}{{/older}}"
+      older: "{{<grandParent}}{{$a}}o{{/a}}{{/grandParent}}"
+      grandParent: "{{$a}}g{{/a}}"
+    expected: c
+
+  - name: Multi-level inheritance, no sub child
+    desc: Top-level substitutions take precedence in multi-level inheritance
+    data: { }
+    template: "{{<parent}}{{/parent}}"
+    partials:
+      parent: "{{<older}}{{$a}}p{{/a}}{{/older}}"
+      older: "{{<grandParent}}{{$a}}o{{/a}}{{/grandParent}}"
+      grandParent: "{{$a}}g{{/a}}"
+    expected: p
+
+  - name: Text inside super
+    desc: Ignores text inside super templates, but does parse $ tags
+    data: { }
+    template: "{{<include}} asdfasd {{$foo}}hmm{{/foo}} asdfasdfasdf {{/include}}"
+    partials:
+      include: "{{$foo}}default content{{/foo}}"
+    expected:
+      hmm
+
+  - name: Text inside super
+    desc: Allows text inside a super tag, but ignores it
+    data: {}
+    template: "{{<include}} asdfasd asdfasdfasdf {{/include}}"
+    partials:
+      include: "{{$foo}}default content{{/foo}}"
+    expected: default content
