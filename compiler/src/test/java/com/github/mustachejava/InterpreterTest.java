@@ -905,6 +905,16 @@ public class InterpreterTest extends TestCase {
     assertEquals("Test2", sw.toString());
   }
 
+  public void testZero() throws IOException {
+    MustacheFactory mf = createMustacheFactory();
+    Mustache m = mf.compile(new StringReader("{{#values}}Test1{{/values}}{{^values}}Test2{{/values}}"), "testZero");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      int values = 0;
+    }).close();
+    assertEquals("Test2", sw.toString());
+  }
+
   public void testPrivate() throws IOException {
     MustacheFactory mf = createMustacheFactory();
     Mustache m = mf.compile(new StringReader("{{#values}}Test1{{/values}}{{^values}}Test2{{/values}}"), "testPrivate");
