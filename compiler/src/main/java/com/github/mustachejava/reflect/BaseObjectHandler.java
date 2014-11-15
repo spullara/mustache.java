@@ -107,13 +107,20 @@ public abstract class BaseObjectHandler implements ObjectHandler {
   protected Method getMethod(Class aClass, String name, Class... params) throws NoSuchMethodException {
     Method member;
     try {
-      member = aClass.getDeclaredMethod(name, params);
-    } catch (NoSuchMethodException nsme) {
-      Class superclass = aClass.getSuperclass();
-      if (superclass != null && superclass != Object.class) {
-        return getMethod(superclass, name);
+      member = aClass.getMethod(name, params);
+      if (member.getDeclaringClass() == Object.class) {
+        throw new NoSuchMethodException();
       }
-      throw nsme;
+    } catch (NoSuchMethodException nsme) {
+      try {
+        member = aClass.getDeclaredMethod(name, params);
+      } catch (NoSuchMethodException nsme2) {
+        Class superclass = aClass.getSuperclass();
+        if (superclass != null && superclass != Object.class) {
+          return getMethod(superclass, name);
+        }
+        throw nsme2;
+      }
     }
     checkMethod(member);
     member.setAccessible(true);
