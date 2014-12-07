@@ -32,7 +32,7 @@ public class DefaultCode implements Code, Cloneable {
   protected final DefaultMustacheFactory df;
 
   public Object clone() {
-    Set<Code> seen = new HashSet<Code>();
+    Set<Code> seen = new HashSet<>();
     seen.add(this);
     return clone(seen);
   }

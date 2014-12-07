@@ -63,10 +63,7 @@ public class ReflectionWrapper extends GuardedWrapper {
       } else {
         return method.invoke(scope, arguments);
       }
-    } catch (IllegalArgumentException e) {
-      throw new MustacheException("Error accessing " + getTargetDescription() + " on " + elementToString(scope)
-          + ", scope: [" + elementsToString(scopes, scopeIndex) + "]" + ", guards: " + Arrays.toString(guards), e);
-    } catch (IllegalAccessException e) {
+    } catch (IllegalArgumentException | IllegalAccessException e) {
       throw new MustacheException("Error accessing " + getTargetDescription() + " on " + elementToString(scope)
           + ", scope: [" + elementsToString(scopes, scopeIndex) + "]" + ", guards: " + Arrays.toString(guards), e);
     } catch (InvocationTargetException e) {

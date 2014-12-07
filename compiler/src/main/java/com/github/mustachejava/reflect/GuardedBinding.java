@@ -38,7 +38,7 @@ public class GuardedBinding implements Binding {
    * The chances of a new guard every time is very low. Instead we will
    * store previously used guards and try them all before creating a new one.
    */
-  private Set<Wrapper> previousSet = new CopyOnWriteArraySet<Wrapper>();
+  private Set<Wrapper> previousSet = new CopyOnWriteArraySet<>();
   private volatile Wrapper[] prevWrappers;
 
   /**

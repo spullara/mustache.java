@@ -31,11 +31,11 @@ public class DotNotationTest {
   public void setUp() {
       factory = new DefaultMustacheFactory();
       
-      mapModel = new HashMap<String, Object>();
-      Map<String, Object> container1 = new HashMap<String, Object>();
+      mapModel = new HashMap<>();
+      Map<String, Object> container1 = new HashMap<>();
       mapModel.put("container1", container1);
       
-      objectModel = new HashMap<String, Object>();
+      objectModel = new HashMap<>();
       objectModel.put("container1", new ModelObject());
   }
   

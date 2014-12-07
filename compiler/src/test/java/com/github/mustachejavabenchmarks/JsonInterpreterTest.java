@@ -96,13 +96,10 @@ public class JsonInterpreterTest extends TestCase {
         long start = System.currentTimeMillis();
         while (true) {
           semaphore.acquire();
-          es.submit(new Runnable() {
-            @Override
-            public void run() {
-              parse.execute(new NullWriter(), new Object[] { parent });
-              runs.incrementAndGet();
-              semaphore.release();
-            }
+          es.submit(() -> {
+            parse.execute(new NullWriter(), new Object[] { parent });
+            runs.incrementAndGet();
+            semaphore.release();
           });
           if (System.currentTimeMillis() - start > TIME * 1000) {
             break;

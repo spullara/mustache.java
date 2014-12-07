@@ -27,7 +27,7 @@ public class ExplicitMapNullTest {
 
     @Test
     public void textExplicitNullMapValue() {
-        Map<String, Object> model = new HashMap<String, Object>();
+        Map<String, Object> model = new HashMap<>();
         model.put("nullData", null);
         
         StringWriter writer = new StringWriter();

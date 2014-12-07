@@ -76,21 +76,18 @@ public class IterableCode extends DefaultCode implements Iteration {
       // Scopes must not cross thread boundaries as they
       // are thread locally reused
       final Object[] newScopes = scopes.clone();
-      les.execute(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            Object call = callable.call();
-            Writer subWriter = handle(originalWriter, call, newScopes);
-            // Wait for the subwriter to complete
-            if (subWriter instanceof LatchedWriter) {
-              ((LatchedWriter) subWriter).await();
-            }
-            // Tell the replacement writer that we are done
-            latchedWriter.done();
-          } catch (Throwable e) {
-            latchedWriter.failed(e);
+      les.execute(() -> {
+        try {
+          Object call = callable.call();
+          Writer subWriter = handle(originalWriter, call, newScopes);
+          // Wait for the subwriter to complete
+          if (subWriter instanceof LatchedWriter) {
+            ((LatchedWriter) subWriter).await();
           }
+          // Tell the replacement writer that we are done
+          latchedWriter.done();
+        } catch (Throwable e) {
+          latchedWriter.failed(e);
         }
       });
     }
@@ -139,7 +136,7 @@ public class IterableCode extends DefaultCode implements Iteration {
   @Override
   public Node invert(Node node, String text, AtomicInteger position) {
     int start = position.get();
-    List<Node> nodes = new ArrayList<Node>();
+    List<Node> nodes = new ArrayList<>();
     Node invert;
     while ((invert = mustache.invert(new Node(), text, position)) != null) {
       nodes.add(invert);

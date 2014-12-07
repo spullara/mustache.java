@@ -45,16 +45,13 @@ public class TypeCheckingHandler extends BaseObjectHandler {
       Class scopeClass = (Class) scope;
       final AccessibleObject member = findMember(scopeClass, name);
       if (member != null) {
-        return new Wrapper() {
-          @Override
-          public Object call(Object[] scopes) throws GuardException {
-            if (member instanceof Field) {
-              return ((Field) member).getType();
-            } else if (member instanceof Method) {
-              return ((Method) member).getReturnType();
-            } else {
-              throw new MustacheException("Member not a field or method: " + member);
-            }
+        return scopes1 -> {
+          if (member instanceof Field) {
+            return ((Field) member).getType();
+          } else if (member instanceof Method) {
+            return ((Method) member).getReturnType();
+          } else {
+            throw new MustacheException("Member not a field or method: " + member);
           }
         };
       }
@@ -64,12 +61,7 @@ public class TypeCheckingHandler extends BaseObjectHandler {
 
   @Override
   public Binding createBinding(final String name, TemplateContext tc, Code code) {
-    return new Binding() {
-      @Override
-      public Object get(Object[] scopes) {
-        return find(name, scopes).call(scopes);
-      }
-    };
+    return scopes -> find(name, scopes).call(scopes);
   }
 
   @Override

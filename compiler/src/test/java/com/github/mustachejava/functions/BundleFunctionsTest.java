@@ -30,7 +30,7 @@ public class BundleFunctionsTest {
         MustacheFactory c = new DefaultMustacheFactory(root);
         Mustache m = c.compile("bundles.html");
         StringWriter sw = new StringWriter();
-        Map<String, Object> scope = new HashMap<String, Object>();
+        Map<String, Object> scope = new HashMap<>();
         scope.put("trans", BundleFunctions.newPreTranslate(BUNDLE, Locale.US));
         scope.put("replaceMe", "replaced");
         m.execute(sw, scope);
@@ -42,7 +42,7 @@ public class BundleFunctionsTest {
         MustacheFactory c = new DefaultMustacheFactory(root);
         Mustache m = c.compile("bundles.html");
         StringWriter sw = new StringWriter();
-        Map<String, Object> scope = new HashMap<String, Object>();
+        Map<String, Object> scope = new HashMap<>();
         scope.put("trans", BundleFunctions.newPostTranslate(BUNDLE, Locale.US));
         scope.put("replaceMe", "replaced");
         m.execute(sw, scope);
@@ -54,7 +54,7 @@ public class BundleFunctionsTest {
         MustacheFactory c = new DefaultMustacheFactory(root);
         Mustache m = c.compile("bundles.html");
         StringWriter sw = new StringWriter();
-        Map<String, Object> scope = new HashMap<String, Object>();
+        Map<String, Object> scope = new HashMap<>();
         scope.put("trans", BundleFunctions.newPreTranslateNullableLabel(BUNDLE, Locale.US));
         scope.put("replaceMe", "replaced");
         m.execute(sw, scope);
@@ -66,7 +66,7 @@ public class BundleFunctionsTest {
         MustacheFactory c = new DefaultMustacheFactory(root);
         Mustache m = c.compile("bundles.html");
         StringWriter sw = new StringWriter();
-        Map<String, Object> scope = new HashMap<String, Object>();
+        Map<String, Object> scope = new HashMap<>();
         scope.put("trans", BundleFunctions.newPostTranslateNullableLabel(BUNDLE, Locale.US));
         // Intentionally leave off the replacement value
         m.execute(sw, scope);

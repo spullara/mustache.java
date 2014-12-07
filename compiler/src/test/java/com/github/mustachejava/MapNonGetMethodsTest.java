@@ -61,7 +61,7 @@ public class MapNonGetMethodsTest {
 
   @Test
   public void testMethodAccessDisallowed() {
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
     
     Reader reader = new StringReader(TEMPLATE);
     Mustache mustache = factory.compile(reader, "template");
@@ -71,7 +71,7 @@ public class MapNonGetMethodsTest {
   
   @Test
   public void testMethodAccessAllowed() {
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
     
     factory.setObjectHandler(new MapMethodReflectionHandler());
     Reader reader = new StringReader(TEMPLATE);
@@ -86,7 +86,7 @@ public class MapNonGetMethodsTest {
     Reader reader = new StringReader(TEMPLATE);
     Mustache mustache = factory.compile(reader, "template");
     
-    Map<String, String> model = new HashMap<String, String>();
+    Map<String, String> model = new HashMap<>();
     verifyOutput("true", model, mustache);
     
     model.put("empty", "data");
@@ -96,7 +96,7 @@ public class MapNonGetMethodsTest {
 
   @Test
   public void testSimpleHandlerMethodAccessDisallowed() {
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
     
     factory.setObjectHandler(new SimpleObjectHandler());
     Reader reader = new StringReader(TEMPLATE);
@@ -107,7 +107,7 @@ public class MapNonGetMethodsTest {
   
   @Test
   public void testSimpleHandlerMethodAccessAllowed() {
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
     
     factory.setObjectHandler(new SimpleMapMethodHandler());
     Reader reader = new StringReader(TEMPLATE);

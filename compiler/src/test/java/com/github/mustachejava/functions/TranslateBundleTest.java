@@ -25,7 +25,7 @@ public class TranslateBundleTest {
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("translatebundle.html");
     StringWriter sw = new StringWriter();
-    Map<String, Object> scope = new HashMap<String, Object>();
+    Map<String, Object> scope = new HashMap<>();
 	  scope.put("trans", new TranslateBundleFunction(BUNDLE, Locale.US));
     m.execute(sw, scope);
     assertEquals(getContents(root, "translatebundle.txt"), sw.toString());

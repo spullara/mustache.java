@@ -50,7 +50,7 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
   public Wrapper find(String name, final Object[] scopes) {
     Wrapper wrapper = null;
     final int length = scopes.length;
-    List<Guard> guards = new ArrayList<Guard>(scopes.length);
+    List<Guard> guards = new ArrayList<>(scopes.length);
     // Simple guard to break if the number of scopes at this call site have changed
     guards.add(createDepthGuard(length));
     NEXT:
@@ -73,10 +73,10 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
         subname = subname.substring(dotIndex + 1);
         // This is used for lookups but otherwise always succeeds
         guards.add(createDotGuard(i, scope, lookup));
-        List<Guard> wrapperGuard = new ArrayList<Guard>(1);
+        List<Guard> wrapperGuard = new ArrayList<>(1);
         wrapperGuard.add(createClassGuard(0, scope));
         wrapper = findWrapper(0, null, wrapperGuard, scope, lookup);
-        if (wrappers == null) wrappers = new ArrayList<Wrapper>();
+        if (wrappers == null) wrappers = new ArrayList<>();
         if (wrapper != null) {
           // We need to dig into a scope when dot notation shows up
           wrappers.add(wrapper);

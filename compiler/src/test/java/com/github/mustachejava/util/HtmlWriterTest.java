@@ -21,7 +21,7 @@ public class HtmlWriterTest {
 
   @Before
   public void setup() {
-    w = new StateAwareWriter<HtmlState>(new StringWriter(), state = new HtmlState());
+    w = new StateAwareWriter<>(new StringWriter(), state = new HtmlState());
   }
 
   @After
@@ -176,7 +176,7 @@ public class HtmlWriterTest {
 
   public static void main(String[] args) throws IOException {
     StringWriter sw = new StringWriter();
-    StateAwareWriter writer = new StateAwareWriter<HtmlState>(sw, new HtmlState());
+    StateAwareWriter writer = new StateAwareWriter<>(sw, new HtmlState());
     BufferedReader reader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemClassLoader().getResourceAsStream("twitter.html"), "UTF-8"));
     char[] chars = new char[32768];
     int read;
@@ -190,7 +190,7 @@ public class HtmlWriterTest {
     for (int j = 0; j < 10; j++) {
       long start = System.currentTimeMillis();
       for (int i = 0; i < ITERATIONS; i++) {
-        Writer hawriter = new StateAwareWriter<HtmlState>(new NullWriter(), new HtmlState());
+        Writer hawriter = new StateAwareWriter<>(new NullWriter(), new HtmlState());
         hawriter.write(value);
         hawriter.close();
       }

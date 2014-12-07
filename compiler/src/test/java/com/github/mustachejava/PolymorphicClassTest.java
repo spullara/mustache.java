@@ -47,7 +47,7 @@ public class PolymorphicClassTest {
    */
   @Test
   public void testPolyClass() throws IOException {
-    HashMap<String, Object> model = new HashMap<String, Object>();
+    HashMap<String, Object> model = new HashMap<>();
     model.put("x", new B());
     assertEquals("ok", compile("{{x.value.text}}", model));
     model.put("x", new A());

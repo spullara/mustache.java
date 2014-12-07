@@ -30,7 +30,7 @@ public class DecoratedCollection<T> extends AbstractCollection<Element<T>> {
       public Element<T> next() {
         T next = iterator.next();
         int current = index++;
-        return new Element<T>(current, current == 0, !iterator.hasNext(), next);
+        return new Element<>(current, current == 0, !iterator.hasNext(), next);
       }
 
       @Override

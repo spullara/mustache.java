@@ -38,10 +38,10 @@ public class AbstractClassTest {
 
   @Test
   public void testAbstractClass() throws IOException {
-      final List<Container> containers = new ArrayList<Container>();
+      final List<Container> containers = new ArrayList<>();
       containers.add(new Container(new Foo()));
       containers.add(new Container(new Bar()));
-      HashMap<String, Object> scopes = new HashMap<String, Object>();
+      HashMap<String, Object> scopes = new HashMap<>();
       Writer writer = new OutputStreamWriter(System.out);
       MustacheFactory mf = new DefaultMustacheFactory();
       Mustache mustache = mf.compile(new StringReader("{{#containers}} {{foo.value}} {{/containers}}"), "example");
@@ -52,10 +52,10 @@ public class AbstractClassTest {
 
   @Test
   public void testAbstractClassNoDots() throws IOException {
-      final List<Container> containers = new ArrayList<Container>();
+      final List<Container> containers = new ArrayList<>();
       containers.add(new Container(new Foo()));
       containers.add(new Container(new Bar()));
-      HashMap<String, Object> scopes = new HashMap<String, Object>();
+      HashMap<String, Object> scopes = new HashMap<>();
       Writer writer = new OutputStreamWriter(System.out);
       MustacheFactory mf = new DefaultMustacheFactory();
       Mustache mustache = mf.compile(new StringReader("{{#containers}} {{#foo}}{{value}}{{/foo}} {{/containers}}"), "example");

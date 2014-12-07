@@ -54,7 +54,7 @@ public class FallbackMustacheFactory extends DefaultMustacheFactory {
       if (resourceObj instanceof String) {  // for String
         String resourceRoot = (String) resourceObj;
         if (!resourceRoot.endsWith("/")) resourceRoot += "/";
-
+        // TODO: this is a bug. we don't update the list.
       } else if (resourceObj instanceof File) {  // for File
         File fileRoot = (File) resourceObj;
         if (!fileRoot.exists()) {

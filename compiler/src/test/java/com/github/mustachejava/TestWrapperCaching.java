@@ -58,7 +58,7 @@ public class TestWrapperCaching {
    */
   @Test
   public void testInitialMiss() {
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
     assertEquals("", render(template, model));
 
     TestObject object = new TestObject();
@@ -72,10 +72,10 @@ public class TestWrapperCaching {
    */
   @Test
   public void testMapInitialMiss() {
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
     assertEquals("", render(template, model));
 
-    Map<String, String> object = new HashMap<String, String>();
+    Map<String, String> object = new HashMap<>();
     object.put("data", "hit");
     model.put("object", object);
     assertEquals("hit", render(template, model));
@@ -83,7 +83,7 @@ public class TestWrapperCaching {
 
   @Test
   public void testMultiScopeInitialHit() {
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
     model.put("scope1", "foo"); //scope 1 full miss
     model.put("scope2", new TestObject(new TestObject("hit"))); //scope 2 dot hit
 
@@ -95,7 +95,7 @@ public class TestWrapperCaching {
 
   @Test
   public void testMultiScopeInitialHit2() {
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
     model.put("scope1", new TestObject(new TestObject("hit"))); //scope 1 hit
     model.put("scope2", "foo"); //scope 2 full miss (shouldn't matter)
 
@@ -107,7 +107,7 @@ public class TestWrapperCaching {
 
   @Test
   public void testMultiScopeInitialMiss() {
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
     model.put("scope1", new TestObject()); //scope 1 dot miss
     model.put("scope2", "foo"); //scope 2 full miss (shouldn't matter)
 
@@ -119,7 +119,7 @@ public class TestWrapperCaching {
 
   @Test
   public void testMultiScopeInitialMiss2() {
-    Map<String, Object> model = new HashMap<String, Object>();
+    Map<String, Object> model = new HashMap<>();
     model.put("scope1", "foo"); //scope 1 full miss
     model.put("scope2", new TestObject()); //scope 2 dot miss
 

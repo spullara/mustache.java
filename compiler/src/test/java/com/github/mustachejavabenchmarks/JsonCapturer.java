@@ -19,9 +19,9 @@ public class JsonCapturer implements CapturingMustacheVisitor.Captured {
 
   public JsonCapturer(JsonGenerator jg) {
     this.jg = jg;
-    seenit = new Stack<Set<String>>();
+    seenit = new Stack<>();
     ignore = 0;
-    seenit.add(new HashSet<String>());
+    seenit.add(new HashSet<>());
   }
 
   @Override
@@ -68,7 +68,7 @@ public class JsonCapturer implements CapturingMustacheVisitor.Captured {
     if (ignore > 0) return;
     try {
       jg.writeStartObject();
-      seenit.push(new HashSet<String>());
+      seenit.push(new HashSet<>());
     } catch (IOException e) {
       e.printStackTrace();
     }

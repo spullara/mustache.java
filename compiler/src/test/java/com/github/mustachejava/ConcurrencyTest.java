@@ -1,12 +1,10 @@
 package com.github.mustachejava;
 
-import com.github.mustachejavabenchmarks.BenchmarkTest;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.security.SecureRandom;
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -46,32 +44,23 @@ public class ConcurrencyTest {
     }
 
     Callable<Integer> calla() throws InterruptedException {
-      return new Callable<Integer>() {
-        @Override
-        public Integer call() throws Exception {
-          Thread.sleep(r.nextInt(10));
-          return a;
-        }
+      return () -> {
+        Thread.sleep(r.nextInt(10));
+        return a;
       };
     }
 
     Callable<Integer> callb() throws InterruptedException {
-      return new Callable<Integer>() {
-        @Override
-        public Integer call() throws Exception {
-          Thread.sleep(r.nextInt(10));
-          return b;
-        }
+      return () -> {
+        Thread.sleep(r.nextInt(10));
+        return b;
       };
     }
 
     Callable<Integer> callc() throws InterruptedException {
-      return new Callable<Integer>() {
-        @Override
-        public Integer call() throws Exception {
-          Thread.sleep(r.nextInt(10));
-          return c;
-        }
+      return () -> {
+        Thread.sleep(r.nextInt(10));
+        return c;
       };
     }
 
@@ -97,23 +86,20 @@ public class ConcurrencyTest {
     final Semaphore semaphore = new Semaphore(100);
     for (int i = 0; i < 100000; i++) {
       semaphore.acquire();
-      es.submit(new Runnable() {
-        @Override
-        public void run() {
-          try {
-          TestObject testObject = new TestObject(r.nextInt(), r.nextInt(), r.nextInt());
-          StringWriter sw = new StringWriter();
-            test.execute(sw, testObject).close();
-            if (!render(testObject).equals(sw.toString())) {
-              total.incrementAndGet();
-            }
-          } catch (IOException e) {
-            // Can't fail
-            e.printStackTrace();
-            System.exit(1);
-          } finally {
-            semaphore.release();
+      es.submit(() -> {
+        try {
+        TestObject testObject = new TestObject(r.nextInt(), r.nextInt(), r.nextInt());
+        StringWriter sw = new StringWriter();
+          test.execute(sw, testObject).close();
+          if (!render(testObject).equals(sw.toString())) {
+            total.incrementAndGet();
           }
+        } catch (IOException e) {
+          // Can't fail
+          e.printStackTrace();
+          System.exit(1);
+        } finally {
+          semaphore.release();
         }
       });
     }
@@ -134,23 +120,20 @@ public class ConcurrencyTest {
     final Semaphore semaphore = new Semaphore(100);
     for (int i = 0; i < 100000; i++) {
       semaphore.acquire();
-      es.submit(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            TestObject testObject = new TestObject(r.nextInt(), r.nextInt(), r.nextInt());
-            StringWriter sw = new StringWriter();
-            test.execute(sw, testObject).close();
-            if (!render(testObject).equals(sw.toString())) {
-              total.incrementAndGet();
-            }
-          } catch (IOException e) {
-            // Can't fail
-            e.printStackTrace();
-            System.exit(1);
-          } finally {
-            semaphore.release();
+      es.submit(() -> {
+        try {
+          TestObject testObject = new TestObject(r.nextInt(), r.nextInt(), r.nextInt());
+          StringWriter sw = new StringWriter();
+          test.execute(sw, testObject).close();
+          if (!render(testObject).equals(sw.toString())) {
+            total.incrementAndGet();
           }
+        } catch (IOException e) {
+          // Can't fail
+          e.printStackTrace();
+          System.exit(1);
+        } finally {
+          semaphore.release();
         }
       });
     }

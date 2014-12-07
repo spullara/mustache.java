@@ -282,7 +282,7 @@ public class InterpreterTest extends TestCase {
       mustacheFactory.setObjectHandler(new SimpleObjectHandler());
     }
     final Mustache defaultMustache = mustacheFactory.compile(new StringReader("{{#okGenerator.isItOk}}{{okGenerator.isItOk}}{{/okGenerator.isItOk}}"), "Test template");
-    final Map<String, Object> params = new HashMap<String, Object>();
+    final Map<String, Object> params = new HashMap<>();
     params.put("okGenerator", new OkGenerator());
     final Writer writer = new StringWriter();
     defaultMustache.execute(writer, params);
@@ -767,8 +767,8 @@ public class InterpreterTest extends TestCase {
     String template = "Value: {{value}}";
     Mustache mustache = new DefaultMustacheFactory().compile(new StringReader(
             template), "test");
-    Map<String, String> emptyMap = new HashMap<String, String>();
-    Map<String, String> map = new HashMap<String, String>();
+    Map<String, String> emptyMap = new HashMap<>();
+    Map<String, String> map = new HashMap<>();
     map.put("value", "something");
 
     // map doesn't have an entry for 'value', lookup will fail
@@ -933,7 +933,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public static class AccessTrackingMap extends HashMap<String, String> {
-    Set<Object> accessed = new HashSet<Object>();
+    Set<Object> accessed = new HashSet<>();
 
     @Override
     public String get(Object key) {
@@ -942,7 +942,7 @@ public class InterpreterTest extends TestCase {
     }
 
     public void check() {
-      Set<String> keyset = new HashSet<String>(keySet());
+      Set<String> keyset = new HashSet<>(keySet());
       keyset.removeAll(accessed);
       if (!keyset.isEmpty()) {
         throw new MustacheException("All keys in the map were not accessed");
@@ -1222,7 +1222,7 @@ public class InterpreterTest extends TestCase {
     DefaultMustacheFactory mustacheFactory = new DefaultMustacheFactory();
     Reader reader = new StringReader("value=${some.value}");
     Mustache mustache = mustacheFactory.compile(reader, "maven", "${", "}");
-    Map<String, String> properties = new HashMap<String, String>();
+    Map<String, String> properties = new HashMap<>();
     properties.put("some.value", "some.value");
     StringWriter writer = new StringWriter();
     mustache.execute(writer, new Object[]{properties}).close();
@@ -1259,12 +1259,12 @@ public class InterpreterTest extends TestCase {
 
   @Test
   public void testMap() throws IOException {
-    ArrayList<Map<String, String>> fn = new ArrayList<Map<String, String>>();
-    Map<String, String> map1 = new HashMap<String, String>();
+    ArrayList<Map<String, String>> fn = new ArrayList<>();
+    Map<String, String> map1 = new HashMap<>();
     map1.put("name", "firstName");
     map1.put("last", "lastName");
     fn.add(map1);
-    Map<String, String> map2 = new HashMap<String, String>();
+    Map<String, String> map2 = new HashMap<>();
     map2.put("name", "firstName 1");
     map2.put("last", "lastName 1");
     fn.add(map2);

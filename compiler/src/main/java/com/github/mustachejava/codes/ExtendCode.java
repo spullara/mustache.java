@@ -53,7 +53,7 @@ public class ExtendCode extends PartialCode {
   @Override
   public synchronized void init() {
     filterText();
-    Map<String, ExtendNameCode> replaceMap = new HashMap<String, ExtendNameCode>();
+    Map<String, ExtendNameCode> replaceMap = new HashMap<>();
     for (Code code : mustache.getCodes()) {
       if (code instanceof ExtendNameCode) {
         // put name codes in the map
@@ -72,7 +72,7 @@ public class ExtendCode extends PartialCode {
     partial = (Mustache) original.clone();
     Code[] supercodes = partial.getCodes();
     // recursively replace named sections with replacements
-    Set<Code> seen = new HashSet<Code>();
+    Set<Code> seen = new HashSet<>();
     seen.add(partial);
     partial.setCodes(replaceCodes(supercodes, replaceMap, seen));
   }

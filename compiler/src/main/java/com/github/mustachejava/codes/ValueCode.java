@@ -88,16 +88,13 @@ public class ValueCode extends DefaultCode {
       }
       final LatchedWriter latchedWriter = new LatchedWriter(writer);
       final Writer finalWriter = writer;
-      les.execute(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            Object call = callable.call();
-            execute(finalWriter, call == null ? null : oh.stringify(call));
-            latchedWriter.done();
-          } catch (Throwable e) {
-            latchedWriter.failed(e);
-          }
+      les.execute(() -> {
+        try {
+          Object call = callable.call();
+          execute(finalWriter, call == null ? null : oh.stringify(call));
+          latchedWriter.done();
+        } catch (Throwable e) {
+          latchedWriter.failed(e);
         }
       });
       return super.execute(latchedWriter, scopes);

@@ -2,7 +2,6 @@ package com.github.mustachejava;
 
 import com.github.mustachejava.util.Node;
 
-import java.io.IOException;
 import java.io.Writer;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;

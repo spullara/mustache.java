@@ -26,7 +26,7 @@ public class ClassGuard implements Guard {
   @Override
   public boolean equals(Object o) {
     ClassGuard other = (ClassGuard) o;
-    return o instanceof ClassGuard && (classGuard == null ? classGuard == other.classGuard : classGuard.equals(other.classGuard));
+    return o != null && (classGuard == null ? other.classGuard == null : classGuard.equals(other.classGuard));
   }
 
   @Override

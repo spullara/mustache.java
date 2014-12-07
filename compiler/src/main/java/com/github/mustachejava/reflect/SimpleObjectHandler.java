@@ -111,7 +111,7 @@ public class SimpleObjectHandler extends BaseObjectHandler {
 
   // Cache of classes + name => field mappings
   // By keeping this non-static you can release the cache by releasing the handler
-  private Map<WrapperKey, AccessibleObject> cache = new ConcurrentHashMap<WrapperKey, AccessibleObject>();
+  private Map<WrapperKey, AccessibleObject> cache = new ConcurrentHashMap<>();
 
   // Used to cache misses
   private static AccessibleObject NONE;

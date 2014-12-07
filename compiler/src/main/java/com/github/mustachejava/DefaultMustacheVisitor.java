@@ -32,7 +32,7 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
     }
   };
 
-  protected final List<Code> list = new LinkedList<Code>();
+  protected final List<Code> list = new LinkedList<>();
   private final Map<String, PragmaHandler> handlers = new HashMap<String, PragmaHandler>() {{
     put("implicit-iterator", new PragmaHandler() {
       @Override

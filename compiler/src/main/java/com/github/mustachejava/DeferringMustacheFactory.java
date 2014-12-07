@@ -45,7 +45,7 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
 
   public static class DeferredCallable implements Callable<String> {
 
-    private List<Deferral> deferrals = new ArrayList<Deferral>();
+    private List<Deferral> deferrals = new ArrayList<>();
 
     public void add(Deferral deferral) {
       deferrals.add(deferral);
@@ -87,17 +87,14 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
                 throw new MustacheException("Failed to write", e);
               }
               deferredCallable.add(
-                      new Deferral(divid, getExecutorService().submit(new Callable<Object>() {
-                        @Override
-                        public Object call() {
-                          try {
-                            StringWriter writer = new StringWriter();
-                            Object[] newscopes = addScope(scopes, object);
-                            partial.execute(writer, newscopes).close();
-                            return writer.toString();
-                          } catch (IOException e) {
-                            throw new MustacheException("Failed to writer", e);
-                          }
+                      new Deferral(divid, getExecutorService().submit(() -> {
+                        try {
+                          StringWriter writer1 = new StringWriter();
+                          Object[] newscopes = addScope(scopes, object);
+                          partial.execute(writer1, newscopes).close();
+                          return writer1.toString();
+                        } catch (IOException e) {
+                          throw new MustacheException("Failed to writer", e);
                         }
                       })));
               return writer;
