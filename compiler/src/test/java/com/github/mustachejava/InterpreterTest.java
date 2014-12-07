@@ -9,8 +9,6 @@ import com.github.mustachejava.resolver.DefaultResolver;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
 import com.github.mustachejavabenchmarks.JsonCapturer;
 import com.github.mustachejavabenchmarks.JsonInterpreterTest;
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
 import junit.framework.TestCase;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonNode;
@@ -28,12 +26,21 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 /**
  * Tests for the compiler.
@@ -337,30 +344,21 @@ public class InterpreterTest extends TestCase {
 
     m.execute(sw, new Object() {
       Iterable list = Arrays.asList(
-              new Callable<Object>() {
-                @Override
-                public Object call() throws Exception {
-                  cdl1.await();
-                  sb.append("How");
-                  return "How";
-                }
+              () -> {
+                cdl1.await();
+                sb.append("How");
+                return "How";
               },
-              new Callable<Object>() {
-                @Override
-                public Object call() throws Exception {
-                  cdl2.await();
-                  sb.append("are");
-                  cdl1.countDown();
-                  return "are";
-                }
+              (Callable<Object>) () -> {
+                cdl2.await();
+                sb.append("are");
+                cdl1.countDown();
+                return "are";
               },
-              new Callable<Object>() {
-                @Override
-                public Object call() throws Exception {
-                  sb.append("you?");
-                  cdl2.countDown();
-                  return "you?";
-                }
+              () -> {
+                sb.append("you?");
+                cdl2.countDown();
+                return "you?";
               }
       );
     }).close();
@@ -375,36 +373,22 @@ public class InterpreterTest extends TestCase {
     StringWriter sw = new StringWriter();
     long start = System.currentTimeMillis();
     Writer execute = m.execute(sw, new Object() {
-      Callable<Object> a = new Callable<Object>() {
-        @Override
-        public Object call() throws Exception {
-          Thread.sleep(300);
-          return "How";
-        }
+      Callable<Object> a = () -> {
+        Thread.sleep(300);
+        return "How";
       };
-      Callable<Object> b = new Callable<Object>() {
-        @Override
-        public Object call() throws Exception {
-          Thread.sleep(200);
-          return "are";
-        }
+      Callable<Object> b = () -> {
+        Thread.sleep(200);
+        return "are";
       };
-      Callable<Object> c = new Callable<Object>() {
-        @Override
-        public Object call() throws Exception {
-          Thread.sleep(100);
-          return "you?";
-        }
+      Callable<Object> c = () -> {
+        Thread.sleep(100);
+        return "you?";
       };
-      Callable<Function> caps = new Callable<Function>() {
+      Callable<Function> caps = () -> new Function() {
         @Override
-        public Function call() throws Exception {
-          return new Function() {
-            @Override
-            public Object apply(Object o) {
-              return o.toString().toUpperCase();
-            }
-          };
+        public Object apply(Object o) {
+          return o.toString().toUpperCase();
         }
       };
     });
@@ -419,26 +403,17 @@ public class InterpreterTest extends TestCase {
     Mustache m = c.compile("latchedtest.html");
     StringWriter sw = new StringWriter();
     Writer execute = m.execute(sw, new Object() {
-      Callable<Object> nest = new Callable<Object>() {
-        @Override
-        public Object call() throws Exception {
-          Thread.sleep(300);
-          return "How";
-        }
+      Callable<Object> nest = () -> {
+        Thread.sleep(300);
+        return "How";
       };
-      Callable<Object> nested = new Callable<Object>() {
-        @Override
-        public Object call() throws Exception {
-          Thread.sleep(200);
-          return "are";
-        }
+      Callable<Object> nested = () -> {
+        Thread.sleep(200);
+        return "are";
       };
-      Callable<Object> nestest = new Callable<Object>() {
-        @Override
-        public Object call() throws Exception {
-          Thread.sleep(100);
-          return "you?";
-        }
+      Callable<Object> nestest = () -> {
+        Thread.sleep(100);
+        return "you?";
       };
     });
     execute.close();
@@ -581,12 +556,7 @@ public class InterpreterTest extends TestCase {
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
       public TemplateFunction i() {
-        return new TemplateFunction() {
-          @Override
-          public String apply(String s) {
-            return s;
-          }
-        };
+        return s -> s;
       }
     });
     assertEquals("This is not interesting.", sw.toString());
@@ -754,12 +724,9 @@ public class InterpreterTest extends TestCase {
       String description;
 
       Callable<String> desc() throws InterruptedException {
-        return new Callable<String>() {
-          @Override
-          public String call() throws Exception {
-            Thread.sleep(1000);
-            return description;
-          }
+        return () -> {
+          Thread.sleep(1000);
+          return description;
         };
       }
     }
@@ -937,14 +904,11 @@ public class InterpreterTest extends TestCase {
       @Override
       public MustacheVisitor createMustacheVisitor() {
         DefaultMustacheVisitor visitor = new DefaultMustacheVisitor(this);
-        visitor.addPragmaHandler("pragma", new PragmaHandler() {
-          @Override
-          public Code handle(TemplateContext tc, String pragma, String args) {
-            if (pragma.equals("pragma") && args.equals("1 2 3")) {
-              found.set(true);
-            }
-            return null;
+        visitor.addPragmaHandler("pragma", (tc, pragma, args) -> {
+          if (pragma.equals("pragma") && args.equals("1 2 3")) {
+            found.set(true);
           }
+          return null;
         });
         return visitor;
       }
@@ -962,12 +926,7 @@ public class InterpreterTest extends TestCase {
     Mustache m = mf.compile(new StringReader("{{^value}}test{{/value}}"), "testNotIterableCallable");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      Callable value = new Callable() {
-        @Override
-        public Object call() throws Exception {
-          return null;
-        }
-      };
+      Callable value = () -> null;
     }).close();
     // Values ignored as if it didn't exist at all
     assertEquals("test", sw.toString());
@@ -1064,12 +1023,7 @@ public class InterpreterTest extends TestCase {
         }
       };
       String test2 = "test";
-      Function f = new Function() {
-        @Override
-        public Object apply(Object o) {
-          return null;
-        }
-      };
+      Function f = o -> null;
       CommentFunction comment = new CommentFunction();
     }).close();
     // Values ignored as if it didn't exist at all
@@ -1223,12 +1177,7 @@ public class InterpreterTest extends TestCase {
     StringWriter sw = new StringWriter();
     mustache.execute(sw, new Object() {
       public TemplateFunction parse() {
-        return new TemplateFunction() {
-          @Override
-          public String apply(String s){
-            return "blablabla {{anotherVar}}, blablabla {{yetAnotherVar}}";
-          }
-        };
+        return s -> "blablabla {{anotherVar}}, blablabla {{yetAnotherVar}}";
       }
       String anotherVar = "banana";
       String yetAnotherVar = "apple";
@@ -1258,17 +1207,13 @@ public class InterpreterTest extends TestCase {
     StringWriter sw = new StringWriter();
     mustache.execute(sw, new Object() {
       public TemplateFunction parse() {
-        return new TemplateFunction() {
-          @Override
-          public String apply(String s){
-            return "blablabla {{anotherVar}}, blablabla {{yetAnotherVar}}";
-          }
-        };
+        return s -> "blablabla {{anotherVar}}, blablabla {{yetAnotherVar}}";
       }
-      Map<String, Object> params = ImmutableMap.<String, Object>builder()
-          .put("anotherVar", "banana")
-          .put("yetAnotherVar", "apple")
-          .build();
+      Map<String, Object> params = new HashMap<>();
+      {
+        params.put("anotherVar", "banana");
+        params.put("yetAnotherVar", "apple");
+      }
     });
     assertEquals("blablabla banana, blablabla apple", sw.toString());
   }

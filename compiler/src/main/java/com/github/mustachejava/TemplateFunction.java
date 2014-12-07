@@ -1,6 +1,6 @@
 package com.github.mustachejava;
 
-import com.google.common.base.Function;
+import java.util.function.Function;
 
 /**
  * Use this function if you to implement additional functions/lambdas

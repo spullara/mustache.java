@@ -1,15 +1,12 @@
 package com.github.mustachejava;
 
-import com.google.common.base.Function;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.function.Function;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -35,24 +32,18 @@ public class PreTranslateTest {
       }
 
       @Override
-      protected LoadingCache<String, Mustache> createMustacheCache() {
-        return CacheBuilder.newBuilder().build(new CacheLoader<String, Mustache>() {
-          @Override
-          public Mustache load(String key) throws Exception {
-            return mp.compile(key);
-          }
-        });
+      protected Function<String, Mustache> getMustacheCacheFunction() {
+        return (template) -> {
+          Mustache compile = mp.compile(template);
+          compile.init();
+          return compile;
+        };
       }
     };
     Mustache m = mf.compile("pretranslate.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      Function i = new TemplateFunction() {
-        @Override
-        public String apply(java.lang.String input) {
-          return "{{test}} Translate";
-        }
-      };
+      Function i = input -> "{{test}} Translate";
     }).close();
     assertEquals("{{#show}}\n{{test}} Translate\n{{/show}}", sw.toString());
     mf = new DefaultMustacheFactory();

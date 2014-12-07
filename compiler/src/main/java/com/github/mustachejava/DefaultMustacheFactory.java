@@ -2,20 +2,16 @@ package com.github.mustachejava;
 
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.resolver.DefaultResolver;
-import com.google.common.base.Charsets;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.io.Files;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 
-import java.io.*;
+import java.io.File;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 
 import static com.github.mustachejava.util.HtmlEscaper.escape;
 
@@ -28,7 +24,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
    * Create the default cache for mustache compilations. This is basically
    * required by the specification to handle recursive templates.
    */
-  protected final LoadingCache<String, Mustache> mustacheCache = createMustacheCache();
+  protected final ConcurrentHashMap<String, Mustache> mustacheCache = createMustacheCache();
 
   /**
    * This is the default object handler.
@@ -45,13 +41,13 @@ public class DefaultMustacheFactory implements MustacheFactory {
    * includes the text of the template and the context so we get proper error
    * messages and debugging information.
    */
-  protected final LoadingCache<FragmentKey, Mustache> templateCache = createLambdaCache();
+  protected final ConcurrentHashMap<FragmentKey, Mustache> templateCache = createLambdaCache();
 
   protected int recursionLimit = 100;
 
   private final MustacheResolver mustacheResolver;
 
-  protected ListeningExecutorService les;
+  protected ExecutorService es;
 
   public DefaultMustacheFactory() {
     this.mustacheResolver = new DefaultResolver();
@@ -92,7 +88,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
       filePath = filePath + extension;
     }
 
-    String path = Files.simplifyPath(new File(filePath).getPath());
+    String path = new File(filePath).getPath();
     return ensureForwardSlash(path);
   }
 
@@ -108,7 +104,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
   @Override
   public Reader getReader(String resourceName) {
     Reader reader = mustacheResolver.getReader(resourceName);
-    if(reader == null) {
+    if (reader == null) {
       throw new MustacheNotFoundException(resourceName);
     }
     return reader;
@@ -140,7 +136,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
    * @return
    */
   public ExecutorService getExecutorService() {
-    return les;
+    return es;
   }
 
   /**
@@ -149,42 +145,28 @@ public class DefaultMustacheFactory implements MustacheFactory {
    * @param es
    */
   public void setExecutorService(ExecutorService es) {
-    if (es instanceof ListeningExecutorService) {
-      les = (ListeningExecutorService) es;
-    } else {
-      les = MoreExecutors.listeningDecorator(es);
-    }
+    this.es = es;
   }
 
   public Mustache getFragment(FragmentKey templateKey) {
-    try {
-      Mustache mustache = templateCache.get(templateKey);
-      mustache.init();
-      return mustache;
-    } catch (ExecutionException e) {
-      throw handle(e);
-    }
+    Mustache mustache = templateCache.computeIfAbsent(templateKey, getFragmentCacheFunction());
+    mustache.init();
+    return mustache;
   }
 
-  private MustacheException handle(Exception e) {
-    Throwable cause = e.getCause();
-    if (cause instanceof MustacheException) {
-      return (MustacheException) cause;
-    }
-    return new MustacheException(cause);
+  protected Function<FragmentKey, Mustache> getFragmentCacheFunction() {
+    return (fragmentKey) -> {
+      StringReader reader = new StringReader(fragmentKey.templateText);
+      TemplateContext tc = fragmentKey.tc;
+      return mc.compile(reader, tc.file(), tc.startChars(), tc.endChars(), tc.startOfLine());
+    };
   }
 
   @Override
   public Mustache compile(String name) {
-    try {
-      Mustache mustache = mustacheCache.get(name);
-      mustache.init();
-      return mustache;
-    } catch (UncheckedExecutionException e) {
-      throw handle(e);
-    } catch (ExecutionException e) {
-      throw handle(e);
-    }
+    Mustache mustache = mustacheCache.computeIfAbsent(name, getMustacheCacheFunction());
+    mustache.init();
+    return mustache;
   }
 
   @Override
@@ -208,7 +190,6 @@ public class DefaultMustacheFactory implements MustacheFactory {
    * Override this method to apply any filtering to text that will appear
    * verbatim in the output template.
    *
-   *
    * @param appended
    * @param b
    * @return
@@ -231,7 +212,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
   private final ThreadLocal<Map<String, Mustache>> partialCache = new ThreadLocal<Map<String, Mustache>>() {
     @Override
     protected Map<String, Mustache> initialValue() {
-      return new HashMap<String, Mustache>();
+      return new HashMap<>();
     }
   };
 
@@ -257,27 +238,15 @@ public class DefaultMustacheFactory implements MustacheFactory {
     }
   }
 
-  protected class MustacheCacheLoader extends CacheLoader<String, Mustache> {
-    @Override
-    public Mustache load(String key) throws Exception {
-      return mc.compile(key);
-    }
+  protected Function<String, Mustache> getMustacheCacheFunction() {
+    return mc::compile;
   }
 
-  protected class FragmentCacheLoader extends CacheLoader<FragmentKey, Mustache> {
-    @Override
-    public Mustache load(FragmentKey fragmentKey) throws Exception {
-      StringReader reader = new StringReader(fragmentKey.templateText);
-      TemplateContext tc = fragmentKey.tc;
-      return mc.compile(reader, tc.file(), tc.startChars(), tc.endChars(), tc.startOfLine());
-    }
+  protected ConcurrentHashMap<String, Mustache> createMustacheCache() {
+    return new ConcurrentHashMap<>();
   }
 
-  protected LoadingCache<String, Mustache> createMustacheCache() {
-    return CacheBuilder.newBuilder().build(new MustacheCacheLoader());
-  }
-
-  protected LoadingCache<FragmentKey, Mustache> createLambdaCache() {
-    return CacheBuilder.newBuilder().build(new FragmentCacheLoader());
+  protected ConcurrentHashMap<FragmentKey, Mustache> createLambdaCache() {
+    return new ConcurrentHashMap<>();
   }
 }

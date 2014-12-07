@@ -9,7 +9,6 @@ import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.TemplateFunction;
 import com.github.mustachejava.util.LatchedWriter;
 import com.github.mustachejava.util.Node;
-import com.google.common.base.Function;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -19,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import static com.github.mustachejava.util.NodeValue.list;
 

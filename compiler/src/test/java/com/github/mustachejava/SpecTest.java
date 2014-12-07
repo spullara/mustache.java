@@ -1,15 +1,19 @@
 package com.github.mustachejava;
 
-import com.google.common.base.Function;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.MappingJsonFactory;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Function;
 
 import static junit.framework.Assert.assertFalse;
 
@@ -62,53 +66,28 @@ public class SpecTest {
     Map<String, Object> functionMap = new HashMap<String, Object>() {{
       put("Interpolation", new Object() {
         Function lambda() {
-          return new Function<String, String>() {
-            @Override
-            public String apply(String input) {
-              return "world";
-            }
-          };
+          return input -> "world";
         }
       });
       put("Interpolation - Expansion", new Object() {
         Function lambda() {
-          return new TemplateFunction() {
-            @Override
-            public String apply(String input) {
-              return "{{planet}}";
-            }
-          };
+          return input -> "{{planet}}";
         }
       });
       put("Interpolation - Alternate Delimiters", new Object() {
         Function lambda() {
-          return new TemplateFunction() {
-            @Override
-            public String apply(String input) {
-              return "|planet| => {{planet}}";
-            }
-          };
+          return input -> "|planet| => {{planet}}";
         }
       });
       put("Interpolation - Multiple Calls", new Object() {
         int calls = 0;
         Function lambda() {
-          return new Function<String, String>() {
-            @Override
-            public String apply(String input) {
-              return String.valueOf(++calls);
-            }
-          };
+          return input -> String.valueOf(++calls);
         }
       });
       put("Escaping", new Object() {
         Function lambda() {
-          return new Function<String, String>() {
-            @Override
-            public String apply(String input) {
-              return ">";
-            }
-          };
+          return input -> ">";
         }
       });
       put("Section", new Object() {
@@ -153,12 +132,7 @@ public class SpecTest {
       });
       put("Inverted Section", new Object() {
         Function lambda() {
-          return new Function<String, Object>() {
-            @Override
-            public Object apply(String input) {
-              return false;
-            }
-          };
+          return input -> false;
         }
       });
     }}; 
@@ -242,26 +216,21 @@ public class SpecTest {
       } else if (value.isValueNode()) {
         return value.asText();
       } else if (value.isArray()) {
-        return new Iterable() {
+        return (Iterable) () -> new Iterator() {
+          private Iterator<JsonNode> iterator = value.iterator();
+
           @Override
-          public Iterator iterator() {
-            return new Iterator() {
-              private Iterator<JsonNode> iterator = value.iterator();
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
 
-              @Override
-              public boolean hasNext() {
-                return iterator.hasNext();
-              }
+          @Override
+          public Object next() {
+            return convert(iterator.next());
+          }
 
-              @Override
-              public Object next() {
-                return convert(iterator.next());
-              }
-
-              @Override
-              public void remove() {
-              }
-            };
+          @Override
+          public void remove() {
           }
         };
       } else {

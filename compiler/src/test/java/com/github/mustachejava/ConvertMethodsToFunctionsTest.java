@@ -5,7 +5,6 @@ import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.reflect.ReflectionWrapper;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
-import com.google.common.base.Function;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -17,6 +16,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.function.Function;
 
 import static junit.framework.Assert.assertEquals;
 

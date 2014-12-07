@@ -2,8 +2,8 @@ package com.github.mustachejava.resolver;
 
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.MustacheResolver;
-import com.google.common.base.Charsets;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * MustacheResolver implementation that resolves
@@ -55,7 +55,7 @@ public class FileSystemResolver implements MustacheResolver {
       }
     }
     if (is != null) {
-      return new BufferedReader(new InputStreamReader(is, Charsets.UTF_8));
+      return new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
     } else {
       return null;
     }

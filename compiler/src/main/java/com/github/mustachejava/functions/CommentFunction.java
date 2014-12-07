@@ -1,6 +1,6 @@
 package com.github.mustachejava.functions;
 
-import com.google.common.base.Function;
+import java.util.function.Function;
 
 /**
  * Mustache.java block comment function.

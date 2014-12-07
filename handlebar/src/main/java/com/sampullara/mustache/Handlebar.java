@@ -1,29 +1,11 @@
 package com.sampullara.mustache;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.activation.FileTypeMap;
-import javax.activation.MimetypesFileTypeMap;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
 import com.github.mustachejava.TemplateFunction;
-import com.google.common.base.Function;
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
@@ -35,13 +17,30 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
-import com.google.common.base.Throwables;
-import com.google.common.io.Files;
-import com.sampullara.cli.Args;
-import com.sampullara.cli.Argument;
+import javax.activation.FileTypeMap;
+import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Run a local server and merge .js and .html files using mustache.
@@ -158,14 +157,18 @@ public class Handlebar {
             // Handle like a file
             res.setStatus(HttpServletResponse.SC_OK);
             ServletOutputStream out = res.getOutputStream();
-            Files.copy(staticres, out);
+            Files.copy(staticres.toPath(), out);
             out.close();
             r.setHandled(true);
           }
         } catch (Exception e) {
           // params
           Map<String, String> params = new HashMap<String, String>();
-          params.put("stacktrace", Throwables.getStackTraceAsString(e));
+          StringWriter out = new StringWriter();
+          PrintWriter pw = new PrintWriter(out);
+          e.printStackTrace(pw);
+          pw.close();
+          params.put("stacktrace", out.toString());
 
           // render template
           res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

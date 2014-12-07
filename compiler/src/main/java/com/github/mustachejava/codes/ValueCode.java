@@ -6,7 +6,6 @@ import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.LatchedWriter;
 import com.github.mustachejava.util.Node;
-import com.google.common.base.Function;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -14,6 +13,7 @@ import java.io.Writer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
