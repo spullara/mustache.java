@@ -1,4 +1,4 @@
-Mustache.java
+Mustache.java [![Build Status](https://travis-ci.org/spullara/mustache.java?branch=master)](https://travis-ci.org/spullara/mustache.java)
 =============
 
 **Mustache.java** is a derivative of [mustache.js](http://mustache.github.com/mustache.5.html).
