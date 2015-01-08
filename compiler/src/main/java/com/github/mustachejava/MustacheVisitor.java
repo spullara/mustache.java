@@ -28,4 +28,5 @@ public interface MustacheVisitor {
 
   void name(TemplateContext templateContext, String variable, Mustache mustache);
 
+  void comment(TemplateContext templateContext, String comment);
 }

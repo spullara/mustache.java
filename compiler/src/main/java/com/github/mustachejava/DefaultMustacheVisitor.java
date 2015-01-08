@@ -1,14 +1,6 @@
 package com.github.mustachejava;
 
-import com.github.mustachejava.codes.DefaultCode;
-import com.github.mustachejava.codes.DefaultMustache;
-import com.github.mustachejava.codes.ExtendCode;
-import com.github.mustachejava.codes.ExtendNameCode;
-import com.github.mustachejava.codes.IterableCode;
-import com.github.mustachejava.codes.NotIterableCode;
-import com.github.mustachejava.codes.PartialCode;
-import com.github.mustachejava.codes.ValueCode;
-import com.github.mustachejava.codes.WriteCode;
+import com.github.mustachejava.codes.*;
 import com.github.mustachejava.util.Node;
 
 import java.io.Writer;
@@ -125,4 +117,8 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
     list.add(new ExtendCode(templateContext, df, mustache, variable));
   }
 
+  @Override
+  public void comment(TemplateContext templateContext, String comment) {
+    list.add(new CommentCode(templateContext, df, comment));
+  }
 }

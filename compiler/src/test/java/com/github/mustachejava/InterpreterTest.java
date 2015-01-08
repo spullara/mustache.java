@@ -450,6 +450,21 @@ public class InterpreterTest extends TestCase {
     assertEquals("Is not present", sw.toString());
   }
 
+  public void testComment() throws IOException {
+    MustacheFactory c = createMustacheFactory();
+    Mustache m = c.compile(new StringReader("{{#process}}{{!comment}}{{/process}}"), "");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      TemplateFunction process = new TemplateFunction() {
+        @Override
+        public String apply(String s) {
+          return s.replace("{", "[");
+        }
+      };
+    });
+    assertEquals("[[!comment}}", sw.toString());
+  }
+
   public void testNumber0IsFalse() throws IOException {
     DefaultMustacheFactory c = createMustacheFactory();
     c.setObjectHandler(new ReflectionObjectHandler() {

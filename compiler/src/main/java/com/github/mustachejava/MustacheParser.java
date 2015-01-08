@@ -202,6 +202,7 @@ public class MustacheParser {
                   break;
                 case '!':
                   // Comment
+                  mv.comment(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable);
                   out = write(mv, out, file, currentLine.intValue(), startOfLine);
                   break;
                 case '=':
