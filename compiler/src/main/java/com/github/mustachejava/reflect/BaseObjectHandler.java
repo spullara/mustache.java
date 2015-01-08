@@ -176,6 +176,6 @@ public abstract class BaseObjectHandler implements ObjectHandler {
 
   @Override
   public String stringify(Object object) {
-    return coerce(object).toString();
+    return object.toString();
   }
 }
