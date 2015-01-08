@@ -14,10 +14,19 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 public abstract class BaseObjectHandler implements ObjectHandler {
   @Override
   public Object coerce(Object object) {
+    if (object instanceof Optional) {
+      Optional optional = (Optional) object;
+      if (optional.isPresent()) {
+        return coerce(optional.get());
+      } else {
+        return null;
+      }
+    }
     return object;
   }
 
@@ -167,6 +176,6 @@ public abstract class BaseObjectHandler implements ObjectHandler {
 
   @Override
   public String stringify(Object object) {
-    return object.toString();
+    return coerce(object).toString();
   }
 }

@@ -16,25 +16,8 @@ import org.codehaus.jackson.map.MappingJsonFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -450,6 +433,21 @@ public class InterpreterTest extends TestCase {
       List people = Arrays.asList("Test");
     });
     assertEquals(getContents(root, "isempty.txt"), sw.toString());
+  }
+
+  public void testOptional() throws IOException {
+    MustacheFactory c = createMustacheFactory();
+    Mustache m = c.compile(new StringReader("{{person}}{{#person}} is present{{/person}}{{^person}}Is not present{{/person}}"), "test");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      Optional<String> person = Optional.of("Test");
+    });
+    assertEquals("Test is present", sw.toString());
+    sw = new StringWriter();
+    m.execute(sw, new Object() {
+      Optional<String> person = Optional.empty();
+    });
+    assertEquals("Is not present", sw.toString());
   }
 
   public void testNumber0IsFalse() throws IOException {
