@@ -11,53 +11,57 @@ import java.io.Writer;
 public interface ObjectHandler {
   /**
    * Find a value named "name" in the array of scopes in reverse order.
-   * @param name
-   * @param scopes
-   * @return
+   * 
+   * @param name the variable name
+   * @param scopes the ordered list of scopes
+   * @return a wrapper that can be used to extract a value
    */
   Wrapper find(String name, Object[] scopes);
 
   /**
    * Coerce results to Java native iterables, functions, callables.
-   * @param object
-   * @return
+   * 
+   * @param object transform an unknown type to a known type
+   * @return the new object
    */
   Object coerce(Object object);
 
   /**
    * Iterate over an object by calling Iteration.next for each value.
-   * @param iteration
-   * @param writer
-   * @param object
-   * @param scopes
-   * @return
+   *
+   * @param iteration callback for the next iteration
+   * @param writer the writer to write to
+   * @param object the current object
+   * @param scopes the scopes present
+   * @return the current writer
    */
   Writer iterate(Iteration iteration, Writer writer, Object object, Object[] scopes);
 
   /**
    * Call Iteration.next() either 0 (true) or 1 (fale) times.
-   * @param iteration
-   * @param writer
-   * @param object
-   * @param scopes
-   * @return
+   *
+   * @param iteration callback for the next iteration
+   * @param writer the writer to write to
+   * @param object the current object
+   * @param scopes the scopes present
+   * @return the current writer
    */
   Writer falsey(Iteration iteration, Writer writer, Object object, Object[] scopes);
 
   /**
    * Each call site has its own binding to allow for fine grained caching without
    * a separate parallel hierarchy of objects.
-   * @param name
-   * @param tc
-   * @param code
-   * @return
+   *
+   * @param name the name that we bound
+   * @param tc the textual context of the binding site
+   * @param code the code that was bound
+   * @return the binding
    */
   Binding createBinding(String name, TemplateContext tc, Code code);
   
   /**
    * Turns an object into the string representation that should be displayed
    * in templates.
-   *
    *
    * @param object the object to be displayed
    * @return a string representation of the object.

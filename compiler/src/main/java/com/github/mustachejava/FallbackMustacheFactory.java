@@ -10,10 +10,10 @@ import java.io.Reader;
 
 /**
  * Mustache.java factory with a fallback mechanism for locating resources.
- * <p/>
+ *
  * (Some parts are based on DefaultMustacheFactory code that is Copyright 2010 RightTime, Inc.)
  *
- * @author gw0 [http://gw.tnode.com/] <gw.2012@tnode.com>
+ * @author gw0 [http://gw.tnode.com/] &lt;gw.2012@tnode.com&gt;
  */
 public class FallbackMustacheFactory extends DefaultMustacheFactory {
 
@@ -35,7 +35,7 @@ public class FallbackMustacheFactory extends DefaultMustacheFactory {
   /**
    * Simple constructor for a fallback Mustache.java factory.
    *
-   * @param resourceRoot normal resource root
+   * @param fileRoot normal resource root
    * @param fallbackRoot fallback alternative root
    */
   public FallbackMustacheFactory(File fileRoot, File fallbackRoot) {

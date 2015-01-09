@@ -35,12 +35,6 @@ public class DefaultMustache extends DefaultCode implements Mustache {
     return writer;
   }
 
-  /**
-   * Invert this mustache given output text.
-   *
-   * @param text
-   * @return
-   */
   @Override
   public Node invert(String text) {
     return invert(new Node(), text, new AtomicInteger(0));

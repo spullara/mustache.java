@@ -60,7 +60,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
   /**
    * Use the classpath to resolve mustache templates.
    *
-   * @param resourceRoot
+   * @param resourceRoot the location in the resources where templates are stored
    */
   public DefaultMustacheFactory(String resourceRoot) {
     this.mustacheResolver = new DefaultResolver(resourceRoot);
@@ -69,7 +69,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
   /**
    * Use the file system to resolve mustache templates.
    *
-   * @param fileRoot
+   * @param fileRoot the root of the file system where templates are stored
    */
   public DefaultMustacheFactory(File fileRoot) {
     this.mustacheResolver = new DefaultResolver(fileRoot);
@@ -123,7 +123,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
   /**
    * You can override the default object handler post construction.
    *
-   * @param oh
+   * @param oh The object handler to use.
    */
   public void setObjectHandler(ObjectHandler oh) {
     this.oh = oh;
@@ -133,7 +133,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
    * There is an ExecutorService that is used when executing parallel
    * operations when a Callable is returned from a mustache value or iterable.
    *
-   * @return
+   * @return the executor service
    */
   public ExecutorService getExecutorService() {
     return es;
@@ -142,7 +142,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
   /**
    * If you need to specify your own executor service you can.
    *
-   * @param es
+   * @param es The executor service to use for Future evaluation
    */
   public void setExecutorService(ExecutorService es) {
     this.es = es;
@@ -190,9 +190,9 @@ public class DefaultMustacheFactory implements MustacheFactory {
    * Override this method to apply any filtering to text that will appear
    * verbatim in the output template.
    *
-   * @param appended
-   * @param b
-   * @return
+   * @param appended The text to be appended to the output
+   * @param b Are we at the start of the line?
+   * @return the filtered string
    */
   public String filterText(String appended, boolean b) {
     return appended;
@@ -200,6 +200,8 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   /**
    * Maximum recursion limit for partials.
+   * 
+   * @param recursionLimit the number of recursions we will attempt before failing
    */
   public void setRecursionLimit(int recursionLimit) {
     this.recursionLimit = recursionLimit;
@@ -220,8 +222,8 @@ public class DefaultMustacheFactory implements MustacheFactory {
    * In order to handle recursion, we need a temporary thread local cache during compilation
    * that is ultimately thrown away after the top level partial is complete.
    *
-   * @param s
-   * @return
+   * @param s the name of the partial to compile
+   * @return the compiled partial
    */
   public Mustache compilePartial(String s) {
     Map<String, Mustache> cache = partialCache.get();

@@ -44,7 +44,7 @@ import java.util.function.Function;
 
 /**
  * Run a local server and merge .js and .html files using mustache.
- * <p/>
+ *
  * User: sam Date: Jun 15, 2010 Time: 4:25:31 PM
  */
 public class Handlebar {

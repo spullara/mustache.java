@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 /**
  * Codes are bound to their variables through bindings.
- * <p/>
+ *
  * User: sam
  * Date: 7/7/12
  * Time: 6:05 PM
@@ -45,7 +45,7 @@ public class GuardedBinding implements Binding {
    * Retrieve the first value in the stacks of scopes that matches
    * the give name. The method wrappers are cached and guarded against
    * the type or number of scopes changing.
-   * <p/>
+   *
    * Methods will be found using the object handler, called here with
    * another lookup on a guard failure and finally coerced to a final
    * value based on the ObjectHandler you provide.

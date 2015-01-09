@@ -10,7 +10,7 @@ import static com.github.mustachejava.reflect.ReflectionObjectHandler.unwrap;
 
 /**
  * Dig into the dot notation to guard it from changing.
- * <p/>
+ *
  * User: sam
  * Date: 6/26/12
  * Time: 9:09 PM

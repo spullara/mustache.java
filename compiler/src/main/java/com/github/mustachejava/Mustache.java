@@ -10,42 +10,48 @@ import java.io.Writer;
 public interface Mustache extends Code {
   /**
    * Append text to the mustache output.
-   * @param text
+   * 
+   * @param text the text to append
    */
   void append(String text);
 
   /**
    * Deep clone of the mustache object.
-   * @return
+   *
+   * @return the clone
    */
   Object clone();
 
   /**
    * Execute the mustache object with a given writer and a single scope context.
-   * @param writer
-   * @param scope
-   * @return
+   *
+   * @param writer write the output of the executed template here
+   * @param scope the root object to use
+   * @return the new writer
    */
   Writer execute(Writer writer, Object scope);
 
   /**
    * Execute the mustache with a given writer and an array of scope objects. The
    * scopes are searched right-to-left for references.
-   * @param writer
-   * @param scopes
-   * @return
+   *
+   * @param writer write the output of the executed template here
+   * @param scopes an ordered list of scopes for variable resolution
+   * @return the new writer
    */
   Writer execute(Writer writer, Object[] scopes);
 
   /**
    * Get the underlying code objects.
-   * @return
+   *
+   * @return the array of child codes
    */
   Code[] getCodes();
 
   /**
    * Execute the mustache to output itself.
-   * @param writer
+   *
+   * @param writer write the output of the executed template here
    */
   void identity(Writer writer);
 
@@ -57,23 +63,25 @@ public interface Mustache extends Code {
 
   /**
    * Change the underlying codes of the mustache implementation.
-   * @param codes
+   *  
+   * @param codes set the children of this code 
    */
   void setCodes(Code[] codes);
 
   /**
    * Only executes the codes. Does not append the text.
-   * @param writer
-   * @param scopes
-   * @return
+   *
+   * @param writer write the output of the executed template here
+   * @param scopes the array of scopes to execute
+   * @return the replacement writer
    */
   Writer run(Writer writer, Object[] scopes);
 
   /**
    * Invert this mustache given output text.
    *
-   * @param text
-   * @return
+   * @param text the text to parse
+   * @return a tree of nodes representing the variables that when passed as a scope would reproduce the text
    */
   Node invert(String text);
 }

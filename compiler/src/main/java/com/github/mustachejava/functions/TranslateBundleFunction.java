@@ -15,14 +15,14 @@ import java.util.ResourceBundle;
  *   }
  *
  * Usage code with a Map:
- *   HashMap<String, Object> scopes = new HashMap<String, Object>();
+ *   HashMap&lt;String, Object&gt; scopes = new HashMap&lt;String, Object&gt;();
  *   scopes.put("trans", new TranslateBundleFunction("com.project.locale", Locale.US));
  *   ...
  *
  * Usage in template:
  *   ... {{#trans}}TranslatedLabel1{{/trans}} ...
  *
- * @author gw0 [http://gw.tnode.com/] <gw.2012@tnode.com>
+ * @author gw0 [http://gw.tnode.com/] &lt;gw.2012@tnode.com&gt;
  */
 public class TranslateBundleFunction implements TemplateFunction {
 

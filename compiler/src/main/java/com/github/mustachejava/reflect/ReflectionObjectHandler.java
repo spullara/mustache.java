@@ -17,7 +17,7 @@ import java.util.Map;
 
 /**
  * Lookup objects using reflection and execute them the same way.
- * <p/>
+ *
  * User: sam
  * Date: 7/24/11
  * Time: 3:02 PM

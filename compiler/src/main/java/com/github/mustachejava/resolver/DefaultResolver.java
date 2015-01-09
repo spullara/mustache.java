@@ -22,7 +22,7 @@ public class DefaultResolver implements MustacheResolver {
   /**
    * Use the classpath to resolve mustache templates.
    *
-   * @param resourceRoot
+   * @param resourceRoot where in the classpath to find the templates
    */
   public DefaultResolver(String resourceRoot) {
     this.classpathResolver = new ClasspathResolver(resourceRoot);
@@ -32,7 +32,7 @@ public class DefaultResolver implements MustacheResolver {
   /**
    * Use the file system to resolve mustache templates.
    *
-   * @param fileRoot
+   * @param fileRoot where in the file system to find the templates
    */
   public DefaultResolver(File fileRoot) {
     this.fileSystemResolver = new FileSystemResolver(fileRoot);
