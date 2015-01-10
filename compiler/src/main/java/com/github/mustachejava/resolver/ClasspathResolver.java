@@ -23,7 +23,7 @@ public class ClasspathResolver implements MustacheResolver {
   /**
    * Use the classpath to resolve mustache templates.
    *
-   * @param resourceRoot
+   * @param resourceRoot where to find the templates
    */
   public ClasspathResolver(String resourceRoot) {
     if (!resourceRoot.endsWith("/")) {

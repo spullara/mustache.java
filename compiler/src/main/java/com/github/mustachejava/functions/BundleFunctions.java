@@ -19,7 +19,7 @@ import java.util.function.Function;
  *
  * Example with a map:
  * <pre>
- * Map<String, Object> scopes =  new HashMap<String, Object>();
+ * Map &lt;String, Object&gt; scopes =  new HashMap%lt;String, Object&gt;();
  * scopes.put("trans", BundleFunctions.newPostTranslateNullableLabel("com.project.locale", Locale.US);
  * ...
  * </pre>
@@ -72,7 +72,7 @@ public class BundleFunctions {
 
   /**
    * Returns a Function that operates prior to template evaluation and returns unknown keys intact.
-   * <p/>
+   *
    * Given the following HTML:
    * <pre>
    * {{#trans}}Label1{{/trans}}
@@ -102,7 +102,7 @@ public class BundleFunctions {
 
   /**
    * Returns a Function that operates prior to template evaluation and returns nulls for unknown keys.
-   * <p/>
+   *
    * Given the following HTML:
    * <pre>
    * {{#trans}}Label1{{/trans}}
@@ -130,7 +130,7 @@ public class BundleFunctions {
 
   /**
    * Returns a Function that operates after template evaluation and returns unknown keys intact.
-   * <p/>
+   *
    * Given the following HTML:
    * <pre>
    * {{#trans}}Label1{{/trans}}
@@ -160,7 +160,7 @@ public class BundleFunctions {
 
   /**
    * Returns a Function that operates after template evaluation and returns nulls for unknown keys.
-   * <p/>
+   *
    * Given the following HTML:
    * <pre>
    * {{#trans}}Label1{{/trans}}

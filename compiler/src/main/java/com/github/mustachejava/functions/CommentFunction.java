@@ -12,14 +12,14 @@ import java.util.function.Function;
  *   }
  *
  * Usage code with a Map:
- *   HashMap<String, Object> scopes = new HashMap<String, Object>();
+ *   HashMap&lt;String, Object&gt; scopes = new HashMap&lt;String, Object&gt;();
  *   scopes.put("comment", new CommentFunction());
  *   ...
  *
  * Usage in template:
  *   ... {{#comment}} Your multiline comment text {{/comment}} ...
  *
- * @author gw0 [http://gw.tnode.com/] <gw.2012@tnode.com>
+ * @author gw0 [http://gw.tnode.com/] &lt;gw.2012@tnode.com&gt;
  */
 public class CommentFunction implements Function<String, String> {
 	

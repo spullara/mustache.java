@@ -8,8 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * The parser generates callbacks into the MustacheFactory to build them. Do not use these
  * directly as you must manage the Mustache object lifecycle as well.
- * <p/>
- * <p/>
+ *
  * User: sam
  * Date: 5/14/11
  * Time: 3:52 PM

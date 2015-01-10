@@ -30,12 +30,5 @@ public interface Code {
 
   String getName();
 
-  /**
-   * If it returns a node, that means that it successfully parsed it
-   * and advanced the reader.
-   *
-   * @param reader
-   * @return
-   */
   Node invert(Node node, String text, AtomicInteger position);
 }

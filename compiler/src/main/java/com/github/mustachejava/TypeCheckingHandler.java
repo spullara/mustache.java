@@ -1,7 +1,6 @@
 package com.github.mustachejava;
 
 import com.github.mustachejava.reflect.BaseObjectHandler;
-import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
 import java.io.Writer;
@@ -13,19 +12,13 @@ import java.util.Arrays;
 /**
  * Rather than pulling values this looks only at types. To check if a template matches the shape
  * of your view classes, pass in the set of classes you expect to have at runtime in the scope.
- * <p/>
+ *
  * User: sam
  * Date: 2/3/13
  * Time: 9:43 AM
  */
 public class TypeCheckingHandler extends BaseObjectHandler {
-  /**
-   * Find a value named "name" in the array of scopes in reverse order.
-   *
-   * @param name
-   * @param scopes
-   * @return
-   */
+
   @Override
   public Wrapper find(String name, Object[] scopes) {
     for (Object scope : scopes) {

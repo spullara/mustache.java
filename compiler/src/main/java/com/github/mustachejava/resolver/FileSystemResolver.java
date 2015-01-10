@@ -20,7 +20,7 @@ public class FileSystemResolver implements MustacheResolver {
   /**
    * Use the file system to resolve mustache templates.
    *
-   * @param fileRoot
+   * @param fileRoot where in the file system to find the templates
    */
   public FileSystemResolver(File fileRoot) {
     if (!fileRoot.exists()) {
