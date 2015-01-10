@@ -23,14 +23,6 @@
       <version>0.9.1-SNAPSHOT</version>
     </dependency>
 
-    <!-- JRuby -->
-    <dependency>
-      <groupId>org.jruby</groupId>
-      <artifactId>jruby</artifactId>
-      <version>1.6.7</version>
-      <scope>provided</scope>
-    </dependency>
-
     <!-- Testing -->
     <dependency>
       <groupId>junit</groupId>
