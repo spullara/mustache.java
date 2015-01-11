@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 
 /**
  * This show how to use the deferred mustache factory.
- * <p/>
+ *
  * User: sam
  * Date: 7/7/12
  * Time: 12:32 PM
