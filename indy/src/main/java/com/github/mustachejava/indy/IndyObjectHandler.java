@@ -5,9 +5,7 @@ import com.github.mustachejava.codegen.CodegenReflectionWrapper;
 import com.github.mustachejava.util.Wrapper;
 
 /**
- * Creates custom classes instead of using reflection for handling objects. Leverages
- * the ReflectionObjectHandler to create the original wrappers and converts them to
- * new versions.
+ * Finds the Codegen created wrappers and then wraps them with invokedynamic calls.
  */
 public class IndyObjectHandler extends CodegenObjectHandler {
 
