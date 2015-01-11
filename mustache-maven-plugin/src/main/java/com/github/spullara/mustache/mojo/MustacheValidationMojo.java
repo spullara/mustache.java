@@ -37,17 +37,14 @@ public class MustacheValidationMojo extends AbstractMojo {
   private boolean includeStale;
 
   public void execute() throws MojoExecutionException, MojoFailureException {
-
     SourceInclusionScanner scanner = includeStale
             ? new StaleSourceScanner(1024, Collections.singleton("**/*." + extension), Collections.<String>emptySet())
             : new SimpleSourceInclusionScanner(Collections.singleton("**/*." + extension), Collections.<String>emptySet());
-
     scanner.addSourceMapping(new SuffixMapping("." + extension, "." + extension));
 
     MustacheFactory mustacheFactory = new DefaultMustacheFactory();
     try {
       Set<File> files = scanner.getIncludedSources(sourceDirectory, outputDirectory);
-
       for (File file : files) {
         try {
           mustacheFactory.compile(new FileReader(file), file.getAbsolutePath());
@@ -55,10 +52,7 @@ public class MustacheValidationMojo extends AbstractMojo {
           throw new MojoFailureException(e.getMessage(), e);
         }
       }
-
-    } catch (InclusionScanException e) {
-      throw new MojoExecutionException(e.getMessage());
-    } catch (FileNotFoundException e) {
+    } catch (InclusionScanException | FileNotFoundException e) {
       throw new MojoExecutionException(e.getMessage());
     }
   }
