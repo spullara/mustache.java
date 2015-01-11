@@ -39,15 +39,11 @@ public final class TemplateContext {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-
     TemplateContext that = (TemplateContext) o;
-
-    if (line != that.line) return false;
-    if (em != null ? !em.equals(that.em) : that.em != null) return false;
-    if (file != null ? !file.equals(that.file) : that.file != null) return false;
-    if (sm != null ? !sm.equals(that.sm) : that.sm != null) return false;
-
-    return true;
+    return line == that.line && 
+            !(em != null ? !em.equals(that.em) : that.em != null) && 
+            !(file != null ? !file.equals(that.file) : that.file != null) && 
+            !(sm != null ? !sm.equals(that.sm) : that.sm != null);
   }
 
   @Override

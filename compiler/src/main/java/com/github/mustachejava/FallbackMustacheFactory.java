@@ -1,12 +1,8 @@
 package com.github.mustachejava;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Mustache.java factory with a fallback mechanism for locating resources.
@@ -50,11 +46,12 @@ public class FallbackMustacheFactory extends DefaultMustacheFactory {
   public FallbackMustacheFactory(Object... resourceRoots) {
     super();
 
+    List<Object> newResourceRoots = new ArrayList<>();
     for (Object resourceObj : resourceRoots) {
       if (resourceObj instanceof String) {  // for String
         String resourceRoot = (String) resourceObj;
         if (!resourceRoot.endsWith("/")) resourceRoot += "/";
-        // TODO: this is a bug. we don't update the list.
+        newResourceRoots.add(resourceRoot);
       } else if (resourceObj instanceof File) {  // for File
         File fileRoot = (File) resourceObj;
         if (!fileRoot.exists()) {
@@ -63,13 +60,14 @@ public class FallbackMustacheFactory extends DefaultMustacheFactory {
         if (!fileRoot.isDirectory()) {
           throw new MustacheException(fileRoot + " is not a directory");
         }
+        newResourceRoots.add(resourceObj);
       } else if (resourceObj == null) {
         // for null
       } else {
         throw new MustacheException("Invalid constructor parameter: " + resourceObj.toString());
       }
     }
-    this.resourceRoots = resourceRoots;
+    this.resourceRoots = newResourceRoots.toArray();
   }
 
   /**

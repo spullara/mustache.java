@@ -3,7 +3,6 @@ package com.github.mustachejava;
 import com.github.mustachejava.codes.*;
 import com.github.mustachejava.util.Node;
 
-import java.io.Writer;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,12 +28,7 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
     put("implicit-iterator", new PragmaHandler() {
       @Override
       public Code handle(TemplateContext tc, String pragma, String args) {
-        return new DefaultCode() {
-          @Override
-          public Writer execute(Writer writer, Object[] scopes) {
-            return super.execute(writer, scopes);
-          }
-        };
+        return new DefaultCode();
       }
     });
   }};

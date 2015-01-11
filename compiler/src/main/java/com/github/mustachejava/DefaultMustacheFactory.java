@@ -191,10 +191,10 @@ public class DefaultMustacheFactory implements MustacheFactory {
    * verbatim in the output template.
    *
    * @param appended The text to be appended to the output
-   * @param b Are we at the start of the line?
+   * @param startOfLine Are we at the start of the line?
    * @return the filtered string
    */
-  public String filterText(String appended, boolean b) {
+  public String filterText(String appended, boolean startOfLine) {
     return appended;
   }
 

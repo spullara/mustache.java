@@ -31,6 +31,7 @@ public class DefaultCode implements Code, Cloneable {
   protected final Binding binding;
   protected final DefaultMustacheFactory df;
 
+  @SuppressWarnings({"CloneDoesntCallSuperClone", "CloneDoesntDeclareCloneNotSupportedException"})
   public Object clone() {
     Set<Code> seen = new HashSet<>();
     seen.add(this);

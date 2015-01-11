@@ -82,11 +82,6 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
       boolean called;
 
       @Override
-      public Object get(Object[] scopes) {
-        return super.get(scopes);
-      }
-
-      @Override
       public Writer next(Writer writer, Object object, Object[] scopes) {
         called = true;
         return super.next(writer, object, scopes);

@@ -4,7 +4,6 @@ import com.github.mustachejava.Binding;
 import com.github.mustachejava.Code;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.TemplateContext;
-import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
 import java.lang.reflect.AccessibleObject;
@@ -31,53 +30,50 @@ public class SimpleObjectHandler extends BaseObjectHandler {
 
   @Override
   public Wrapper find(final String name, final Object[] scopes) {
-    return new Wrapper() {
-      @Override
-      public Object call(Object[] scopes) throws GuardException {
-        for (int i = scopes.length - 1; i >= 0; i--) {
-          Object scope = scopes[i];
-          if (scope != null) {
-            int index = name.indexOf(".");
-            if (index == -1) {
-              // Special case Maps
-              if (scope instanceof Map) {
-                Map map = (Map) scope;
-                if (map.containsKey(name)) {
-                  return map.get(name);
-                } else if (!areMethodsAccessible(map)) {
-                  continue; //don't check methods, move to next scope
-                }
+    return scopes1 -> {
+      for (int i = scopes1.length - 1; i >= 0; i--) {
+        Object scope = scopes1[i];
+        if (scope != null) {
+          int index = name.indexOf(".");
+          if (index == -1) {
+            // Special case Maps
+            if (scope instanceof Map) {
+              Map map = (Map) scope;
+              if (map.containsKey(name)) {
+                return map.get(name);
+              } else if (!areMethodsAccessible(map)) {
+                continue; //don't check methods, move to next scope
               }
-              // Check to see if there is a method or field that matches
-              try {
-                AccessibleObject ao = lookup(scope.getClass(), name);
-                if (ao instanceof Method) {
-                  return ((Method) ao).invoke(scope);
-                } else if (ao instanceof Field) {
-                  return ((Field) ao).get(scope);
-                }
-              } catch (InvocationTargetException ie) {
-                throw new MustacheException("Failed to get " + name + " from " + scope.getClass(), ie);
-              } catch (IllegalAccessException iae) {
-                throw new MustacheException("Set accessible failed to get " + name + " from " + scope.getClass(), iae);
+            }
+            // Check to see if there is a method or field that matches
+            try {
+              AccessibleObject ao = lookup(scope.getClass(), name);
+              if (ao instanceof Method) {
+                return ((Method) ao).invoke(scope);
+              } else if (ao instanceof Field) {
+                return ((Field) ao).get(scope);
               }
-            } else {
-              // Dig into the dot-notation through recursion
-              Object[] subscope = {scope};
-              Wrapper wrapper = find(name.substring(0, index), subscope);
-              if (wrapper != null) {
-                scope = wrapper.call(subscope);
-                if (scope == null) {
-                  continue;
-                }
-                subscope = new Object[]{scope};
-                return find(name.substring(index + 1), new Object[]{subscope}).call(subscope);
+            } catch (InvocationTargetException ie) {
+              throw new MustacheException("Failed to get " + name + " from " + scope.getClass(), ie);
+            } catch (IllegalAccessException iae) {
+              throw new MustacheException("Set accessible failed to get " + name + " from " + scope.getClass(), iae);
+            }
+          } else {
+            // Dig into the dot-notation through recursion
+            Object[] subscope = {scope};
+            Wrapper wrapper = find(name.substring(0, index), subscope);
+            if (wrapper != null) {
+              scope = wrapper.call(subscope);
+              if (scope == null) {
+                continue;
               }
+              subscope = new Object[]{scope};
+              return find(name.substring(index + 1), new Object[]{subscope}).call(subscope);
             }
           }
         }
-        return null;
       }
+      return null;
     };
   }
 

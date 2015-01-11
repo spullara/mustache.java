@@ -16,13 +16,8 @@ public class FragmentKey {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-
     FragmentKey that = (FragmentKey) o;
-
-    if (!tc.equals(that.tc)) return false;
-    if (!templateText.equals(that.templateText)) return false;
-
-    return true;
+    return tc.equals(that.tc) && templateText.equals(that.templateText);
   }
 
   @Override

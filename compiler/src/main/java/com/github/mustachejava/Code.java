@@ -24,6 +24,7 @@ public interface Code {
 
   void init();
 
+  @SuppressWarnings("CloneDoesntDeclareCloneNotSupportedException")
   Object clone();
 
   Object clone(Set<Code> seen);

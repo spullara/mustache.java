@@ -22,7 +22,7 @@ public class FallbackTest {
     Mustache m = c.compile("page1.html");
     StringWriter sw = new StringWriter();
     Map scope = new HashMap();
-	scope.put("title", "My title");
+    scope.put("title", "My title");
     m.execute(sw, scope);
     assertEquals(getContents(rootDefault, "page1.txt"), sw.toString());
   }
@@ -33,7 +33,7 @@ public class FallbackTest {
     Mustache m = c.compile("page1.html");
     StringWriter sw = new StringWriter();
     Map scope = new HashMap();
-	scope.put("title", "My title");
+    scope.put("title", "My title");
     m.execute(sw, scope);
     assertEquals(getContents(rootOverride, "page1.txt"), sw.toString());
   }
@@ -44,7 +44,7 @@ public class FallbackTest {
     Mustache m = c.compile("page2.html");
     StringWriter sw = new StringWriter();
     Map scope = new HashMap();
-	scope.put("title", "My title");
+    scope.put("title", "My title");
     m.execute(sw, scope);
     assertEquals(getContents(rootOverride, "page2.txt"), sw.toString());
   }
@@ -62,7 +62,7 @@ public class FallbackTest {
   }
 
   protected String getContents(File root, String file) throws IOException {
-    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(root, file)),"UTF-8"));
+    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(root, file)), "UTF-8"));
     StringWriter capture = new StringWriter();
     char[] buffer = new char[8192];
     int read;
@@ -79,6 +79,4 @@ public class FallbackTest {
     file = new File("compiler/src/test/resources/fallback/override");
     rootOverride = new File(file, "base.html").exists() ? file : new File("src/test/resources/fallback/override");
   }
-
-
 }
