@@ -6,7 +6,6 @@
     <groupId>com.github.spullara.mustache.java</groupId>
     <artifactId>mustache.java</artifactId>
     <version>0.8.18-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>scala-extensions</artifactId>
