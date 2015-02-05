@@ -1,7 +1,8 @@
 Mustache.java [![Build Status](https://travis-ci.org/spullara/mustache.java.svg?branch=master)](https://travis-ci.org/spullara/mustache.java)
 =============
 
-As of release 0.9.0 mustache.java is now Java 8 only.
+As of release 0.9.0 mustache.java is now Java 8 only. For Java 7 support use 0.8.x.
+
 There are no external dependencies and the compiler library is 95k.
 
 **Mustache.java** is a derivative of [mustache.js](http://mustache.github.com/mustache.5.html).
@@ -71,11 +72,23 @@ Build suggestions:
 
 Maven dependency information (ie. for most common cases you will just need the `compiler` module):
 
+Java 8+:
+
 ```xml
 <dependency>
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>compiler</artifactId>
   <version>0.9.0</version>
+</dependency>
+```
+
+Java 6/7:
+
+```xml
+<dependency>
+  <groupId>com.github.spullara.mustache.java</groupId>
+  <artifactId>compiler</artifactId>
+  <version>0.8.17</version>
 </dependency>
 ```
 
