@@ -1,7 +1,7 @@
 Mustache.java [![Build Status](https://travis-ci.org/spullara/mustache.java.svg?branch=master)](https://travis-ci.org/spullara/mustache.java)
 =============
 
-As of release 0.9.0 mustache.java is now Java 8 only. For Java 7 support use 0.8.x.
+As of release 0.9.0 mustache.java is now Java 8 only. For Java 6/7 support use 0.8.x.
 
 There are no external dependencies and the compiler library is 95k.
 
