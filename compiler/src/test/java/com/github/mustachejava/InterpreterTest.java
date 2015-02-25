@@ -2,6 +2,7 @@ package com.github.mustachejava;
 
 import com.github.mustachejava.codes.IterableCode;
 import com.github.mustachejava.codes.PartialCode;
+import com.github.mustachejava.codes.ValueCode;
 import com.github.mustachejava.functions.CommentFunction;
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.reflect.SimpleObjectHandler;
@@ -1240,6 +1241,39 @@ public class InterpreterTest extends TestCase {
     StringWriter writer = new StringWriter();
     mustache.execute(writer, new Object[]{properties}).close();
     Assert.assertEquals("value=some.value", writer.toString());
+  }
+  
+  public void testLeavingAloneMissingVariables() throws IOException {
+    DefaultMustacheFactory dmf = new DefaultMustacheFactory(root) {
+      @Override
+      public MustacheVisitor createMustacheVisitor() {
+        return new DefaultMustacheVisitor(this) {
+          @Override
+          public void value(TemplateContext tc, String variable, boolean encoded) {
+            list.add(new ValueCode(tc, df, variable, encoded) {
+              @Override
+              public Writer execute(Writer writer, Object[] scopes) {
+                try {
+                  final Object object = get(scopes);
+                  if (object == null) {
+                    identity(writer);
+                  }
+                  return super.execute(writer, scopes);
+                } catch (Exception e) {
+                  throw new MustacheException("Failed to get value for " + name, e, tc);
+                }
+              }
+            });
+          }
+        };
+      }
+    };
+    Mustache test = dmf.compile(new StringReader("{{name}} - {{email}}"), "test");
+    StringWriter sw = new StringWriter();
+    Map map = new HashMap<>();
+    map.put("name", "Sam Pullara");
+    test.execute(sw, map).close();
+    assertEquals("Sam Pullara - {{email}}", sw.toString());
   }
 
   private MustacheFactory init() {
