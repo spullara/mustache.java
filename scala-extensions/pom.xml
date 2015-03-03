@@ -15,7 +15,7 @@
     <module>scala-extensions-2.8</module>
     <module>scala-extensions-2.9</module>
     <module>scala-extensions-2.10</module>
-<!--    <module>scala-extensions-2.11</module> -->
+    <module>scala-extensions-2.11</module>
   </modules>
   <packaging>pom</packaging>
 </project>
