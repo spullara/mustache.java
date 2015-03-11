@@ -127,7 +127,7 @@ public class JsonInterpreterTest extends TestCase {
     }
   }
 
-  private Object getScope() throws IOException {
+  protected Object getScope() throws IOException {
     MappingJsonFactory jf = new MappingJsonFactory();
     InputStream json = getClass().getClassLoader().getResourceAsStream("hogan.json");
     final Map node = (Map) toObject(jf.createJsonParser(json).readValueAsTree());
