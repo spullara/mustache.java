@@ -9,6 +9,7 @@
 
   <modules>
     <module>compiler</module>
+    <module>javascript</module>
     <module>handlebar</module>
     <module>codegen</module>
     <module>indy</module>
