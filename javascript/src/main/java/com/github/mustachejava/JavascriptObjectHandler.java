@@ -3,6 +3,9 @@ package com.github.mustachejava;
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import jdk.nashorn.api.scripting.JSObject;
 
+import java.util.ArrayList;
+import java.util.Map;
+
 /**
  * Uses Nashorn to support Javascript scope objects
  */
@@ -31,6 +34,9 @@ public class JavascriptObjectHandler extends ReflectionObjectHandler {
             return call == null ? null : call.toString();
           }
         };
+      } else if (jso.isArray()) {
+        // Let's see what it is really. Maybe it is a list.
+        return new ArrayList(((Map) jso).values());
       }
     }
     return super.coerce(object);

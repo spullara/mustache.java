@@ -1,14 +1,15 @@
 package com.github.mustachejava;
 
+import com.github.mustachejavabenchmarks.Tweet;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -47,5 +48,36 @@ public class JavascriptObjectHandlerTest {
             "this;");
     m.execute(sw, eval).close();
     assertEquals("sampullara", sw.toString());
+  }
+  
+  @Test
+  public void testTweet() throws IOException, ScriptException {
+    File file = new File("src/test/resources");
+    File root = new File(file, "simple.html").exists() ? file : new File("../src/test/resources");
+    DefaultMustacheFactory mf = new DefaultMustacheFactory(root);
+    mf.setObjectHandler(new JavascriptObjectHandler());
+    InputStream json = getClass().getClassLoader().getResourceAsStream("hogan.json");
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    byte[] bytes = new byte[1024];
+    int read;
+    while ((read = json.read(bytes)) != -1) {
+      baos.write(bytes, 0, read);
+    }
+    Object scope = se.eval("var tweet = " + new String(baos.toByteArray()) + "; " +
+            "var tweets = []; for (var i = 0; i < 50; i++) { tweets.push(tweet); };" +
+            "this;");
+    StringWriter sw = new StringWriter();
+    Mustache m = mf.compile("timeline.mustache");
+    m.execute(sw, scope).close();
+
+    StringWriter sw2 = new StringWriter();
+    final List<Tweet> list = new ArrayList<Tweet>();
+    for (int i = 0; i < 50 ; i++) {
+      list.add(new Tweet());
+    }
+    m.execute(sw2, new Object() {
+      List tweets = list;
+    }).close();
+    assertEquals(sw2.toString(), sw.toString());
   }
 }
