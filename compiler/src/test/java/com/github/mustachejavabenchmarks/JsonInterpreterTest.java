@@ -27,7 +27,7 @@ import static com.github.mustachejavabenchmarks.BenchmarkTest.skip;
  * Time: 10:23:54 AM
  */
 public class JsonInterpreterTest extends TestCase {
-  private static final int TIME = 2;
+  private static final int TIME = 20;
 
   protected File root;
 

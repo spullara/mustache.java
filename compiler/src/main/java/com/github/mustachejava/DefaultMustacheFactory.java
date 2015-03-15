@@ -112,7 +112,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   @Override
   public void encode(String value, Writer writer) {
-    escape(value, writer, true);
+    escape(value, writer);
   }
 
   @Override
