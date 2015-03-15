@@ -2,6 +2,8 @@ package mustachejava.benchmarks;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
+import com.github.mustachejava.codegen.CodegenObjectHandler;
+import com.github.mustachejava.indy.IndyObjectHandler;
 import com.github.mustachejavabenchmarks.NullWriter;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
@@ -44,12 +46,19 @@ Converstion of array scope to list scope:
 Benchmark            Mode  Cnt       Score       Error  Units
 Main.benchMustache  thrpt   20  913015.783 ± 40586.647  ops/s
 
+Basically I can delete codegen/indy:
+Main.benchMustache         thrpt   20  1046459.757 ± 36631.743  ops/s
+Main.benchMustacheCodegen  thrpt   20  1066092.882 ± 33464.632  ops/s
+Main.benchMustacheIndy     thrpt   20  1087113.076 ± 21833.084  ops/s
+
  */
 @State(Scope.Benchmark)
 public class Main {
 
   private final NullWriter nw = new NullWriter();
-  private final Mustache m = new DefaultMustacheFactory().compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
+  private final Mustache normal = new DefaultMustacheFactory().compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
+  private final Mustache indy;
+  private final Mustache codegen;
   private final Object scope = new Object() {
     List loop = new ArrayList();
     {
@@ -61,12 +70,30 @@ public class Main {
       }
     }
   };
+
+  {
+    DefaultMustacheFactory dmf1 = new DefaultMustacheFactory();
+    dmf1.setObjectHandler(new CodegenObjectHandler());
+    codegen = dmf1.compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
+    DefaultMustacheFactory dmf2 = new DefaultMustacheFactory();
+    dmf2.setObjectHandler(new IndyObjectHandler());
+    indy = dmf1.compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
+  }
   
   @Benchmark
   public void benchMustache() throws IOException {
-    m.execute(nw, scope).close();
+    normal.execute(nw, scope).close();
   }
   
+  @Benchmark
+  public void benchMustacheCodegen() throws IOException {
+    normal.execute(nw, scope).close();
+  }
+
+  @Benchmark
+  public void benchMustacheIndy() throws IOException {
+    normal.execute(nw, scope).close();
+  }
 //  @Benchmark
 //  public void benchTheoreticalLimit() throws IOException {
 //    nw.write("variable");

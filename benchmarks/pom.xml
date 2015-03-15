@@ -23,7 +23,7 @@
   <dependencies>
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
-      <artifactId>compiler</artifactId>
+      <artifactId>indy</artifactId>
       <version>0.9.1-SNAPSHOT</version>
     </dependency>
     <dependency>
