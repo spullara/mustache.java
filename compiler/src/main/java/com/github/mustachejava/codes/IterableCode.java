@@ -128,8 +128,9 @@ public class IterableCode extends DefaultCode implements Iteration {
   }
 
   public Writer next(Writer writer, Object next, List<Object> scopes) {
-    List<Object> iteratorScopes = addScope(scopes, next);
-    writer = run(writer, iteratorScopes);
+    boolean added = addScope(scopes, next);
+    writer = run(writer, scopes);
+    if (added) scopes.remove(scopes.size() - 1);
     return writer;
   }
 

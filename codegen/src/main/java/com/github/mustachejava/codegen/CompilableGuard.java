@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Optimizable guards
  */
 public interface CompilableGuard extends Guard, Opcodes {
+  Type LIST_TYPE = Type.getType(List.class);
   Type OBJECT_TYPE = Type.getType(Object.class);
   Type CLASS_TYPE = Type.getType(Class.class);
   Type MAP_TYPE = Type.getType(Map.class);
@@ -28,9 +29,9 @@ public interface CompilableGuard extends Guard, Opcodes {
   Type GUARD_TYPE = Type.getType(Guard.class);
   Method CLASS_FORNAME = Method.getMethod("Class forName(String)");
   Method OBJECT_GETCLASS = Method.getMethod("Class getClass()");
-  Method ROH_UNWRAP = Method.getMethod("Object unwrap(com.github.mustachejava.ObjectHandler, int, com.github.mustachejava.util.Wrapper[], Object[])");
+  Method ROH_UNWRAP = Method.getMethod("Object unwrap(com.github.mustachejava.ObjectHandler, int, com.github.mustachejava.util.Wrapper[], java.util.List)");
   Method MAP_CONTAINSKEY = Method.getMethod("boolean containsKey(Object)");
-  Method GUARD_APPLY = Method.getMethod("boolean apply(Object[])");
+  Method GUARD_APPLY = Method.getMethod("boolean apply(java.util.List)");
 
   public abstract void addGuard(Label returnFalse,
                                 GeneratorAdapter gm,

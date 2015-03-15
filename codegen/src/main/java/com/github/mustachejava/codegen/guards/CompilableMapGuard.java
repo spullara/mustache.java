@@ -8,6 +8,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.commons.Method;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,7 +43,7 @@ public class CompilableMapGuard extends MapGuard implements CompilableGuard {
     cm.loadThis();
     cm.loadArg(0);
     cm.push(ohArg);
-    cm.arrayLoad(OBJECT_TYPE);
+    cm.invokeInterface(LIST_TYPE, Method.getMethod("Object get(int)"));
     cm.checkCast(OH_TYPE);
     cm.putField(thisType, ohFieldName, OH_TYPE);
 
@@ -51,7 +52,7 @@ public class CompilableMapGuard extends MapGuard implements CompilableGuard {
     cm.loadThis();
     cm.loadArg(0);
     cm.push(wrappersArg);
-    cm.arrayLoad(OBJECT_TYPE);
+    cm.invokeInterface(LIST_TYPE, Method.getMethod("Object get(int)"));
     cm.checkCast(WRAPPERS_TYPE);
     cm.putField(thisType, wrappersFieldName, WRAPPERS_TYPE);
 

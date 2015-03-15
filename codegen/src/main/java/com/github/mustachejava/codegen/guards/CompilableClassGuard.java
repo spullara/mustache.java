@@ -6,6 +6,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.commons.Method;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,14 +42,14 @@ public class CompilableClassGuard extends ClassGuard implements CompilableGuard 
 
     // Check that we have enough scopes to satisfy
     gm.loadArg(0); // scopes
-    gm.arrayLength(); // scopes.length
+    gm.invokeInterface(LIST_TYPE, Method.getMethod("int size()"));
     gm.push(scopeIndex);
     gm.ifICmp(LE, returnFalse); // scopes.length <= scopeIndex return false
 
     // Initialize local variables
     gm.loadArg(0); // scopes
     gm.push(scopeIndex);
-    gm.arrayLoad(OBJECT_TYPE); // Object[]
+    gm.invokeInterface(LIST_TYPE, Method.getMethod("Object get(int)"));
     int scopeLocal = gm.newLocal(OBJECT_TYPE);
     gm.storeLocal(scopeLocal);
     int classGuardLocal = gm.newLocal(CLASS_TYPE);

@@ -213,11 +213,12 @@ public class DefaultCode implements Code, Cloneable {
   }
 
   // Expand the current set of scopes
-  protected List<Object> addScope(List<Object> scopes, Object scope) {
+  protected boolean addScope(List<Object> scopes, Object scope) {
     if (scope != null) {
       scopes.add(scope);
+      return true;
     }
-    return scopes;
+    return false;
   }
 
   @Override

@@ -90,8 +90,9 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
                       new Deferral(divid, getExecutorService().submit(() -> {
                         try {
                           StringWriter writer1 = new StringWriter();
-                          List<Object> newscopes = addScope(scopes, object);
-                          partial.execute(writer1, newscopes).close();
+                          boolean added = addScope(scopes, object);
+                          partial.execute(writer1, scopes).close();
+                          if (added) scopes.remove(scopes.size() - 1);
                           return writer1.toString();
                         } catch (IOException e) {
                           throw new MustacheException("Failed to writer", e);

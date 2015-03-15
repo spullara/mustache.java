@@ -18,21 +18,21 @@ import static org.objectweb.asm.commons.Method.getMethod;
  */
 public class CodeCompiler {
   private static AtomicInteger id = new AtomicInteger(0);
-  private static final Method EXECUTE_METHOD = Method.getMethod("java.io.Writer execute(java.io.Writer, Object[])");
+  private static final Method EXECUTE_METHOD = Method.getMethod("java.io.Writer execute(java.io.Writer, java.util.List)");
 
   public static CompiledCodes compile(Code[] newcodes) {
     ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
     int classId = id.incrementAndGet();
     String className = "com.github.mustachejava.codegen.RunCodes" + classId;
     String internalClassName = className.replace(".", "/");
-    cw.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, internalClassName, null, "java/lang/Object", new String[]{CompiledCodes.class.getName().replace(".", "/")});
+    cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, internalClassName, null, "java/lang/Object", new String[]{CompiledCodes.class.getName().replace(".", "/")});
     cw.visitSource("runCodes", null);
 
     GeneratorAdapter cm = new GeneratorAdapter(Opcodes.ACC_PUBLIC, getMethod("void <init> (com.github.mustachejava.Code[])"), null, null, cw);
     cm.loadThis();
     cm.invokeConstructor(Type.getType(Object.class), getMethod("void <init> ()"));
     {
-      GeneratorAdapter gm = new GeneratorAdapter(Opcodes.ACC_PUBLIC, getMethod("java.io.Writer runCodes(java.io.Writer, Object[])"), null, null, cw);
+      GeneratorAdapter gm = new GeneratorAdapter(Opcodes.ACC_PUBLIC, getMethod("java.io.Writer runCodes(java.io.Writer, java.util.List)"), null, null, cw);
       int writerLocal = gm.newLocal(Type.getType(Writer.class));
       // Put the writer in our local
       gm.loadArg(0);

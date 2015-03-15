@@ -6,6 +6,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.commons.Method;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,7 +28,7 @@ public class CompilableDepthGuard extends DepthGuard implements CompilableGuard 
 
     // If they are not equal return false
     gm.loadArg(0);
-    gm.arrayLength();
+    gm.invokeInterface(LIST_TYPE, Method.getMethod("int size()"));
     gm.push(length);
     gm.ifICmp(GeneratorAdapter.NE, returnFalse);
   }

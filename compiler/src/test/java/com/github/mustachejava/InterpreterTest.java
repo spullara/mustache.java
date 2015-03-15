@@ -799,7 +799,7 @@ public class InterpreterTest extends TestCase {
     MustacheFactory mf = createMustacheFactory();
     Mustache compile = mf.compile("relative/paths.html");
     StringWriter sw = new StringWriter();
-    compile.execute(sw, null).close();
+    compile.execute(sw, "").close();
     assertEquals(getContents(root, "relative/paths.txt"), sw.toString());
   }
 
@@ -807,7 +807,7 @@ public class InterpreterTest extends TestCase {
     MustacheFactory mf = createMustacheFactory();
     Mustache compile = mf.compile("relative/rootpath.html");
     StringWriter sw = new StringWriter();
-    compile.execute(sw, null).close();
+    compile.execute(sw, "").close();
     assertEquals(getContents(root, "relative/paths.txt"), sw.toString());
   }
 
@@ -815,7 +815,7 @@ public class InterpreterTest extends TestCase {
     MustacheFactory mf = createMustacheFactory();
     Mustache compile = mf.compile("relative/extension.html");
     StringWriter sw = new StringWriter();
-    compile.execute(sw, null).close();
+    compile.execute(sw, "").close();
     assertEquals(getContents(root, "relative/paths.txt"), sw.toString());
   }
 
@@ -929,7 +929,7 @@ public class InterpreterTest extends TestCase {
     };
     Mustache m = mf.compile(new StringReader("Pragma: {{% pragma 1 2 3 }}"), "testPragma");
     StringWriter sw = new StringWriter();
-    m.execute(sw, null).close();
+    m.execute(sw, "").close();
     // Values ignored as if it didn't exist at all
     assertEquals("Pragma: ", sw.toString());
     assertTrue(found.get());
@@ -1062,7 +1062,7 @@ public class InterpreterTest extends TestCase {
     MustacheFactory mf = createMustacheFactory();
     Mustache compile = mf.compile("relative/dotdot.html");
     StringWriter sw = new StringWriter();
-    compile.execute(sw, null).close();
+    compile.execute(sw, "").close();
     assertEquals(getContents(root, "uninterestingpartial.html"), sw.toString());
   }
 
@@ -1075,7 +1075,7 @@ public class InterpreterTest extends TestCase {
     };
     Mustache compile = mf.compile("relative/nonrelative.html");
     StringWriter sw = new StringWriter();
-    compile.execute(sw, null).close();
+    compile.execute(sw, "").close();
     assertEquals(getContents(root, "nonrelative.html"), sw.toString());
   }
 
@@ -1098,7 +1098,7 @@ public class InterpreterTest extends TestCase {
       }
     };
     StringWriter sw = new StringWriter();
-    mf.compile("overrideextension.html").execute(sw, null).close();
+    mf.compile("overrideextension.html").execute(sw, "").close();
     assertEquals("not interesting.", sw.toString());
   }
 
@@ -1124,7 +1124,7 @@ public class InterpreterTest extends TestCase {
   public void testImplicitIteratorNoScope() throws IOException {
     Mustache test = new DefaultMustacheFactory().compile(new StringReader("{{.}}"), "test");
     StringWriter sw = new StringWriter();
-    test.execute(sw, null).close();
+    test.execute(sw, "").close();
     assertEquals("", sw.toString());
     StringWriter sw2 = new StringWriter();
     test.execute(sw2, new Object[0]).close();
@@ -1210,7 +1210,12 @@ public class InterpreterTest extends TestCase {
             list.add(new IterableCode(templateContext, df, mustache, variable) {
               Binding binding = oh.createBinding("params", templateContext, this);
               protected Writer handleFunction(Writer writer, Function function, List<Object> scopes) {
-                return super.handleFunction(writer, function, addScope(scopes, binding.get(scopes)));
+                boolean added = addScope(scopes, binding.get(scopes));
+                try {
+                  return super.handleFunction(writer, function, scopes);
+                } finally {
+                  if (added) scopes.remove(scopes.size() - 1);
+                }
               }
             });
           }

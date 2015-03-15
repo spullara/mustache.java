@@ -37,6 +37,8 @@ Main.benchJustEscapeClean  thrpt   20  196904626.848 ± 19804749.810  ops/s
 Main.benchJustEscapeOnce   thrpt   20  102768645.605 ±  3764598.754  ops/s
 Main.benchJustEscapeTwo    thrpt   20   81450001.026 ±  2270993.769  ops/s
 
+Benchmark            Mode  Cnt       Score       Error  Units
+Main.benchMustache  thrpt   20  913015.783 ± 40586.647  ops/s
 
  */
 @State(Scope.Benchmark)

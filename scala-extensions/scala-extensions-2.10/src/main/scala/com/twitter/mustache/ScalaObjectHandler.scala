@@ -28,7 +28,7 @@ class ScalaObjectHandler extends ReflectionObjectHandler {
     }
   }
 
-  override def iterate(iteration: Iteration, writer: Writer, value: AnyRef, scopes: Array[AnyRef]) = {
+  override def iterate(iteration: Iteration, writer: Writer, value: AnyRef, scopes: java.util.List[AnyRef]) = {
     value match {
       case TraversableAnyRef(t) => {
         var newWriter = writer
@@ -43,7 +43,7 @@ class ScalaObjectHandler extends ReflectionObjectHandler {
     }
   }
 
-  override def falsey(iteration: Iteration, writer: Writer, value: AnyRef, scopes: Array[AnyRef]) = {
+  override def falsey(iteration: Iteration, writer: Writer, value: AnyRef, scopes: java.util.List[AnyRef]) = {
     value match {
       case TraversableAnyRef(t) => {
         if (t.isEmpty) {

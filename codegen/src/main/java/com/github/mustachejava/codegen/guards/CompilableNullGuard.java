@@ -6,6 +6,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.commons.Method;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,7 +20,7 @@ public class CompilableNullGuard extends NullGuard implements CompilableGuard {
   public void addGuard(Label returnFalse, GeneratorAdapter gm, GeneratorAdapter cm, GeneratorAdapter sm, ClassWriter cw, AtomicInteger atomicId, List<Object> cargs, Type thisType) {
     gm.loadArg(0);
     gm.push(0);
-    gm.arrayLoad(OBJECT_TYPE);
+    gm.invokeInterface(LIST_TYPE, Method.getMethod("Object get(int)"));
     gm.ifNonNull(returnFalse);
   }
 }

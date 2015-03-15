@@ -42,11 +42,11 @@ public class GuardCompiler {
     int classId = id.incrementAndGet();
     String className = "com.github.mustachejava.codegen.CompiledGuards" + classId;
     String internalClassName = className.replace(".", "/");
-    cw.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, internalClassName, null, "java/lang/Object", new String[]{Guard.class.getName().replace(".", "/")});
+    cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, internalClassName, null, "java/lang/Object", new String[]{Guard.class.getName().replace(".", "/")});
     cw.visitSource(source, null);
 
     // Constructor
-    GeneratorAdapter cm = new GeneratorAdapter(Opcodes.ACC_PUBLIC, getMethod("void <init> (Object[])"), null, null, cw);
+    GeneratorAdapter cm = new GeneratorAdapter(Opcodes.ACC_PUBLIC, getMethod("void <init> (java.util.List)"), null, null, cw);
     cm.loadThis();
     cm.invokeConstructor(Type.getType(Object.class), getMethod("void <init> ()"));
 
@@ -54,11 +54,11 @@ public class GuardCompiler {
     GeneratorAdapter sm = new GeneratorAdapter(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, getMethod("void <clinit> ()"), null, null, cw);
 
     // Method implementation
-    GeneratorAdapter gm = new GeneratorAdapter(Opcodes.ACC_PUBLIC, getMethod("boolean apply(Object[])"), null, null, cw);
+    GeneratorAdapter gm = new GeneratorAdapter(Opcodes.ACC_PUBLIC, getMethod("boolean apply(java.util.List)"), null, null, cw);
     Label returnFalse = new Label();
 
     // Add each guard in the list
-    List<Object> cargs = new ArrayList<Object>();
+    List<Object> cargs = new ArrayList<>();
     for (CompilableGuard guard : guards) {
       guard.addGuard(returnFalse, gm, cm, sm, cw, id, cargs, Type.getType(internalClassName));
     }
@@ -66,6 +66,7 @@ public class GuardCompiler {
     // Makes it through the guard, success
     gm.push(true);
     gm.returnValue();
+
     // Jumps to returnFalse, failure
     gm.visitLabel(returnFalse);
     gm.push(false);
@@ -82,7 +83,7 @@ public class GuardCompiler {
 
     cw.visitEnd();
     Class<?> aClass = defineClass(className, cw.toByteArray());
-    return (Guard) aClass.getConstructor(Object[].class).newInstance((Object) cargs.toArray(new Object[cargs.size()]));
+    return (Guard) aClass.getConstructor(List.class).newInstance(cargs);
   }
 
   private static final DefiningClassLoader cl = new DefiningClassLoader(Thread.currentThread().getContextClassLoader());

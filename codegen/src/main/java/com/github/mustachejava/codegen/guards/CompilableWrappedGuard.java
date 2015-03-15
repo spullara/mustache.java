@@ -10,7 +10,9 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
+import org.objectweb.asm.commons.Method;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -47,7 +49,7 @@ public class CompilableWrappedGuard extends WrappedGuard implements CompilableGu
     cm.loadThis();
     cm.loadArg(0);
     cm.push(ohArg);
-    cm.arrayLoad(OBJECT_TYPE);
+    cm.invokeInterface(LIST_TYPE, Method.getMethod("Object get(int)"));
     cm.checkCast(OH_TYPE);
     cm.putField(thisType, ohFieldName, OH_TYPE);
 
@@ -56,7 +58,7 @@ public class CompilableWrappedGuard extends WrappedGuard implements CompilableGu
     cm.loadThis();
     cm.loadArg(0);
     cm.push(wrappersArg);
-    cm.arrayLoad(OBJECT_TYPE);
+    cm.invokeInterface(LIST_TYPE, Method.getMethod("Object get(int)"));
     cm.checkCast(WRAPPERS_TYPE);
     cm.putField(thisType, wrappersFieldName, WRAPPERS_TYPE);
 
@@ -65,7 +67,7 @@ public class CompilableWrappedGuard extends WrappedGuard implements CompilableGu
     cm.loadThis();
     cm.loadArg(0);
     cm.push(guardArg);
-    cm.arrayLoad(OBJECT_TYPE);
+    cm.invokeInterface(LIST_TYPE, Method.getMethod("Object get(int)"));
     cm.checkCast(GUARD_TYPE);
     cm.putField(thisType, guardFieldName, GUARD_TYPE);
 
@@ -80,22 +82,16 @@ public class CompilableWrappedGuard extends WrappedGuard implements CompilableGu
     int scopeLocal = gm.newLocal(OBJECT_TYPE);
     gm.storeLocal(scopeLocal);
 
-    // Create the object array
-    gm.push(1);
-    gm.newArray(OBJECT_TYPE);
-    int arrayLocal = gm.newLocal(Type.getType(Object[].class));
-    gm.storeLocal(arrayLocal);
-
-    // Put the scope in the array
-    gm.loadLocal(arrayLocal);
-    gm.push(0);
+    // Create the list
     gm.loadLocal(scopeLocal);
-    gm.arrayStore(OBJECT_TYPE);
+    gm.invokeStatic(Type.getType(ObjectHandler.class), Method.getMethod("java.util.List makeList(Object)"));
+    int listLocal = gm.newLocal(Type.getType(ArrayList.class));
+    gm.storeLocal(listLocal);
 
     // Call the apply method on the guard
     gm.loadThis();
     gm.getField(thisType, guardFieldName, GUARD_TYPE);
-    gm.loadLocal(arrayLocal);
+    gm.loadLocal(listLocal);
     gm.invokeInterface(GUARD_TYPE, GUARD_APPLY);
 
     // If this is false, return false
