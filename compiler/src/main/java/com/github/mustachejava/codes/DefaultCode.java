@@ -192,10 +192,16 @@ public class DefaultCode implements Code, Cloneable {
     writer.write(tc.endChars());
   }
 
+  private char[] appendedChars;
+  
   protected Writer appendText(Writer writer) {
     if (appended != null) {
       try {
-        writer.write(appended);
+        // Avoid allocations at runtime
+        if (appendedChars == null) {
+          appendedChars = appended.toCharArray();
+        }
+        writer.write(appendedChars);
       } catch (IOException e) {
         throw new MustacheException(e);
       }
