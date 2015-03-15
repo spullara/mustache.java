@@ -117,7 +117,7 @@ public class Main {
   public static void main(String[] args) throws IOException {
     Main main = new Main();
     while(true) {
-      main.benchMustache();
+      main.benchMustacheIndy();
     }
   }
 }
