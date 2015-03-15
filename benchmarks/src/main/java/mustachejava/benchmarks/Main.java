@@ -1,10 +1,16 @@
 package mustachejava.benchmarks;
 
-import com.github.mustachejava.util.HtmlEscaper;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
 import com.github.mustachejavabenchmarks.NullWriter;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 
 /*
 
@@ -37,19 +43,48 @@ Main.benchJustEscapeTwo    thrpt   20   81450001.026 ±  2270993.769  ops/s
 public class Main {
 
   private final NullWriter nw = new NullWriter();
-
+  private final Mustache m = new DefaultMustacheFactory().compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
+  private final Object scope = new Object() {
+    List loop = new ArrayList();
+    {
+      for (int i = 0; i < 10; i++) {
+        final int finalI = i;
+        loop.add(new Object() {
+          String value = String.valueOf(finalI);
+        });
+      }
+    }
+  };
+  
   @Benchmark
-  public void benchJustEscapeClean() {
-    HtmlEscaper.escape("variable", nw);
+  public void benchMustache() throws IOException {
+    m.execute(nw, scope).close();
   }
-
-  @Benchmark
-  public void benchJustEscapeOnce() {
-    HtmlEscaper.escape("vari\"ble", nw);
-  }
-
-  @Benchmark
-  public void benchJustEscapeTwo() {
-    HtmlEscaper.escape("va&ri\"ble", nw);
+  
+//  @Benchmark
+//  public void benchTheoreticalLimit() throws IOException {
+//    nw.write("variable");
+//  }
+//  
+//  @Benchmark
+//  public void benchJustEscapeClean() {
+//    HtmlEscaper.escape("variable", nw);
+//  }
+//
+//  @Benchmark
+//  public void benchJustEscapeOnce() {
+//    HtmlEscaper.escape("vari\"ble", nw);
+//  }
+//
+//  @Benchmark
+//  public void benchJustEscapeTwo() {
+//    HtmlEscaper.escape("va&ri\"ble", nw);
+//  }
+  
+  public static void main(String[] args) throws IOException {
+    Main main = new Main();
+    while(true) {
+      main.benchMustache();
+    }
   }
 }
