@@ -6,6 +6,7 @@ import com.github.mustachejava.util.Wrapper;
 
 import java.util.List;
 
+import static com.github.mustachejava.ObjectHandler.makeList;
 import static com.github.mustachejava.reflect.ReflectionObjectHandler.unwrap;
 
 /**
@@ -29,10 +30,10 @@ public class WrappedGuard implements Guard {
   }
 
   @Override
-  public boolean apply(Object[] objects) {
+  public boolean apply(List<Object> objects) {
     Object scope = unwrap(oh, index, wrappers, objects);
     for (Guard predicate : wrapperGuard) {
-      if (!predicate.apply(new Object[]{scope})) {
+      if (!predicate.apply(makeList(scope))) {
         return false;
       }
     }

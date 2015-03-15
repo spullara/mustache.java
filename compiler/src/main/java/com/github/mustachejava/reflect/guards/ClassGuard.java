@@ -2,6 +2,8 @@ package com.github.mustachejava.reflect.guards;
 
 import com.github.mustachejava.reflect.Guard;
 
+import java.util.List;
+
 /**
  * Ensure that the class of the current scope is that same as when this wrapper was generated.
  * User: spullara
@@ -30,9 +32,9 @@ public class ClassGuard implements Guard {
   }
 
   @Override
-  public boolean apply(Object[] scopes) {
-    if (scopes == null || scopes.length <= scopeIndex) return false;
-    Object scope = scopes[scopeIndex];
+  public boolean apply(List<Object> scopes) {
+    if (scopes == null || scopes.size() <= scopeIndex) return false;
+    Object scope = scopes.get(scopeIndex);
     return !(scope != null && classGuard != scope.getClass()) && !(scope == null && classGuard != null);
   }
 

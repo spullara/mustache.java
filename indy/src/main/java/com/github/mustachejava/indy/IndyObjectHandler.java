@@ -4,13 +4,15 @@ import com.github.mustachejava.codegen.CodegenObjectHandler;
 import com.github.mustachejava.codegen.CodegenReflectionWrapper;
 import com.github.mustachejava.util.Wrapper;
 
+import java.util.List;
+
 /**
  * Finds the Codegen created wrappers and then wraps them with invokedynamic calls.
  */
 public class IndyObjectHandler extends CodegenObjectHandler {
 
   @Override
-  public Wrapper find(String name, Object[] scopes) {
+  public Wrapper find(String name, List<Object> scopes) {
     Wrapper wrapper = super.find(name, scopes);
     if (wrapper instanceof CodegenReflectionWrapper) {
       CodegenReflectionWrapper rw = (CodegenReflectionWrapper) wrapper;

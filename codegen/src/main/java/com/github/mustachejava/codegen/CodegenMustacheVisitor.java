@@ -4,6 +4,7 @@ import com.github.mustachejava.*;
 import com.github.mustachejava.codes.DefaultMustache;
 
 import java.io.Writer;
+import java.util.List;
 
 public class CodegenMustacheVisitor extends DefaultMustacheVisitor {
   public CodegenMustacheVisitor(DefaultMustacheFactory mf) {
@@ -17,7 +18,7 @@ public class CodegenMustacheVisitor extends DefaultMustacheVisitor {
       private CompiledCodes compiledCodes;
 
       @Override
-      public Writer run(Writer writer, Object[] scopes) {
+      public Writer run(Writer writer, List<Object> scopes) {
         if (compiledCodes != null) {
           return compiledCodes.runCodes(writer, scopes);
         }

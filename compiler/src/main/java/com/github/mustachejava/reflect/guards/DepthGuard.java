@@ -2,6 +2,8 @@ package com.github.mustachejava.reflect.guards;
 
 import com.github.mustachejava.reflect.Guard;
 
+import java.util.List;
+
 /**
  * Check that there are the same number of scope levels.
  */
@@ -27,8 +29,8 @@ public class DepthGuard implements Guard {
   }
 
   @Override
-  public boolean apply(Object[] objects) {
-    return objects != null && length == objects.length;
+  public boolean apply(List<Object> objects) {
+    return objects != null && length == objects.size();
   }
 
   public String toString() {

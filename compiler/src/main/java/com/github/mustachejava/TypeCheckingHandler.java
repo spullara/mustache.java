@@ -8,6 +8,7 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Rather than pulling values this looks only at types. To check if a template matches the shape
@@ -20,18 +21,18 @@ import java.util.Arrays;
 public class TypeCheckingHandler extends BaseObjectHandler {
 
   @Override
-  public Wrapper find(String name, Object[] scopes) {
+  public Wrapper find(String name, List<Object> scopes) {
     for (Object scope : scopes) {
       if (!(scope instanceof Class)) {
         throw new MustacheException("Only classes allowed with this object handler: " + scope);
       }
     }
-    int length = scopes.length;
+    int length = scopes.size();
     if (length == 0) {
       throw new MustacheException("Empty scopes");
     }
     for (int i = length - 1; i >= 0; i--) {
-      Object scope = scopes[i];
+      Object scope = scopes.get(i);
       if (scope == null || !(scope instanceof Class)) {
         throw new MustacheException("Invalid scope: " + scope);
       }
@@ -58,13 +59,13 @@ public class TypeCheckingHandler extends BaseObjectHandler {
   }
 
   @Override
-  public Writer falsey(Iteration iteration, Writer writer, Object object, Object[] scopes) {
+  public Writer falsey(Iteration iteration, Writer writer, Object object, List<Object> scopes) {
     // Iterate once in either case
     return iterate(iteration, writer, object, scopes);
   }
 
   @Override
-  public Writer iterate(Iteration iteration, Writer writer, Object object, Object[] scopes) {
+  public Writer iterate(Iteration iteration, Writer writer, Object object, List<Object> scopes) {
     return iteration.next(writer, object, scopes);
   }
 

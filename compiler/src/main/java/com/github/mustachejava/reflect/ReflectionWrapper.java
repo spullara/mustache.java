@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Used for evaluating values at a callsite
@@ -44,16 +45,16 @@ public class ReflectionWrapper extends GuardedWrapper {
     this(rw.scopeIndex, rw.wrappers, rw.guards, rw.method == null ? rw.field : rw.method, rw.arguments, rw.oh);
   }
 
-  protected Object unwrap(Object[] scopes) {
+  protected Object unwrap(List<Object> scopes) {
     if (wrappers == null || wrappers.length == 0) {
-      return scopes[scopeIndex];
+      return scopes.get(scopeIndex);
     } else {
       return ReflectionObjectHandler.unwrap(oh, scopeIndex, wrappers, scopes);
     }
   }
 
   @Override
-  public Object call(Object[] scopes) throws GuardException {
+  public Object call(List<Object> scopes) throws GuardException {
     guardCall(scopes);
     Object scope = oh.coerce(unwrap(scopes));
     try {
@@ -108,18 +109,18 @@ public class ReflectionWrapper extends GuardedWrapper {
   private String getTargetDescription() {
     return method == null
         ? "field " + field.getDeclaringClass() + "." + field.getName()
-        : "method " + method.getDeclaringClass().getCanonicalName() + "." + method.getName() + "(" + elementsToString(arguments, method.getParameterTypes().length - 1) + ")";
+        : "method " + method.getDeclaringClass().getCanonicalName() + "." + method.getName() + "(" + elementsToString(Arrays.asList(arguments), method.getParameterTypes().length - 1) + ")";
   }
   
-  private String elementsToString(Object[] objects, int showUpTo) {
-    if (objects == null || objects.length == 0 || showUpTo < 0) {
+  private String elementsToString(List<Object> objects, int showUpTo) {
+    if (objects == null || objects.size() == 0 || showUpTo < 0) {
       return "";
     }
     StringBuilder sb = new StringBuilder();
-    for (int i = 0; i <= showUpTo && i < objects.length; i++) {
+    for (int i = 0; i <= showUpTo && i < objects.size(); i++) {
       if (sb.length() > 0)
         sb.append(",");
-      sb.append(elementToString(objects[i]));
+      sb.append(elementToString(objects.get(i)));
     }
     return sb.toString();
   }

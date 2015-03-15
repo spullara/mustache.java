@@ -7,6 +7,7 @@ import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.Node;
 
 import java.io.Writer;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -26,7 +27,7 @@ public class DefaultMustache extends DefaultCode implements Mustache {
     return codes;
   }
 
-  public Writer run(Writer writer, Object[] scopes) {
+  public Writer run(Writer writer, List<Object> scopes) {
     if (codes != null) {
       for (Code code : codes) {
         writer = code.execute(writer, scopes);

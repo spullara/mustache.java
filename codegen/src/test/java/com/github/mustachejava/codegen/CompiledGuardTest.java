@@ -1,5 +1,6 @@
 package com.github.mustachejava.codegen;
 
+import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.codegen.guards.CompilableClassGuard;
 import com.github.mustachejava.reflect.Guard;
 import com.github.mustachejava.reflect.guards.ClassGuard;
@@ -22,20 +23,19 @@ public class CompiledGuardTest implements Opcodes {
   @Test
   public void testGuard() {
     ClassGuard stringClassGuard = new ClassGuard(0, "");
-    assertTrue("string is ok", stringClassGuard.apply(new Object[]{"test"}));
-    assertFalse("integer is not ok", stringClassGuard.apply(new Object[]{1}));
+    assertTrue("string is ok", stringClassGuard.apply(ObjectHandler.makeList("test")));
+    assertFalse("integer is not ok", stringClassGuard.apply(ObjectHandler.makeList(1)));
   }
 
   @Test
   public void testCompiledGuard() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
-    String source = "Test.java";
     CompilableClassGuard stringClassGuard = new CompilableClassGuard(0, "");
     List<CompilableGuard> guards = new ArrayList<CompilableGuard>();
     guards.add(stringClassGuard);
 
     Guard testGuard = compile(guards);
-    assertTrue("string is ok", testGuard.apply(new Object[]{"test", 1}));
-    assertFalse("integer is not ok", testGuard.apply(new Object[]{1, "test"}));
+    assertTrue("string is ok", testGuard.apply(ObjectHandler.makeList("test", 1)));
+    assertFalse("integer is not ok", testGuard.apply(ObjectHandler.makeList(1, "test")));
   }
 
 }

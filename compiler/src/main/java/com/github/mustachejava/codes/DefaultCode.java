@@ -1,17 +1,12 @@
 package com.github.mustachejava.codes;
 
-import com.github.mustachejava.Binding;
-import com.github.mustachejava.Code;
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.*;
 import com.github.mustachejava.util.Node;
-import com.github.mustachejava.ObjectHandler;
-import com.github.mustachejava.TemplateContext;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -131,10 +126,10 @@ public class DefaultCode implements Code, Cloneable {
     mustache.setCodes(newcodes);
   }
 
-  public Object get(Object[] scopes) {
+  public Object get(List<Object> scopes) {
     if (returnThis) {
-      int length = scopes == null ? 0 : scopes.length;
-      return length == 0 ? null : scopes[length - 1];
+      int length = scopes == null ? 0 : scopes.size();
+      return length == 0 ? null : scopes.get(length - 1);
     }
     try {
       return binding.get(scopes);
@@ -146,11 +141,6 @@ public class DefaultCode implements Code, Cloneable {
     }
   }
 
-  @Override
-  public Writer execute(Writer writer, Object scope) {
-    return execute(writer, new Object[]{scope});
-  }
-
   /**
    * The default behavior is to run the codes and append the captured text.
    *
@@ -158,7 +148,7 @@ public class DefaultCode implements Code, Cloneable {
    * @param scopes The scopes to evaluate the embedded names against.
    */
   @Override
-  public Writer execute(Writer writer, Object[] scopes) {
+  public Writer execute(Writer writer, List<Object> scopes) {
     return appendText(run(writer, scopes));
   }
 
@@ -209,7 +199,7 @@ public class DefaultCode implements Code, Cloneable {
     return writer;
   }
 
-  protected Writer run(Writer writer, Object[] scopes) {
+  protected Writer run(Writer writer, List<Object> scopes) {
     return mustache == null ? writer : mustache.run(writer, scopes);
   }
 
@@ -223,16 +213,11 @@ public class DefaultCode implements Code, Cloneable {
   }
 
   // Expand the current set of scopes
-  protected Object[] addScope(Object[] scopes, Object scope) {
-    if (scope == null) {
-      return scopes;
-    } else {
-      int length = scopes.length;
-      Object[] newScopes = new Object[length + 1];
-      System.arraycopy(scopes, 0, newScopes, 0, length);
-      newScopes[length] = scope;
-      return newScopes;
+  protected List<Object> addScope(List<Object> scopes, Object scope) {
+    if (scope != null) {
+      scopes.add(scope);
     }
+    return scopes;
   }
 
   @Override

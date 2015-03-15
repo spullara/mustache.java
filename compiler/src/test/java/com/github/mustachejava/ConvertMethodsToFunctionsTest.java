@@ -58,7 +58,7 @@ public class ConvertMethodsToFunctionsTest {
           method.setAccessible(true);
           return new ReflectionWrapper(scopeIndex, wrappers, guards.toArray(new Guard[guards.size()]), method, null, this) {
             @Override
-            public Object call(Object[] scopes) throws GuardException {
+            public Object call(List<Object> scopes) throws GuardException {
               guardCall(scopes);
               final Object scope1 = unwrap(scopes);
               if (scope1 == null) return null;

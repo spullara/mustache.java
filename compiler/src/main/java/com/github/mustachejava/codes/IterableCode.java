@@ -36,14 +36,14 @@ public class IterableCode extends DefaultCode implements Iteration {
   }
 
   @Override
-  public Writer execute(Writer writer, final Object[] scopes) {
+  public Writer execute(Writer writer, final List<Object> scopes) {
     Object resolved = get(scopes);
     writer = handle(writer, resolved, scopes);
     appendText(writer);
     return writer;
   }
 
-  protected Writer handle(Writer writer, Object resolved, Object[] scopes) {
+  protected Writer handle(Writer writer, Object resolved, List<Object> scopes) {
     if (resolved != null) {
       if (resolved instanceof Function) {
         writer = handleFunction(writer, (Function) resolved, scopes);
@@ -56,7 +56,7 @@ public class IterableCode extends DefaultCode implements Iteration {
     return writer;
   }
 
-  protected Writer handleCallable(Writer writer, final Callable callable, final Object[] scopes) {
+  protected Writer handleCallable(Writer writer, final Callable callable, final List<Object> scopes) {
     if (les == null) {
       try {
         writer = execute(writer, callable.call(), scopes);
@@ -75,7 +75,7 @@ public class IterableCode extends DefaultCode implements Iteration {
       writer = latchedWriter;
       // Scopes must not cross thread boundaries as they
       // are thread locally reused
-      final Object[] newScopes = scopes.clone();
+      final List<Object> newScopes = new ArrayList<>(scopes);
       les.execute(() -> {
         try {
           Object call = callable.call();
@@ -95,7 +95,7 @@ public class IterableCode extends DefaultCode implements Iteration {
   }
 
   @SuppressWarnings("unchecked")
-  protected Writer handleFunction(Writer writer, Function function, Object[] scopes) {
+  protected Writer handleFunction(Writer writer, Function function, List<Object> scopes) {
     StringWriter sw = new StringWriter();
     runIdentity(sw);
     if (function instanceof TemplateFunction) {
@@ -119,16 +119,16 @@ public class IterableCode extends DefaultCode implements Iteration {
     return writer;
   }
 
-  protected Writer writeTemplate(Writer writer, String templateText, Object[] scopes) {
+  protected Writer writeTemplate(Writer writer, String templateText, List<Object> scopes) {
     return df.getFragment(new FragmentKey(tc, templateText)).execute(writer, scopes);
   }
 
-  protected Writer execute(Writer writer, Object resolve, Object[] scopes) {
+  protected Writer execute(Writer writer, Object resolve, List<Object> scopes) {
     return oh.iterate(this, writer, resolve, scopes);
   }
 
-  public Writer next(Writer writer, Object next, Object... scopes) {
-    Object[] iteratorScopes = addScope(scopes, next);
+  public Writer next(Writer writer, Object next, List<Object> scopes) {
+    List<Object> iteratorScopes = addScope(scopes, next);
     writer = run(writer, iteratorScopes);
     return writer;
   }

@@ -3,6 +3,9 @@ package com.github.mustachejava;
 import com.github.mustachejava.util.Node;
 
 import java.io.Writer;
+import java.util.List;
+
+import static com.github.mustachejava.ObjectHandler.makeList;
 
 /**
  * The interface to Mustache objects
@@ -29,7 +32,9 @@ public interface Mustache extends Code {
    * @param scope the root object to use
    * @return the new writer
    */
-  Writer execute(Writer writer, Object scope);
+  default Writer execute(Writer writer, Object scope) {
+    return execute(writer, makeList(scope));
+  }
 
   /**
    * Execute the mustache with a given writer and an array of scope objects. The
@@ -39,7 +44,7 @@ public interface Mustache extends Code {
    * @param scopes an ordered list of scopes for variable resolution
    * @return the new writer
    */
-  Writer execute(Writer writer, Object[] scopes);
+  Writer execute(Writer writer, List<Object> scopes);
 
   /**
    * Get the underlying code objects.
@@ -75,7 +80,7 @@ public interface Mustache extends Code {
    * @param scopes the array of scopes to execute
    * @return the replacement writer
    */
-  Writer run(Writer writer, Object[] scopes);
+  Writer run(Writer writer, List<Object> scopes);
 
   /**
    * Invert this mustache given output text.
@@ -84,4 +89,6 @@ public interface Mustache extends Code {
    * @return a tree of nodes representing the variables that when passed as a scope would reproduce the text
    */
   Node invert(String text);
+  
+  
 }

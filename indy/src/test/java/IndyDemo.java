@@ -1,3 +1,4 @@
+import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.codegen.CodegenObjectHandler;
 import com.github.mustachejava.codegen.CodegenReflectionWrapper;
 import com.github.mustachejava.indy.IndyObjectHandler;
@@ -10,6 +11,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
+import java.util.List;
 
 public class IndyDemo {
 
@@ -36,7 +38,7 @@ public class IndyDemo {
 
   public static void timeReflectionOH(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
-    Object[] scopes = {indyDemo};
+    List<Object> scopes = ObjectHandler.makeList(indyDemo);
     for (int i = 0; i < TIMES; i++) {
       REFLECTED.call(scopes);
     }
@@ -45,7 +47,7 @@ public class IndyDemo {
 
   public static void timeCodegenReflectionOH(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
-    Object[] scopes = {indyDemo};
+    List<Object> scopes = ObjectHandler.makeList(indyDemo);
     for (int i = 0; i < TIMES; i++) {
       CODEGEN_REFLECTED.call(scopes);
     }
@@ -68,7 +70,7 @@ public class IndyDemo {
 
   public static void timeIndy(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
-    Object[] scopes = {indyDemo};
+    List<Object> scopes = ObjectHandler.makeList(indyDemo);
     for (int i = 0; i < TIMES; i++) {
       INDY.call(scopes);
     }
@@ -77,7 +79,7 @@ public class IndyDemo {
 
   public static void timeIndyNoGuard(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
-    Object[] scopes = {indyDemo};
+    List<Object> scopes = ObjectHandler.makeList(indyDemo);
     for (int i = 0; i < TIMES; i++) {
       INDY_NOGUARD.call(scopes);
     }
@@ -86,7 +88,7 @@ public class IndyDemo {
 
   public static void timeIndyOH(IndyDemo indyDemo) throws Throwable {
     long start = System.currentTimeMillis();
-    Object[] scopes = {indyDemo};
+    List<Object> scopes = ObjectHandler.makeList(indyDemo);
     for (int i = 0; i < TIMES; i++) {
       INDY_OH.call(scopes);
     }
@@ -172,11 +174,11 @@ public class IndyDemo {
 
   static {
     IndyDemo indyDemo = new IndyDemo();
-    REFLECTED = new ReflectionObjectHandler().find("someMethod", new Object[] { indyDemo });
-    CODEGEN_REFLECTED = new CodegenObjectHandler().find("someMethod", new Object[] { indyDemo });
+    REFLECTED = new ReflectionObjectHandler().find("someMethod", ObjectHandler.makeList(indyDemo));
+    CODEGEN_REFLECTED = new CodegenObjectHandler().find("someMethod", ObjectHandler.makeList(indyDemo));
     INDY = IndyWrapper.create((CodegenReflectionWrapper) CODEGEN_REFLECTED);
     INDY_NOGUARD = IndyWrapper.create((CodegenReflectionWrapper) CODEGEN_REFLECTED, false);
-    INDY_OH = new IndyObjectHandler().find("someMethod", new Object[] { indyDemo });
+    INDY_OH = new IndyObjectHandler().find("someMethod", ObjectHandler.makeList(indyDemo));
   }
 
   private int length = 0;

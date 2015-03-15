@@ -3,6 +3,8 @@ package com.github.mustachejava;
 import com.github.mustachejava.util.Wrapper;
 
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The ObjectHandler is responsible for creating wrappers to find values
@@ -16,7 +18,7 @@ public interface ObjectHandler {
    * @param scopes the ordered list of scopes
    * @return a wrapper that can be used to extract a value
    */
-  Wrapper find(String name, Object[] scopes);
+  Wrapper find(String name, List<Object> scopes);
 
   /**
    * Coerce results to Java native iterables, functions, callables.
@@ -35,7 +37,7 @@ public interface ObjectHandler {
    * @param scopes the scopes present
    * @return the current writer
    */
-  Writer iterate(Iteration iteration, Writer writer, Object object, Object[] scopes);
+  Writer iterate(Iteration iteration, Writer writer, Object object, List<Object> scopes);
 
   /**
    * Call Iteration.next() either 0 (true) or 1 (fale) times.
@@ -46,7 +48,7 @@ public interface ObjectHandler {
    * @param scopes the scopes present
    * @return the current writer
    */
-  Writer falsey(Iteration iteration, Writer writer, Object object, Object[] scopes);
+  Writer falsey(Iteration iteration, Writer writer, Object object, List<Object> scopes);
 
   /**
    * Each call site has its own binding to allow for fine grained caching without
@@ -67,4 +69,17 @@ public interface ObjectHandler {
    * @return a string representation of the object.
    */
   String stringify(Object object);
+  
+  static List<Object> makeList(Object scope) {
+    List<Object> scopes = new ArrayList<>();
+    scopes.add(scope);
+    return scopes;
+  }
+
+  static List<Object> makeList(Object scope, Object scope2) {
+    List<Object> scopes = new ArrayList<>();
+    scopes.add(scope);
+    scopes.add(scope2);
+    return scopes;
+  }
 }

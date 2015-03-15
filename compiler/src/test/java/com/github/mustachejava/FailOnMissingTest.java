@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -21,7 +22,7 @@ public class FailOnMissingTest {
       public Binding createBinding(String name, final TemplateContext tc, Code code) {
         return new GuardedBinding(this, name, tc, code) {
           @Override
-          protected synchronized Wrapper getWrapper(String name, Object[] scopes) {
+          protected synchronized Wrapper getWrapper(String name, List<Object> scopes) {
             Wrapper wrapper = super.getWrapper(name, scopes);
             if (wrapper instanceof MissingWrapper) {
               throw new MustacheException(name + " not found in " + tc);

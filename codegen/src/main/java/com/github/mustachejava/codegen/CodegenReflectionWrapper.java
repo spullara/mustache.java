@@ -23,7 +23,7 @@ public class CodegenReflectionWrapper extends ReflectionWrapper {
   }
 
   @Override
-  protected void guardCall(Object[] scopes) throws GuardException {
+  protected void guardCall(List<Object> scopes) throws GuardException {
     if (!compiledGuards.apply(scopes)) {
       throw guardException;
     }

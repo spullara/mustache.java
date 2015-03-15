@@ -6,6 +6,7 @@ import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Logger;
@@ -54,7 +55,7 @@ public class GuardedBinding implements Binding {
    * @return The value of the field or method
    */
   @Override
-  public Object get(Object[] scopes) {
+  public Object get(List<Object> scopes) {
     // Loop over the wrappers and find the one that matches
     // this set of scopes or get a new one
     Wrapper current = null;
@@ -74,7 +75,7 @@ public class GuardedBinding implements Binding {
     return createAndGet(scopes);
   }
 
-  private Object createAndGet(Object[] scopes) {
+  private Object createAndGet(List<Object> scopes) {
     // Make a new wrapper for this set of scopes and add it to the set
     Wrapper wrapper = getWrapper(name, scopes);
     previousSet.add(wrapper);
@@ -90,7 +91,7 @@ public class GuardedBinding implements Binding {
     }
   }
 
-  protected synchronized Wrapper getWrapper(String name, Object[] scopes) {
+  protected synchronized Wrapper getWrapper(String name, List<Object> scopes) {
     Wrapper wrapper = oh.find(name, scopes);
     if (wrapper instanceof MissingWrapper) {
       if (debug) {

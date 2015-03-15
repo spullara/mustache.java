@@ -1,15 +1,13 @@
 package com.github.mustachejava.reflect;
 
-import com.github.mustachejava.Binding;
-import com.github.mustachejava.Code;
-import com.github.mustachejava.MustacheException;
-import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.*;
 import com.github.mustachejava.util.Wrapper;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,17 +20,17 @@ public class SimpleObjectHandler extends BaseObjectHandler {
       private Wrapper wrapper = find(name, null);
 
       @Override
-      public Object get(Object[] scopes) {
+      public Object get(List<Object> scopes) {
         return wrapper.call(scopes);
       }
     };
   }
 
   @Override
-  public Wrapper find(final String name, final Object[] scopes) {
+  public Wrapper find(final String name, final List<Object> scopes) {
     return scopes1 -> {
-      for (int i = scopes1.length - 1; i >= 0; i--) {
-        Object scope = scopes1[i];
+      for (int i = scopes1.size() - 1; i >= 0; i--) {
+        Object scope = scopes1.get(i);
         if (scope != null) {
           int index = name.indexOf(".");
           if (index == -1) {
@@ -60,15 +58,15 @@ public class SimpleObjectHandler extends BaseObjectHandler {
             }
           } else {
             // Dig into the dot-notation through recursion
-            Object[] subscope = {scope};
+            List<Object> subscope = ObjectHandler.makeList(scope);
             Wrapper wrapper = find(name.substring(0, index), subscope);
             if (wrapper != null) {
               scope = wrapper.call(subscope);
               if (scope == null) {
                 continue;
               }
-              subscope = new Object[]{scope};
-              return find(name.substring(index + 1), new Object[]{subscope}).call(subscope);
+              subscope = ObjectHandler.makeList(scope);
+              return find(name.substring(index + 1), ObjectHandler.makeList(subscope)).call(subscope);
             }
           }
         }

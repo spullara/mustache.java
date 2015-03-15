@@ -4,6 +4,7 @@ import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.reflect.Guard;
 import com.github.mustachejava.util.Wrapper;
 
+import java.util.List;
 import java.util.Map;
 
 import static com.github.mustachejava.reflect.ReflectionObjectHandler.unwrap;
@@ -27,7 +28,7 @@ public class MapGuard implements Guard {
   }
 
   @Override
-  public boolean apply(Object[] objects) {
+  public boolean apply(List<Object> objects) {
     Object scope = unwrap(oh, scopeIndex, wrappers, objects);
     if (scope instanceof Map) {
       Map map = (Map) scope;

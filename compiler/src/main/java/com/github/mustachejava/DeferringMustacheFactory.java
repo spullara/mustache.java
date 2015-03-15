@@ -76,7 +76,7 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
           Wrapper deferredWrapper;
 
           @Override
-          public Writer execute(Writer writer, final Object[] scopes) {
+          public Writer execute(Writer writer, final List<Object> scopes) {
             final Object object = get(scopes);
             final DeferredCallable deferredCallable = getDeferred(scopes);
             if (object == DEFERRED && deferredCallable != null) {
@@ -90,7 +90,7 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
                       new Deferral(divid, getExecutorService().submit(() -> {
                         try {
                           StringWriter writer1 = new StringWriter();
-                          Object[] newscopes = addScope(scopes, object);
+                          List<Object> newscopes = addScope(scopes, object);
                           partial.execute(writer1, newscopes).close();
                           return writer1.toString();
                         } catch (IOException e) {
@@ -103,7 +103,7 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
             }
           }
 
-          private DeferredCallable getDeferred(Object[] scopes) {
+          private DeferredCallable getDeferred(List<Object> scopes) {
             try {
               if (deferredWrapper == null) {
                 deferredWrapper = getObjectHandler().find("deferred", scopes);

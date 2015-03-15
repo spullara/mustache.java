@@ -26,12 +26,12 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
 
   protected static final Method MAP_METHOD;
 
-  public static Object unwrap(ObjectHandler oh, int scopeIndex, Wrapper[] wrappers, Object[] scopes) throws GuardException {
-    Object scope = oh.coerce(scopes[scopeIndex]);
+  public static Object unwrap(ObjectHandler oh, int scopeIndex, Wrapper[] wrappers, List<Object> scopes) throws GuardException {
+    Object scope = oh.coerce(scopes.get(scopeIndex));
     // The value may be buried by . notation
     if (wrappers != null) {
       for (Wrapper wrapper : wrappers) {
-        scope = oh.coerce(wrapper.call(new Object[]{scope}));
+        scope = oh.coerce(wrapper.call(ObjectHandler.makeList(scope)));
       }
     }
     return scope;
@@ -47,15 +47,15 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
   
   @SuppressWarnings("unchecked")
   @Override
-  public Wrapper find(String name, final Object[] scopes) {
+  public Wrapper find(String name, final List<Object> scopes) {
     Wrapper wrapper = null;
-    final int length = scopes.length;
-    List<Guard> guards = new ArrayList<>(scopes.length);
+    final int length = scopes.size();
+    List<Guard> guards = new ArrayList<>(length);
     // Simple guard to break if the number of scopes at this call site have changed
     guards.add(createDepthGuard(length));
     NEXT:
     for (int i = length - 1; i >= 0; i--) {
-      Object scope = scopes[i];
+      Object scope = scopes.get(i);
       if (scope == null) continue;
       // Make sure that the current scope is the same class
       guards.add(createClassGuard(i, scope));
@@ -82,7 +82,7 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
           wrappers.add(wrapper);
           try {
             // Pull out the next level
-            scope = coerce(wrapper.call(new Object[]{scope}));
+            scope = coerce(wrapper.call(ObjectHandler.makeList(scope)));
           } catch (GuardException e) {
             throw new AssertionError(e);
           }

@@ -10,6 +10,7 @@ import com.github.mustachejava.util.Node;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,7 +57,7 @@ public class ValueCode extends DefaultCode {
   }
 
   @Override
-  public Writer execute(Writer writer, final Object[] scopes) {
+  public Writer execute(Writer writer, final List<Object> scopes) {
     try {
       final Object object = get(scopes);
       if (object != null) {
@@ -74,7 +75,7 @@ public class ValueCode extends DefaultCode {
     }
   }
 
-  protected Writer handleCallable(Writer writer, final Callable callable, final Object[] scopes) throws Exception {
+  protected Writer handleCallable(Writer writer, final Callable callable, final List<Object> scopes) throws Exception {
     if (les == null) {
       Object call = callable.call();
       execute(writer, call == null ? null : oh.stringify(call));
@@ -102,7 +103,7 @@ public class ValueCode extends DefaultCode {
   }
 
   @SuppressWarnings("unchecked")
-  protected void handleFunction(Writer writer, Function function, Object[] scopes) throws IOException {
+  protected void handleFunction(Writer writer, Function function, List<Object> scopes) throws IOException {
     String value;
     Object newtemplate = function.apply(null);
     if (newtemplate == null) {

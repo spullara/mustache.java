@@ -470,7 +470,7 @@ public class InterpreterTest extends TestCase {
     DefaultMustacheFactory c = createMustacheFactory();
     c.setObjectHandler(new ReflectionObjectHandler() {
       @Override
-      public Writer falsey(Iteration iteration, Writer writer, Object object, Object[] scopes) {
+      public Writer falsey(Iteration iteration, Writer writer, Object object, List<Object> scopes) {
         if (object instanceof Number) {
           if (((Number) object).intValue() == 0) {
             return iteration.next(writer, object, scopes);
@@ -480,7 +480,7 @@ public class InterpreterTest extends TestCase {
       }
 
       @Override
-      public Writer iterate(Iteration iteration, Writer writer, Object object, Object[] scopes) {
+      public Writer iterate(Iteration iteration, Writer writer, Object object, List<Object> scopes) {
         if (object instanceof Number) {
           if (((Number) object).intValue() == 0) {
             return writer;
@@ -1209,7 +1209,7 @@ public class InterpreterTest extends TestCase {
           public void iterable(final TemplateContext templateContext, String variable, Mustache mustache) {
             list.add(new IterableCode(templateContext, df, mustache, variable) {
               Binding binding = oh.createBinding("params", templateContext, this);
-              protected Writer handleFunction(Writer writer, Function function, Object[] scopes) {
+              protected Writer handleFunction(Writer writer, Function function, List<Object> scopes) {
                 return super.handleFunction(writer, function, addScope(scopes, binding.get(scopes)));
               }
             });
@@ -1252,7 +1252,7 @@ public class InterpreterTest extends TestCase {
           public void value(TemplateContext tc, String variable, boolean encoded) {
             list.add(new ValueCode(tc, df, variable, encoded) {
               @Override
-              public Writer execute(Writer writer, Object[] scopes) {
+              public Writer execute(Writer writer, List<Object> scopes) {
                 try {
                   final Object object = get(scopes);
                   if (object == null) {

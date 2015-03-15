@@ -31,7 +31,7 @@ public abstract class BaseObjectHandler implements ObjectHandler {
   }
 
   @Override
-  public Writer falsey(Iteration iteration, Writer writer, Object object, Object[] scopes) {
+  public Writer falsey(Iteration iteration, Writer writer, Object object, List<Object> scopes) {
     if (object != null) {
       if (object instanceof Boolean) {
         if ((Boolean) object) {
@@ -65,7 +65,7 @@ public abstract class BaseObjectHandler implements ObjectHandler {
   @Override
   public abstract Binding createBinding(String name, TemplateContext tc, Code code);
 
-  public Writer iterate(Iteration iteration, Writer writer, Object object, Object[] scopes) {
+  public Writer iterate(Iteration iteration, Writer writer, Object object, List<Object> scopes) {
     if (object == null) return writer;
     if (object instanceof Boolean) {
       if (!(Boolean) object) {

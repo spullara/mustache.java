@@ -9,6 +9,7 @@ import com.github.mustachejava.codes.NotIterableCode;
 import com.github.mustachejava.codes.ValueCode;
 
 import java.io.Writer;
+import java.util.List;
 
 /**
  * Grab a map of values returned from calls
@@ -38,7 +39,7 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
   public void value(TemplateContext tc, String variable, boolean encoded) {
     list.add(new ValueCode(tc, df, variable, encoded) {
       @Override
-      public Object get(Object[] scopes) {
+      public Object get(List<Object> scopes) {
         Object o = super.get(scopes);
         if (o != null) {
           captured.value(name, o.toString());
@@ -53,14 +54,14 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
     list.add(new IterableCode(tc, df, mustache, variable) {
 
       @Override
-      public Writer execute(Writer writer, Object[] scopes) {
+      public Writer execute(Writer writer, List<Object> scopes) {
         Writer execute = super.execute(writer, scopes);
         captured.arrayEnd();
         return execute;
       }
 
       @Override
-      public Writer next(Writer writer, Object next, Object... scopes) {
+      public Writer next(Writer writer, Object next, List<Object> scopes) {
         captured.objectStart();
         Writer nextObject = super.next(writer, next, scopes);
         captured.objectEnd();
@@ -68,7 +69,7 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
       }
 
       @Override
-      public Object get(Object[] scopes) {
+      public Object get(List<Object> scopes) {
         Object o = super.get(scopes);
         captured.arrayStart(name);
         return o;
@@ -82,13 +83,13 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
       boolean called;
 
       @Override
-      public Writer next(Writer writer, Object object, Object[] scopes) {
+      public Writer next(Writer writer, Object object, List<Object> scopes) {
         called = true;
         return super.next(writer, object, scopes);
       }
 
       @Override
-      public Writer execute(Writer writer, Object[] scopes) {
+      public Writer execute(Writer writer, List<Object> scopes) {
         Writer execute = super.execute(writer, scopes);
         if (called) {
           captured.arrayStart(name);

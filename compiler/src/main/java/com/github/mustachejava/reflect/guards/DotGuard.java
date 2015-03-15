@@ -2,6 +2,8 @@ package com.github.mustachejava.reflect.guards;
 
 import com.github.mustachejava.reflect.Guard;
 
+import java.util.List;
+
 /**
  * Guard dot notation references.
  */
@@ -32,7 +34,7 @@ public class DotGuard implements Guard {
   }
 
   @Override
-  public boolean apply(Object[] objects) {
+  public boolean apply(List<Object> objects) {
     return true;
   }
 

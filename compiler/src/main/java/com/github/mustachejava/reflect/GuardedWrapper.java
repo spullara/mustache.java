@@ -4,6 +4,7 @@ import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static java.util.Arrays.asList;
 
@@ -30,12 +31,12 @@ public class GuardedWrapper implements Wrapper {
   }
 
   @Override
-  public Object call(Object[] scopes) throws GuardException {
+  public Object call(List<Object> scopes) throws GuardException {
     guardCall(scopes);
     return null;
   }
 
-  protected void guardCall(Object[] scopes) throws GuardException {
+  protected void guardCall(List<Object> scopes) throws GuardException {
     for (Guard predicate : guards) {
       if (!predicate.apply(scopes)) {
         throw guardException;

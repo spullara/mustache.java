@@ -4,6 +4,7 @@ import com.github.mustachejava.*;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 
 public class PartialCode extends DefaultCode {
   protected final String extension;
@@ -49,7 +50,7 @@ public class PartialCode extends DefaultCode {
   }
 
   @Override
-  public Writer execute(Writer writer, final Object[] scopes) {
+  public Writer execute(Writer writer, final List<Object> scopes) {
     DepthLimitedWriter depthLimitedWriter;
     if (writer instanceof DepthLimitedWriter) {
       depthLimitedWriter = (DepthLimitedWriter) writer;
