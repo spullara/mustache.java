@@ -77,7 +77,13 @@ public abstract class BaseObjectHandler implements ObjectHandler {
         return writer;
       }
     }
-    if (object instanceof Iterable) {
+    if (object instanceof List) {
+      List list = (List) object;
+      int length = list.size();
+      for (int i = 0; i < length; i++) {
+        writer = iteration.next(writer, coerce(list.get(i)), scopes);
+      }
+    } else if (object instanceof Iterable) {
       for (Object next : ((Iterable) object)) {
         writer = iteration.next(writer, coerce(next), scopes);
       }

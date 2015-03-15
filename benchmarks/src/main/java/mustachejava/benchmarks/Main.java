@@ -38,6 +38,10 @@ Main.benchJustEscapeOnce   thrpt   20  102768645.605 ±  3764598.754  ops/s
 Main.benchJustEscapeTwo    thrpt   20   81450001.026 ±  2270993.769  ops/s
 
 Benchmark            Mode  Cnt       Score       Error  Units
+Main.benchMustache  thrpt   20  763256.970 ± 59474.781  ops/s
+
+Converstion of array scope to list scope:
+Benchmark            Mode  Cnt       Score       Error  Units
 Main.benchMustache  thrpt   20  913015.783 ± 40586.647  ops/s
 
  */
