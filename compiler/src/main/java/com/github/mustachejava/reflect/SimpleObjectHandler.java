@@ -79,7 +79,7 @@ public class SimpleObjectHandler extends BaseObjectHandler {
   private static class WrapperKey {
     private final Class aClass;
     private final String name;
-    private int hashcode;
+    private final int hashcode;
 
     WrapperKey(Class aClass, String name) {
       this.aClass = aClass;

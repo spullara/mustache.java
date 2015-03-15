@@ -4,6 +4,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.codegen.CodegenObjectHandler;
 import com.github.mustachejava.indy.IndyObjectHandler;
+import com.github.mustachejava.reflect.SimpleObjectHandler;
 import com.github.mustachejavabenchmarks.NullWriter;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
@@ -59,6 +60,8 @@ public class Main {
   private final Mustache normal = new DefaultMustacheFactory().compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
   private final Mustache indy;
   private final Mustache codegen;
+  private final Mustache simple;
+
   private final Object scope = new Object() {
     List loop = new ArrayList();
     {
@@ -78,6 +81,9 @@ public class Main {
     DefaultMustacheFactory dmf2 = new DefaultMustacheFactory();
     dmf2.setObjectHandler(new IndyObjectHandler());
     indy = dmf1.compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
+    DefaultMustacheFactory dmf3 = new DefaultMustacheFactory();
+    dmf3.setObjectHandler(new SimpleObjectHandler());
+    simple = dmf1.compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
   }
   
   @Benchmark
@@ -94,6 +100,13 @@ public class Main {
   public void benchMustacheIndy() throws IOException {
     normal.execute(nw, scope).close();
   }
+  
+  @Benchmark
+  public void benchMustacheSimple() throws IOException {
+    simple.execute(nw, scope).close();
+  }
+  
+  
 //  @Benchmark
 //  public void benchTheoreticalLimit() throws IOException {
 //    nw.write("variable");
