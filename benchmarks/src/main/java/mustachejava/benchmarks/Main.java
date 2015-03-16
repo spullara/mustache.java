@@ -93,12 +93,12 @@ public class Main {
   
   @Benchmark
   public void benchMustacheCodegen() throws IOException {
-    normal.execute(nw, scope).close();
+    codegen.execute(nw, scope).close();
   }
 
   @Benchmark
   public void benchMustacheIndy() throws IOException {
-    normal.execute(nw, scope).close();
+    indy.execute(nw, scope).close();
   }
   
   @Benchmark
@@ -130,7 +130,7 @@ public class Main {
   public static void main(String[] args) throws IOException {
     Main main = new Main();
     while(true) {
-      main.benchMustacheIndy();
+      main.benchMustacheSimple();
     }
   }
 }
