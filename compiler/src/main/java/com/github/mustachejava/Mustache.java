@@ -3,7 +3,7 @@ package com.github.mustachejava;
 import com.github.mustachejava.util.Node;
 
 import java.io.Writer;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.github.mustachejava.ObjectHandler.makeList;
@@ -39,10 +39,7 @@ public interface Mustache extends Code {
 
   // Support the previous behavior for users
   default Writer execute(Writer writer, Object[] scopes) {
-    List<Object> newscopes = new ArrayList<>();
-    for (Object scope : scopes) {
-      newscopes.add(scope);
-    }
+    final List<Object> newscopes = Arrays.asList(scopes);
     return execute(writer, newscopes);
   }
 
