@@ -2,8 +2,8 @@ package com.github.mustachejava;
 
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.resolver.DefaultResolver;
-
 import java.io.File;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
@@ -75,6 +75,16 @@ public class DefaultMustacheFactory implements MustacheFactory {
     this.mustacheResolver = new DefaultResolver(fileRoot);
   }
 
+  private boolean htmlEscape=true;
+
+  public void setHtmlEscape(boolean htmlEscape) {
+    this.htmlEscape=htmlEscape;
+  }
+
+  public boolean isHtmlEscape() {
+    return this.htmlEscape;
+  }
+
   public String resolvePartialPath(String dir, String name, String extension) {
     String filePath = name;
 
@@ -112,7 +122,15 @@ public class DefaultMustacheFactory implements MustacheFactory {
 
   @Override
   public void encode(String value, Writer writer) {
-    escape(value, writer);
+    if(htmlEscape) {
+      escape(value, writer);
+    } else {
+      try {
+        writer.append(value);
+      } catch (IOException e) {
+        throw new MustacheException("Failed to append value: " + value);
+      }
+    }
   }
 
   @Override
