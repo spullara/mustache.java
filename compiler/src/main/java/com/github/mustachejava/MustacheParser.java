@@ -184,9 +184,7 @@ public class MustacheParser {
                 }
                 case '%':
                   // Pragmas
-                  if (!onlywhitespace) {
-                    out = write(mv, out, file, currentLine.intValue(), startOfLine);
-                  }
+	              out = write(mv, out, file, currentLine.intValue(), startOfLine);
                   int index = variable.indexOf(" ");
                   String pragma;
                   String args;

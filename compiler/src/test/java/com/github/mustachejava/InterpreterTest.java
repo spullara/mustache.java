@@ -3,6 +3,7 @@ package com.github.mustachejava;
 import com.github.mustachejava.codes.IterableCode;
 import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.codes.ValueCode;
+import com.github.mustachejava.codes.WriteCode;
 import com.github.mustachejava.functions.CommentFunction;
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.reflect.SimpleObjectHandler;
@@ -933,6 +934,25 @@ public class InterpreterTest extends TestCase {
     // Values ignored as if it didn't exist at all
     assertEquals("Pragma: ", sw.toString());
     assertTrue(found.get());
+  }
+
+  public void testPragmaWhiteSpaceHandling() throws IOException {
+    DefaultMustacheFactory mf = new DefaultMustacheFactory() {
+      @Override
+	  public MustacheVisitor createMustacheVisitor() {
+        DefaultMustacheVisitor visitor = new DefaultMustacheVisitor(this);
+	    // Add a pragma handler that simply renders a dash to visualize the output
+		visitor.addPragmaHandler("pragma", (tc, pragma, args) ->  new WriteCode(tc, this, "-"));
+        return visitor;
+      }
+	};
+
+	Mustache m = mf.compile(new StringReader(" {{% pragma}} {{% pragma}} "), "testPragma");
+	StringWriter sw = new StringWriter();
+	m.execute(sw, "").close();
+
+	// Pragma rendering should preserve template whitespace
+	assertEquals(" - - ", sw.toString());
   }
 
   public void testNotIterableCallable() throws IOException {
