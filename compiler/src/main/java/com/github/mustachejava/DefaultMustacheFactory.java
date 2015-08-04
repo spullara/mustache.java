@@ -226,14 +226,15 @@ public class DefaultMustacheFactory implements MustacheFactory {
    * @return the compiled partial
    */
   public Mustache compilePartial(String s) {
-    Map<String, Mustache> cache = partialCache.get();
+    final Map<String, Mustache> cache = partialCache.get();
+    final Mustache cached = cache.get(s);
+    if (cached != null) {
+      return cached;
+    }
     try {
-      Mustache mustache = cache.get(s);
-      if (mustache == null) {
-        mustache = mc.compile(s);
-        cache.put(s, mustache);
-        mustache.init();
-      }
+      final Mustache mustache = mc.compile(s);
+      cache.put(s, mustache);
+      mustache.init();
       return mustache;
     } finally {
       cache.remove(s);
