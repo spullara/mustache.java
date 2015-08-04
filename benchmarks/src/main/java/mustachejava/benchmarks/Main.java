@@ -75,15 +75,21 @@ public class Main {
   };
 
   {
-    DefaultMustacheFactory dmf1 = new DefaultMustacheFactory();
-    dmf1.setObjectHandler(new CodegenObjectHandler());
-    codegen = dmf1.compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
-    DefaultMustacheFactory dmf2 = new DefaultMustacheFactory();
-    dmf2.setObjectHandler(new IndyObjectHandler());
-    indy = dmf1.compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
-    DefaultMustacheFactory dmf3 = new DefaultMustacheFactory();
-    dmf3.setObjectHandler(new SimpleObjectHandler());
-    simple = dmf1.compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
+      {
+        DefaultMustacheFactory dmf1 = new DefaultMustacheFactory();
+        dmf1.setObjectHandler(new CodegenObjectHandler());
+        codegen = dmf1.compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
+      }
+      {
+        DefaultMustacheFactory dmf2 = new DefaultMustacheFactory();
+        dmf2.setObjectHandler(new IndyObjectHandler());
+        indy = dmf2.compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
+      }
+      {
+        DefaultMustacheFactory dmf3 = new DefaultMustacheFactory();
+        dmf3.setObjectHandler(new SimpleObjectHandler());
+        simple = dmf3.compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
+      }
   }
   
   @Benchmark
