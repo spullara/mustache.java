@@ -62,8 +62,8 @@
     </dependency>
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>util-core</artifactId>
-      <version>6.12.1</version>
+      <artifactId>util-core_2.10</artifactId>
+      <version>6.23.0</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
