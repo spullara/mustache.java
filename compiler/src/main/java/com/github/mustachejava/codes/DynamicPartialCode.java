@@ -60,14 +60,14 @@ public class DynamicPartialCode extends DefaultCode {
       throw new MustacheException("Maximum partial recursion limit reached: " + recrusionLimit);
     }
     try{
-    		if(get(scopes)!=null)
-    			partial = df.compilePartial(get(scopes) +".html");
-		}catch(Exception e){
-			throw new MustacheException("Failed to compile partial: " + name);
-		}
+       if(get(scopes)!=null)
+          partial = df.compilePartial(get(scopes) +".html");
+          }catch(Exception e){
+        throw new MustacheException("Failed to compile partial: " + name);
+      }
     if (partial == null) {
-	      throw new MustacheException("Failed to compile partial: " + name);
-		    }
+        throw new MustacheException("Failed to compile partial: " + name);
+       }
     Writer execute = partial.execute(depthLimitedWriter, scopes);
     depthLimitedWriter.decr();
     return appendText(execute);

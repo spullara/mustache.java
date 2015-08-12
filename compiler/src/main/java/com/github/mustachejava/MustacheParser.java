@@ -216,10 +216,10 @@ public class MustacheParser {
                   em = delimiters.substring(length / 2, length - 1);
                   break;
                 case '+':
-					 out = write(mv, out, file, currentLine.intValue(), startOfLine);
-	                  startOfLine = startOfLine & onlywhitespace;
-	                  mv.dynamicPartial(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable);
-					break;
+                      out = write(mv, out, file, currentLine.intValue(), startOfLine);
+                      startOfLine = startOfLine & onlywhitespace;
+                      mv.dynamicPartial(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable);
+                  break;
                 default: {
                   if (c == -1) {
                     throw new MustacheException(
