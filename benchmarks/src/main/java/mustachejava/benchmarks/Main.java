@@ -2,18 +2,15 @@ package mustachejava.benchmarks;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
-import com.github.mustachejava.codegen.CodegenObjectHandler;
-import com.github.mustachejava.indy.IndyObjectHandler;
 import com.github.mustachejava.reflect.SimpleObjectHandler;
 import com.github.mustachejavabenchmarks.NullWriter;
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /*
 
@@ -59,12 +56,11 @@ public class Main {
 
   private final NullWriter nw = new NullWriter();
   private final Mustache normal = new DefaultMustacheFactory().compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
-  private final Mustache indy;
-  private final Mustache codegen;
   private final Mustache simple;
 
   private final Object scope = new Object() {
     List loop = new ArrayList();
+
     {
       for (int i = 0; i < 10; i++) {
         final int finalI = i;
@@ -76,44 +72,28 @@ public class Main {
   };
 
   {
-      {
-        DefaultMustacheFactory dmf1 = new DefaultMustacheFactory();
-        dmf1.setObjectHandler(new CodegenObjectHandler());
-        codegen = dmf1.compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
-      }
-      {
-        DefaultMustacheFactory dmf2 = new DefaultMustacheFactory();
-        dmf2.setObjectHandler(new IndyObjectHandler());
-        indy = dmf2.compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
-      }
-      {
-        DefaultMustacheFactory dmf3 = new DefaultMustacheFactory();
-        dmf3.setObjectHandler(new SimpleObjectHandler());
-        simple = dmf3.compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
-      }
-  }
-  
-  @Benchmark
-  public void benchMustache() throws IOException {
-    normal.execute(nw, scope).close();
-  }
-  
-  @Benchmark
-  public void benchMustacheCodegen() throws IOException {
-    codegen.execute(nw, scope).close();
+    {
+      DefaultMustacheFactory dmf3 = new DefaultMustacheFactory();
+      dmf3.setObjectHandler(new SimpleObjectHandler());
+      simple = dmf3.compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
+    }
   }
 
   @Benchmark
-  public void benchMustacheIndy() throws IOException {
-    indy.execute(nw, scope).close();
+  @BenchmarkMode(Mode.Throughput)
+  @OutputTimeUnit(TimeUnit.SECONDS)
+  public void benchMustache() throws IOException {
+    normal.execute(nw, scope).close();
   }
-  
+
   @Benchmark
+  @BenchmarkMode(Mode.Throughput)
+  @OutputTimeUnit(TimeUnit.SECONDS)
   public void benchMustacheSimple() throws IOException {
     simple.execute(nw, scope).close();
   }
-  
-  
+
+
 //  @Benchmark
 //  public void benchTheoreticalLimit() throws IOException {
 //    nw.write("variable");
@@ -133,10 +113,10 @@ public class Main {
 //  public void benchJustEscapeTwo() {
 //    HtmlEscaper.escape("va&ri\"ble", nw);
 //  }
-  
+
   public static void main(String[] args) throws IOException {
     Main main = new Main();
-    while(true) {
+    while (true) {
       main.benchMustacheSimple();
     }
   }
