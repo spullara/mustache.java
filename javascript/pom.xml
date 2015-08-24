@@ -3,7 +3,7 @@
   <parent>
     <groupId>com.github.spullara.mustache.java</groupId>
     <artifactId>mustache.java</artifactId>
-    <version>0.9.1</version>
+    <version>0.9.2-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -13,7 +13,7 @@
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>compiler</artifactId>
-      <version>0.9.1</version>
+      <version>0.9.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>compiler</artifactId>
-      <version>0.9.1</version>
+      <version>0.9.2-SNAPSHOT</version>
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
