@@ -48,9 +48,10 @@ Benchmark            Mode  Cnt       Score       Error  Units
 Main.benchMustache  thrpt   20  913015.783 ± 40586.647  ops/s
 
 Basically I can delete codegen/indy:
-Main.benchMustache         thrpt   20  1046459.757 ± 36631.743  ops/s
-Main.benchMustacheCodegen  thrpt   20  1066092.882 ± 33464.632  ops/s
-Main.benchMustacheIndy     thrpt   20  1087113.076 ± 21833.084  ops/s
+Main.benchMustache         thrpt   20  982355.601 ± 30641.685  ops/s
+Main.benchMustacheCodegen  thrpt   20  987436.507 ± 54305.222  ops/s
+Main.benchMustacheIndy     thrpt   20  818468.833 ± 71852.617  ops/s
+Main.benchMustacheSimple   thrpt   20  683899.043 ± 43079.288  ops/s
 
  */
 @State(Scope.Benchmark)
