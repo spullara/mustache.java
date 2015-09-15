@@ -13,10 +13,12 @@ public class DefaultResolver implements MustacheResolver {
 
   private final ClasspathResolver classpathResolver;
   private final FileSystemResolver fileSystemResolver;
+  private final URIResolver uriResolver;
 
   public DefaultResolver() {
     this.fileSystemResolver = new FileSystemResolver();
     this.classpathResolver = new ClasspathResolver();
+    this.uriResolver = new URIResolver();
   }
 
   /**
@@ -27,6 +29,7 @@ public class DefaultResolver implements MustacheResolver {
   public DefaultResolver(String resourceRoot) {
     this.classpathResolver = new ClasspathResolver(resourceRoot);
     this.fileSystemResolver = new FileSystemResolver();
+    this.uriResolver = new URIResolver();
   }
 
   /**
@@ -37,6 +40,7 @@ public class DefaultResolver implements MustacheResolver {
   public DefaultResolver(File fileRoot) {
     this.fileSystemResolver = new FileSystemResolver(fileRoot);
     this.classpathResolver = new ClasspathResolver();
+    this.uriResolver = new URIResolver();
   }
 
   @Override
@@ -44,6 +48,9 @@ public class DefaultResolver implements MustacheResolver {
       Reader reader = classpathResolver.getReader(resourceName);
       if(reader == null) {
         reader = fileSystemResolver.getReader(resourceName);
+        if (reader == null) {
+          reader = uriResolver.getReader(resourceName);
+        }
       }
       return reader;
   }
