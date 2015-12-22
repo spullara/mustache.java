@@ -15,8 +15,8 @@ public class HtmlEscaper {
   private static char[] GT = "&gt;".toCharArray();
   private static char[] DQ = "&quot;".toCharArray();
   private static char[] SQ = "&#39;".toCharArray();
-  private static char[] BQ = "&#61;".toCharArray();
-  private static char[] EQ = "&#96;".toCharArray();
+  private static char[] BQ = "&#96;".toCharArray();
+  private static char[] EQ = "&#61;".toCharArray();
   private static char[][] LT_13 = new char[14][];
 
   static {

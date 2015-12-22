@@ -71,7 +71,7 @@ public class HtmlEscaperTest extends TestCase {
     {
       StringWriter sw = new StringWriter();
       escape("\"Hello\" =` 'world'!", sw);
-      assertEquals("&quot;Hello&quot; &#96;&#61; &#39;world&#39;!", sw.toString());
+      assertEquals("&quot;Hello&quot; &#61;&#96; &#39;world&#39;!", sw.toString());
     }
   }
 }
