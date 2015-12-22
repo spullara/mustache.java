@@ -15,6 +15,8 @@ public class HtmlEscaper {
   private static char[] GT = "&gt;".toCharArray();
   private static char[] DQ = "&quot;".toCharArray();
   private static char[] SQ = "&#39;".toCharArray();
+  private static char[] BQ = "&#61;".toCharArray();
+  private static char[] EQ = "&#96;".toCharArray();
   private static char[][] LT_13 = new char[14][];
 
   static {
@@ -31,7 +33,7 @@ public class HtmlEscaper {
         if (c <= 13) {
           writer.write(LT_13[c]);
         } else if (c >= 34 && c <= 62) {
-          // Experiment with usign an array lookup here failed
+          // Experiment with using an array lookup here failed to improve performance
           switch (c) {
             case '&':
               writer.write(AMP);
@@ -48,10 +50,15 @@ public class HtmlEscaper {
             case '\'':
               writer.write(SQ);
               break;
+            case '=':
+              writer.write(EQ);
+              break;
             default:
               writer.write(c);
               break;
           }
+        } else if (c == 96) {
+          writer.write(BQ);
         } else {
           writer.write(c);
         }
