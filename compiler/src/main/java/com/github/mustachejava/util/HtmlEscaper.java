@@ -47,6 +47,12 @@ public class HtmlEscaper {
             case '\'':
               position = append(value, writer, position, i, "&#39;");
               break;
+            case '=':
+              position = append(value, writer, position, i, "&#61;");
+              break;
+            case '`':
+              position = append(value, writer, position, i, "&#96;");
+              break;
           }
         }
       }
