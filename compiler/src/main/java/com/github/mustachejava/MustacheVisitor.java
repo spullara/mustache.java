@@ -27,5 +27,8 @@ public interface MustacheVisitor {
   void extend(TemplateContext templateContext, String variable, Mustache mustache);
 
   void name(TemplateContext templateContext, String variable, Mustache mustache);
+  
+  void dynamicPartial(TemplateContext paramTemplateContext,
+          String paramString);
 
 }

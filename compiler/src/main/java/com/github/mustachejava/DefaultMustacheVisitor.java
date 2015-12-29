@@ -7,6 +7,7 @@ import com.github.mustachejava.codes.ExtendNameCode;
 import com.github.mustachejava.codes.IterableCode;
 import com.github.mustachejava.codes.NotIterableCode;
 import com.github.mustachejava.codes.PartialCode;
+import com.github.mustachejava.codes.DynamicPartialCode;
 import com.github.mustachejava.codes.ValueCode;
 import com.github.mustachejava.codes.WriteCode;
 import com.github.mustachejava.util.Node;
@@ -81,6 +82,12 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
   public void partial(TemplateContext tc, final String variable) {
     TemplateContext partialTC = new TemplateContext("{{", "}}", tc.file(), tc.line(), tc.startOfLine());
     list.add(new PartialCode(partialTC, df, variable));
+  }
+  
+  @Override
+  public void dynamicPartial(TemplateContext tc, final String variable) {
+    TemplateContext partialTC = new TemplateContext("{{", "}}", tc.file(), tc.line(), tc.startOfLine());
+    list.add(new DynamicPartialCode(partialTC, df, variable));
   }
 
   @Override
