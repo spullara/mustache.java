@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import static com.github.mustachejava.TestUtil.getContents;
 import static org.junit.Assert.assertEquals;
 
 public class TranslateBundleTest {
@@ -29,17 +30,6 @@ public class TranslateBundleTest {
 	  scope.put("trans", new TranslateBundleFunction(BUNDLE, Locale.US));
     m.execute(sw, scope);
     assertEquals(getContents(root, "translatebundle.txt"), sw.toString());
-  }
-
-  protected String getContents(File root, String file) throws IOException {
-    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(root, file)),"UTF-8"));
-    StringWriter capture = new StringWriter();
-    char[] buffer = new char[8192];
-    int read;
-    while ((read = br.read(buffer)) != -1) {
-      capture.write(buffer, 0, read);
-    }
-    return capture.toString();
   }
 
   @BeforeClass

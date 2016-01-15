@@ -27,6 +27,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
+import static com.github.mustachejava.TestUtil.getContents;
+
 /**
  * Tests for the compiler.
  * <p/>
@@ -406,7 +408,7 @@ public class InterpreterTest extends TestCase {
 
   public void testIsNotEmpty() throws IOException {
     Object object = new Object() {
-      List people = Collections.singletonList("Test");
+      List<String> people = Collections.singletonList("Test");
     };
     StringWriter sw = execute("isempty.html", object);
     assertEquals(getContents(root, "isempty.txt"), sw.toString());
@@ -879,7 +881,7 @@ public class InterpreterTest extends TestCase {
     MustacheFactory mf = createMustacheFactory();
     Mustache m = mf.compile(new StringReader("{{value } }}"), "testSingleCurly");
     StringWriter sw = new StringWriter();
-    m.execute(sw, new HashMap() {{
+    m.execute(sw, new HashMap<String, String>() {{
       put("value }", "test");
     }}).close();
     // Values ignored as if it didn't exist at all
@@ -940,11 +942,11 @@ public class InterpreterTest extends TestCase {
   }
 
   private static class AccessTrackingMap extends HashMap<String, String> {
-    Set<Object> accessed = new HashSet<>();
+    Set<String> accessed = new HashSet<>();
 
     @Override
     public String get(Object key) {
-      accessed.add(key);
+      accessed.add((String) key);
       return super.get(key);
     }
 
@@ -1037,7 +1039,7 @@ public class InterpreterTest extends TestCase {
     assertEquals("test", sw.toString());
   }
 
-  static class SuperClass {
+  private static class SuperClass {
     String values = "value";
   }
 
@@ -1265,7 +1267,7 @@ public class InterpreterTest extends TestCase {
     };
     Mustache test = dmf.compile(new StringReader("{{name}} - {{email}}"), "test");
     StringWriter sw = new StringWriter();
-    Map map = new HashMap<>();
+    Map<Object, Object> map = new HashMap<>();
     map.put("name", "Sam Pullara");
     test.execute(sw, map).close();
     assertEquals("Sam Pullara - {{email}}", sw.toString());
@@ -1275,18 +1277,6 @@ public class InterpreterTest extends TestCase {
     DefaultMustacheFactory cf = createMustacheFactory();
     cf.setExecutorService(Executors.newCachedThreadPool());
     return cf;
-  }
-
-  protected String getContents(File root, String file) throws IOException {
-    BufferedReader br = new BufferedReader(
-            new InputStreamReader(new FileInputStream(new File(root, file)), "UTF-8"));
-    StringWriter capture = new StringWriter();
-    char[] buffer = new char[8192];
-    int read;
-    while ((read = br.read(buffer)) != -1) {
-      capture.write(buffer, 0, read);
-    }
-    return capture.toString();
   }
 
   protected void setUp() throws Exception {
@@ -1306,7 +1296,7 @@ public class InterpreterTest extends TestCase {
     map2.put("name", "firstName 1");
     map2.put("last", "lastName 1");
     fn.add(map2);
-    Map map = new HashMap();
+    Map<String, ArrayList<Map<String, String>>> map = new HashMap<>();
     map.put("names", fn);
 
     Writer writer = new OutputStreamWriter(System.out);

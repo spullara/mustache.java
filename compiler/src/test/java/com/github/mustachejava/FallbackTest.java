@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import static com.github.mustachejava.TestUtil.getContents;
 import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertEquals;
 
@@ -59,17 +60,6 @@ public class FallbackTest {
     } catch (MustacheNotFoundException e) {
       assertEquals(nonExistingMustache, e.getName());
     }
-  }
-
-  protected String getContents(File root, String file) throws IOException {
-    BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(root, file)), "UTF-8"));
-    StringWriter capture = new StringWriter();
-    char[] buffer = new char[8192];
-    int read;
-    while ((read = br.read(buffer)) != -1) {
-      capture.write(buffer, 0, read);
-    }
-    return capture.toString();
   }
 
   @BeforeClass
