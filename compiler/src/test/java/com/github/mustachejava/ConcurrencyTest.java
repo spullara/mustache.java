@@ -82,6 +82,11 @@ public class ConcurrencyTest {
     String template = "{{aa}}:{{bb}}:{{cc}}";
     final Mustache test = new DefaultMustacheFactory().compile(new StringReader(template), "test");
     ExecutorService es = Executors.newCachedThreadPool();
+    final AtomicInteger total = render(test, es);
+    assertEquals(0, total.intValue());
+  }
+
+  private AtomicInteger render(Mustache test, ExecutorService es) throws InterruptedException {
     final AtomicInteger total = new AtomicInteger();
     final Semaphore semaphore = new Semaphore(100);
     for (int i = 0; i < 100000; i++) {
@@ -105,7 +110,7 @@ public class ConcurrencyTest {
     }
     // Wait for them all to complete
     semaphore.acquire(100);
-    assertEquals(0, total.intValue());
+    return total;
   }
 
   @Test
@@ -116,29 +121,7 @@ public class ConcurrencyTest {
     DefaultMustacheFactory dmf = new DefaultMustacheFactory();
     dmf.setExecutorService(es);
     final Mustache test = dmf.compile(new StringReader(template), "test");
-    final AtomicInteger total = new AtomicInteger();
-    final Semaphore semaphore = new Semaphore(100);
-    for (int i = 0; i < 100000; i++) {
-      semaphore.acquire();
-      es.submit(() -> {
-        try {
-          TestObject testObject = new TestObject(r.nextInt(), r.nextInt(), r.nextInt());
-          StringWriter sw = new StringWriter();
-          test.execute(sw, testObject).close();
-          if (!render(testObject).equals(sw.toString())) {
-            total.incrementAndGet();
-          }
-        } catch (IOException e) {
-          // Can't fail
-          e.printStackTrace();
-          System.exit(1);
-        } finally {
-          semaphore.release();
-        }
-      });
-    }
-    // Wait for them all to complete
-    semaphore.acquire(100);
+    final AtomicInteger total = render(test, es);
     assertEquals(0, total.intValue());
   }
 }

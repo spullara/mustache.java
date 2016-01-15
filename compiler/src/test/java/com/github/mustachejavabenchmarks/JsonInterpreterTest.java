@@ -155,23 +155,11 @@ public class JsonInterpreterTest extends TestCase {
     parse.execute(writer, parent);
     writer.flush();
 
-    start = System.currentTimeMillis();
-    for (int i = 0; i < 500; i++) {
-      parse.execute(new StringWriter(), parent);
-    }
-    System.out.println((System.currentTimeMillis() - start));
+    time(parse, parent);
 
-    start = System.currentTimeMillis();
-    for (int i = 0; i < 500; i++) {
-      parse.execute(new StringWriter(), parent);
-    }
-    System.out.println((System.currentTimeMillis() - start));
+    time(parse, parent);
 
-    start = System.currentTimeMillis();
-    for (int i = 0; i < 500; i++) {
-      parse.execute(new StringWriter(), parent);
-    }
-    System.out.println((System.currentTimeMillis() - start));
+    time(parse, parent);
 
     System.out.println("timeline.html evaluations:");
     for (int i = 0; i < 2; i++) {
@@ -196,6 +184,15 @@ public class JsonInterpreterTest extends TestCase {
         System.out.println("StringWriter Serial: " + total / TIME + "/s");
       }
     }
+  }
+
+  private void time(Mustache parse, Object parent) {
+    long start;
+    start = System.currentTimeMillis();
+    for (int i = 0; i < 500; i++) {
+      parse.execute(new StringWriter(), parent);
+    }
+    System.out.println((System.currentTimeMillis() - start));
   }
 
   protected void setUp() throws Exception {

@@ -34,6 +34,7 @@ import java.util.function.Function;
  * Date: May 3, 2010
  * Time: 10:23:54 AM
  */
+@SuppressWarnings("unused")
 public class InterpreterTest extends TestCase {
   protected File root;
 
@@ -133,16 +134,6 @@ public class InterpreterTest extends TestCase {
 
   public void testSimpleFiltered() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheFactory c = new DefaultMustacheFactory(root) {
-      /**
-       * Override this method to apply any filtering to text that will appear
-       * verbatim in the output template.
-       *
-       *
-       *
-       * @param appended
-       * @param startOfLine
-       * @return
-       */
       @Override
       public String filterText(String appended, boolean startOfLine) {
         // Remove duplicate spaces, leading spaces and trailing spaces
@@ -194,15 +185,12 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simpletyped.txt"), sw.toString());
   }
 
-  protected DefaultMustacheFactory createMustacheFactory() {
+  private DefaultMustacheFactory createMustacheFactory() {
     return new DefaultMustacheFactory(root);
   }
 
   public void testRecurision() throws IOException {
-    MustacheFactory c = createMustacheFactory();
-    Mustache m = c.compile("recursion.html");
-    StringWriter sw = new StringWriter();
-    m.execute(sw, new Object() {
+    StringWriter sw = execute("recursion.html", new Object() {
       Object value = new Object() {
         boolean value = false;
       };
@@ -211,10 +199,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testRecursionWithInheritance() throws IOException {
-    MustacheFactory c = createMustacheFactory();
-    Mustache m = c.compile("recursion_with_inheritance.html");
-    StringWriter sw = new StringWriter();
-    m.execute(sw, new Object() {
+    StringWriter sw = execute("recursion_with_inheritance.html", new Object() {
       Object value = new Object() {
         boolean value = false;
       };
@@ -223,10 +208,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testPartialRecursionWithInheritance() throws IOException {
-    MustacheFactory c = createMustacheFactory();
-    Mustache m = c.compile("recursive_partial_inheritance.html");
-    StringWriter sw = new StringWriter();
-    m.execute(sw, new Object() {
+    StringWriter sw = execute("recursive_partial_inheritance.html", new Object() {
       Object test = new Object() {
         boolean test = false;
       };
@@ -370,12 +352,7 @@ public class InterpreterTest extends TestCase {
         Thread.sleep(100);
         return "you?";
       };
-      Callable<Function> caps = () -> new Function() {
-        @Override
-        public Object apply(Object o) {
-          return o.toString().toUpperCase();
-        }
-      };
+      Callable<Function> caps = () -> (Function) o -> o.toString().toUpperCase();
     });
     execute.close();
     assertTrue("Time < 600ms", System.currentTimeMillis() - start < 600);
@@ -408,7 +385,7 @@ public class InterpreterTest extends TestCase {
 
   public void testBrokenSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
     try {
-      MustacheFactory c = init();
+      MustacheFactory c = createMustacheFactory();
       Mustache m = c.compile("brokensimple.html");
       StringWriter sw = new StringWriter();
       m.execute(sw, new Object() {
@@ -428,20 +405,27 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testIsNotEmpty() throws IOException {
-    MustacheFactory c = createMustacheFactory();
-    Mustache m = c.compile("isempty.html");
-    StringWriter sw = new StringWriter();
-    m.execute(sw, new Object() {
-      List people = Arrays.asList("Test");
-    });
+    Object object = new Object() {
+      List people = Collections.singletonList("Test");
+    };
+    StringWriter sw = execute("isempty.html", object);
     assertEquals(getContents(root, "isempty.txt"), sw.toString());
+  }
+
+  private StringWriter execute(String name, Object object) {
+    MustacheFactory c = createMustacheFactory();
+    Mustache m = c.compile(name);
+    StringWriter sw = new StringWriter();
+    m.execute(sw, object);
+    return sw;
   }
 
   public void testOptional() throws IOException {
     MustacheFactory c = createMustacheFactory();
-    Mustache m = c.compile(new StringReader("{{person}}{{#person}} is present{{/person}}{{^person}}Is not present{{/person}}"), "test");
+    StringReader template = new StringReader("{{person}}{{#person}} is present{{/person}}{{^person}}Is not present{{/person}}");
+    Mustache m = c.compile(template, "test");
     StringWriter sw = new StringWriter();
-    m.execute(sw, new Object() {
+    m.execute(sw,  new Object() {
       Optional<String> person = Optional.of("Test");
     });
     assertEquals("Test is present", sw.toString());
@@ -457,12 +441,7 @@ public class InterpreterTest extends TestCase {
     Mustache m = c.compile(new StringReader("{{#process}}{{!comment}}{{/process}}"), "");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      TemplateFunction process = new TemplateFunction() {
-        @Override
-        public String apply(String s) {
-          return s.replace("{", "[");
-        }
-      };
+      TemplateFunction process = s -> s.replace("{", "[");
     });
     assertEquals("[[!comment}}", sw.toString());
   }
@@ -500,7 +479,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testSecurity() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheFactory c = init();
+    MustacheFactory c = createMustacheFactory();
     Mustache m = c.compile("security.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -520,7 +499,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testIdentitySimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheFactory c = init();
+    MustacheFactory c = createMustacheFactory();
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
     m.identity(sw);
@@ -529,7 +508,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testProperties() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheFactory c = init();
+    MustacheFactory c = createMustacheFactory();
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -553,10 +532,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testSimpleWithMap() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    MustacheFactory c = init();
-    Mustache m = c.compile("simple.html");
-    StringWriter sw = new StringWriter();
-    m.execute(sw, new HashMap<String, Object>() {{
+    StringWriter sw = execute("simple.html", new HashMap<String, Object>() {{
       put("name", "Chris");
       put("value", 10000);
       put("taxed_value", 6000);
@@ -566,7 +542,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testPartialWithTF() throws MustacheException, IOException {
-    MustacheFactory c = init();
+    MustacheFactory c = createMustacheFactory();
     Mustache m = c.compile("partialintemplatefunction.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
@@ -578,7 +554,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testFunctions() throws IOException {
-    MustacheFactory c = init();
+    MustacheFactory c = createMustacheFactory();
     Mustache m = c.compile(new StringReader("{{#f}}{{foo}}{{/f}}"), "test");
     {
       StringWriter sw = new StringWriter();
@@ -630,7 +606,7 @@ public class InterpreterTest extends TestCase {
     JsonNode jsonNode = jf.createJsonParser(json.toString()).readValueAsTree();
     Object o = JsonInterpreterTest.toObject(jsonNode);
     sw = new StringWriter();
-    m = init().compile("complex.html");
+    m = createMustacheFactory().compile("complex.html");
     m.execute(sw, o);
     assertEquals(getContents(root, "complex.txt"), sw.toString());
   }
@@ -644,10 +620,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testSerialCallable() throws MustacheException, IOException {
-    MustacheFactory c = init();
-    Mustache m = c.compile("complex.html");
-    StringWriter sw = new StringWriter();
-    m.execute(sw, new ParallelComplexObject());
+    StringWriter sw = execute("complex.html", new ParallelComplexObject());
     assertEquals(getContents(root, "complex.txt"), sw.toString());
   }
 
@@ -680,7 +653,7 @@ public class InterpreterTest extends TestCase {
   }
   */
   public void testReadme() throws MustacheException, IOException {
-    MustacheFactory c = init();
+    MustacheFactory c = createMustacheFactory();
     Mustache m = c.compile("items.html");
     StringWriter sw = new StringWriter();
     long start = System.currentTimeMillis();
@@ -690,7 +663,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testReadmeSerial() throws MustacheException, IOException {
-    MustacheFactory c = init();
+    MustacheFactory c = createMustacheFactory();
     Mustache m = c.compile("items2.html");
     StringWriter sw = new StringWriter();
     long start = System.currentTimeMillis();
@@ -966,7 +939,7 @@ public class InterpreterTest extends TestCase {
     assertEquals("test", sw.toString());
   }
 
-  public static class AccessTrackingMap extends HashMap<String, String> {
+  private static class AccessTrackingMap extends HashMap<String, String> {
     Set<Object> accessed = new HashSet<>();
 
     @Override
@@ -975,7 +948,7 @@ public class InterpreterTest extends TestCase {
       return super.get(key);
     }
 
-    public void check() {
+    void check() {
       Set<String> keyset = new HashSet<>(keySet());
       keyset.removeAll(accessed);
       if (!keyset.isEmpty()) {
@@ -1179,10 +1152,7 @@ public class InterpreterTest extends TestCase {
 
   public void testLimitedDepthRecursion() {
     try {
-      MustacheFactory c = init();
-      Mustache m = c.compile("infiniteparent.html");
-      StringWriter sw = new StringWriter();
-      m.execute(sw, new Context());
+      StringWriter sw = execute("infiniteparent.html", new Context());
       fail("Should have failed");
     } catch (StackOverflowError soe) {
       fail("Should not have overflowed the stack");
@@ -1299,10 +1269,6 @@ public class InterpreterTest extends TestCase {
     map.put("name", "Sam Pullara");
     test.execute(sw, map).close();
     assertEquals("Sam Pullara - {{email}}", sw.toString());
-  }
-
-  private MustacheFactory init() {
-    return createMustacheFactory();
   }
 
   private DefaultMustacheFactory initParallel() {
