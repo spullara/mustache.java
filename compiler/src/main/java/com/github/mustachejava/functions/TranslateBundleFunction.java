@@ -22,6 +22,7 @@ import java.util.ResourceBundle;
  * Usage in template:
  *   ... {{#trans}}TranslatedLabel1{{/trans}} ...
  *
+ *   ... {{#trans}}TranslatedLabel2 param1=newparam1 param2=newparma2{{/trans}}
  * @author gw0 [http://gw.tnode.com/] &lt;gw.2012@tnode.com&gt;
  */
 public class TranslateBundleFunction implements TemplateFunction {
@@ -41,10 +42,18 @@ public class TranslateBundleFunction implements TemplateFunction {
 	/** Return translation from the localized ResourceBundle. */
 	@Override
 	public String apply(String input) {
-		if(res.containsKey(input)) {
-			return res.getString(input);  // return translation
-		} else {
+ 		String[] inputWithParams = input.split(" ");
+ 		String key = inputWithParams[0];
+		if(!res.containsKey(key)) {
 			return input;  // return untranslated label
 		}
+		String translatedValue = res.getString(key);
+		for (int i = 1; i < inputWithParams.length; i++) {
+			String[] splitParam = inputWithParams[i].split("=");
+			String oldTag = splitParam[0];
+			String newTag = splitParam[1];
+			translatedValue = translatedValue.replace("{{" + oldTag + "}}", "{{" + newTag + "}}");
+		}
+		return translatedValue;
 	}
 }
