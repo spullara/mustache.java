@@ -25,7 +25,7 @@ public class FallbackMustacheFactory extends DefaultMustacheFactory {
    * @param fallbackRoot fallback alternative root
    */
   public FallbackMustacheFactory(String resourceRoot, String fallbackRoot) {
-    this(new String[]{resourceRoot, fallbackRoot});
+    this(new Object[]{resourceRoot, fallbackRoot});
   }
 
   /**
@@ -35,7 +35,7 @@ public class FallbackMustacheFactory extends DefaultMustacheFactory {
    * @param fallbackRoot fallback alternative root
    */
   public FallbackMustacheFactory(File fileRoot, File fallbackRoot) {
-    this(new File[]{fileRoot, fallbackRoot});
+    this(new Object[]{fileRoot, fallbackRoot});
   }
 
   /**
