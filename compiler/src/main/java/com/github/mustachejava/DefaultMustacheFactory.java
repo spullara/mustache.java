@@ -178,6 +178,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
   public Mustache compile(Reader reader, String file, String sm, String em) {
     Mustache compile = mc.compile(reader, file, sm, em);
     compile.init();
+    partialCache.remove();
     return compile;
   }
 
