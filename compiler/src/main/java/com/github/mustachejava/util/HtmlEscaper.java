@@ -10,18 +10,48 @@ import java.io.Writer;
  */
 public class HtmlEscaper {
 
-  private static char[] AMP = "&amp;".toCharArray();
-  private static char[] LT = "&lt;".toCharArray();
-  private static char[] GT = "&gt;".toCharArray();
-  private static char[] DQ = "&quot;".toCharArray();
-  private static char[] SQ = "&#39;".toCharArray();
-  private static char[] BQ = "&#96;".toCharArray();
-  private static char[] EQ = "&#61;".toCharArray();
-  private static char[][] LT_13 = new char[14][];
+  private static char[][] LT_96 = new char[97][];
 
   static {
-    for (int i = 0; i < LT_13.length; i++) {
-      LT_13[i] = ("&#" + String.valueOf(i) + ";").toCharArray();
+    char[] AMP = "&amp;".toCharArray();
+    char[] LT = "&lt;".toCharArray();
+    char[] GT = "&gt;".toCharArray();
+    char[] DQ = "&quot;".toCharArray();
+    char[] SQ = "&#39;".toCharArray();
+    char[] BQ = "&#96;".toCharArray();
+    char[] EQ = "&#61;".toCharArray();
+    for (int c = 0; c < LT_96.length; c++) {
+      if (c <= 13) {
+        LT_96[c] = ("&#" + String.valueOf(c) + ";").toCharArray();
+      } else {
+        // Experiment with using an array lookup here failed to improve performance
+        switch (c) {
+          case '&':
+            LT_96[c] = AMP;
+            break;
+          case '<':
+            LT_96[c] = LT;
+            break;
+          case '>':
+            LT_96[c] = GT;
+            break;
+          case '"':
+            LT_96[c] = DQ;
+            break;
+          case '\'':
+            LT_96[c] = SQ;
+            break;
+          case '=':
+            LT_96[c] = EQ;
+            break;
+          case '`':
+            LT_96[c] = BQ;
+            break;
+          default:
+            LT_96[c] = new char[]{(char) c};
+            break;
+        }
+      }
     }
   }
 
@@ -30,35 +60,8 @@ public class HtmlEscaper {
       int length = value.length();
       for (int i = 0; i < length; i++) {
         char c = value.charAt(i);
-        if (c <= 13) {
-          writer.write(LT_13[c]);
-        } else if (c >= 34 && c <= 62) {
-          // Experiment with using an array lookup here failed to improve performance
-          switch (c) {
-            case '&':
-              writer.write(AMP);
-              break;
-            case '<':
-              writer.write(LT);
-              break;
-            case '>':
-              writer.write(GT);
-              break;
-            case '"':
-              writer.write(DQ);
-              break;
-            case '\'':
-              writer.write(SQ);
-              break;
-            case '=':
-              writer.write(EQ);
-              break;
-            default:
-              writer.write(c);
-              break;
-          }
-        } else if (c == 96) {
-          writer.write(BQ);
+        if (c <= 96) {
+          writer.write(LT_96[c]);
         } else {
           writer.write(c);
         }
