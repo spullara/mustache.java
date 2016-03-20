@@ -65,6 +65,7 @@ public abstract class BaseObjectHandler implements ObjectHandler {
   @Override
   public abstract Binding createBinding(String name, TemplateContext tc, Code code);
 
+  @SuppressWarnings("ForLoopReplaceableByForEach") // it allocates objects for foreach
   public Writer iterate(Iteration iteration, Writer writer, Object object, List<Object> scopes) {
     if (object == null) return writer;
     if (object instanceof Boolean) {

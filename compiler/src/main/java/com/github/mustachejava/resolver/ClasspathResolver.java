@@ -47,8 +47,4 @@ public class ClasspathResolver implements MustacheResolver {
     }
   }
 
-  public String getResourceRoot() {
-    return resourceRoot;
-  }
-
 }

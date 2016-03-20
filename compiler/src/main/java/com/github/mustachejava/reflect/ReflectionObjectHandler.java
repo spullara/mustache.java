@@ -10,10 +10,9 @@ import com.github.mustachejava.util.Wrapper;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Lookup objects using reflection and execute them the same way.
@@ -93,13 +92,13 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
         }
         if (scope == null) {
           // Found a wrapper, but the result of was null
-          guards.add(createWrappedGuard(i, wrappers, Arrays.<Guard>asList(createNullGuard())));
+          guards.add(createWrappedGuard(i, wrappers, singletonList(createNullGuard())));
           // Break here to allow the wrapper to be returned with the partial evaluation of the dot notation
           break;
         }
       }
       if (wrappers != null) {
-        guards.add(createWrappedGuard(i, wrappers, Arrays.asList((Guard)createClassGuard(0, scope))));
+        guards.add(createWrappedGuard(i, wrappers, singletonList((Guard) createClassGuard(0, scope))));
       }
       Wrapper[] foundWrappers = wrappers == null ? null : wrappers.toArray(new Wrapper[wrappers.size()]);
       wrapper = findWrapper(i, foundWrappers, guards, scope, subname);

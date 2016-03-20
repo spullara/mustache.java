@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * The parser generates callbacks into the MustacheFactory to build them. Do not use these
  * directly as you must manage the Mustache object lifecycle as well.
- *
+ * <p>
  * User: sam
  * Date: 5/14/11
  * Time: 3:52 PM
@@ -42,6 +42,7 @@ public class MustacheParser {
     return compile(reader, null, new AtomicInteger(0), file, sm, em, startOfLine);
   }
 
+  @SuppressWarnings("ConstantConditions") // this method is too complex
   protected Mustache compile(final Reader reader, String tag, final AtomicInteger currentLine, String file, String sm, String em, boolean startOfLine) throws MustacheException {
     if (reader == null) {
       throw new MustacheException("Reader is null");
@@ -65,6 +66,7 @@ public class MustacheParser {
       try {
         int c;
         while ((c = br.read()) != -1) {
+          // We remember that we saw a carriage return so we can put it back in later
           if (c == '\r') {
             sawCR = true;
             continue;
@@ -172,8 +174,7 @@ public class MustacheParser {
                               "Improperly closed variable in " + file + ":" + currentLine);
                     }
                   }
-                  final String finalName = name;
-                  mv.value(new TemplateContext(sm, em, file, currentLine.get(), false), finalName, false);
+                  mv.value(new TemplateContext(sm, em, file, currentLine.get(), false), name, false);
                   break;
                 }
                 case '&': {
@@ -184,7 +185,7 @@ public class MustacheParser {
                 }
                 case '%':
                   // Pragmas
-	              out = write(mv, out, file, currentLine.intValue(), startOfLine);
+                  out = write(mv, out, file, currentLine.intValue(), startOfLine);
                   int index = variable.indexOf(" ");
                   String pragma;
                   String args;
@@ -215,8 +216,7 @@ public class MustacheParser {
                   break;
                 default: {
                   if (c == -1) {
-                    throw new MustacheException(
-                            "Improperly closed variable in " + file + ":" + currentLine);
+                    throw new MustacheException("Improperly closed variable in " + file + ":" + currentLine);
                   }
                   // Reference
                   out = write(mv, out, file, currentLine.intValue(), startOfLine);

@@ -5,11 +5,12 @@ import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Logger;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Codes are bound to their variables through bindings.
@@ -86,8 +87,7 @@ public class GuardedBinding implements Binding {
     try {
       return oh.coerce(wrapper.call(scopes));
     } catch (GuardException e) {
-      throw new GuardException(
-              "BUG: Unexpected guard failure: " + name + " " + previousSet + " " + Arrays.asList(scopes));
+      throw new GuardException("BUG: Unexpected guard failure: " + name + " " + previousSet + " " + singletonList(scopes));
     }
   }
 
@@ -105,21 +105,19 @@ public class GuardedBinding implements Binding {
                   .append(tc.line())
                   .append(") ")
                   .append("in");
-          for (Object scope : scopes) {
-            if (scope != null) {
-              Class aClass = scope.getClass();
+          scopes.stream().filter(scope -> scope != null).forEach(scope -> {
+            Class aClass = scope.getClass();
+            try {
+              sb.append(" ").append(aClass.getSimpleName());
+            } catch (Exception e) {
+              // Some generated classes don't have simple names
               try {
-                sb.append(" ").append(aClass.getSimpleName());
-              } catch (Exception e) {
-                // Some generated classes don't have simple names
-                try {
-                  sb.append(" ").append(aClass.getName());
-                } catch (Exception e1) {
-                  // Some generated classes have proper names at all
-                }
+                sb.append(" ").append(aClass.getName());
+              } catch (Exception e1) {
+                // Some generated classes have proper names at all
               }
             }
-          }
+          });
           logger.warning(sb.toString());
         }
       }

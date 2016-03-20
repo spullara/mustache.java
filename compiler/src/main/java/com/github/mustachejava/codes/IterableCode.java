@@ -143,14 +143,6 @@ public class IterableCode extends DefaultCode implements Iteration {
       nodes.add(invert);
     }
     node.put(name, list(nodes));
-    if (appended == null) {
-      return node;
-    } else if (text.substring(position.get()).startsWith(appended)) {
-      position.addAndGet(appended.length());
-      return node;
-    } else {
-      position.set(start);
-      return null;
-    }
+    return matchAppended(node, text, position, start);
   }
 }

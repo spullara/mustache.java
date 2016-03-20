@@ -90,6 +90,10 @@ public class DefaultCode implements Code, Cloneable {
         }
       }
     }
+    return matchAppended(node, text, position, start);
+  }
+
+  protected Node matchAppended(Node node, String text, AtomicInteger position, int start) {
     if (appended == null) {
       return node;
     } else if (text.substring(position.get()).startsWith(appended)) {

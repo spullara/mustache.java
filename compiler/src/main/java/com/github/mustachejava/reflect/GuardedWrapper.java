@@ -14,6 +14,7 @@ import static java.util.Arrays.asList;
 public class GuardedWrapper implements Wrapper {
   // We only need a single guard exception -- don't fill stack trace
   // and don't reallocate it.
+  @SuppressWarnings("ThrowableInstanceNeverThrown")
   protected static final GuardException guardException = new GuardException();
 
   static {

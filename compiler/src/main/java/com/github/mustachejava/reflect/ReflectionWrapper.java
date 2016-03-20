@@ -41,10 +41,6 @@ public class ReflectionWrapper extends GuardedWrapper {
     this.scopeIndex = scopeIndex;
   }
 
-  public ReflectionWrapper(ReflectionWrapper rw) {
-    this(rw.scopeIndex, rw.wrappers, rw.guards, rw.method == null ? rw.field : rw.method, rw.arguments, rw.oh);
-  }
-
   protected Object unwrap(List<Object> scopes) {
     if (wrappers == null || wrappers.length == 0) {
       return scopes.get(scopeIndex);

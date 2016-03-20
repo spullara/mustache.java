@@ -43,6 +43,7 @@ public class FallbackMustacheFactory extends DefaultMustacheFactory {
    *
    * @param resourceRoots array of fallback resource roots as String or File
    */
+  @SuppressWarnings("StatementWithEmptyBody")
   public FallbackMustacheFactory(Object... resourceRoots) {
     super();
 

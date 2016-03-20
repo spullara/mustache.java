@@ -50,6 +50,7 @@ public class ExtendCode extends PartialCode {
     return newcodes;
   }
 
+  @SuppressWarnings("StatementWithEmptyBody")
   @Override
   public synchronized void init() {
     filterText();

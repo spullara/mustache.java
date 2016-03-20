@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.mustachejava.ObjectHandler.makeList;
+import static java.util.Collections.addAll;
 
 /**
  * The interface to Mustache objects
@@ -40,9 +41,7 @@ public interface Mustache extends Code {
   // Support the previous behavior for users
   default Writer execute(Writer writer, Object[] scopes) {
     List<Object> newscopes = new ArrayList<>();
-    for (Object scope : scopes) {
-      newscopes.add(scope);
-    }
+    addAll(newscopes, scopes);
     return execute(writer, newscopes);
   }
 

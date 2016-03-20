@@ -10,5 +10,5 @@ import java.util.List;
  * Time: 6:07 PM
  */
 public interface Binding {
-  public Object get(List<Object> scopes);
+  Object get(List<Object> scopes);
 }

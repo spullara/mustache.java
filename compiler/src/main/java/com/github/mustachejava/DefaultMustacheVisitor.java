@@ -25,12 +25,7 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
 
   protected final List<Code> list = new LinkedList<>();
   private final Map<String, PragmaHandler> handlers = new HashMap<String, PragmaHandler>() {{
-    put("implicit-iterator", new PragmaHandler() {
-      @Override
-      public Code handle(TemplateContext tc, String pragma, String args) {
-        return new DefaultCode();
-      }
-    });
+    put("implicit-iterator", (tc, pragma, args) -> new DefaultCode());
   }};
 
   protected DefaultMustacheFactory df;

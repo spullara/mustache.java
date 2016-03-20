@@ -60,9 +60,4 @@ public class FileSystemResolver implements MustacheResolver {
       return null;
     }
   }
-
-  public File getFileRoot() {
-    return fileRoot;
-  }
-
 }
