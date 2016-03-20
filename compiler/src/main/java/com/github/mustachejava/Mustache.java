@@ -99,6 +99,5 @@ public interface Mustache extends Code {
    * @return a tree of nodes representing the variables that when passed as a scope would reproduce the text
    */
   Node invert(String text);
-  
-  
+
 }

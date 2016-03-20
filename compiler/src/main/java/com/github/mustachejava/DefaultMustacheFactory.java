@@ -1,5 +1,6 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.codes.DefaultMustache;
 import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.resolver.DefaultResolver;
 
@@ -230,6 +231,11 @@ public class DefaultMustacheFactory implements MustacheFactory {
     final Map<String, Mustache> cache = partialCache.get();
     final Mustache cached = cache.get(s);
     if (cached != null) {
+      // Our implementation supports this but I
+      // don't think it makes sense in the interface
+      if (cached instanceof DefaultMustache) {
+        ((DefaultMustache)cached).setRecursive();
+      }
       return cached;
     }
     try {

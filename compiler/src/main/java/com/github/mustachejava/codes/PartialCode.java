@@ -11,6 +11,7 @@ public class PartialCode extends DefaultCode {
   protected final String dir;
   protected Mustache partial;
   protected int recrusionLimit;
+  protected boolean isRecursive;
 
   protected PartialCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String type, String variable) {
     super(tc, df, mustache, variable, type);
@@ -51,17 +52,26 @@ public class PartialCode extends DefaultCode {
 
   @Override
   public Writer execute(Writer writer, final List<Object> scopes) {
-    DepthLimitedWriter depthLimitedWriter;
-    if (writer instanceof DepthLimitedWriter) {
-      depthLimitedWriter = (DepthLimitedWriter) writer;
-    } else {
-      depthLimitedWriter = new DepthLimitedWriter(writer);
+    DepthLimitedWriter depthLimitedWriter = null;
+    // If the mustache wasn't found to recurse at compilation time we
+    // don't need to track the recursion depth and therefore don't need
+    // to create and use the DepthLimitedWriter. Another allocation slain.
+    if (isRecursive) {
+      if (writer instanceof DepthLimitedWriter) {
+        depthLimitedWriter = (DepthLimitedWriter) writer;
+      } else {
+        depthLimitedWriter = new DepthLimitedWriter(writer);
+      }
+      if (depthLimitedWriter.incr() > recrusionLimit) {
+        throw new MustacheException("Maximum partial recursion limit reached: " + recrusionLimit);
+      }
+      writer = depthLimitedWriter;
     }
-    if (depthLimitedWriter.incr() > recrusionLimit) {
-      throw new MustacheException("Maximum partial recursion limit reached: " + recrusionLimit);
+    Writer execute = partial.execute(writer, scopes);
+    if (isRecursive) {
+      assert depthLimitedWriter != null;
+      depthLimitedWriter.decr();
     }
-    Writer execute = partial.execute(depthLimitedWriter, scopes);
-    depthLimitedWriter.decr();
     return appendText(execute);
   }
 
@@ -69,6 +79,9 @@ public class PartialCode extends DefaultCode {
   public synchronized void init() {
     filterText();
     partial = df.compilePartial(partialName());
+    if (partial instanceof DefaultMustache && ((DefaultMustache)partial).isRecursive()) {
+      isRecursive = true;
+    }
     if (partial == null) {
       throw new MustacheException("Failed to compile partial: " + name);
     }

@@ -59,4 +59,16 @@ public class DefaultMustache extends DefaultCode implements Mustache {
       super.init();
     }
   }
+
+
+  // Used for an optimization in PartialCode
+  private boolean isRecursive = false;
+
+  public boolean isRecursive() {
+    return isRecursive;
+  }
+
+  public void setRecursive() {
+    isRecursive = true;
+  }
 }
