@@ -4,13 +4,13 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.reflect.SimpleObjectHandler;
 import com.github.mustachejavabenchmarks.NullWriter;
-import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /*
 
@@ -79,19 +79,19 @@ public class Main {
     }
   }
 
-  @Benchmark
-  @BenchmarkMode(Mode.Throughput)
-  @OutputTimeUnit(TimeUnit.SECONDS)
-  public void benchMustache() throws IOException {
-    normal.execute(nw, scope).close();
-  }
-
-  @Benchmark
-  @BenchmarkMode(Mode.Throughput)
-  @OutputTimeUnit(TimeUnit.SECONDS)
-  public void benchMustacheSimple() throws IOException {
-    simple.execute(nw, scope).close();
-  }
+//  @Benchmark
+//  @BenchmarkMode(Mode.Throughput)
+//  @OutputTimeUnit(TimeUnit.SECONDS)
+//  public void benchMustache() throws IOException {
+//    normal.execute(nw, scope).close();
+//  }
+//
+//  @Benchmark
+//  @BenchmarkMode(Mode.Throughput)
+//  @OutputTimeUnit(TimeUnit.SECONDS)
+//  public void benchMustacheSimple() throws IOException {
+//    simple.execute(nw, scope).close();
+//  }
 
 
 //  @Benchmark
@@ -115,9 +115,9 @@ public class Main {
 //  }
 
   public static void main(String[] args) throws IOException {
-    Main main = new Main();
-    while (true) {
-      main.benchMustacheSimple();
-    }
+//    Main main = new Main();
+//    while (true) {
+//      main.benchMustacheSimple();
+//    }
   }
 }
