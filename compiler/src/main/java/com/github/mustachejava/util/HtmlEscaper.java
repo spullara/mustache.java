@@ -24,7 +24,6 @@ public class HtmlEscaper {
       if (c <= 13) {
         LT_96[c] = ("&#" + String.valueOf(c) + ";").toCharArray();
       } else {
-        // Experiment with using an array lookup here failed to improve performance
         switch (c) {
           case '&':
             LT_96[c] = AMP;

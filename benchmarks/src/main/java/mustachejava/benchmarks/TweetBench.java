@@ -2,18 +2,14 @@ package mustachejava.benchmarks;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheResolver;
 import com.github.mustachejavabenchmarks.NullWriter;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.MappingJsonFactory;
 import org.openjdk.jmh.annotations.*;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Collections.singletonList;
@@ -32,16 +28,53 @@ import static java.util.Collections.singletonList;
  Benchmark                  Mode  Cnt       Score       Error  Units
  TweetBench.testExecution  thrpt   20  412346.447 ± 19794.264  ops/s
 
+ TweetBench.testCompilation                thrpt   20       7529.923 ±      617.342  ops/s
+ TweetBench.testExecution                  thrpt   20     407067.266 ±    12712.684  ops/s
+ TweetBench.testExecutionWithStringWriter  thrpt   20     177134.276 ±     6049.166  ops/s
+ TweetBench.testJsonExecution              thrpt   20     236385.894 ±    15152.458  ops/s
+
  */
 @State(Scope.Benchmark)
 public class TweetBench {
 
-  DefaultMustacheFactory dmf = new DefaultMustacheFactory();
-  Mustache m = dmf.compile("tweet.mustache");
+  Mustache tweetMustache = new DefaultMustacheFactory().compile("tweet.mustache");
+  Mustache timelineMustache = new DefaultMustacheFactory().compile("timeline.mustache");
   Tweet tweet = new Tweet();
   NullWriter nullWriter = new NullWriter();
   List<Object> tweetScope = new ArrayList<>(singletonList(tweet));
+  List<Object> timelineScope = new ArrayList<>();
+  {
+    List<Tweet> tweetList = new ArrayList<>();
+    for (int i = 0; i < 20; i++) {
+      tweetList.add(new Tweet());
+    }
+    timelineScope.add(new Object() {
+      List<Tweet> tweets = tweetList;
+    });
+  }
   List<Object> jsonScope;
+  Map<String, String> cache = new HashMap<>();
+  {
+    cache.put("tweet.mustache", readResource("tweet.mustache"));
+    cache.put("entities.mustache", readResource("entities.mustache"));
+  }
+  MustacheResolver cached = resourceName -> new StringReader(cache.get(resourceName));
+
+  private String readResource(String name) {
+    StringWriter sw = new StringWriter();
+    InputStreamReader reader = new InputStreamReader(ClassLoader.getSystemResourceAsStream(name));
+    char[] chars = new char[1024];
+    int read;
+    try {
+      while ((read = reader.read(chars)) != -1) {
+        sw.write(chars, 0, read);
+      }
+      sw.close();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    return sw.toString();
+  }
 
   public TweetBench() {
     try {
@@ -57,7 +90,7 @@ public class TweetBench {
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
   public void testCompilation() {
-    DefaultMustacheFactory dmf = new DefaultMustacheFactory();
+    DefaultMustacheFactory dmf = new DefaultMustacheFactory(cached);
     Mustache m = dmf.compile("tweet.mustache");
   }
 
@@ -65,22 +98,14 @@ public class TweetBench {
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
   public void testExecution() throws IOException {
-    m.execute(nullWriter, tweetScope).close();
+    tweetMustache.execute(nullWriter, tweetScope).close();
   }
 
   @Benchmark
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
-  public void testExecutionWithStringWriter() throws IOException {
-    StringWriter writer = new StringWriter();
-    m.execute(writer, tweetScope).close();
-  }
-
-  @Benchmark
-  @BenchmarkMode(Mode.Throughput)
-  @OutputTimeUnit(TimeUnit.SECONDS)
-  public void testJsonExecution() throws IOException {
-    m.execute(nullWriter, jsonScope).close();
+  public void testTimeline() throws IOException {
+    timelineMustache.execute(nullWriter, timelineScope).close();
   }
 
   public static void main(String[] args) throws IOException {
@@ -99,7 +124,7 @@ public class TweetBench {
 
     TweetBench tb = new TweetBench();
     while (true) {
-      tb.testExecution();
+      tb.testCompilation();
     }
   }
 

@@ -2,7 +2,6 @@ package mustachejava.benchmarks;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
-import com.github.mustachejava.reflect.SimpleObjectHandler;
 import com.github.mustachejava.util.HtmlEscaper;
 import com.github.mustachejavabenchmarks.NullWriter;
 import org.openjdk.jmh.annotations.*;
@@ -10,6 +9,7 @@ import org.openjdk.jmh.annotations.*;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -38,13 +38,6 @@ Main.benchJustEscapeClean  thrpt   20  196904626.848 ± 19804749.810  ops/s
 Main.benchJustEscapeOnce   thrpt   20  102768645.605 ±  3764598.754  ops/s
 Main.benchJustEscapeTwo    thrpt   20   81450001.026 ±  2270993.769  ops/s
 
-Now purely an array lookup
-Benchmark                      Mode  Cnt          Score          Error  Units
-Main.benchJustEscapeClean     thrpt   20  408133726.531 ± 41452124.506  ops/s
-Main.benchJustEscapeOldClean  thrpt   20  136543848.645 ±  4981651.587  ops/s
-Main.benchJustEscapeOnce      thrpt   20  216812988.639 ± 16074660.164  ops/s
-Main.benchJustEscapeTwo       thrpt   20  101607565.357 ±  5789918.319  ops/s
-
 Benchmark            Mode  Cnt       Score       Error  Units
 Main.benchMustache  thrpt   20  763256.970 ± 59474.781  ops/s
 
@@ -58,15 +51,27 @@ Main.benchMustacheCodegen  thrpt   20  987436.507 ± 54305.222  ops/s
 Main.benchMustacheIndy     thrpt   20  818468.833 ± 71852.617  ops/s
 Main.benchMustacheSimple   thrpt   20  683899.043 ± 43079.288  ops/s
 
+Now purely an array lookup
+Benchmark                      Mode  Cnt          Score          Error  Units
+Main.benchJustEscapeClean     thrpt   20  408133726.531 ± 41452124.506  ops/s
+Main.benchJustEscapeOldClean  thrpt   20  136543848.645 ±  4981651.587  ops/s
+Main.benchJustEscapeOnce      thrpt   20  216812988.639 ± 16074660.164  ops/s
+Main.benchJustEscapeTwo       thrpt   20  101607565.357 ±  5789918.319  ops/s
+
+Main.benchJustEscapeClean                 thrpt   20  397296922.707 ± 77462659.664  ops/s
+Main.benchJustEscapeOnce                  thrpt   20  216287927.848 ± 13641785.965  ops/s
+Main.benchJustEscapeTwo                   thrpt   20  106926157.896 ±  5172497.616  ops/s
+Main.benchMustache                        thrpt   20     897792.899 ±    44805.792  ops/s
+Main.benchMustacheSimple                  thrpt   20     588578.957 ±    61712.824  ops/s
+
  */
 @State(Scope.Benchmark)
 public class Main {
 
   private final NullWriter nw = new NullWriter();
   private final Mustache normal = new DefaultMustacheFactory().compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
-  private final Mustache simple;
 
-  private final Object scope = new Object() {
+  private final List<Object> scope = new ArrayList<>(Collections.singletonList(new Object() {
     List loop = new ArrayList();
 
     {
@@ -77,15 +82,7 @@ public class Main {
         });
       }
     }
-  };
-
-  {
-    {
-      DefaultMustacheFactory dmf3 = new DefaultMustacheFactory();
-      dmf3.setObjectHandler(new SimpleObjectHandler());
-      simple = dmf3.compile(new StringReader("({{#loop}}({{value}}){{/loop}})"), "test");
-    }
-  }
+  }));
 
   @Benchmark
   @BenchmarkMode(Mode.Throughput)
@@ -97,21 +94,13 @@ public class Main {
   @Benchmark
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
-  public void benchMustacheSimple() throws IOException {
-    simple.execute(nw, scope).close();
-  }
-
-  @Benchmark
   public void benchJustEscapeClean() {
     HtmlEscaper.escape("variable", nw);
   }
 
   @Benchmark
-  public void benchJustEscapeOnce() {
-    HtmlEscaper.escape("vari\"ble", nw);
-  }
-
-  @Benchmark
+  @BenchmarkMode(Mode.Throughput)
+  @OutputTimeUnit(TimeUnit.SECONDS)
   public void benchJustEscapeTwo() {
     HtmlEscaper.escape("va&ri\"ble", nw);
   }
@@ -119,7 +108,7 @@ public class Main {
   public static void main(String[] args) throws IOException {
     Main main = new Main();
     while (true) {
-      main.benchMustacheSimple();
+      main.benchMustache();
     }
   }
 }

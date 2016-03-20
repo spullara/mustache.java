@@ -119,7 +119,7 @@ public abstract class BaseObjectHandler implements ObjectHandler {
     return member;
   }
 
-  protected Method getMethod(Class<?> aClass, String name, Class... params) throws NoSuchMethodException {
+  protected Method getMethod(Class<?> aClass, String name, Class<?>... params) throws NoSuchMethodException {
     Method member;
     try {
       member = aClass.getMethod(name, params);
