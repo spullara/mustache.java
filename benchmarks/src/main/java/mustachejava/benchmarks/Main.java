@@ -3,14 +3,15 @@ package mustachejava.benchmarks;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.reflect.SimpleObjectHandler;
+import com.github.mustachejava.util.HtmlEscaper;
 import com.github.mustachejavabenchmarks.NullWriter;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /*
 
@@ -36,6 +37,13 @@ Benchmark                   Mode  Cnt          Score          Error  Units
 Main.benchJustEscapeClean  thrpt   20  196904626.848 ± 19804749.810  ops/s
 Main.benchJustEscapeOnce   thrpt   20  102768645.605 ±  3764598.754  ops/s
 Main.benchJustEscapeTwo    thrpt   20   81450001.026 ±  2270993.769  ops/s
+
+Now purely an array lookup
+Benchmark                      Mode  Cnt          Score          Error  Units
+Main.benchJustEscapeClean     thrpt   20  408133726.531 ± 41452124.506  ops/s
+Main.benchJustEscapeOldClean  thrpt   20  136543848.645 ±  4981651.587  ops/s
+Main.benchJustEscapeOnce      thrpt   20  216812988.639 ± 16074660.164  ops/s
+Main.benchJustEscapeTwo       thrpt   20  101607565.357 ±  5789918.319  ops/s
 
 Benchmark            Mode  Cnt       Score       Error  Units
 Main.benchMustache  thrpt   20  763256.970 ± 59474.781  ops/s
@@ -79,45 +87,39 @@ public class Main {
     }
   }
 
-//  @Benchmark
-//  @BenchmarkMode(Mode.Throughput)
-//  @OutputTimeUnit(TimeUnit.SECONDS)
-//  public void benchMustache() throws IOException {
-//    normal.execute(nw, scope).close();
-//  }
-//
-//  @Benchmark
-//  @BenchmarkMode(Mode.Throughput)
-//  @OutputTimeUnit(TimeUnit.SECONDS)
-//  public void benchMustacheSimple() throws IOException {
-//    simple.execute(nw, scope).close();
-//  }
+  @Benchmark
+  @BenchmarkMode(Mode.Throughput)
+  @OutputTimeUnit(TimeUnit.SECONDS)
+  public void benchMustache() throws IOException {
+    normal.execute(nw, scope).close();
+  }
 
+  @Benchmark
+  @BenchmarkMode(Mode.Throughput)
+  @OutputTimeUnit(TimeUnit.SECONDS)
+  public void benchMustacheSimple() throws IOException {
+    simple.execute(nw, scope).close();
+  }
 
-//  @Benchmark
-//  public void benchTheoreticalLimit() throws IOException {
-//    nw.write("variable");
-//  }
-//  
-//  @Benchmark
-//  public void benchJustEscapeClean() {
-//    HtmlEscaper.escape("variable", nw);
-//  }
-//
-//  @Benchmark
-//  public void benchJustEscapeOnce() {
-//    HtmlEscaper.escape("vari\"ble", nw);
-//  }
-//
-//  @Benchmark
-//  public void benchJustEscapeTwo() {
-//    HtmlEscaper.escape("va&ri\"ble", nw);
-//  }
+  @Benchmark
+  public void benchJustEscapeClean() {
+    HtmlEscaper.escape("variable", nw);
+  }
+
+  @Benchmark
+  public void benchJustEscapeOnce() {
+    HtmlEscaper.escape("vari\"ble", nw);
+  }
+
+  @Benchmark
+  public void benchJustEscapeTwo() {
+    HtmlEscaper.escape("va&ri\"ble", nw);
+  }
 
   public static void main(String[] args) throws IOException {
-//    Main main = new Main();
-//    while (true) {
-//      main.benchMustacheSimple();
-//    }
+    Main main = new Main();
+    while (true) {
+      main.benchMustacheSimple();
+    }
   }
 }

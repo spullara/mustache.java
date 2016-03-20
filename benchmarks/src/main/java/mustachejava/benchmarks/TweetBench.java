@@ -10,18 +10,27 @@ import org.openjdk.jmh.annotations.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Created by sam on 3/19/16.
 
+ Initial test 5b9fce4
  Benchmark                                  Mode  Cnt       Score       Error  Units
  TweetBench.testCompilation                thrpt   20    8070.287 ±   567.640  ops/s
  TweetBench.testExecution                  thrpt   20  389133.230 ± 15624.712  ops/s
  TweetBench.testExecutionWithStringWriter  thrpt   20  157934.510 ± 41675.991  ops/s
  TweetBench.testJsonExecution              thrpt   20  239396.118 ± 11455.727  ops/s
+
+ Added recursion and escaping optimization e8df5360
+ Benchmark                  Mode  Cnt       Score       Error  Units
+ TweetBench.testExecution  thrpt   20  412346.447 ± 19794.264  ops/s
 
  */
 @State(Scope.Benchmark)
@@ -31,15 +40,14 @@ public class TweetBench {
   Mustache m = dmf.compile("tweet.mustache");
   Tweet tweet = new Tweet();
   NullWriter nullWriter = new NullWriter();
-  InputStream json = TweetBench.class.getClassLoader().getResourceAsStream("tweet.json");
-  MappingJsonFactory jf = new MappingJsonFactory();
-  JsonNode jsonNode;
-  JsonMap jsonMap;
+  List<Object> tweetScope = new ArrayList<>(singletonList(tweet));
+  List<Object> jsonScope;
 
   public TweetBench() {
     try {
-      jsonNode = jf.createJsonParser(json).readValueAsTree();
-      jsonMap = new JsonMap(jsonNode);
+      MappingJsonFactory jf = new MappingJsonFactory();
+      InputStream json = TweetBench.class.getClassLoader().getResourceAsStream("tweet.json");
+      jsonScope = new ArrayList<>(singletonList(new JsonMap(jf.createJsonParser(json).readValueAsTree())));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -57,7 +65,7 @@ public class TweetBench {
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
   public void testExecution() throws IOException {
-    m.execute(nullWriter, tweet).close();
+    m.execute(nullWriter, tweetScope).close();
   }
 
   @Benchmark
@@ -65,14 +73,14 @@ public class TweetBench {
   @OutputTimeUnit(TimeUnit.SECONDS)
   public void testExecutionWithStringWriter() throws IOException {
     StringWriter writer = new StringWriter();
-    m.execute(writer, tweet).close();
+    m.execute(writer, tweetScope).close();
   }
 
   @Benchmark
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
   public void testJsonExecution() throws IOException {
-    m.execute(nullWriter, jsonMap).close();
+    m.execute(nullWriter, jsonScope).close();
   }
 
   public static void main(String[] args) throws IOException {
@@ -88,6 +96,11 @@ public class TweetBench {
     sw = new StringWriter();
     m.execute(sw, new JsonMap(jsonNode)).close();
     System.out.println(sw);
+
+    TweetBench tb = new TweetBench();
+    while (true) {
+      tb.testExecution();
+    }
   }
 
   private static class JsonMap extends HashMap {
