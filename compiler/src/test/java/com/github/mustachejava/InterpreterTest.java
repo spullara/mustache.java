@@ -18,9 +18,27 @@ import org.codehaus.jackson.map.MappingJsonFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -80,7 +98,7 @@ public class InterpreterTest extends TestCase {
       // First look with locale
       Reader reader = super.getReader(newResourceName);
 
-      if(reader == null) {
+      if (reader == null) {
         // Fallback to non-localized resourceName
         reader = super.getReader(resourceName);
       }
@@ -427,7 +445,7 @@ public class InterpreterTest extends TestCase {
     StringReader template = new StringReader("{{person}}{{#person}} is present{{/person}}{{^person}}Is not present{{/person}}");
     Mustache m = c.compile(template, "test");
     StringWriter sw = new StringWriter();
-    m.execute(sw,  new Object() {
+    m.execute(sw, new Object() {
       Optional<String> person = Optional.of("Test");
     });
     assertEquals("Test is present", sw.toString());
@@ -624,6 +642,60 @@ public class InterpreterTest extends TestCase {
   public void testSerialCallable() throws MustacheException, IOException {
     StringWriter sw = execute("complex.html", new ParallelComplexObject());
     assertEquals(getContents(root, "complex.txt"), sw.toString());
+  }
+
+  public void testDynamicPartial() throws MustacheException, IOException {
+    // Implement >+ syntax that dynamically includes template files at runtime
+    MustacheFactory c = new DefaultMustacheFactory(root) {
+      @Override
+      public MustacheVisitor createMustacheVisitor() {
+        return new DefaultMustacheVisitor(this) {
+          @Override
+          public void partial(TemplateContext tc, String variable) {
+            if (variable.startsWith("+")) {
+              // This is a dynamic partial rather than a static one
+              TemplateContext partialTC = new TemplateContext("{{", "}}", tc.file(), tc.line(), tc.startOfLine());
+              list.add(new PartialCode(partialTC, df, variable.substring(1).trim()) {
+                @Override
+                public synchronized void init() {
+                  filterText();
+                  // Treat the actual text as a Mustache with single [ ] as the delimiter
+                  // so we can do interpoliation of things like [foo]/[bar].txt
+                  partial = df.compile(new StringReader(name), "__dynpartial__", "[", "]");
+                  if (partial == null) {
+                    throw new MustacheException("Failed to parse partial name template: " + name);
+                  }
+                }
+
+                ConcurrentMap<String, Mustache> dynamicaPartialCache = new ConcurrentHashMap<>();
+
+                @Override
+                public Writer execute(Writer writer, List<Object> scopes) {
+                  // Calculate the name of the dynamic partial
+                  StringWriter sw = new StringWriter();
+                  partial.execute(sw, scopes);
+                  Mustache mustache = dynamicaPartialCache.computeIfAbsent(sw.toString(), df::compilePartial);
+                  Writer execute = mustache.execute(writer, scopes);
+                  return appendText(execute);
+                }
+              });
+            } else {
+              super.partial(tc, variable);
+            }
+          }
+        };
+      }
+    };
+    Mustache m = c.compile(new StringReader("{{>+ [foo].html}}"), "test.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new HashMap<String, Object>() {{
+      put("name", "Chris");
+      put("value", 10000);
+      put("taxed_value", 6000);
+      put("in_ca", true);
+      put("foo", "simple");
+    }});
+    assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
   /*
@@ -914,20 +986,20 @@ public class InterpreterTest extends TestCase {
   public void testPragmaWhiteSpaceHandling() throws IOException {
     DefaultMustacheFactory mf = new DefaultMustacheFactory() {
       @Override
-	  public MustacheVisitor createMustacheVisitor() {
+      public MustacheVisitor createMustacheVisitor() {
         DefaultMustacheVisitor visitor = new DefaultMustacheVisitor(this);
-	    // Add a pragma handler that simply renders a dash to visualize the output
-		visitor.addPragmaHandler("pragma", (tc, pragma, args) ->  new WriteCode(tc, this, "-"));
+        // Add a pragma handler that simply renders a dash to visualize the output
+        visitor.addPragmaHandler("pragma", (tc, pragma, args) -> new WriteCode(tc, this, "-"));
         return visitor;
       }
-	};
+    };
 
-	Mustache m = mf.compile(new StringReader(" {{% pragma}} {{% pragma}} "), "testPragma");
-	StringWriter sw = new StringWriter();
-	m.execute(sw, "").close();
+    Mustache m = mf.compile(new StringReader(" {{% pragma}} {{% pragma}} "), "testPragma");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, "").close();
 
-	// Pragma rendering should preserve template whitespace
-	assertEquals(" - - ", sw.toString());
+    // Pragma rendering should preserve template whitespace
+    assertEquals(" - - ", sw.toString());
   }
 
   public void testNotIterableCallable() throws IOException {
@@ -1185,6 +1257,7 @@ public class InterpreterTest extends TestCase {
       public TemplateFunction parse() {
         return s -> "blablabla {{anotherVar}}, blablabla {{yetAnotherVar}}";
       }
+
       String anotherVar = "banana";
       String yetAnotherVar = "apple";
     });
@@ -1201,6 +1274,7 @@ public class InterpreterTest extends TestCase {
           public void iterable(final TemplateContext templateContext, String variable, Mustache mustache) {
             list.add(new IterableCode(templateContext, df, mustache, variable) {
               Binding binding = oh.createBinding("params", templateContext, this);
+
               protected Writer handleFunction(Writer writer, Function function, List<Object> scopes) {
                 boolean added = addScope(scopes, binding.get(scopes));
                 try {
@@ -1220,7 +1294,9 @@ public class InterpreterTest extends TestCase {
       public TemplateFunction parse() {
         return s -> "blablabla {{anotherVar}}, blablabla {{yetAnotherVar}}";
       }
+
       Map<String, Object> params = new HashMap<>();
+
       {
         params.put("anotherVar", "banana");
         params.put("yetAnotherVar", "apple");
@@ -1239,7 +1315,7 @@ public class InterpreterTest extends TestCase {
     mustache.execute(writer, new Object[]{properties}).close();
     Assert.assertEquals("value=some.value", writer.toString());
   }
-  
+
   public void testLeavingAloneMissingVariables() throws IOException {
     DefaultMustacheFactory dmf = new DefaultMustacheFactory(root) {
       @Override
