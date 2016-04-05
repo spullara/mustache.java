@@ -97,15 +97,15 @@ public class GuardedBinding implements Binding {
       if (debug) {
         // Ugly but generally not interesting
         if (!(code instanceof PartialCode)) {
-          logWarning(name, scopes, tc);
+          logWarning("Failed to find: ", name, scopes, tc);
         }
       }
     }
     return wrapper;
   }
 
-  public static void logWarning(String name, List<Object> scopes, TemplateContext tc) {
-    StringBuilder sb = new StringBuilder("Failed to find: ")
+  public static void logWarning(String warning, String name, List<Object> scopes, TemplateContext tc) {
+    StringBuilder sb = new StringBuilder(warning)
             .append(name)
             .append(" (")
             .append(tc.file())

@@ -1319,12 +1319,12 @@ public class InterpreterTest extends TestCase {
                     } else {
                       String stringify = oh.stringify(object);
                       if (stringify.equals("")) {
-                        GuardedBinding.logWarning(variable, scopes, tc);
+                        GuardedBinding.logWarning("Variable is empty string: ", variable, scopes, tc);
                       }
                       execute(writer, stringify);
                     }
                   } else {
-                    GuardedBinding.logWarning(variable, scopes, tc);
+                    GuardedBinding.logWarning("Variable is null: ", variable, scopes, tc);
                   }
                   return appendText(run(writer, scopes));
                 } catch (Exception e) {
