@@ -76,6 +76,14 @@ public class DefaultMustacheFactory implements MustacheFactory {
     this.mustacheResolver = new DefaultResolver(fileRoot);
   }
 
+  /**
+   * Using the directory, namd and extension, resolve a partial to a name.
+   *
+   * @param dir
+   * @param name
+   * @param extension
+   * @return
+   */
   public String resolvePartialPath(String dir, String name, String extension) {
     String filePath = name;
 
