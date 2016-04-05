@@ -10,7 +10,6 @@ import com.github.mustachejava.resolver.DefaultResolver;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
 import com.github.mustachejavabenchmarks.JsonCapturer;
 import com.github.mustachejavabenchmarks.JsonInterpreterTest;
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import junit.framework.TestCase;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonNode;
@@ -1354,8 +1353,9 @@ public class InterpreterTest extends TestCase {
       } catch (MustacheException e) {
       }
     }
-    ByteOutputStream out = new ByteOutputStream();
-    System.setErr(new PrintStream(out));
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(out);
+    System.setErr(ps);
     {
       sw = new StringWriter();
       sr = new StringReader("{{value}}");
@@ -1364,7 +1364,8 @@ public class InterpreterTest extends TestCase {
         m.execute(sw, new Object() {
           String value = null;
         }).close();
-        assertTrue(new String(out.getBytes(), 0, out.size()).contains("Failed to find: value (value:1)"));
+        ps.flush();
+        assertTrue(new String(out.toByteArray()).contains("Variable is null"));
       } catch (MustacheException e) {
       }
     }
@@ -1377,7 +1378,8 @@ public class InterpreterTest extends TestCase {
         m.execute(sw, new Object() {
           String value = "";
         }).close();
-        assertTrue(new String(out.getBytes(), 0, out.size()).contains("Failed to find: value (value:1)"));
+        ps.flush();
+        assertTrue(new String(out.toByteArray()).contains("Variable is empty string"));
       } catch (MustacheException e) {
       }
     }
@@ -1390,7 +1392,8 @@ public class InterpreterTest extends TestCase {
         m.execute(sw, new Object() {
           String value = "value";
         }).close();
-        assertEquals("", new String(out.getBytes(), 0, out.size()));
+        ps.flush();
+        assertEquals("", new String(out.toByteArray()));
         assertEquals("value", sw.toString());
       } catch (MustacheException e) {
       }
