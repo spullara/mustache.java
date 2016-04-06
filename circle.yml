@@ -4,3 +4,6 @@ dependencies:
 test:
   override:
     - mvn test
+machine:
+  java:
+    version: oraclejdk8
