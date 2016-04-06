@@ -1,0 +1,6 @@
+dependencies:
+  override:
+    - mvn install -DskipTests
+test:
+  override:
+    - mvn test
