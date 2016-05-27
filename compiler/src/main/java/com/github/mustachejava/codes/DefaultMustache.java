@@ -7,6 +7,7 @@ import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.Node;
 
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -44,6 +45,14 @@ public class DefaultMustache extends DefaultCode implements Mustache {
   @Override
   public void setCodes(Code[] newcodes) {
     codes = newcodes;
+  }
+
+  @Override
+  public Writer execute(Writer writer, List<Object> scopes) {
+    if (!(scopes instanceof ArrayList)) {
+      scopes = new ArrayList<>(scopes);
+    }
+    return super.execute(writer, scopes);
   }
 
   @Override

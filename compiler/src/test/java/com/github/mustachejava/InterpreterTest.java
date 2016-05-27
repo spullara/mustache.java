@@ -5,7 +5,11 @@ import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.codes.ValueCode;
 import com.github.mustachejava.codes.WriteCode;
 import com.github.mustachejava.functions.CommentFunction;
-import com.github.mustachejava.reflect.*;
+import com.github.mustachejava.reflect.Guard;
+import com.github.mustachejava.reflect.GuardedBinding;
+import com.github.mustachejava.reflect.MissingWrapper;
+import com.github.mustachejava.reflect.ReflectionObjectHandler;
+import com.github.mustachejava.reflect.SimpleObjectHandler;
 import com.github.mustachejava.resolver.DefaultResolver;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
 import com.github.mustachejavabenchmarks.JsonCapturer;
@@ -17,10 +21,17 @@ import org.codehaus.jackson.map.MappingJsonFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,6 +50,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import static com.github.mustachejava.TestUtil.getContents;
+import static java.util.Collections.singletonList;
 
 /**
  * Tests for the compiler.
@@ -428,7 +440,7 @@ public class InterpreterTest extends TestCase {
 
   public void testIsNotEmpty() throws IOException {
     Object object = new Object() {
-      List<String> people = Collections.singletonList("Test");
+      List<String> people = singletonList("Test");
     };
     StringWriter sw = execute("isempty.html", object);
     assertEquals(getContents(root, "isempty.txt"), sw.toString());
@@ -440,6 +452,22 @@ public class InterpreterTest extends TestCase {
     StringWriter sw = new StringWriter();
     m.execute(sw, object);
     return sw;
+  }
+
+  private StringWriter execute(String name, List<Object> objects) {
+    MustacheFactory c = createMustacheFactory();
+    Mustache m = c.compile(name);
+    StringWriter sw = new StringWriter();
+    m.execute(sw, objects);
+    return sw;
+  }
+
+  public void testImmutableList() throws IOException {
+    Object object = new Object() {
+      List<String> people = singletonList("Test");
+    };
+    StringWriter sw = execute("isempty.html", singletonList(object));
+    assertEquals(getContents(root, "isempty.txt"), sw.toString());
   }
 
   public void testOptional() throws IOException {

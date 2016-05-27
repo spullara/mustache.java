@@ -1,6 +1,12 @@
 package com.github.mustachejava.codes;
 
-import com.github.mustachejava.*;
+import com.github.mustachejava.Binding;
+import com.github.mustachejava.Code;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.ObjectHandler;
+import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.util.Node;
 
 import java.io.IOException;
