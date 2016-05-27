@@ -5,8 +5,7 @@ import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.codes.ValueCode;
 import com.github.mustachejava.codes.WriteCode;
 import com.github.mustachejava.functions.CommentFunction;
-import com.github.mustachejava.reflect.ReflectionObjectHandler;
-import com.github.mustachejava.reflect.SimpleObjectHandler;
+import com.github.mustachejava.reflect.*;
 import com.github.mustachejava.resolver.DefaultResolver;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
 import com.github.mustachejavabenchmarks.JsonCapturer;
@@ -18,13 +17,7 @@ import org.codehaus.jackson.map.MappingJsonFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1312,6 +1305,108 @@ public class InterpreterTest extends TestCase {
       }
     });
     assertEquals("blablabla banana, blablabla apple", sw.toString());
+  }
+
+  public void testOverrideValueCode() throws IOException {
+    DefaultMustacheFactory mf = new DefaultMustacheFactory() {
+      @Override
+      public MustacheVisitor createMustacheVisitor() {
+        return new DefaultMustacheVisitor(this) {
+          @Override
+          public void value(TemplateContext tc, String variable, boolean encoded) {
+            list.add(new ValueCode(tc, df, variable, encoded) {
+              @Override
+              public Writer execute(Writer writer, List<Object> scopes) {
+                try {
+                  final Object object = get(scopes);
+                  if (object != null) {
+                    if (object instanceof Function) {
+                      handleFunction(writer, (Function) object, scopes);
+                    } else if (object instanceof Callable) {
+                      return handleCallable(writer, (Callable) object, scopes);
+                    } else {
+                      String stringify = oh.stringify(object);
+                      if (stringify.equals("")) {
+                        GuardedBinding.logWarning("Variable is empty string: ", variable, scopes, tc);
+                      }
+                      execute(writer, stringify);
+                    }
+                  } else {
+                    GuardedBinding.logWarning("Variable is null: ", variable, scopes, tc);
+                  }
+                  return appendText(run(writer, scopes));
+                } catch (Exception e) {
+                  throw new MustacheException("Failed to get value for " + name, e, tc);
+                }
+              }
+            });
+          }
+        };
+      }
+    };
+    mf.setObjectHandler(new ReflectionObjectHandler() {
+      @Override
+      protected MissingWrapper createMissingWrapper(String name, List<Guard> guards) {
+        throw new MustacheException("Failed to find: " + name);
+      }
+    });
+    StringReader sr;
+    StringWriter sw;
+    {
+      sw = new StringWriter();
+      sr = new StringReader("{{value}}");
+      Mustache m = mf.compile(sr, "value");
+      try {
+        m.execute(sw, new Object() {});
+        fail("Should throw an exception");
+      } catch (MustacheException e) {
+      }
+    }
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(out);
+    System.setErr(ps);
+    {
+      sw = new StringWriter();
+      sr = new StringReader("{{value}}");
+      Mustache m = mf.compile(sr, "value");
+      try {
+        m.execute(sw, new Object() {
+          String value = null;
+        }).close();
+        ps.flush();
+        assertTrue(new String(out.toByteArray()).contains("Variable is null"));
+      } catch (MustacheException e) {
+      }
+    }
+    out.reset();
+    {
+      sw = new StringWriter();
+      sr = new StringReader("{{value}}");
+      Mustache m = mf.compile(sr, "value");
+      try {
+        m.execute(sw, new Object() {
+          String value = "";
+        }).close();
+        ps.flush();
+        assertTrue(new String(out.toByteArray()).contains("Variable is empty string"));
+      } catch (MustacheException e) {
+      }
+    }
+    out.reset();
+    {
+      sw = new StringWriter();
+      sr = new StringReader("{{value}}");
+      Mustache m = mf.compile(sr, "value");
+      try {
+        m.execute(sw, new Object() {
+          String value = "value";
+        }).close();
+        ps.flush();
+        assertEquals("", new String(out.toByteArray()));
+        assertEquals("value", sw.toString());
+      } catch (MustacheException e) {
+      }
+    }
   }
 
   public void testPropertyWithDot() throws IOException {

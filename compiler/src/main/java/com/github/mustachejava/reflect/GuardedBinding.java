@@ -97,31 +97,35 @@ public class GuardedBinding implements Binding {
       if (debug) {
         // Ugly but generally not interesting
         if (!(code instanceof PartialCode)) {
-          StringBuilder sb = new StringBuilder("Failed to find: ")
-                  .append(name)
-                  .append(" (")
-                  .append(tc.file())
-                  .append(":")
-                  .append(tc.line())
-                  .append(") ")
-                  .append("in");
-          scopes.stream().filter(scope -> scope != null).forEach(scope -> {
-            Class aClass = scope.getClass();
-            try {
-              sb.append(" ").append(aClass.getSimpleName());
-            } catch (Exception e) {
-              // Some generated classes don't have simple names
-              try {
-                sb.append(" ").append(aClass.getName());
-              } catch (Exception e1) {
-                // Some generated classes have proper names at all
-              }
-            }
-          });
-          logger.warning(sb.toString());
+          logWarning("Failed to find: ", name, scopes, tc);
         }
       }
     }
     return wrapper;
+  }
+
+  public static void logWarning(String warning, String name, List<Object> scopes, TemplateContext tc) {
+    StringBuilder sb = new StringBuilder(warning)
+            .append(name)
+            .append(" (")
+            .append(tc.file())
+            .append(":")
+            .append(tc.line())
+            .append(") ")
+            .append("in");
+    scopes.stream().filter(scope -> scope != null).forEach(scope -> {
+      Class aClass = scope.getClass();
+      try {
+        sb.append(" ").append(aClass.getSimpleName());
+      } catch (Exception e) {
+        // Some generated classes don't have simple names
+        try {
+          sb.append(" ").append(aClass.getName());
+        } catch (Exception e1) {
+          // Some generated classes don't have proper names at all
+        }
+      }
+    });
+    logger.warning(sb.toString());
   }
 }
