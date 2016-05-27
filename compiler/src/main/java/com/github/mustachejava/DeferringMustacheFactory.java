@@ -2,6 +2,7 @@ package com.github.mustachejava;
 
 import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.util.GuardException;
+import com.github.mustachejava.util.InternalArrayList;
 import com.github.mustachejava.util.Wrapper;
 
 import java.io.File;
@@ -77,6 +78,7 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
 
           @Override
           public Writer execute(Writer writer, final List<Object> scopes) {
+
             final Object object = get(scopes);
             final DeferredCallable deferredCallable = getDeferred(scopes);
             if (object == DEFERRED && deferredCallable != null) {
@@ -86,13 +88,15 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
               } catch (IOException e) {
                 throw new MustacheException("Failed to write", e);
               }
+              // Make a copy of the scopes so we don't change them
+              List<Object> scopesCopy = new InternalArrayList<>(scopes);
               deferredCallable.add(
                       new Deferral(divid, getExecutorService().submit(() -> {
                         try {
                           StringWriter writer1 = new StringWriter();
-                          boolean added = addScope(scopes, object);
-                          partial.execute(writer1, scopes).close();
-                          if (added) scopes.remove(scopes.size() - 1);
+                          boolean added = addScope(scopesCopy, object);
+                          partial.execute(writer1, scopesCopy).close();
+                          if (added) scopesCopy.remove(scopesCopy.size() - 1);
                           return writer1.toString();
                         } catch (IOException e) {
                           throw new MustacheException("Failed to writer", e);

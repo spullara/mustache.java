@@ -1,6 +1,10 @@
 package com.github.mustachejava.reflect;
 
-import com.github.mustachejava.*;
+import com.github.mustachejava.Binding;
+import com.github.mustachejava.Code;
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.ObjectHandler;
+import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;

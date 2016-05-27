@@ -1,9 +1,9 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.util.InternalArrayList;
 import com.github.mustachejava.util.Wrapper;
 
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -71,15 +71,8 @@ public interface ObjectHandler {
   String stringify(Object object);
   
   static List<Object> makeList(Object scope) {
-    List<Object> scopes = new ArrayList<>();
+    List<Object> scopes = new InternalArrayList<>();
     scopes.add(scope);
-    return scopes;
-  }
-
-  static List<Object> makeList(Object scope, Object scope2) {
-    List<Object> scopes = new ArrayList<>();
-    scopes.add(scope);
-    scopes.add(scope2);
     return scopes;
   }
 }
