@@ -1,0 +1,4 @@
+<main id="content" role="main">
+  This is the page content
+
+</main>

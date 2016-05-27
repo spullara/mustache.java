@@ -236,6 +236,15 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "recursive_partial_inheritance.txt"), sw.toString());
   }
 
+  public void testChainedInheritance() throws IOException {
+    StringWriter sw = execute("page.html", new Object() {
+      Object test = new Object() {
+        boolean test = false;
+      };
+    });
+    assertEquals(getContents(root, "page.txt"), sw.toString());
+  }
+
   public void testSimplePragma() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheFactory c = createMustacheFactory();
     Mustache m = c.compile("simplepragma.html");
