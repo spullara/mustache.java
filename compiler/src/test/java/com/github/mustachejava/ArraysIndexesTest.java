@@ -34,18 +34,18 @@ public class ArraysIndexesTest {
             "{{/test}}\n" +
             "</ol>";
     String result = "<ol>\n" +
-            "    <li>1</li>\n" +
-            "    <li>0</li>\n" +
-            "    <li>3</li>\n" +
+            "    <li>b</li>\n" +
+            "    <li>a</li>\n" +
+            "    <li>d</li>\n" +
             "</ol>\n" +
             "<ol>\n" +
-            "    <li>0</li>\n" +
-            "    <li>1</li>\n" +
-            "    <li>2</li>\n" +
-            "    <li>3</li>\n" +
+            "    <li>a</li>\n" +
+            "    <li>b</li>\n" +
+            "    <li>c</li>\n" +
+            "    <li>d</li>\n" +
             "</ol>";
     Object scope = new Object() {
-      int[] test = { 0, 1, 2, 3 };
+      String[] test = { "a", "b", "c", "d" };
     };
     ReflectionObjectHandler oh = new ReflectionObjectHandler() {
       @Override

@@ -1,14 +1,14 @@
 package com.github.mustachejava;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 public final class MultipleRecursivePartialsTest {
 
@@ -35,7 +35,7 @@ public final class MultipleRecursivePartialsTest {
   }
   
   @SuppressWarnings("unused")
-  private static enum Type {
+  private enum Type {
     FOO, BAR;
     boolean isFoo () { return this == FOO; }
     boolean isBar() { return this == BAR; }
@@ -52,7 +52,7 @@ public final class MultipleRecursivePartialsTest {
     MustacheFactory factory = new DefaultMustacheFactory(root);
     Mustache template = factory.compile(TEMPLATE_FILE);
     StringWriter sw = new StringWriter();
-    Model model = new Model(Type.FOO, Arrays.asList(new Model[] { new Model(Type.BAR), new Model(Type.FOO) }));
+    Model model = new Model(Type.FOO, Arrays.asList(new Model(Type.BAR), new Model(Type.FOO)));
     template.execute(sw, model);
     assertEquals("I'm a foo!\nIn foo: I'm a bar!\n\nIn foo: I'm a foo!\n\n\n", sw.toString());
   }
