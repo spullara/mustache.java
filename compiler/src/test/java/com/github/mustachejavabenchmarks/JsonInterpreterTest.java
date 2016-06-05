@@ -83,9 +83,9 @@ public class JsonInterpreterTest extends TestCase {
     singlethreaded(parse, parent);
   }
 
-  public void testObjectMapper() throws IOException {
+  public void testContextPrecedence() throws IOException {
     Mustache m = new DefaultMustacheFactory().compile(new StringReader("{{#a}}{{b.c}}{{/a}}"), "test");
-    Map map = new ObjectMapper().readValue("{\"a\": {\"b\": { \"c\": \"\" }}, \"b\": {\"c\": \"ERROR\"}}", Map.class);
+    Map map = new ObjectMapper().readValue("{\"a\": {\"b\": {}}, \"b\": {\"c\": \"ERROR\"}}", Map.class);
 
     StringWriter sw = new StringWriter();
     m.execute(sw, map).close();

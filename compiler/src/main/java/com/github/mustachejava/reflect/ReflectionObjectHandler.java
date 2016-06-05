@@ -102,7 +102,14 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
       }
       Wrapper[] foundWrappers = wrappers == null ? null : wrappers.toArray(new Wrapper[wrappers.size()]);
       wrapper = findWrapper(i, foundWrappers, guards, scope, subname);
-      if (wrapper != null) {
+      if (wrapper == null) {
+        // If we have found any wrappers we need to keep them rather than return a missing wrapper
+        // otherwise it will continue you on to other scopes and break context precedence
+        if (wrappers != null) {
+          wrapper = createMissingWrapper(subname, guards);
+          break;
+        }
+      } else {
         break;
       }
     }
