@@ -1,23 +1,35 @@
 package com.github.mustachejava;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.github.mustachejava.codes.IterableCode;
 import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.codes.ValueCode;
 import com.github.mustachejava.codes.WriteCode;
 import com.github.mustachejava.functions.CommentFunction;
-import com.github.mustachejava.reflect.*;
+import com.github.mustachejava.reflect.Guard;
+import com.github.mustachejava.reflect.GuardedBinding;
+import com.github.mustachejava.reflect.MissingWrapper;
+import com.github.mustachejava.reflect.ReflectionObjectHandler;
+import com.github.mustachejava.reflect.SimpleObjectHandler;
 import com.github.mustachejava.resolver.DefaultResolver;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
 import com.github.mustachejavabenchmarks.JsonCapturer;
 import com.github.mustachejavabenchmarks.JsonInterpreterTest;
 import junit.framework.TestCase;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.MappingJsonFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1348,7 +1360,8 @@ public class InterpreterTest extends TestCase {
       sr = new StringReader("{{value}}");
       Mustache m = mf.compile(sr, "value");
       try {
-        m.execute(sw, new Object() {});
+        m.execute(sw, new Object() {
+        });
         fail("Should throw an exception");
       } catch (MustacheException e) {
       }

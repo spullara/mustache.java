@@ -28,7 +28,7 @@ public class ArraysIndexesTest {
             "    <li>{{test.0}}</li>\n" +
             "    <li>{{test.3}}</li>\n" +
             "</ol>\n" +
-            "<ol>\n" +
+            "<ol>{{test}}\n" +
             "{{#test}}\n" +
             "    <li>{{.}}</li>\n" +
             "{{/test}}\n" +

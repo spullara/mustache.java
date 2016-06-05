@@ -1,8 +1,9 @@
 package com.github.mustachejava;
 
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.MappingJsonFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -11,7 +12,6 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -22,41 +22,39 @@ import static junit.framework.Assert.assertFalse;
  */
 public class SpecTest {
 
-  private JsonFactory jf = new MappingJsonFactory();
-
   @Test
   public void interpolations() throws IOException {
-    run(getSpec("interpolation.json"));
+    run(getSpec("interpolation.yml"));
   }
 
   @Test
   public void sections() throws IOException {
-    run(getSpec("sections.json"));
+    run(getSpec("sections.yml"));
   }
 
   @Test
   public void delimiters() throws IOException {
-    run(getSpec("delimiters.json"));
+    run(getSpec("delimiters.yml"));
   }
 
   @Test
   public void inverted() throws IOException {
-    run(getSpec("inverted.json"));
+    run(getSpec("inverted.yml"));
   }
 
   @Test
   public void partials() throws IOException {
-    run(getSpec("partials.json"));
+    run(getSpec("partials.yml"));
   }
 
   @Test
   public void lambdas() throws IOException {
-    run(getSpec("~lambdas.json"));
+    run(getSpec("~lambdas.yml"));
   }
 
   // @Test — need this to appear in the spec repository to enable
   public void inheritance() throws IOException {
-    run(getSpec("inheritance.json"));
+    run(getSpec("inheritance.yml"));
   }
 
   private void run(JsonNode spec) {
@@ -81,6 +79,7 @@ public class SpecTest {
       });
       put("Interpolation - Multiple Calls", new Object() {
         int calls = 0;
+
         Function lambda() {
           return input -> String.valueOf(++calls);
         }
@@ -135,19 +134,19 @@ public class SpecTest {
           return input -> false;
         }
       });
-    }}; 
+    }};
     for (final JsonNode test : spec.get("tests")) {
       boolean failed = false;
       final DefaultMustacheFactory CF = createMustacheFactory(test);
-      String file = test.get("name").getTextValue();
-      System.out.print("Running " + file + " - " + test.get("desc").getTextValue());
-      StringReader template = new StringReader(test.get("template").getTextValue());
+      String file = test.get("name").asText();
+      System.out.print("Running " + file + " - " + test.get("desc").asText());
+      StringReader template = new StringReader(test.get("template").asText());
       JsonNode data = test.get("data");
       try {
         Mustache compile = CF.compile(template, file);
         StringWriter writer = new StringWriter();
-        compile.execute(writer, new Object[] { new JsonMap(data), functionMap.get(file) });
-        String expected = test.get("expected").getTextValue();
+        compile.execute(writer, new Object[]{new ObjectMapper().readValue(data.toString(), Map.class), functionMap.get(file)});
+        String expected = test.get("expected").asText();
         if (writer.toString().replaceAll("\\s+", "").equals(expected.replaceAll("\\s+", ""))) {
           System.out.print(": success");
           if (writer.toString().equals(expected)) {
@@ -177,65 +176,18 @@ public class SpecTest {
 
   protected DefaultMustacheFactory createMustacheFactory(final JsonNode test) {
     return new DefaultMustacheFactory("/spec/specs") {
-          @Override
-          public Reader getReader(String resourceName) {
-            JsonNode partial = test.get("partials").get(resourceName);
-            return new StringReader(partial == null ? "" : partial.getTextValue());
-          }
-        };
+      @Override
+      public Reader getReader(String resourceName) {
+        JsonNode partial = test.get("partials").get(resourceName);
+        return new StringReader(partial == null ? "" : partial.asText());
+      }
+    };
   }
 
   private JsonNode getSpec(String spec) throws IOException {
-    return jf.createJsonParser(new InputStreamReader(
+    return new YAMLFactory(new YAMLMapper()).createParser(new InputStreamReader(
             SpecTest.class.getResourceAsStream(
                     "/spec/specs/" + spec))).readValueAsTree();
   }
 
-  private static class JsonMap extends HashMap {
-    private final JsonNode test;
-
-    public JsonMap(JsonNode test) {
-      this.test = test;
-    }
-
-    @Override
-    public Object get(Object key) {
-      JsonNode value = test.get(key.toString());
-      return convert(value);
-    }
-
-    @Override
-    public boolean containsKey(Object key) {
-      return test.has(key.toString());
-    }
-
-    private Object convert(final JsonNode value) {
-      if (value == null || value.isNull()) return null;
-      if (value.isBoolean()) {
-        return value.getBooleanValue();
-      } else if (value.isValueNode()) {
-        return value.asText();
-      } else if (value.isArray()) {
-        return (Iterable) () -> new Iterator() {
-          private Iterator<JsonNode> iterator = value.iterator();
-
-          @Override
-          public boolean hasNext() {
-            return iterator.hasNext();
-          }
-
-          @Override
-          public Object next() {
-            return convert(iterator.next());
-          }
-
-          @Override
-          public void remove() {
-          }
-        };
-      } else {
-        return new JsonMap(value);
-      }
-    }
-  }
 }

@@ -1,7 +1,7 @@
 package com.github.mustachejavabenchmarks;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
-import org.codehaus.jackson.JsonGenerator;
 
 import java.io.IOException;
 import java.util.HashSet;

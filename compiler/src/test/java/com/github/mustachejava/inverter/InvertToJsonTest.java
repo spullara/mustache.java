@@ -1,11 +1,11 @@
 package com.github.mustachejava.inverter;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.util.Node;
 import com.github.mustachejava.util.NodeValue;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.MappingJsonFactory;
 import org.junit.Test;
 
 import java.io.IOException;

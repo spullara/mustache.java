@@ -1,17 +1,23 @@
 package com.github.mustachejavabenchmarks;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import junit.framework.TestCase;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.MappingJsonFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -40,7 +46,7 @@ public class JsonInterpreterTest extends TestCase {
       }};
     } else if (node.isObject()) {
       return new HashMap() {{
-        for (Iterator<Map.Entry<String, JsonNode>> i = node.getFields(); i.hasNext(); ) {
+        for (Iterator<Map.Entry<String, JsonNode>> i = node.fields(); i.hasNext(); ) {
           Map.Entry<String, JsonNode> next = i.next();
           Object o = toObject(next.getValue());
           put(next.getKey(), o);
@@ -65,7 +71,8 @@ public class JsonInterpreterTest extends TestCase {
     if (skip()) return;
     final Mustache parse = getMustache();
     final Object parent = new Object() {
-      List<Tweet> tweets = new ArrayList<>(); 
+      List<Tweet> tweets = new ArrayList<>();
+
       {
         for (int i = 0; i < 20; i++) {
           tweets.add(new Tweet());
@@ -74,6 +81,15 @@ public class JsonInterpreterTest extends TestCase {
     };
 
     singlethreaded(parse, parent);
+  }
+
+  public void testObjectMapper() throws IOException {
+    Mustache m = new DefaultMustacheFactory().compile(new StringReader("{{#a}}{{b.c}}{{/a}}"), "test");
+    Map map = new ObjectMapper().readValue("{\"a\": {\"b\": { \"c\": \"\" }}, \"b\": {\"c\": \"ERROR\"}}", Map.class);
+
+    StringWriter sw = new StringWriter();
+    m.execute(sw, map).close();
+    assertEquals("", sw.toString());
   }
 
   public void testCompiler() throws MustacheException, IOException, InterruptedException {
