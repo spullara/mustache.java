@@ -4,6 +4,7 @@ import com.github.mustachejava.Code;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.util.InternalArrayList;
 import com.github.mustachejava.util.Node;
 
 import java.io.Writer;
@@ -44,6 +45,14 @@ public class DefaultMustache extends DefaultCode implements Mustache {
   @Override
   public void setCodes(Code[] newcodes) {
     codes = newcodes;
+  }
+
+  @Override
+  public Writer execute(Writer writer, List<Object> scopes) {
+    if (!(scopes instanceof InternalArrayList)) {
+      scopes = new InternalArrayList<>(scopes);
+    }
+    return super.execute(writer, scopes);
   }
 
   @Override

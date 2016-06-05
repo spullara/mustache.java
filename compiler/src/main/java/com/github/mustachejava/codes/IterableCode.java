@@ -7,6 +7,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.TemplateFunction;
+import com.github.mustachejava.util.InternalArrayList;
 import com.github.mustachejava.util.LatchedWriter;
 import com.github.mustachejava.util.Node;
 
@@ -75,7 +76,7 @@ public class IterableCode extends DefaultCode implements Iteration {
       writer = latchedWriter;
       // Scopes must not cross thread boundaries as they
       // are thread locally reused
-      final List<Object> newScopes = new ArrayList<>(scopes);
+      final List<Object> newScopes = new InternalArrayList<>(scopes);
       les.execute(() -> {
         try {
           Object call = callable.call();
