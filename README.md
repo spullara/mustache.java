@@ -66,7 +66,7 @@ Build suggestions:
   - set your JAVA_HOME to a JDK 8 JDK
   - mvn -DskipTests clean install
 - If you must build and test but not benchmark:
-  - CI=1 mvn clean install
+  - CI=1 mvn clean install -pl :compiler -am
 - If you must build, test and benchmark:
   - mvn clean install
 
@@ -78,7 +78,7 @@ Java 8+:
 <dependency>
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>compiler</artifactId>
-  <version>0.9.1</version>
+  <version>0.9.2</version>
 </dependency>
 ```
 
