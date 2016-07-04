@@ -9,42 +9,56 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 
 /**
- * MustacheResolver implementation that resolves
- * mustache files from the classpath.
+ * MustacheResolver implementation that resolves mustache files from the classpath.
  */
 public class ClasspathResolver implements MustacheResolver {
 
-  private final String resourceRoot;
+    private final String resourceRoot;
 
-  public ClasspathResolver() {
-    this.resourceRoot = null;
-  }
-
-  /**
-   * Use the classpath to resolve mustache templates.
-   *
-   * @param resourceRoot where to find the templates
-   */
-  public ClasspathResolver(String resourceRoot) {
-    if (!resourceRoot.endsWith("/")) {
-      resourceRoot += "/";
+    public ClasspathResolver() {
+        this.resourceRoot = null;
     }
-    this.resourceRoot = resourceRoot;
-  }
 
-  @Override
-  public Reader getReader(String resourceName) {
-    ClassLoader ccl = Thread.currentThread().getContextClassLoader();
-    String name = (resourceRoot == null ? "" : resourceRoot) + resourceName;
-    InputStream is = ccl.getResourceAsStream(name);
-    if (is == null) {
-      is = ClasspathResolver.class.getClassLoader().getResourceAsStream(name);
+    /**
+     * Use the classpath to resolve mustache templates.
+     *
+     * @param resourceRoot where to find the templates
+     */
+    public ClasspathResolver(String resourceRoot) {
+        this.resourceRoot = resourceRoot;
     }
-    if (is != null) {
-      return new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-    } else {
-      return null;
-    }
-  }
 
+    @Override
+    public Reader getReader(String resourceName) {
+        ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+
+        String fullResourceName = concatResourceRootAndResourceName(resourceName);
+
+        InputStream is = ccl.getResourceAsStream(fullResourceName);
+        if (is == null) {
+            ClassLoader classLoader = ClasspathResolver.class.getClassLoader();
+            is = classLoader.getResourceAsStream(fullResourceName);
+        }
+
+        if (is != null) {
+            return new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+        } else {
+            return null;
+        }
+    }
+
+    private String concatResourceRootAndResourceName(String resourceName) {
+        if ((resourceRoot == null) || (resourceName == null)) {
+            return resourceName;
+        } else {
+            //Ensure there is only one (and only one) forward slash between the resourceRoot and resourceName paths
+            if (resourceName.startsWith("/") && resourceRoot.endsWith("/")) {
+                return resourceRoot.substring(0, resourceRoot.length() - 1) + resourceName;
+            } else if ((resourceName.startsWith("/") && !resourceRoot.endsWith("/")) || (!resourceName.startsWith("/") && resourceRoot.endsWith("/"))) {
+                return resourceRoot + resourceName;
+            } else {
+                return resourceRoot + "/" + resourceName;
+            }
+        }
+    }
 }
