@@ -4,10 +4,14 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.MustacheFactory;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -28,6 +32,26 @@ public class CommentTest {
     scope.put("ignored", "ignored");
     m.execute(sw, scope);
     assertEquals(getContents(root, "comment.txt"), sw.toString());
+  }
+
+  @Test
+  public void testCommentInline() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("commentInline.html");
+    StringWriter sw = new StringWriter();
+    Map scope = new HashMap();
+    scope.put("title", "A Comedy of Errors");
+    m.execute(sw, scope);
+    assertEquals(getContents(root, "commentInline.txt"), sw.toString());
+  }
+
+  @Test
+  public void testInlineCommentWithinExtendCodeBlock() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("commentWithinExtendCodeBlock.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, Collections.emptyList());
+    assertEquals(getContents(root, "commentWithinExtendCodeBlock.txt"), sw.toString());
   }
 
   @BeforeClass
