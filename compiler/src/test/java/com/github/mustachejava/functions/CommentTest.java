@@ -5,7 +5,6 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.MustacheFactory;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -21,10 +20,9 @@ import static org.junit.Assert.assertEquals;
 
 public class CommentTest {
 
-  private static File root;
-
   @Test
   public void testCommentBlock() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    File root = getRoot("comment.html");
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("comment.html");
     StringWriter sw = new StringWriter();
@@ -36,6 +34,7 @@ public class CommentTest {
 
   @Test
   public void testCommentInline() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    File root = getRoot("commentInline.html");
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("commentInline.html");
     StringWriter sw = new StringWriter();
@@ -47,6 +46,7 @@ public class CommentTest {
 
   @Test
   public void testInlineCommentWithinExtendCodeBlock() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    File root = getRoot("commentWithinExtendCodeBlock.html");
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("commentWithinExtendCodeBlock.html");
     StringWriter sw = new StringWriter();
@@ -54,9 +54,8 @@ public class CommentTest {
     assertEquals(getContents(root, "commentWithinExtendCodeBlock.txt"), sw.toString());
   }
 
-  @BeforeClass
-  public static void setUp() throws Exception {
+  private File getRoot(String fileName) {
     File file = new File("compiler/src/test/resources/functions");
-    root = new File(file, "comment.html").exists() ? file : new File("src/test/resources/functions");
+    return new File(file, fileName).exists() ? file : new File("src/test/resources/functions");
   }
 }
