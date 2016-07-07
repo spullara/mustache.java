@@ -23,6 +23,7 @@ public class CommentTest {
   @Test
   public void testCommentBlock() throws MustacheException, IOException, ExecutionException, InterruptedException {
     File root = getRoot("comment.html");
+    System.out.println("****** using root: " + root);
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("comment.html");
     StringWriter sw = new StringWriter();
@@ -35,6 +36,7 @@ public class CommentTest {
   @Test
   public void testCommentInline() throws MustacheException, IOException, ExecutionException, InterruptedException {
     File root = getRoot("commentInline.html");
+    System.out.println("****** using root: " + root);
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("commentInline.html");
     StringWriter sw = new StringWriter();
@@ -47,6 +49,7 @@ public class CommentTest {
   @Test
   public void testInlineCommentWithinExtendCodeBlock() throws MustacheException, IOException, ExecutionException, InterruptedException {
     File root = getRoot("commentWithinExtendCodeBlock.html");
+    System.out.println("****** using root: " + root);
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("commentWithinExtendCodeBlock.html");
     StringWriter sw = new StringWriter();
