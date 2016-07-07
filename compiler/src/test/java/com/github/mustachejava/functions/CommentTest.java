@@ -23,7 +23,6 @@ public class CommentTest {
   @Test
   public void testCommentBlock() throws MustacheException, IOException, ExecutionException, InterruptedException {
     File root = getRoot("comment.html");
-    System.out.println("****** using root: " + root);
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("comment.html");
     StringWriter sw = new StringWriter();
@@ -35,21 +34,19 @@ public class CommentTest {
 
   @Test
   public void testCommentInline() throws MustacheException, IOException, ExecutionException, InterruptedException {
-    File root = getRoot("commentInline.html");
-    System.out.println("****** using root: " + root);
+    File root = getRoot("commentinline.html");
     MustacheFactory c = new DefaultMustacheFactory(root);
-    Mustache m = c.compile("commentInline.html");
+    Mustache m = c.compile("commentinline.html");
     StringWriter sw = new StringWriter();
     Map scope = new HashMap();
     scope.put("title", "A Comedy of Errors");
     m.execute(sw, scope);
-    assertEquals(getContents(root, "commentInline.txt"), sw.toString());
+    assertEquals(getContents(root, "commentinline.txt"), sw.toString());
   }
 
   @Test
   public void testInlineCommentWithinExtendCodeBlock() throws MustacheException, IOException, ExecutionException, InterruptedException {
     File root = getRoot("commentWithinExtendCodeBlock.html");
-    System.out.println("****** using root: " + root);
     MustacheFactory c = new DefaultMustacheFactory(root);
     Mustache m = c.compile("commentWithinExtendCodeBlock.html");
     StringWriter sw = new StringWriter();
