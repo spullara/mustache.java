@@ -1,6 +1,10 @@
 package com.github.mustachejava.codes;
 
-import com.github.mustachejava.*;
+import com.github.mustachejava.Code;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheException;
+import com.github.mustachejava.TemplateContext;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,8 +65,8 @@ public class ExtendCode extends PartialCode {
         ExtendNameCode erc = (ExtendNameCode) code;
         replaceMap.put(erc.getName(), erc);
         erc.init();
-      } else if (code instanceof WriteCode) {
-        // ignore text
+      } else if ((code instanceof WriteCode) || (code instanceof CommentCode)) {
+        // ignore text and comments
       } else {
         // fail on everything else
         throw new IllegalArgumentException(
