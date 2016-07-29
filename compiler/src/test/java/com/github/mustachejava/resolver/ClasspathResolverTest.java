@@ -65,4 +65,17 @@ public class ClasspathResolverTest {
         underTest.getReader(null);
     }
 
+    @Test
+    public void getReaderWithRootAndResourceHasDoubleDotRelativePath() throws Exception {
+        ClasspathResolver underTest = new ClasspathResolver("templates");
+        Reader reader = underTest.getReader("absolute/../absolute_partials_template.html");
+        assertThat(reader, is(notNullValue()));
+    }
+
+    @Test
+    public void getReaderWithRootAndResourceHasDotRelativePath() throws Exception {
+        ClasspathResolver underTest = new ClasspathResolver("templates");
+        Reader reader = underTest.getReader("absolute/./nested_partials_sub.html");
+        assertThat(reader, is(notNullValue()));
+    }
 }
