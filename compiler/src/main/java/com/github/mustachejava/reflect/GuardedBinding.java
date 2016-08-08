@@ -73,7 +73,7 @@ public class GuardedBinding implements Binding {
         } catch (GuardException ge) {
           // Check the next one or create a new one
         } catch (MustacheException me) {
-          throw new MustacheException("Failed: " + current, me);
+          throw new MustacheException("Failed: " + current, me, tc);
         }
       }
     }

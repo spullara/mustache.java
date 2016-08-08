@@ -109,7 +109,8 @@ public class MustacheParser {
               }
               final String command = mf.translate(sb.toString());
               if (command.length() == 0) {
-                throw new MustacheException("Empty mustache in " + file + ":" + currentLine);
+                TemplateContext tc = new TemplateContext(sm, em, file, currentLine.get(), startOfLine);
+                throw new MustacheException("Empty mustache", tc);
               }
               final char ch = command.charAt(0);
               final String variable = command.substring(1).trim();
@@ -150,8 +151,9 @@ public class MustacheParser {
                     write(mv, out, file, currentLine.intValue(), startOfLine);
                   }
                   if (!variable.equals(tag)) {
+                    TemplateContext tc = new TemplateContext(sm, em, file, currentLine.get(), startOfLine);
                     throw new MustacheException(
-                            "Mismatched start/end tags: " + tag + " != " + variable + " in " + file + ":" + currentLine);
+                            "Mismatched start/end tags: " + tag + " != " + variable + " in " + file + ":" + currentLine, tc);
                   }
 
                   return mv.mustache(new TemplateContext(sm, em, file, 0, startOfLine));
@@ -170,8 +172,9 @@ public class MustacheParser {
                     name = variable.substring(0, variable.length() - 1);
                   } else {
                     if (br.read() != '}') {
+                      TemplateContext tc = new TemplateContext(sm, em, file, currentLine.get(), startOfLine);
                       throw new MustacheException(
-                              "Improperly closed variable in " + file + ":" + currentLine);
+                              "Improperly closed variable in " + file + ":" + currentLine, tc);
                     }
                   }
                   mv.value(new TemplateContext(sm, em, file, currentLine.get(), false), name, false);
@@ -209,14 +212,16 @@ public class MustacheParser {
                   String delimiters = command.replaceAll("\\s+", "");
                   int length = delimiters.length();
                   if (length > 6 || length / 2 * 2 != length) {
-                    throw new MustacheException("Invalid delimiter string");
+                    TemplateContext tc = new TemplateContext(sm, em, file, currentLine.get(), startOfLine);
+                    throw new MustacheException("Invalid delimiter string", tc);
                   }
                   sm = delimiters.substring(1, length / 2);
                   em = delimiters.substring(length / 2, length - 1);
                   break;
                 default: {
                   if (c == -1) {
-                    throw new MustacheException("Improperly closed variable in " + file + ":" + currentLine);
+                    TemplateContext tc = new TemplateContext(sm, em, file, currentLine.get(), startOfLine);
+                    throw new MustacheException("Improperly closed variable", tc);
                   }
                   // Reference
                   out = write(mv, out, file, currentLine.intValue(), startOfLine);
@@ -239,10 +244,12 @@ public class MustacheParser {
         if (tag == null) {
           br.close();
         } else {
-          throw new MustacheException("Failed to close '" + tag + "' tag at line " + startLine);
+          TemplateContext tc = new TemplateContext(sm, em, file, startLine, startOfLine);
+          throw new MustacheException("Failed to close '" + tag + "' tag", tc);
         }
       } catch (IOException e) {
-        throw new MustacheException("Failed to read", e);
+        TemplateContext tc = new TemplateContext(sm, em, file, currentLine.get(), startOfLine);
+        throw new MustacheException("Failed to read", tc);
       }
       mv.eof(new TemplateContext(sm, em, file, currentLine.get(), startOfLine));
       return mv.mustache(new TemplateContext(sm, em, file, 0, startOfLine));

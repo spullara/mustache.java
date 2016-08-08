@@ -18,15 +18,25 @@ public class MustacheException extends RuntimeException {
     super(message, throwable);
   }
 
-  public MustacheException(String s, Throwable throwable, TemplateContext context) {
-    super(s, throwable);
+  public MustacheException(String message, Throwable throwable, TemplateContext context) {
+    super(message, throwable);
     this.context = context;
   }
 
   public MustacheException(Throwable throwable) {
     super(throwable);
   }
-  
+
+  public MustacheException(String message, TemplateContext context) {
+    super(message);
+    this.context = context;
+  }
+
+  public MustacheException(Exception e, TemplateContext context) {
+    super(e);
+    this.context = context;
+  }
+
   @Override
   public String getMessage() {
     return context == null ? super.getMessage() : super.getMessage() + " @" + context;
@@ -36,5 +46,8 @@ public class MustacheException extends RuntimeException {
     if (this.context == null)
       this.context = context;
   }
-  
+
+  public TemplateContext getContext() {
+    return context;
+  }
 }

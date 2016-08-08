@@ -46,7 +46,7 @@ public class ValueCode extends DefaultCode {
       }
       appendText(writer);
     } catch (IOException e) {
-      throw new MustacheException(e);
+      throw new MustacheException(e, tc);
     }
   }
 
@@ -85,7 +85,7 @@ public class ValueCode extends DefaultCode {
       try {
         writer.flush();
       } catch (IOException e) {
-        throw new MustacheException("Failed to flush writer", e);
+        throw new MustacheException("Failed to flush writer", e, tc);
       }
       final LatchedWriter latchedWriter = new LatchedWriter(writer);
       final Writer finalWriter = writer;

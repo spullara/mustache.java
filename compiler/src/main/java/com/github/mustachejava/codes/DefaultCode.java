@@ -64,7 +64,7 @@ public class DefaultCode implements Code, Cloneable {
       }
       return code;
     } catch (CloneNotSupportedException e) {
-      throw new MustacheException("Clone not supported");
+      throw new MustacheException("Clone not supported", e, tc);
     }
   }
 
@@ -174,7 +174,7 @@ public class DefaultCode implements Code, Cloneable {
       }
       appendText(writer);
     } catch (IOException e) {
-      throw new MustacheException(e);
+      throw new MustacheException("Failed to write", e, tc);
     }
   }
 
@@ -203,7 +203,7 @@ public class DefaultCode implements Code, Cloneable {
         }
         writer.write(appendedChars);
       } catch (IOException e) {
-        throw new MustacheException(e);
+        throw new MustacheException("Failed to write", e, tc);
       }
     }
     return writer;

@@ -86,7 +86,7 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
                 writeTarget(writer, divid);
                 writer.append(appended);
               } catch (IOException e) {
-                throw new MustacheException("Failed to write", e);
+                throw new MustacheException("Failed to write", e, tc);
               }
               // Make a copy of the scopes so we don't change them
               List<Object> scopesCopy = new InternalArrayList<>(scopes);
@@ -97,7 +97,7 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
                           partial.execute(sw, scopesCopy).close();
                           return sw.toString();
                         } catch (IOException e) {
-                          throw new MustacheException("Failed to writer", e);
+                          throw new MustacheException("Failed to writer", e, tc);
                         }
                       })));
               return writer;

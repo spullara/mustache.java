@@ -1261,7 +1261,7 @@ public class InterpreterTest extends TestCase {
     } catch (StackOverflowError soe) {
       fail("Should not have overflowed the stack");
     } catch (MustacheException e) {
-      assertEquals("Maximum partial recursion limit reached: 100", e.getMessage());
+      assertEquals("Maximum partial recursion limit reached: 100 @[infiniteparent.html:1]", e.getMessage());
     }
   }
 
@@ -1273,7 +1273,7 @@ public class InterpreterTest extends TestCase {
       mustache.execute(sw, new Object[0]);
       fail("Should have failed to compile");
     } catch (MustacheException e) {
-      assertEquals("Failed to close 'value' tag at line 2", e.getMessage());
+      assertEquals("Failed to close 'value' tag @[test:2]", e.getMessage());
     }
   }
 

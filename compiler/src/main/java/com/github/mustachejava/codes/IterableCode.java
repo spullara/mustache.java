@@ -62,14 +62,14 @@ public class IterableCode extends DefaultCode implements Iteration {
       try {
         writer = execute(writer, callable.call(), scopes);
       } catch (Exception e) {
-        throw new MustacheException(e);
+        throw new MustacheException(e, tc);
       }
     } else {
       // Flush the current writer
       try {
         writer.flush();
       } catch (IOException e) {
-        throw new MustacheException("Failed to flush writer", e);
+        throw new MustacheException("Failed to flush writer", e, tc);
       }
       final Writer originalWriter = writer;
       final LatchedWriter latchedWriter = new LatchedWriter(writer);
@@ -114,7 +114,7 @@ public class IterableCode extends DefaultCode implements Iteration {
           writer.write(apply.toString());
         }
       } catch (IOException e) {
-        throw new MustacheException("Failed to write function result", e);
+        throw new MustacheException("Failed to write function result", e, tc);
       }
     }
     return writer;

@@ -36,7 +36,7 @@ public class PartialCode extends DefaultCode {
       }
       appendText(writer);
     } catch (IOException e) {
-      throw new MustacheException(e);
+      throw new MustacheException(e, tc);
     }
   }
 
@@ -63,7 +63,7 @@ public class PartialCode extends DefaultCode {
         depthLimitedWriter = new DepthLimitedWriter(writer);
       }
       if (depthLimitedWriter.incr() > recrusionLimit) {
-        throw new MustacheException("Maximum partial recursion limit reached: " + recrusionLimit);
+        throw new MustacheException("Maximum partial recursion limit reached: " + recrusionLimit, tc);
       }
       writer = depthLimitedWriter;
     }
@@ -83,7 +83,7 @@ public class PartialCode extends DefaultCode {
       isRecursive = true;
     }
     if (partial == null) {
-      throw new MustacheException("Failed to compile partial: " + name);
+      throw new MustacheException("Failed to compile partial: " + name, tc);
     }
   }
 

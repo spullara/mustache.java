@@ -66,7 +66,7 @@ public class HtmlEscaper {
         }
       }
     } catch (IOException e) {
-      throw new MustacheException("Failed to encode value: " + value);
+      throw new MustacheException("Failed to encode value: " + value, e);
     }
   }
 }

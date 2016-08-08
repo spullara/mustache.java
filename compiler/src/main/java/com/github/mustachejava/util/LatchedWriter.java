@@ -80,8 +80,8 @@ public class LatchedWriter extends Writer {
   public void await() {
     try {
       latch.await();
-    } catch (InterruptedException e1) {
-      throw new MustacheException("Interrupted while waiting for completion", e1);
+    } catch (InterruptedException e) {
+      throw new MustacheException("Interrupted while waiting for completion", e);
     }
   }
 
