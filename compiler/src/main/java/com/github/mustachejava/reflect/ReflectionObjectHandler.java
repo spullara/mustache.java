@@ -1,18 +1,25 @@
 package com.github.mustachejava.reflect;
 
+import static java.util.Collections.*;
+
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.github.mustachejava.Binding;
 import com.github.mustachejava.Code;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.TemplateContext;
-import com.github.mustachejava.reflect.guards.*;
+import com.github.mustachejava.reflect.guards.ClassGuard;
+import com.github.mustachejava.reflect.guards.DepthGuard;
+import com.github.mustachejava.reflect.guards.DotGuard;
+import com.github.mustachejava.reflect.guards.MapGuard;
+import com.github.mustachejava.reflect.guards.NullGuard;
+import com.github.mustachejava.reflect.guards.WrappedGuard;
 import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
-
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Method;
-import java.util.*;
-
-import static java.util.Collections.singletonList;
 
 /**
  * Lookup objects using reflection and execute them the same way.
@@ -144,7 +151,7 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
       }
     }
     AccessibleObject member = findMember(scope.getClass(), name);
-    return member == null ? null : createWrapper(scopeIndex, wrappers, guards, member, null);
+    return member == null ? null : createWrapper(scopeIndex, wrappers, guards, member, new Object[0]);
   }
 
   // Factories
