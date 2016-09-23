@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -33,11 +34,12 @@ public class ClasspathResolver implements MustacheResolver {
         ClassLoader ccl = Thread.currentThread().getContextClassLoader();
 
         String fullResourceName = concatResourceRootAndResourceName(resourceName);
+        String normalizeResourceName = URI.create(fullResourceName).normalize().getPath();
 
-        InputStream is = ccl.getResourceAsStream(fullResourceName);
+        InputStream is = ccl.getResourceAsStream(normalizeResourceName);
         if (is == null) {
             ClassLoader classLoader = ClasspathResolver.class.getClassLoader();
-            is = classLoader.getResourceAsStream(fullResourceName);
+            is = classLoader.getResourceAsStream(normalizeResourceName);
         }
 
         if (is != null) {
