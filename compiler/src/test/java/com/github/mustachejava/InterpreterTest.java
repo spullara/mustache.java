@@ -1229,12 +1229,12 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testImplicitIteratorWithScope() throws IOException {
-    Mustache test = new DefaultMustacheFactory().compile(new StringReader("{{#test}}{{.}}{{/test}}"), "test");
+    Mustache test = new DefaultMustacheFactory().compile(new StringReader("{{#test}}_{{.}}_{{/test}}"), "test");
     StringWriter sw = new StringWriter();
     test.execute(sw, new Object() {
       List<String> test = Arrays.asList("a", "b", "c");
     }).close();
-    assertEquals("abc", sw.toString());
+    assertEquals("_a__b__c_", sw.toString());
   }
 
   public void testCR() {
