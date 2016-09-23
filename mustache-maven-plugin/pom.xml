@@ -4,10 +4,10 @@
   <parent>
     <groupId>com.github.spullara.mustache.java</groupId>
     <artifactId>mustache.java</artifactId>
-    <version>0.9.4</version>
+    <version>0.9.5-SNAPSHOT</version>
   </parent>
   <artifactId>mustache-maven-plugin</artifactId>
-  <version>0.9.4</version>
+  <version>0.9.5-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
   <name>mustache-maven-plugin Maven Mojo</name>
   <url>http://maven.apache.org</url>
@@ -59,7 +59,7 @@
     <dependency>
       <groupId>com.github.spullara.mustache.java</groupId>
       <artifactId>compiler</artifactId>
-      <version>0.9.4</version>
+      <version>0.9.5-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
