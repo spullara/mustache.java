@@ -1,11 +1,11 @@
 package mustachejava.benchmarks;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheResolver;
 import com.github.mustachejavabenchmarks.NullWriter;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.MappingJsonFactory;
 import org.openjdk.jmh.annotations.*;
 
 import java.io.*;
@@ -80,7 +80,7 @@ public class TweetBench {
     try {
       MappingJsonFactory jf = new MappingJsonFactory();
       InputStream json = TweetBench.class.getClassLoader().getResourceAsStream("tweet.json");
-      jsonScope = new ArrayList<>(singletonList(new JsonMap(jf.createJsonParser(json).readValueAsTree())));
+      jsonScope = new ArrayList<>(singletonList(new JsonMap(jf.createParser(json).readValueAsTree())));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -117,7 +117,7 @@ public class TweetBench {
 
     InputStream json = TweetBench.class.getClassLoader().getResourceAsStream("tweet.json");
     MappingJsonFactory jf = new MappingJsonFactory();
-    JsonNode jsonNode = jf.createJsonParser(json).readValueAsTree();
+    JsonNode jsonNode = jf.createParser(json).readValueAsTree();
     sw = new StringWriter();
     m.execute(sw, new JsonMap(jsonNode)).close();
     System.out.println(sw);
@@ -149,7 +149,7 @@ public class TweetBench {
     private Object convert(final JsonNode value) {
       if (value == null || value.isNull()) return null;
       if (value.isBoolean()) {
-        return value.getBooleanValue();
+        return value.booleanValue();
       } else if (value.isValueNode()) {
         return value.asText();
       } else if (value.isArray()) {

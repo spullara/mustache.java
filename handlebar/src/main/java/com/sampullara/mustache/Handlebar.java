@@ -1,17 +1,17 @@
 package com.sampullara.mustache;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.github.mustachejava.TemplateFunction;
 import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.MappingJsonFactory;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
@@ -89,7 +89,7 @@ public class Handlebar {
     } else if (node.isObject()) {
       return new HashMap() {
         {
-          for (Iterator<Map.Entry<String, JsonNode>> i = node.getFields(); i.hasNext();) {
+          for (Iterator<Map.Entry<String, JsonNode>> i = node.fields(); i.hasNext();) {
             Map.Entry<String, JsonNode> next = i.next();
             Object o = toObject(next.getValue());
             put(next.getKey(), o);
@@ -97,7 +97,7 @@ public class Handlebar {
         }
       };
     } else if (node.isBoolean()) {
-      return node.getBooleanValue();
+      return node.booleanValue();
     } else if (node.isNull()) {
       return null;
     } else {
@@ -223,7 +223,7 @@ public class Handlebar {
         if (file.exists()) {
           BufferedReader br =
               new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-          JsonParser parser = JSON_FACTORY.createJsonParser(br);
+          JsonParser parser = JSON_FACTORY.createParser(br);
           JsonNode json = parser.readValueAsTree();
           br.close();
           scs.add(0, toObject(json));

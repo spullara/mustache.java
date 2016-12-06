@@ -20,6 +20,10 @@
   <name>mustache.java</name>
   <url>http://github.com/spullara/mustache.java</url>
 
+  <properties>
+    <jackson.version>2.7.4</jackson.version>
+  </properties>
+
   <developers>
     <developer>
       <id>spullara</id>
