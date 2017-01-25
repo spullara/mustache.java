@@ -213,7 +213,7 @@ public class MustacheParser {
                   int length = delimiters.length();
                   if (length > 6 || length / 2 * 2 != length) {
                     TemplateContext tc = new TemplateContext(sm, em, file, currentLine.get(), startOfLine);
-                    throw new MustacheException("Invalid delimiter string", tc);
+                    throw new MustacheException("Invalid delimiter string: " + delimiters, tc);
                   }
                   sm = delimiters.substring(1, length / 2);
                   em = delimiters.substring(length / 2, length - 1);
