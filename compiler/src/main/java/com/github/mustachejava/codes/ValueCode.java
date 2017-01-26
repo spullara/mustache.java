@@ -111,6 +111,9 @@ public class ValueCode extends DefaultCode {
     } else {
       String templateText = newtemplate.toString();
       StringWriter sw = new StringWriter();
+      // The specification says that template functions need to be parsed with the default delimiters
+      // Running Interpolation - Alternate Delimiters - A lambda's return value should parse with the default delimiters.: failed!
+      // TemplateContext newTC = new TemplateContext(tc.startChars(), tc.endChars(), tc.file(), tc.line(), tc.startOfLine());
       TemplateContext newTC = new TemplateContext(DEFAULT_SM, DEFAULT_EM, tc.file(), tc.line(), tc.startOfLine());
       df.getFragment(new FragmentKey(newTC, templateText)).execute(sw, scopes).close();
       value = sw.toString();

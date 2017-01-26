@@ -38,9 +38,7 @@ public class DelimiterTest {
     Mustache maven = mf.compile(new StringReader("Hello, ${#f}${foo}${/f}."), "maven", "${", "}");
     StringWriter sw = new StringWriter();
     maven.execute(sw, new Object() {
-      TemplateFunction f = (s) -> {
-        return s;
-      };
+      TemplateFunction f = (s) -> s;
       String foo = "Jason";
     }).close();
     assertEquals("Hello, Jason.", sw.toString());
@@ -52,12 +50,10 @@ public class DelimiterTest {
     Mustache maven = mf.compile(new StringReader("Hello, ${foo}."), "maven", "${", "}");
     StringWriter sw = new StringWriter();
     maven.execute(sw, new Object() {
-      TemplateFunction foo = (s) -> {
-        return "${name}";
-      };
+      TemplateFunction foo = (s) -> "${name}";
       String name = "Jason";
     }).close();
-    assertEquals("Hello, Jason.", sw.toString());
+    assertEquals("Hello, ${name}.", sw.toString());
   }
 
   private static class NoEncodingMustacheFactory extends DefaultMustacheFactory {
