@@ -56,6 +56,28 @@ public class DelimiterTest {
     assertEquals("Hello, ${name}.", sw.toString());
   }
 
+  @Test
+  public void testStrSubstitutor() throws IOException {
+    DefaultMustacheFactory mf = new DefaultMustacheFactory();
+    Mustache maven = mf.compile(new StringReader("Hello, $<foo>."), "maven", "$<", ">");
+    StringWriter sw = new StringWriter();
+    maven.execute(sw, new Object() {
+      String foo = "Jason";
+    }).close();
+    assertEquals("Hello, Jason.", sw.toString());
+  }
+
+  @Test
+  public void testStrSubstitutor2() throws IOException {
+    DefaultMustacheFactory mf = new DefaultMustacheFactory();
+    Mustache maven = mf.compile(new StringReader("{{=$< >=}}Hello, $<foo>."), "maven");
+    StringWriter sw = new StringWriter();
+    maven.execute(sw, new Object() {
+      String foo = "Jason";
+    }).close();
+    assertEquals("Hello, Jason.", sw.toString());
+  }
+
   private static class NoEncodingMustacheFactory extends DefaultMustacheFactory {
     @Override
     public void encode(String value, Writer writer) {

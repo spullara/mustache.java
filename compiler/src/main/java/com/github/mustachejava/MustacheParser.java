@@ -90,10 +90,28 @@ public class MustacheParser {
           if (c == sm.charAt(0)) {
             br.mark(1);
             if (sm.length() == 1 || br.read() == sm.charAt(1)) {
+              // If it is a delimiter change we need to specially handle it
               // Two mustaches, now capture command
               StringBuilder sb = new StringBuilder();
+              br.mark(1);
+              c = br.read();
+              boolean delimiter = c == '=';
+              if (delimiter) {
+                sb.append((char) c);
+              } else {
+                br.reset();
+              }
               while ((c = br.read()) != -1) {
                 br.mark(1);
+                if (delimiter) {
+                  if (c == '=') {
+                    // Reached the end of the definition
+                    delimiter = false;
+                  } else {
+                    sb.append((char) c);
+                  }
+                  continue;
+                }
                 if (c == em.charAt(0)) {
                   if (em.length() > 1) {
                     if (br.read() == em.charAt(1)) {
@@ -209,14 +227,14 @@ public class MustacheParser {
                 case '=':
                   // Change delimiters
                   out = write(mv, out, file, currentLine.intValue(), startOfLine);
-                  String delimiters = command.replaceAll("\\s+", "");
-                  int length = delimiters.length();
-                  if (length > 6 || length / 2 * 2 != length) {
+                  String trimmed = command.substring(1).trim();
+                  String[] split = trimmed.split("\\s+");
+                  if (split.length != 2) {
                     TemplateContext tc = new TemplateContext(sm, em, file, currentLine.get(), startOfLine);
-                    throw new MustacheException("Invalid delimiter string: " + delimiters, tc);
+                    throw new MustacheException("Invalid delimiter string: " + trimmed, tc);
                   }
-                  sm = delimiters.substring(1, length / 2);
-                  em = delimiters.substring(length / 2, length - 1);
+                  sm = split[0];
+                  em = split[1];
                   break;
                 default: {
                   if (c == -1) {
