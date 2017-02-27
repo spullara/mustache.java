@@ -1254,6 +1254,15 @@ public class InterpreterTest extends TestCase {
     assertEquals("{{##", sw.toString());
   }
 
+  public void testImproperlyClosedVariable() throws IOException {
+    try {
+      new DefaultMustacheFactory().compile(new StringReader("{{{#containers}} {{/containers}}"), "example");
+      fail("Should have throw MustacheException");
+    } catch (MustacheException actual) {
+      assertEquals("Improperly closed variable in example:1 @[example:1]", actual.getMessage());
+    }
+  }
+
   public void testLimitedDepthRecursion() {
     try {
       StringWriter sw = execute("infiniteparent.html", new Context());
