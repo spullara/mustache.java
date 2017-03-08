@@ -50,6 +50,8 @@ public class DefaultMustache extends DefaultCode implements Mustache {
   @Override
   public Writer execute(Writer writer, List<Object> scopes) {
     if (!(scopes instanceof InternalArrayList)) {
+      // This is the only place where we explicitly allocate post initialization for a compiled mustache
+      // in order to track the scopes as you descend the template. It ends up being ~200 bytes.
       scopes = new InternalArrayList<>(scopes);
     }
     return super.execute(writer, scopes);

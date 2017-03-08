@@ -5,10 +5,15 @@ import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheResolver;
+import com.github.mustachejava.util.InternalArrayList;
 import com.github.mustachejavabenchmarks.NullWriter;
+import com.sun.management.ThreadMXBean;
 import org.openjdk.jmh.annotations.*;
 
 import java.io.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryManagerMXBean;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -108,23 +113,45 @@ public class TweetBench {
     timelineMustache.execute(nullWriter, timelineScope).close();
   }
 
+
+  private static ThreadMXBean threadMXBean = (com.sun.management.ThreadMXBean) ManagementFactory.getThreadMXBean();
+
   public static void main(String[] args) throws IOException {
     DefaultMustacheFactory dmf = new DefaultMustacheFactory();
     Mustache m = dmf.compile("tweet.mustache");
-    StringWriter sw = new StringWriter();
-    m.execute(sw, new Tweet()).close();
-    System.out.println(sw);
+    StringWriter sw1 = new StringWriter();
+    m.execute(sw1, new Tweet()).close();
+    System.out.println(sw1);
 
     InputStream json = TweetBench.class.getClassLoader().getResourceAsStream("tweet.json");
     MappingJsonFactory jf = new MappingJsonFactory();
     JsonNode jsonNode = jf.createParser(json).readValueAsTree();
-    sw = new StringWriter();
-    m.execute(sw, new JsonMap(jsonNode)).close();
-    System.out.println(sw);
+    StringWriter sw2 = new StringWriter();
+    m.execute(sw2, new JsonMap(jsonNode)).close();
+    System.out.println(sw2);
+
+    System.out.println(sw1.toString().equals(sw2.toString()));
+
 
     TweetBench tb = new TweetBench();
+    int i = 0;
+    long startTime = System.nanoTime();
+    long threadId = Thread.currentThread().getId();
+    long startMemory = threadMXBean.getThreadAllocatedBytes(threadId);
+    int n = 0;
     while (true) {
-      tb.testCompilation();
+      if (++i == 10000) {
+        long endTime = System.nanoTime();
+        long diffTime = endTime - startTime;
+        long endMemory = threadMXBean.getThreadAllocatedBytes(threadId);
+        long diffMemory = endMemory - startMemory;
+        System.out.println(diffTime / i + " ns/iteration, " + diffMemory / i + " bytes/iteration, " + 1.0e9/diffTime*i + " per second");
+        startTime = endTime;
+        startMemory = endMemory;
+        i = 0;
+        if (++n == 5) break;
+      }
+      tb.testTimeline();
     }
   }
 
