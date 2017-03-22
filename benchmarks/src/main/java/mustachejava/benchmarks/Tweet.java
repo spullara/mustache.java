@@ -47,19 +47,8 @@ public class Tweet {
     Object entities = new Object() {
       List urls = new ArrayList();
       List hashtags = new ArrayList();
-      List user_mentions = Arrays.asList(new Object() {
-        String name = "Chelsea Henry";
-        String id_str = "16447200";
-        List indices = Arrays.asList(11, 19);
-        long id = 16447200;
-        String screen_name = "chelsea";
-      }, new Object() {
-        String name = "Twitter";
-        String id_str = "783214";
-        List indices = Arrays.asList(33, 41);
-        long id = 783214;
-        String screen_name = "twitter";
-      });
+      List user_mentions = Arrays.asList(new MentionEntity("Chelsea Henry", "16447200", 11, 19, 16447200, "chelsea"),
+              new MentionEntity("Twitter", "783214", 33, 41, 783214, "twitter"));
     };
     String lang = "en";
     boolean show_all_inline_media = true;
@@ -69,6 +58,22 @@ public class Tweet {
     int id = 31393;
     String created_at = "Wed Nov 29 22:40:31 +0000 2006";
     String screen_name = "richardhenry";
+  }
+
+  private static class MentionEntity {
+    String name;
+    String id_str;
+    List indices;
+    long id;
+    String screen_name;
+
+    private MentionEntity(String name, String id_str, int start, int end, int id, String screen_name) {
+      this.name = name;
+      this.id_str = id_str;
+      indices = Arrays.asList(start, end);
+      this.id = id;
+      this.screen_name = screen_name;
+    }
   }
 
   User user = new User();

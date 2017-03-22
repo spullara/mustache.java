@@ -140,7 +140,7 @@ public class TweetBench {
     long startMemory = threadMXBean.getThreadAllocatedBytes(threadId);
     int n = 0;
     while (true) {
-      if (++i == 10000) {
+      if (++i == 100000) {
         long endTime = System.nanoTime();
         long diffTime = endTime - startTime;
         long endMemory = threadMXBean.getThreadAllocatedBytes(threadId);

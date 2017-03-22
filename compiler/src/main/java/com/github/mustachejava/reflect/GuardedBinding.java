@@ -66,7 +66,8 @@ public class GuardedBinding implements Binding {
     Wrapper current = null;
     Wrapper[] wrappers = prevWrappers;
     if (wrappers != null) {
-      for (Wrapper prevWrapper : wrappers) {
+      for (int i = 0; i < wrappers.length; i++) {
+        Wrapper prevWrapper = wrappers[i];
         try {
           current = prevWrapper;
           return oh.coerce(prevWrapper.call(scopes));
