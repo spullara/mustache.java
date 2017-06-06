@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 public class AbstractClassTest {
   static abstract class AbstractFoo {
       public abstract String getValue();
@@ -63,4 +66,15 @@ public class AbstractClassTest {
       mustache.execute(writer, scopes);
       writer.flush();
   }
+
+  @Test
+  public void testImproperlyClosedVariable() throws IOException {
+      try {
+        new DefaultMustacheFactory().compile(new StringReader("{{{#containers}} {{/containers}}"), "example");
+        fail("Should have throw MustacheException");
+      } catch (MustacheException actual) {
+          assertEquals("Improperly closed variable in example:1 @[example:1]", actual.getMessage());
+      }
+  }
+
 }
