@@ -78,7 +78,7 @@ Java 8+:
 <dependency>
   <groupId>com.github.spullara.mustache.java</groupId>
   <artifactId>compiler</artifactId>
-  <version>0.9.2</version>
+  <version>0.9.5</version>
 </dependency>
 ```
 
