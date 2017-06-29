@@ -135,4 +135,36 @@ class ObjectHandlerTest {
     }).close()
     Assert.assertEquals("Hello", sw.toString)
   }
+
+  @Test
+  def testClass() {
+    val mf = new DefaultMustacheFactory()
+    mf.setObjectHandler(new ScalaObjectHandler)
+    val m = mf.compile(
+      new StringReader("{{#map}}{{test}}{{test2}}{{/map}}"),
+      "helloworld"
+    )
+    case class TestClass(
+      test: String
+    )
+    val sw = new StringWriter
+    val w = m.execute(sw, Map( "map" -> TestClass("fred") ) ).close()
+    Assert.assertEquals("fred", sw.toString())
+  }
+
+  @Test
+  def testClassDot() {
+    val mf = new DefaultMustacheFactory()
+    mf.setObjectHandler(new ScalaObjectHandler)
+    val m = mf.compile(
+      new StringReader("{{map.test}}"),
+      "helloworld"
+    )
+    case class TestClass(
+      test: String
+    )
+    val sw = new StringWriter
+    val w = m.execute(sw, Map( "map" -> TestClass("fred") ) ).close()
+    Assert.assertEquals("fred", sw.toString())
+  }
 }
