@@ -5,15 +5,12 @@ import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheResolver;
-import com.github.mustachejava.util.InternalArrayList;
 import com.github.mustachejavabenchmarks.NullWriter;
 import com.sun.management.ThreadMXBean;
 import org.openjdk.jmh.annotations.*;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryManagerMXBean;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -21,33 +18,52 @@ import static java.util.Collections.singletonList;
 
 /**
  * Created by sam on 3/19/16.
-
- Initial test 5b9fce4
- Benchmark                                  Mode  Cnt       Score       Error  Units
- TweetBench.testCompilation                thrpt   20    8070.287 ±   567.640  ops/s
- TweetBench.testExecution                  thrpt   20  389133.230 ± 15624.712  ops/s
- TweetBench.testExecutionWithStringWriter  thrpt   20  157934.510 ± 41675.991  ops/s
- TweetBench.testJsonExecution              thrpt   20  239396.118 ± 11455.727  ops/s
-
- Added recursion and escaping optimization e8df5360
- Benchmark                  Mode  Cnt       Score       Error  Units
- TweetBench.testExecution  thrpt   20  412346.447 ± 19794.264  ops/s
-
- TweetBench.testCompilation                thrpt   20       7529.923 ±      617.342  ops/s
- TweetBench.testExecution                  thrpt   20     407067.266 ±    12712.684  ops/s
- TweetBench.testExecutionWithStringWriter  thrpt   20     177134.276 ±     6049.166  ops/s
- TweetBench.testJsonExecution              thrpt   20     236385.894 ±    15152.458  ops/s
-
+ * <p>
+ * Initial test 5b9fce4
+ * Benchmark                                  Mode  Cnt       Score       Error  Units
+ * TweetBench.testCompilation                thrpt   20    8070.287 ±   567.640  ops/s
+ * TweetBench.testExecution                  thrpt   20  389133.230 ± 15624.712  ops/s
+ * TweetBench.testExecutionWithStringWriter  thrpt   20  157934.510 ± 41675.991  ops/s
+ * TweetBench.testJsonExecution              thrpt   20  239396.118 ± 11455.727  ops/s
+ * <p>
+ * Added recursion and escaping optimization e8df5360
+ * Benchmark                  Mode  Cnt       Score       Error  Units
+ * TweetBench.testExecution  thrpt   20  412346.447 ± 19794.264  ops/s
+ * <p>
+ * TweetBench.testCompilation                thrpt   20       7529.923 ±      617.342  ops/s
+ * TweetBench.testExecution                  thrpt   20     407067.266 ±    12712.684  ops/s
+ * TweetBench.testExecutionWithStringWriter  thrpt   20     177134.276 ±     6049.166  ops/s
+ * TweetBench.testJsonExecution              thrpt   20     236385.894 ±    15152.458  ops/s
+ * <p>
+ * Java 1.8.0_144
+ * Benchmark                    Mode  Cnt           Score          Error  Units
+ * Main.benchJustEscapeClean   thrpt   20   554814932.404 ± 10199017.578  ops/s
+ * Main.benchJustEscapeTwo     thrpt   20   171512683.535 ±  4149779.926  ops/s
+ * Main.benchMustache          thrpt   20      983399.501 ±    38625.627  ops/s
+ * TweetBench.testCompilation  thrpt   20       57576.565 ±     1109.601  ops/s
+ * TweetBench.testExecution    thrpt   20      461662.966 ±    43016.740  ops/s
+ * TweetBench.testTimeline     thrpt   20       24707.624 ±     1411.883  ops/s
+ * <p>
+ * Java 9+181
+ * Benchmark                    Mode  Cnt           Score           Error  Units
+ * Main.benchJustEscapeClean   thrpt   20  1703973020.899 ± 126794076.169  ops/s
+ * Main.benchJustEscapeTwo     thrpt   20  1173719723.660 ±  40555137.903  ops/s
+ * Main.benchMustache          thrpt   20      982541.378 ±     29570.703  ops/s
+ * TweetBench.testCompilation  thrpt   20       44001.507 ±      1793.522  ops/s
+ * TweetBench.testExecution    thrpt   20      444469.477 ±     12699.894  ops/s
+ * TweetBench.testTimeline     thrpt   20       21863.356 ±       352.252  ops/s
  */
+@SuppressWarnings("unused")
 @State(Scope.Benchmark)
 public class TweetBench {
 
-  Mustache tweetMustache = new DefaultMustacheFactory().compile("tweet.mustache");
-  Mustache timelineMustache = new DefaultMustacheFactory().compile("timeline.mustache");
-  Tweet tweet = new Tweet();
-  NullWriter nullWriter = new NullWriter();
-  List<Object> tweetScope = new ArrayList<>(singletonList(tweet));
-  List<Object> timelineScope = new ArrayList<>();
+  private Mustache tweetMustache = new DefaultMustacheFactory().compile("tweet.mustache");
+  private Mustache timelineMustache = new DefaultMustacheFactory().compile("timeline.mustache");
+  private Tweet tweet = new Tweet();
+  private NullWriter nullWriter = new NullWriter();
+  private List<Object> tweetScope = new ArrayList<>(singletonList(tweet));
+  private List<Object> timelineScope = new ArrayList<>();
+
   {
     List<Tweet> tweetList = new ArrayList<>();
     for (int i = 0; i < 20; i++) {
@@ -57,13 +73,15 @@ public class TweetBench {
       List<Tweet> tweets = tweetList;
     });
   }
-  List<Object> jsonScope;
-  Map<String, String> cache = new HashMap<>();
+
+  private Map<String, String> cache = new HashMap<>();
+
   {
     cache.put("tweet.mustache", readResource("tweet.mustache"));
     cache.put("entities.mustache", readResource("entities.mustache"));
   }
-  MustacheResolver cached = resourceName -> new StringReader(cache.get(resourceName));
+
+  private MustacheResolver cached = resourceName -> new StringReader(cache.get(resourceName));
 
   private String readResource(String name) {
     StringWriter sw = new StringWriter();
@@ -85,7 +103,7 @@ public class TweetBench {
     try {
       MappingJsonFactory jf = new MappingJsonFactory();
       InputStream json = TweetBench.class.getClassLoader().getResourceAsStream("tweet.json");
-      jsonScope = new ArrayList<>(singletonList(new JsonMap(jf.createParser(json).readValueAsTree())));
+      new ArrayList<>(singletonList(new JsonMap(jf.createParser(json).readValueAsTree())));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -145,7 +163,7 @@ public class TweetBench {
         long diffTime = endTime - startTime;
         long endMemory = threadMXBean.getThreadAllocatedBytes(threadId);
         long diffMemory = endMemory - startMemory;
-        System.out.println(diffTime / i + " ns/iteration, " + diffMemory / i + " bytes/iteration, " + 1.0e9/diffTime*i + " per second");
+        System.out.println(diffTime / i + " ns/iteration, " + diffMemory / i + " bytes/iteration, " + 1.0e9 / diffTime * i + " per second");
         startTime = endTime;
         startMemory = endMemory;
         i = 0;
@@ -158,7 +176,7 @@ public class TweetBench {
   private static class JsonMap extends HashMap {
     private final JsonNode test;
 
-    public JsonMap(JsonNode test) {
+    JsonMap(JsonNode test) {
       this.test = test;
     }
 

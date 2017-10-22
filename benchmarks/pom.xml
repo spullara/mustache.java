@@ -9,11 +9,11 @@
   <artifactId>benchmarks</artifactId>
   <packaging>jar</packaging>
 
-  <name>benchmarking</name>
+  <name>benchmarks</name>
   <url>http://maven.apache.org</url>
 
   <properties>
-    <jmh.version>1.9.3</jmh.version>
+    <jmh.version>1.19</jmh.version>
     <uberjar.name>benchmarks</uberjar.name>
   </properties>
 
