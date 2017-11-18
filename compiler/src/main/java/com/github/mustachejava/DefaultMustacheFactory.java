@@ -92,8 +92,11 @@ public class DefaultMustacheFactory implements MustacheFactory {
       filePath = dir + filePath;
     }
 
-    // Do not append extension if it is already defined
-    if (!name.endsWith(extension)) {
+    int sepIndex = name.lastIndexOf("/");
+    name = sepIndex == -1 ? name : name.substring(sepIndex);
+    
+    // Do not append extension if it has the same extension or original one
+    if (!(name.endsWith(extension) || name.contains("."))) {
       filePath = filePath + extension;
     }
 

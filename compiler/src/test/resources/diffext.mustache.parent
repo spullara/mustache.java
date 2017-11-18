@@ -1,0 +1,2 @@
+parent
+{{>diffext.mustache.child}}

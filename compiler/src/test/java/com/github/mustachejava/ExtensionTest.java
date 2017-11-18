@@ -157,6 +157,15 @@ public class ExtensionTest {
     m.execute(sw, new Object() {});
     assertEquals(getContents(root, "nested_inheritance.txt"), sw.toString());
   }
+  
+  @Test
+  public void testDiffExt() throws IOException {
+    MustacheFactory c = new DefaultMustacheFactory(root);
+    Mustache m = c.compile("diffext.mustache.parent");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {});
+    assertEquals(getContents(root, "diffext.txt"), sw.toString());
+  }
 
   @BeforeClass
   public static void setUp() throws Exception {
