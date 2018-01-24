@@ -924,15 +924,44 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testIterator() throws IOException {
-    MustacheFactory mf = createMustacheFactory();
-    Mustache m = mf.compile(new StringReader("{{#values}}{{.}}{{/values}}{{^values}}Test2{{/values}}"), "testIterator");
-    StringWriter sw = new StringWriter();
-    m.execute(sw, new Object() {
-      Iterator values() {
-        return Arrays.asList(1, 2, 3).iterator();
-      }
-    }).close();
-    assertEquals("123", sw.toString());
+    {
+      MustacheFactory mf = createMustacheFactory();
+      Mustache m = mf.compile(new StringReader("{{#values}}{{.}}{{/values}}{{^values}}Test2{{/values}}"), "testIterator");
+      StringWriter sw = new StringWriter();
+      m.execute(sw, new Object() {
+        Iterator values() {
+          return Arrays.asList(1, 2, 3).iterator();
+        }
+      }).close();
+      assertEquals("123", sw.toString());
+    }
+    {
+      MustacheFactory mf = new DefaultMustacheFactory(root) {
+        @Override
+        public MustacheVisitor createMustacheVisitor() {
+          return new DefaultMustacheVisitor(this) {
+            @Override
+            public void iterable(TemplateContext templateContext, String variable, Mustache mustache) {
+              list.add(new IterableCode(templateContext, df, mustache, variable) {
+                @Override
+                protected boolean addScope(List<Object> scopes, Object scope) {
+                  scopes.add(scope);
+                  return true;
+                }
+              });
+            }
+          };
+        }
+      };
+      Mustache m = mf.compile(new StringReader("{{#values}}{{.}}{{/values}}{{^values}}Test2{{/values}}"), "testIterator");
+      StringWriter sw = new StringWriter();
+      m.execute(sw, new Object() {
+        Iterator values() {
+          return Arrays.asList(1, null, 3).iterator();
+        }
+      }).close();
+      assertEquals("13", sw.toString());
+    }
   }
 
   public void testObjectArray() throws IOException {
