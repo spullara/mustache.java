@@ -136,6 +136,7 @@ public class MustacheParser {
                 case '#':
                 case '^':
                 case '<':
+                case '?':
                 case '$': {
                   boolean oldStartOfLine = startOfLine;
                   startOfLine = startOfLine & onlywhitespace;
@@ -158,6 +159,9 @@ public class MustacheParser {
                       break;
                     case '$':
                       mv.name(new TemplateContext(sm, em, file, line, startOfLine), variable, mustache);
+                      break;
+                    case '?':
+                      mv.checkName(new TemplateContext(sm, em, file, line, startOfLine), variable, mustache);
                       break;
                   }
                   iterable = lines != 0;

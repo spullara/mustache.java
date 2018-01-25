@@ -43,6 +43,12 @@ public class ExtendCode extends PartialCode {
             enc.setCodes(replaceCodes(enc.getCodes(), replaceMap, seen));
           }
         } else {
+          if (code instanceof ExtendCheckNameCode) {
+            ExtendCheckNameCode ecnc = (ExtendCheckNameCode) code;
+            if (!replaceMap.containsKey(ecnc.getName())) {
+              code.setCodes(new Code[0]);
+            }
+          }
           Code[] codes = code.getCodes();
           if (codes != null) {
             code.setCodes(replaceCodes(codes, replaceMap, seen));

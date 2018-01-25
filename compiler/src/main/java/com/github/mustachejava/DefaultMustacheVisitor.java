@@ -59,6 +59,11 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
   }
 
   @Override
+  public void checkName(TemplateContext templateContext, String variable, Mustache mustache) {
+      list.add(new ExtendCheckNameCode(templateContext, df, mustache, variable));
+  }
+
+  @Override
   public void partial(TemplateContext tc, final String variable) {
     TemplateContext partialTC = new TemplateContext("{{", "}}", tc.file(), tc.line(), tc.startOfLine());
     list.add(new PartialCode(partialTC, df, variable));

@@ -926,61 +926,7 @@ public class InterpreterTest extends TestCase {
   }
 
   public void testVariableInhertiance() throws IOException {
-    DefaultMustacheFactory mf = new DefaultMustacheFactory(root) {
-      @Override
-      public MustacheVisitor createMustacheVisitor() {
-        DefaultMustacheVisitor visitor = new DefaultMustacheVisitor(this) {
-          @Override
-          public void extend(TemplateContext templateContext, String variable, Mustache mustache) {
-            list.add(new ExtendCode(templateContext, df, mustache, variable) {
-              @Override
-              public synchronized void init() {
-                // Find the comments that the pragma generates
-                List<Code> comments = new ArrayList<>();
-                for (Code code : mustache.getCodes()) {
-                  if (code instanceof CommentCode) {
-                    comments.add(code);
-                  }
-                }
-                super.init();
-                // Put the comments at the start of the base codes
-                Code[] codes = partial.getCodes();
-                if (!comments.isEmpty()) {
-                  Code[] newcodes = new Code[comments.size() + codes.length];
-                  for (int i = 0; i < comments.size(); i++) {
-                    newcodes[i] = comments.get(i);
-                  }
-                  System.arraycopy(codes, 0, newcodes, comments.size(), codes.length);
-                  partial.setCodes(newcodes);
-                }
-
-              }
-            });
-          }
-        };
-        visitor.addPragmaHandler("set", (tc, pragma, args) -> {
-          // Create a comment code that sets variables
-          int index = args.indexOf("=");
-          if (index == -1) {
-            throw new MustacheException("Pragme 'set' must have varname=value as an argument");
-          }
-          String name = args.substring(0, index);
-          String value = args.substring(index + 1);
-          Map<String, String> variable = new HashMap<String, String>() {{
-            put(name, value);
-          }};
-          return new CommentCode(tc, null, "") {
-            @Override
-            public Writer execute(Writer writer, List<Object> scopes) {
-              scopes.add(variable);
-              return writer;
-            }
-          };
-        });
-        return visitor;
-      }
-    };
-
+    DefaultMustacheFactory mf = createMustacheFactory();
     Mustache m = mf.compile("issue_201/chat.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object()).close();
