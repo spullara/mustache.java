@@ -140,7 +140,7 @@ public class ValueCode extends DefaultCode {
       if (appended == null) {
         compiledAppended = Pattern.compile("$");
       } else {
-        compiledAppended = Pattern.compile(appended);
+        compiledAppended = Pattern.compile(Pattern.quote(appended));
       }
     }
     int start = position.get();
