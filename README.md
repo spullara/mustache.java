@@ -1,4 +1,5 @@
 Mustache.java [![Build Status](https://travis-ci.org/spullara/mustache.java.svg?branch=master)](https://travis-ci.org/spullara/mustache.java)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fspullara%2Fmustache.java.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fspullara%2Fmustache.java?ref=badge_shield)
 =============
 
 As of release 0.9.0 mustache.java is now Java 8 only. For Java 6/7 support use 0.8.x.
@@ -242,3 +243,7 @@ An alternative approach for providing variables would be to use a Map object, li
     writer.flush();
   }
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fspullara%2Fmustache.java.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fspullara%2Fmustache.java?ref=badge_large)
