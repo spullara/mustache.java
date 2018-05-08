@@ -4,13 +4,15 @@ Mustache.java [![Build Status](https://travis-ci.org/spullara/mustache.java.svg?
 
 As of release 0.9.0 mustache.java is now Java 8 only. For Java 6/7 support use 0.8.x.
 
-There are no external dependencies and the compiler library is 95k.
+There are no external dependencies and the compiler library is ~100k.
 
 **Mustache.java** is a derivative of [mustache.js](http://mustache.github.com/mustache.5.html).
 
 There is a Google Group for support and questions: <http://groups.google.com/group/mustachejava>
 
 Travis CI: https://travis-ci.org/spullara/mustache.java
+
+API documentation: http://spullara.github.io/mustache/apidocs/
 
 Largest production deployment of Mustache.java:
 - Twitter (the web site, email, syndicated widgets, etc)
