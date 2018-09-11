@@ -12,7 +12,7 @@ public interface MustacheVisitor {
 
   void notIterable(TemplateContext templateContext, String variable, Mustache mustache);
 
-  void partial(TemplateContext templateContext, String variable);
+  void partial(TemplateContext templateContext, String variable, String indent);
 
   void value(TemplateContext templateContext, String variable, boolean encoded);
 

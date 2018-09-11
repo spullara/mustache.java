@@ -181,9 +181,20 @@ public class MustacheParser {
                   return mv.mustache(new TemplateContext(sm, em, file, 0, startOfLine));
                 }
                 case '>': {
+                  String indent = (onlywhitespace && startOfLine) ? out.toString() : "";
                   out = write(mv, out, file, currentLine.intValue(), startOfLine);
                   startOfLine = startOfLine & onlywhitespace;
-                  mv.partial(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable);
+                  mv.partial(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable, indent);
+
+                  // a new line following a partial is dropped
+                  if (startOfLine) {
+                    br.mark(2);
+                    int ca = br.read();
+                    if (ca == '\r') {
+                      ca = br.read();
+                    }
+                    if (ca != '\n') br.reset();
+                  }
                   break;
                 }
                 case '{': {

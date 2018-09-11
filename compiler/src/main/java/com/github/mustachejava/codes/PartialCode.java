@@ -1,6 +1,7 @@
 package com.github.mustachejava.codes;
 
 import com.github.mustachejava.*;
+import com.github.mustachejava.util.IndentWriter;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -13,8 +14,13 @@ public class PartialCode extends DefaultCode {
   protected int recrusionLimit;
   protected boolean isRecursive;
 
-  protected PartialCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String type, String variable) {
+  private final String indent;
+
+  protected PartialCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String type, String variable, String indent) {
     super(tc, df, mustache, variable, type);
+
+    this.indent = indent;
+
     // Use the  name of the parent to get the name of the partial
     String file = tc.file();
     int dotindex = file.lastIndexOf(".");
@@ -24,8 +30,8 @@ public class PartialCode extends DefaultCode {
     recrusionLimit = df.getRecursionLimit();
   }
 
-  public PartialCode(TemplateContext tc, DefaultMustacheFactory cf, String variable) {
-    this(tc, cf, null, ">", variable);
+  public PartialCode(TemplateContext tc, DefaultMustacheFactory cf, String variable, String indent) {
+    this(tc, cf, null, ">", variable, indent);
   }
 
   @Override
@@ -67,12 +73,12 @@ public class PartialCode extends DefaultCode {
       }
       writer = depthLimitedWriter;
     }
-    Writer execute = partial.execute(writer, scopes);
+    partial.execute(new IndentWriter(writer, indent), scopes);
     if (isRecursive) {
       assert depthLimitedWriter != null;
       depthLimitedWriter.decr();
     }
-    return appendText(execute);
+    return appendText(writer);
   }
 
   @Override
