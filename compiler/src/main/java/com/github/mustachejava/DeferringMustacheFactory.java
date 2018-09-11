@@ -70,10 +70,10 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
     final AtomicLong id = new AtomicLong(0);
     return new DefaultMustacheVisitor(this) {
       @Override
-      public void partial(TemplateContext tc, final String variable) {
+      public void partial(TemplateContext tc, final String variable, final String indent) {
         TemplateContext partialTC = new TemplateContext("{{", "}}", tc.file(), tc.line(), tc.startOfLine());
         final Long divid = id.incrementAndGet();
-        list.add(new PartialCode(partialTC, df, variable) {
+        list.add(new PartialCode(partialTC, df, variable, indent) {
           Wrapper deferredWrapper;
 
           @Override
