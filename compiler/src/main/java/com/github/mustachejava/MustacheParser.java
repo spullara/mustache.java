@@ -80,7 +80,7 @@ public class MustacheParser {
           // Increment the line
           if (c == '\n') {
             currentLine.incrementAndGet();
-            if (!iterable || (iterable && !onlywhitespace)) {
+            if (specConformWhitespace || !iterable || (iterable && !onlywhitespace)) {
               if (sawCR) out.append("\r");
               out.append("\n");
             }
@@ -146,13 +146,16 @@ public class MustacheParser {
                 case '$': {
                   boolean oldStartOfLine = startOfLine;
                   startOfLine = startOfLine & onlywhitespace;
-                  int line = currentLine.get();
-                  final Mustache mustache = compile(br, variable, currentLine, file, sm, em, startOfLine);
-                  int lines = currentLine.get() - line;
-                  if (!onlywhitespace || lines == 0) {
+
+                  if (!trimNewline(startOfLine, br)) {
                     write(mv, out, file, currentLine.intValue(), oldStartOfLine);
                   }
                   out = new StringBuilder();
+
+                  int line = currentLine.get();
+                  final Mustache mustache = compile(br, variable, currentLine, file, sm, em, startOfLine);
+                  int lines = currentLine.get() - line;
+
                   switch (ch) {
                     case '#':
                       mv.iterable(new TemplateContext(sm, em, file, line, startOfLine), variable, mustache);
@@ -175,7 +178,7 @@ public class MustacheParser {
                 }
                 case '/': {
                   // Tag end
-                  if (!startOfLine || !onlywhitespace) {
+                  if (!trimNewline(onlywhitespace & startOfLine, br)) {
                     write(mv, out, file, currentLine.intValue(), startOfLine);
                   }
                   if (!variable.equals(tag)) {
