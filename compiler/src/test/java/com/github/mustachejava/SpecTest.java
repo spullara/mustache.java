@@ -157,7 +157,7 @@ public class SpecTest {
           }
         } else {
           System.out.println(": failed!");
-          System.out.println(expected.replace("\n", "\\n").replace("\r", "\\r") + " != " + writer.toString().replace("\n", "\\n").replace("\r", "\\r"));
+          System.out.println(expected + " !=" + writer.toString());
           System.out.println(test);
           failed = true;
         }
