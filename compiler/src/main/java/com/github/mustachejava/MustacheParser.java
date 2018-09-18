@@ -193,7 +193,7 @@ public class MustacheParser {
                   mv.partial(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable, indent);
 
                   // a new line following a partial is dropped
-                  chompNewline(startOfLine, br);
+                  trimNewline(startOfLine, br);
                   break;
                 }
                 case '{': {
@@ -240,7 +240,7 @@ public class MustacheParser {
                   break;
                 case '=':
                   // Change delimiters
-                  if (chompNewline(startOfLine & onlywhitespace, br)) {
+                  if (trimNewline(startOfLine & onlywhitespace, br)) {
                     // indented standalone tags drop the preceding whitespace
                     out = new StringBuilder();
                   } else {
@@ -320,11 +320,11 @@ public class MustacheParser {
    * For backwards compatibility we only do this if the parser is explicitly configured so.
    * @param firstStmt If the statement that was just read was at the start of line with only whitespace preceding it
    * @param br The reader
-   * @return true if a following new line was chomped or the buffer was finished
+   * @return true if trimming was allowed and a following new line was removed or the buffer was finished;
    * @throws IOException
    */
-  private boolean chompNewline(boolean firstStmt, Reader br) throws IOException {
-    boolean chomped = false;
+  private boolean trimNewline(boolean firstStmt, Reader br) throws IOException {
+    boolean trimmed = false;
 
     if (specConformWhitespace && firstStmt) {
       br.mark(2);
@@ -334,12 +334,12 @@ public class MustacheParser {
       }
 
       if (ca == '\n' || ca == -1) {
-        chomped = true;
+        trimmed = true;
       } else {
         br.reset();
       }
     }
 
-    return chomped;
+    return trimmed;
   }
 }
