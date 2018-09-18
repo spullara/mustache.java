@@ -240,7 +240,13 @@ public class MustacheParser {
                   break;
                 case '=':
                   // Change delimiters
-                  out = write(mv, out, file, currentLine.intValue(), startOfLine);
+                  if (chompNewline(startOfLine & onlywhitespace, br)) {
+                    // indented standalone tags drop the preceding whitespace
+                    out = new StringBuilder();
+                  } else {
+                    out = write(mv, out, file, currentLine.intValue(), startOfLine);
+                  }
+
                   String trimmed = command.substring(1).trim();
                   String[] split = trimmed.split("\\s+");
                   if (split.length != 2) {
@@ -249,9 +255,6 @@ public class MustacheParser {
                   }
                   sm = split[0];
                   em = split[1];
-
-                  chompNewline(startOfLine, br);
-
                   break;
                 default: {
                   if (c == -1) {
@@ -315,18 +318,28 @@ public class MustacheParser {
    * This means that if they are the only content on this line (except whitespace) then the following newline is
    * chopped.
    * For backwards compatibility we only do this if the parser is explicitly configured so.
-   * @param startOfLine If the statement that was just read was at the start of line
+   * @param firstStmt If the statement that was just read was at the start of line with only whitespace preceding it
    * @param br The reader
+   * @return true if a following new line was chomped or the buffer was finished
    * @throws IOException
    */
-  private void chompNewline(boolean startOfLine, Reader br) throws IOException {
-    if (specConformWhitespace && startOfLine) {
+  private boolean chompNewline(boolean firstStmt, Reader br) throws IOException {
+    boolean chomped = false;
+
+    if (specConformWhitespace && firstStmt) {
       br.mark(2);
       int ca = br.read();
       if (ca == '\r') {
         ca = br.read();
       }
-      if (ca != '\n') br.reset();
+
+      if (ca == '\n' || ca == -1) {
+        chomped = true;
+      } else {
+        br.reset();
+      }
     }
+
+    return chomped;
   }
 }
