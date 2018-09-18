@@ -16,10 +16,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MustacheParser {
   public static final String DEFAULT_SM = "{{";
   public static final String DEFAULT_EM = "}}";
+  private final boolean specConformWhitespace;
   private MustacheFactory mf;
 
-  protected MustacheParser(MustacheFactory mf) {
+  protected MustacheParser(MustacheFactory mf, boolean specConformWhitespace) {
     this.mf = mf;
+    this.specConformWhitespace = specConformWhitespace;
+  }
+
+  protected MustacheParser(MustacheFactory mf) {
+    this(mf, false);
   }
 
   public Mustache compile(String file) {
@@ -187,7 +193,7 @@ public class MustacheParser {
                   mv.partial(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable, indent);
 
                   // a new line following a partial is dropped
-                  if (startOfLine) {
+                  if (specConformWhitespace && startOfLine) {
                     br.mark(2);
                     int ca = br.read();
                     if (ca == '\r') {
