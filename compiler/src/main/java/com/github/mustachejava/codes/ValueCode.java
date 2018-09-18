@@ -4,7 +4,6 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.FragmentKey;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.TemplateContext;
-import com.github.mustachejava.util.IndentWriter;
 import com.github.mustachejava.util.LatchedWriter;
 import com.github.mustachejava.util.Node;
 
@@ -76,18 +75,6 @@ public class ValueCode extends DefaultCode {
     }
   }
 
-  private Writer getInnerWriter(Writer w) throws IOException {
-    if (w instanceof IndentWriter) {
-      IndentWriter iw = (IndentWriter) w;
-      iw.flushIndent();
-      w = iw.inner;
-      while (w instanceof IndentWriter) {
-        w = ((IndentWriter) w).inner;
-      }
-    }
-    return w;
-  }
-
   protected Writer handleCallable(Writer writer, final Callable callable, final List<Object> scopes) throws Exception {
     if (les == null) {
       Object call = callable.call();
@@ -138,9 +125,9 @@ public class ValueCode extends DefaultCode {
     // Treat null values as the empty string
     if (value != null) {
       if (encoded) {
-        df.encode(value, getInnerWriter(writer));
+        df.encode(value, writer);
       } else {
-        getInnerWriter(writer).write(value);
+        writer.write(value);
       }
     }
   }
