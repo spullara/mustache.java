@@ -193,14 +193,7 @@ public class MustacheParser {
                   mv.partial(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable, indent);
 
                   // a new line following a partial is dropped
-                  if (specConformWhitespace && startOfLine) {
-                    br.mark(2);
-                    int ca = br.read();
-                    if (ca == '\r') {
-                      ca = br.read();
-                    }
-                    if (ca != '\n') br.reset();
-                  }
+                  chompNewline(startOfLine, br);
                   break;
                 }
                 case '{': {
@@ -256,6 +249,9 @@ public class MustacheParser {
                   }
                   sm = split[0];
                   em = split[1];
+
+                  chompNewline(startOfLine, br);
+
                   break;
                 default: {
                   if (c == -1) {
@@ -314,4 +310,23 @@ public class MustacheParser {
     return new StringBuilder();
   }
 
+  /**
+   * Some statements such as partials are treated as "standalone".
+   * This means that if they are the only content on this line (except whitespace) then the following newline is
+   * chopped.
+   * For backwards compatibility we only do this if the parser is explicitly configured so.
+   * @param startOfLine If the statement that was just read was at the start of line
+   * @param br The reader
+   * @throws IOException
+   */
+  private void chompNewline(boolean startOfLine, Reader br) throws IOException {
+    if (specConformWhitespace && startOfLine) {
+      br.mark(2);
+      int ca = br.read();
+      if (ca == '\r') {
+        ca = br.read();
+      }
+      if (ca != '\n') br.reset();
+    }
+  }
 }
