@@ -147,7 +147,7 @@ public class SpecTest {
         StringWriter writer = new StringWriter();
         compile.execute(writer, new Object[]{new ObjectMapper().readValue(data.toString(), Map.class), functionMap.get(file)});
         String expected = test.get("expected").asText();
-        if (writer.toString().replaceAll("\\s+", "").equals(expected.replaceAll("\\s+", ""))) {
+        if (transformOutput(writer.toString()).equals(transformOutput(expected))) {
           System.out.print(": success");
           if (writer.toString().equals(expected)) {
             System.out.println("!");
@@ -172,6 +172,10 @@ public class SpecTest {
     }
     System.out.println("Success: " + success + " Whitespace: " + whitespace + " Fail: " + fail);
     assertFalse(fail > 0);
+  }
+
+  protected String transformOutput(String output) {
+    return output.replaceAll("\\s+", "");
   }
 
   protected DefaultMustacheFactory createMustacheFactory(final JsonNode test) {
