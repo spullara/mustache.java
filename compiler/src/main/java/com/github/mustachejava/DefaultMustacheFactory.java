@@ -35,7 +35,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
   /**
    * This parser should work with any MustacheFactory
    */
-  protected final MustacheParser mc = new MustacheParser(this);
+  protected final MustacheParser mc = createParser();
 
   /**
    * New templates that are generated at runtime are cached here. The template key
@@ -257,6 +257,10 @@ public class DefaultMustacheFactory implements MustacheFactory {
     } finally {
       cache.remove(s);
     }
+  }
+
+  protected MustacheParser createParser() {
+    return new MustacheParser(this);
   }
 
   protected Function<String, Mustache> getMustacheCacheFunction() {
