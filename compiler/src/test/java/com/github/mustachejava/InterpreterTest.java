@@ -688,7 +688,7 @@ public class InterpreterTest extends TestCase {
             if (variable.startsWith("+")) {
               // This is a dynamic partial rather than a static one
               TemplateContext partialTC = new TemplateContext("{{", "}}", tc.file(), tc.line(), tc.startOfLine());
-              list.add(new PartialCode(partialTC, df, variable.substring(1).trim()) {
+              list.add(new PartialCode(partialTC, df, variable.substring(1).trim(), indent) {
                 @Override
                 public synchronized void init() {
                   filterText();
@@ -1224,7 +1224,7 @@ public class InterpreterTest extends TestCase {
           @Override
           public void partial(TemplateContext tc, String variable, String indent) {
             TemplateContext partialTC = new TemplateContext("{{", "}}", tc.file(), tc.line(), tc.startOfLine());
-            list.add(new PartialCode(partialTC, df, variable) {
+            list.add(new PartialCode(partialTC, df, variable, indent) {
               @Override
               protected String partialName() {
                 return name;

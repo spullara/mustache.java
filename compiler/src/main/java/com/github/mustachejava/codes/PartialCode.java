@@ -1,6 +1,7 @@
 package com.github.mustachejava.codes;
 
 import com.github.mustachejava.*;
+import com.github.mustachejava.util.IndentWriter;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -12,9 +13,11 @@ public class PartialCode extends DefaultCode {
   protected Mustache partial;
   protected int recrusionLimit;
   protected boolean isRecursive;
+  protected String indent;
 
-  protected PartialCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String type, String variable) {
+  protected PartialCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String type, String variable, String indent) {
     super(tc, df, mustache, variable, type);
+    this.indent = indent;
 
     // Use the  name of the parent to get the name of the partial
     String file = tc.file();
@@ -25,8 +28,8 @@ public class PartialCode extends DefaultCode {
     recrusionLimit = df.getRecursionLimit();
   }
 
-  public PartialCode(TemplateContext tc, DefaultMustacheFactory cf, String variable) {
-    this(tc, cf, null, ">", variable);
+  public PartialCode(TemplateContext tc, DefaultMustacheFactory cf, String variable, String indent) {
+    this(tc, cf, null, ">", variable, indent);
   }
 
   @Override
@@ -53,15 +56,27 @@ public class PartialCode extends DefaultCode {
 
   @Override
   public Writer execute(Writer writer, final List<Object> scopes) {
+    writer = new IndentWriter(writer, indent);
     DepthLimitedWriter depthLimitedWriter = null;
     // If the mustache wasn't found to recurse at compilation time we
     // don't need to track the recursion depth and therefore don't need
     // to create and use the DepthLimitedWriter. Another allocation slain.
     if (isRecursive) {
-      if (writer instanceof DepthLimitedWriter) {
-        depthLimitedWriter = (DepthLimitedWriter) writer;
-      } else {
-        depthLimitedWriter = new DepthLimitedWriter(writer);
+      if (writer instanceof IndentWriter) {
+        Writer inner = writer;
+        do {
+          inner = ((IndentWriter) inner).inner;
+        } while (inner instanceof IndentWriter);
+        if (inner instanceof DepthLimitedWriter) {
+          depthLimitedWriter = (DepthLimitedWriter) inner;
+        }
+      }
+      if (depthLimitedWriter == null) {
+        if (writer instanceof DepthLimitedWriter) {
+          depthLimitedWriter = (DepthLimitedWriter) writer;
+        } else {
+          depthLimitedWriter = new DepthLimitedWriter(writer);
+        }
       }
       if (depthLimitedWriter.incr() > recrusionLimit) {
         throw new MustacheException("Maximum partial recursion limit reached: " + recrusionLimit, tc);

@@ -4,6 +4,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.FragmentKey;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.util.IndentWriter;
 import com.github.mustachejava.util.LatchedWriter;
 import com.github.mustachejava.util.Node;
 
@@ -122,6 +123,15 @@ public class ValueCode extends DefaultCode {
   }
 
   protected void execute(Writer writer, String value) throws IOException {
+    // If wrapped, use the inner writer
+    if (writer instanceof IndentWriter) {
+      IndentWriter iw = (IndentWriter) writer;
+      iw.flushIndent();
+      writer = iw.inner;
+      while (writer instanceof IndentWriter) {
+        writer = ((IndentWriter) writer).inner;
+      }
+    }
     // Treat null values as the empty string
     if (value != null) {
       if (encoded) {
@@ -137,7 +147,7 @@ public class ValueCode extends DefaultCode {
   @Override
   public Node invert(Node node, String text, AtomicInteger position) {
     if (compiledAppended == null) {
-      if (appended == null) {
+      if (appended == null || appended.equals("")) {
         compiledAppended = Pattern.compile("$");
       } else {
         compiledAppended = Pattern.compile(appended);

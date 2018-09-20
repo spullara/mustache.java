@@ -2,7 +2,6 @@
 <head>
 <title>My title
  @ Default</title>
-
 </head>
 <body>
 
@@ -13,11 +12,9 @@
 <div id="content">
 	<h2>Content</h2>
 	<p>This is default content.</p>
-
 </div>
 
 <div class="menu">Menu: <ul><li>Default 1</li><li>Default 2</li></ul></div>
-
 
 </body>
 </html>

@@ -10,23 +10,25 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-/**
- * The default implementation that builds up Code lists
- */
+/** The default implementation that builds up Code lists */
 public class DefaultMustacheVisitor implements MustacheVisitor {
   protected static Logger logger = Logger.getLogger(DefaultMustacheVisitor.class.getSimpleName());
 
-  private static final Code EOF = new DefaultCode() {
-    @Override
-    public Node invert(Node node, String text, AtomicInteger position) {
-      return text.length() == position.get() ? node : null;
-    }
-  };
+  private static final Code EOF =
+      new DefaultCode() {
+        @Override
+        public Node invert(Node node, String text, AtomicInteger position) {
+          return text.length() == position.get() ? node : null;
+        }
+      };
 
   protected final List<Code> list = new LinkedList<>();
-  private final Map<String, PragmaHandler> handlers = new HashMap<String, PragmaHandler>() {{
-    put("implicit-iterator", (tc, pragma, args) -> new DefaultCode());
-  }};
+  private final Map<String, PragmaHandler> handlers =
+      new HashMap<String, PragmaHandler>() {
+        {
+          put("implicit-iterator", (tc, pragma, args) -> new DefaultCode());
+        }
+      };
 
   protected DefaultMustacheFactory df;
 
@@ -40,7 +42,8 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
 
   @Override
   public Mustache mustache(TemplateContext templateContext) {
-    return new DefaultMustache(templateContext, df, list.toArray(new Code[list.size()]), templateContext.file());
+    return new DefaultMustache(
+        templateContext, df, list.toArray(new Code[list.size()]), templateContext.file());
   }
 
   @Override
@@ -60,13 +63,14 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
 
   @Override
   public void checkName(TemplateContext templateContext, String variable, Mustache mustache) {
-      list.add(new ExtendCheckNameCode(templateContext, df, mustache, variable));
+    list.add(new ExtendCheckNameCode(templateContext, df, mustache, variable));
   }
 
   @Override
   public void partial(TemplateContext tc, final String variable, String indent) {
-    TemplateContext partialTC = new TemplateContext("{{", "}}", tc.file(), tc.line(), tc.startOfLine());
-    list.add(new PartialCode(partialTC, df, variable));
+    TemplateContext partialTC =
+        new TemplateContext("{{", "}}", tc.file(), tc.line(), tc.startOfLine());
+    list.add(new PartialCode(partialTC, df, variable, indent));
   }
 
   @Override
@@ -76,14 +80,12 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
 
   @Override
   public void write(TemplateContext tc, final String text) {
-    if (text.length() > 0) {
-      int size = list.size();
-      if (size > 0) {
-        Code code = list.get(size - 1);
-        code.append(text);
-      } else {
-        list.add(new WriteCode(tc, df, text));
-      }
+    int size = list.size();
+    if (size > 0) {
+      Code code = list.get(size - 1);
+      code.append(text);
+    } else if (text.length() > 0) {
+      list.add(new WriteCode(tc, df, text));
     }
   }
 

@@ -1,4 +1,3 @@
 precontent
 third
-
 postcontent

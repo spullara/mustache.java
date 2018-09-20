@@ -8,4 +8,5 @@ This is a test
 Test space
 Test <partial>
 With padding!
-</partial> Test
+</partial>
+ Test

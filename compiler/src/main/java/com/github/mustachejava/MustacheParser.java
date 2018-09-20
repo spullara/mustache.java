@@ -17,20 +17,10 @@ public class MustacheParser {
   public static final String DEFAULT_SM = "{{";
   public static final String DEFAULT_EM = "}}";
 
-  /**
-   * For legacy reasons we keep the non-spec conform parsing of whitespace unless this flag is true.
-   */
-  private final boolean specConformWhitespace;
-
   private MustacheFactory mf;
 
-  protected MustacheParser(MustacheFactory mf, boolean specConformWhitespace) {
-    this.mf = mf;
-    this.specConformWhitespace = specConformWhitespace;
-  }
-
   protected MustacheParser(MustacheFactory mf) {
-    this(mf, false);
+    this.mf = mf;
   }
 
   public Mustache compile(String file) {
@@ -71,7 +61,6 @@ public class MustacheParser {
       // Now we grab the mustache template
       boolean onlywhitespace = true;
       // Starting a new line
-      boolean iterable = currentLine.get() != 0;
       currentLine.compareAndSet(0, 1);
       StringBuilder out = new StringBuilder();
       try {
@@ -85,13 +74,10 @@ public class MustacheParser {
           // Increment the line
           if (c == '\n') {
             currentLine.incrementAndGet();
-            if (specConformWhitespace || !iterable || (iterable && !onlywhitespace)) {
-              if (sawCR) out.append("\r");
-              out.append("\n");
-            }
+            if (sawCR) out.append("\r");
+            out.append("\n");
             out = write(mv, out, file, currentLine.intValue(), startOfLine);
 
-            iterable = false;
             onlywhitespace = true;
             startOfLine = true;
             continue;
@@ -152,14 +138,11 @@ public class MustacheParser {
                   boolean oldStartOfLine = startOfLine;
                   startOfLine = startOfLine & onlywhitespace;
 
-                  boolean nextStartOfLine = specConformWhitespace && trimNewline(startOfLine, br);
+                  boolean nextStartOfLine = trimNewline(startOfLine, br);
 
                   int line = currentLine.get();
                   final Mustache mustache = compile(br, variable, currentLine, file, sm, em, startOfLine);
-                  int lines = currentLine.get() - line;
-
-                  if ((specConformWhitespace && !nextStartOfLine) ||
-                      (!specConformWhitespace && (!onlywhitespace || lines == 0))) {
+                  if (!nextStartOfLine) {
                     write(mv, out, file, currentLine.intValue(), oldStartOfLine);
                   }
                   out = new StringBuilder();
@@ -183,16 +166,11 @@ public class MustacheParser {
                   }
 
                   startOfLine = nextStartOfLine;
-                  iterable = lines != 0;
                   break;
                 }
                 case '/': {
                   // Tag end
-                  if (specConformWhitespace) {
-                    if (!trimNewline(onlywhitespace & startOfLine, br)) {
-                      write(mv, out, file, currentLine.intValue(), startOfLine);
-                    }
-                  } else if (!startOfLine || !onlywhitespace) {
+                  if (!trimNewline(onlywhitespace & startOfLine, br)) {
                     write(mv, out, file, currentLine.intValue(), startOfLine);
                   }
 
@@ -211,7 +189,7 @@ public class MustacheParser {
                   mv.partial(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable, indent);
 
                   // a new line following a partial is dropped
-                  startOfLine = specConformWhitespace && trimNewline(startOfLine, br);
+                  startOfLine = trimNewline(startOfLine, br);
                   break;
                 }
                 case '{': {
@@ -275,18 +253,13 @@ public class MustacheParser {
                   em = split[1];
 
 
-                  if (specConformWhitespace) {
-                    boolean sol = trimNewline(startOfLine & onlywhitespace, br);
+                  boolean sol = trimNewline(startOfLine & onlywhitespace, br);
 
-                    if (!sol) {
-                      write(mv, out, file, currentLine.intValue(), startOfLine);
-                    }
-
-                    startOfLine = sol;
-                  } else {
+                  if (!sol) {
                     write(mv, out, file, currentLine.intValue(), startOfLine);
-                    startOfLine = false;
                   }
+
+                  startOfLine = sol;
                   out = new StringBuilder();
 
 
@@ -302,12 +275,6 @@ public class MustacheParser {
                   startOfLine = false;
                   break;
                 }
-              }
-              if (!specConformWhitespace) {
-                // Additional text is no longer at the start of the line
-                // in spec-conform whitespace parsing we sometimes chop a whole line so we let the individual commands
-                // decide wether we are at the start of a line
-                startOfLine = false;
               }
               continue;
             } else {
@@ -361,7 +328,7 @@ public class MustacheParser {
    * @param firstStmt If the statement that was just read was at the start of line with only whitespace preceding it
    * @param br The reader
    * @return true if trimming was allowed and a following new line was removed or the buffer was finished;
-   * @throws IOException
+   * @throws IOException if mark isn't supported
    */
   private boolean trimNewline(boolean firstStmt, Reader br) throws IOException {
     boolean trimmed = false;
