@@ -1,6 +1,7 @@
 package com.github.mustachejava;
 
 import com.github.mustachejava.reflect.BaseObjectHandler;
+import com.github.mustachejava.util.IndentWriter;
 import com.github.mustachejava.util.Wrapper;
 
 import java.io.Writer;
@@ -59,13 +60,13 @@ public class TypeCheckingHandler extends BaseObjectHandler {
   }
 
   @Override
-  public Writer falsey(Iteration iteration, Writer writer, Object object, List<Object> scopes) {
+  public IndentWriter falsey(Iteration iteration, IndentWriter writer, Object object, List<Object> scopes) {
     // Iterate once in either case
     return iterate(iteration, writer, object, scopes);
   }
 
   @Override
-  public Writer iterate(Iteration iteration, Writer writer, Object object, List<Object> scopes) {
+  public IndentWriter iterate(Iteration iteration, IndentWriter writer, Object object, List<Object> scopes) {
     return iteration.next(writer, object, scopes);
   }
 

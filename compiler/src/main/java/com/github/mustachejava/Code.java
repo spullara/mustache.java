@@ -1,5 +1,6 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.util.IndentWriter;
 import com.github.mustachejava.util.Node;
 
 import java.io.Writer;
@@ -11,9 +12,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Code objects that are executed in order to evaluate the template
  */
 public interface Code {
-  Writer execute(Writer writer, List<Object> scopes);
+  IndentWriter execute(IndentWriter writer, List<Object> scopes);
 
-  void identity(Writer writer);
+  void identity(IndentWriter writer);
 
   void append(String text);
 

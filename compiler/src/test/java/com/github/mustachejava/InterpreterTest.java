@@ -17,6 +17,7 @@ import com.github.mustachejava.reflect.ReflectionObjectHandler;
 import com.github.mustachejava.reflect.SimpleObjectHandler;
 import com.github.mustachejava.resolver.DefaultResolver;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
+import com.github.mustachejava.util.IndentWriter;
 import com.github.mustachejavabenchmarks.JsonCapturer;
 import com.github.mustachejavabenchmarks.JsonInterpreterTest;
 import com.google.common.collect.ImmutableMap;
@@ -503,7 +504,7 @@ public class InterpreterTest extends TestCase {
     DefaultMustacheFactory c = createMustacheFactory();
     c.setObjectHandler(new ReflectionObjectHandler() {
       @Override
-      public Writer falsey(Iteration iteration, Writer writer, Object object, List<Object> scopes) {
+      public IndentWriter falsey(Iteration iteration, IndentWriter writer, Object object, List<Object> scopes) {
         if (object instanceof Number) {
           if (((Number) object).intValue() == 0) {
             return iteration.next(writer, object, scopes);
@@ -513,7 +514,7 @@ public class InterpreterTest extends TestCase {
       }
 
       @Override
-      public Writer iterate(Iteration iteration, Writer writer, Object object, List<Object> scopes) {
+      public IndentWriter iterate(Iteration iteration, IndentWriter writer, Object object, List<Object> scopes) {
         if (object instanceof Number) {
           if (((Number) object).intValue() == 0) {
             return writer;
@@ -703,12 +704,12 @@ public class InterpreterTest extends TestCase {
                 ConcurrentMap<String, Mustache> dynamicaPartialCache = new ConcurrentHashMap<>();
 
                 @Override
-                public Writer execute(Writer writer, List<Object> scopes) {
+                public IndentWriter execute(IndentWriter writer, List<Object> scopes) {
                   // Calculate the name of the dynamic partial
                   StringWriter sw = new StringWriter();
                   partial.execute(sw, scopes);
                   Mustache mustache = dynamicaPartialCache.computeIfAbsent(sw.toString(), df::compilePartial);
-                  Writer execute = mustache.execute(writer, scopes);
+                  IndentWriter execute = mustache.execute(writer, scopes);
                   return appendText(execute);
                 }
               });
@@ -1362,7 +1363,7 @@ public class InterpreterTest extends TestCase {
             list.add(new IterableCode(templateContext, df, mustache, variable) {
               Binding binding = oh.createBinding("params", templateContext, this);
 
-              protected Writer handleFunction(Writer writer, Function function, List<Object> scopes) {
+              protected IndentWriter handleFunction(IndentWriter writer, Function function, List<Object> scopes) {
                 boolean added = addScope(scopes, binding.get(scopes));
                 try {
                   return super.handleFunction(writer, function, scopes);
@@ -1401,7 +1402,7 @@ public class InterpreterTest extends TestCase {
           public void value(TemplateContext tc, String variable, boolean encoded) {
             list.add(new ValueCode(tc, df, variable, encoded) {
               @Override
-              public Writer execute(Writer writer, List<Object> scopes) {
+              public IndentWriter execute(IndentWriter writer, List<Object> scopes) {
                 try {
                   final Object object = get(scopes);
                   if (object != null) {
@@ -1515,7 +1516,7 @@ public class InterpreterTest extends TestCase {
           public void value(TemplateContext tc, String variable, boolean encoded) {
             list.add(new ValueCode(tc, df, variable, encoded) {
               @Override
-              public Writer execute(Writer writer, List<Object> scopes) {
+              public IndentWriter execute(IndentWriter writer, List<Object> scopes) {
                 try {
                   final Object object = get(scopes);
                   if (object == null) {

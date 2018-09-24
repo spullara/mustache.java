@@ -1,5 +1,7 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.util.IndentWriter;
+
 import java.io.Writer;
 import java.util.List;
 
@@ -8,5 +10,5 @@ import java.util.List;
  * method in an ObjectHandler to change the types recognized by mustache.java as iterable.
  */
 public interface Iteration {
-  Writer next(Writer writer, Object next, List<Object> scopes);
+  IndentWriter next(IndentWriter writer, Object next, List<Object> scopes);
 }

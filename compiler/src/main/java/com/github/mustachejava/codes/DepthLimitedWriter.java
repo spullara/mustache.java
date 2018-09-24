@@ -1,12 +1,16 @@
 package com.github.mustachejava.codes;
 
+import com.github.mustachejava.util.AbstractIndentWriter;
+import com.github.mustachejava.util.IndentWriter;
+
 import java.io.FilterWriter;
+import java.io.IOException;
 import java.io.Writer;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class DepthLimitedWriter extends FilterWriter {
+class DepthLimitedWriter extends AbstractIndentWriter {
   private AtomicInteger depth = new AtomicInteger(0);
-  public DepthLimitedWriter(Writer writer) {
+  public DepthLimitedWriter(IndentWriter writer) {
     super(writer);
   }
 

@@ -7,9 +7,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.TemplateFunction;
-import com.github.mustachejava.util.InternalArrayList;
-import com.github.mustachejava.util.LatchedWriter;
-import com.github.mustachejava.util.Node;
+import com.github.mustachejava.util.*;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -37,14 +35,14 @@ public class IterableCode extends DefaultCode implements Iteration {
   }
 
   @Override
-  public Writer execute(Writer writer, final List<Object> scopes) {
+  public IndentWriter execute(IndentWriter writer, final List<Object> scopes) {
     Object resolved = get(scopes);
     writer = handle(writer, resolved, scopes);
     appendText(writer);
     return writer;
   }
 
-  protected Writer handle(Writer writer, Object resolved, List<Object> scopes) {
+  protected IndentWriter handle(IndentWriter writer, Object resolved, List<Object> scopes) {
     if (resolved != null) {
       if (resolved instanceof Function) {
         writer = handleFunction(writer, (Function) resolved, scopes);
@@ -57,7 +55,7 @@ public class IterableCode extends DefaultCode implements Iteration {
     return writer;
   }
 
-  protected Writer handleCallable(Writer writer, final Callable callable, final List<Object> scopes) {
+  protected IndentWriter handleCallable(IndentWriter writer, final Callable callable, final List<Object> scopes) {
     if (les == null) {
       try {
         writer = execute(writer, callable.call(), scopes);
@@ -71,7 +69,7 @@ public class IterableCode extends DefaultCode implements Iteration {
       } catch (IOException e) {
         throw new MustacheException("Failed to flush writer", e, tc);
       }
-      final Writer originalWriter = writer;
+      final IndentWriter originalWriter = writer;
       final LatchedWriter latchedWriter = new LatchedWriter(writer);
       writer = latchedWriter;
       // Scopes must not cross thread boundaries as they
@@ -96,9 +94,9 @@ public class IterableCode extends DefaultCode implements Iteration {
   }
 
   @SuppressWarnings("unchecked")
-  protected Writer handleFunction(Writer writer, Function function, List<Object> scopes) {
+  protected IndentWriter handleFunction(IndentWriter writer, Function function, List<Object> scopes) {
     StringWriter sw = new StringWriter();
-    runIdentity(sw);
+    runIdentity(new BaseIndentWriter(sw));
     if (function instanceof TemplateFunction) {
       Object newtemplate = function.apply(sw.toString());
       if (newtemplate != null) {
@@ -108,7 +106,7 @@ public class IterableCode extends DefaultCode implements Iteration {
     } else {
       try {
         StringWriter capture = new StringWriter();
-        writeTemplate(capture, sw.toString(), scopes).close();
+        writeTemplate(new BaseIndentWriter(capture), sw.toString(), scopes).close();
         Object apply = function.apply(capture.toString());
         if (apply != null) {
           writer.write(apply.toString());
@@ -120,15 +118,15 @@ public class IterableCode extends DefaultCode implements Iteration {
     return writer;
   }
 
-  protected Writer writeTemplate(Writer writer, String templateText, List<Object> scopes) {
+  protected IndentWriter writeTemplate(IndentWriter writer, String templateText, List<Object> scopes) {
     return df.getFragment(new FragmentKey(tc, templateText)).execute(writer, scopes);
   }
 
-  protected Writer execute(Writer writer, Object resolve, List<Object> scopes) {
+  protected IndentWriter execute(IndentWriter writer, Object resolve, List<Object> scopes) {
     return oh.iterate(this, writer, resolve, scopes);
   }
 
-  public Writer next(Writer writer, Object next, List<Object> scopes) {
+  public IndentWriter next(IndentWriter writer, Object next, List<Object> scopes) {
     boolean added = addScope(scopes, next);
     writer = run(writer, scopes);
     if (added) scopes.remove(scopes.size() - 1);

@@ -2,6 +2,7 @@ package com.github.mustachejava.codes;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.util.IndentWriter;
 import com.github.mustachejava.util.Node;
 
 import java.io.Writer;
@@ -19,7 +20,7 @@ public class WriteCode extends DefaultCode {
   }
 
   @Override
-  public void identity(Writer writer) {
+  public void identity(IndentWriter writer) {
     execute(writer, null);
   }
 

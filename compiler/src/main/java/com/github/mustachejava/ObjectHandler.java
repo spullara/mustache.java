@@ -1,5 +1,6 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.util.IndentWriter;
 import com.github.mustachejava.util.InternalArrayList;
 import com.github.mustachejava.util.Wrapper;
 
@@ -37,7 +38,7 @@ public interface ObjectHandler {
    * @param scopes the scopes present
    * @return the current writer
    */
-  Writer iterate(Iteration iteration, Writer writer, Object object, List<Object> scopes);
+  IndentWriter iterate(Iteration iteration, IndentWriter writer, Object object, List<Object> scopes);
 
   /**
    * Call Iteration.next() either 0 (true) or 1 (fale) times.
@@ -48,7 +49,7 @@ public interface ObjectHandler {
    * @param scopes the scopes present
    * @return the current writer
    */
-  Writer falsey(Iteration iteration, Writer writer, Object object, List<Object> scopes);
+  IndentWriter falsey(Iteration iteration, IndentWriter writer, Object object, List<Object> scopes);
 
   /**
    * Each call site has its own binding to allow for fine grained caching without

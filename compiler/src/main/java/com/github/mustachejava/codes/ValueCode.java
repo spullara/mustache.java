@@ -4,6 +4,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.FragmentKey;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.util.IndentWriter;
 import com.github.mustachejava.util.LatchedWriter;
 import com.github.mustachejava.util.Node;
 
@@ -30,7 +31,7 @@ public class ValueCode extends DefaultCode {
   private final ExecutorService les;
 
   @Override
-  public void identity(Writer writer) {
+  public void identity(IndentWriter writer) {
     try {
       if (name != null) {
         writer.write(tc.startChars());
@@ -57,7 +58,7 @@ public class ValueCode extends DefaultCode {
   }
 
   @Override
-  public Writer execute(Writer writer, final List<Object> scopes) {
+  public IndentWriter execute(IndentWriter writer, final List<Object> scopes) {
     try {
       final Object object = get(scopes);
       if (object != null) {
@@ -75,7 +76,7 @@ public class ValueCode extends DefaultCode {
     }
   }
 
-  protected Writer handleCallable(Writer writer, final Callable callable, final List<Object> scopes) throws Exception {
+  protected IndentWriter handleCallable(IndentWriter writer, final Callable callable, final List<Object> scopes) throws Exception {
     if (les == null) {
       Object call = callable.call();
       execute(writer, call == null ? null : oh.stringify(call));

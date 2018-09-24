@@ -4,33 +4,34 @@ import com.github.mustachejava.MustacheException;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 
 /**
  * Buffer content while a future is being evaluated in another thread.
  */
-public class LatchedWriter extends Writer {
+public class LatchedWriter extends AbstractIndentWriter {
 
   // Write to the buffer while latched, when unlatched, write the
   // buffer to the underlying writer and any future writes
   private final CountDownLatch latch = new CountDownLatch(1);
 
   // A buffer that holds writes until the latch is unlatched
-  private final StringBuilder buffer = new StringBuilder();
-
-  // The underlying writer
-  private final Writer writer;
+  private final ArrayList<char[]> buffereredLines = new ArrayList<>();
 
   // This is set when the latch holder fails
   private volatile Throwable e;
 
-  public LatchedWriter(Writer writer) {
-    this.writer = writer;
+  public LatchedWriter(IndentWriter writer) {
+    super(writer);
   }
 
   // Call this when your processing is complete
   public synchronized void done() throws IOException {
-    writer.append(buffer);
+    if (!buffereredLines.isEmpty()) {
+      inner.writeLines(buffereredLines.toArray(new char[buffereredLines.size()][]));
+    }
     latch.countDown();
   }
 
@@ -44,10 +45,45 @@ public class LatchedWriter extends Writer {
   public synchronized void write(char[] cbuf, int off, int len) throws IOException {
     checkException();
     if (latch.getCount() == 0) {
-      writer.write(cbuf, off, len);
+      inner.write(cbuf, off, len);
     } else {
-      buffer.append(cbuf, off, len);
+      this.appendToLastBuffer(cbuf, off, len);
     }
+  }
+
+  @Override
+  public synchronized void writeLines(char[][] lines) throws IOException {
+    checkException();
+    if (latch.getCount() == 0) {
+      inner.writeLines(lines);
+    } else if (lines.length > 0) {
+      this.appendToLastBuffer(lines[0], 0, lines[0].length);
+
+      for (int i = 1; i < lines.length; ++i) {
+        this.buffereredLines.add(lines[i]);
+      }
+    }
+  }
+
+  private void appendToLastBuffer(char[] cbuf, int off, int len) {
+    int destOff;
+    char[] dest;
+
+    if (buffereredLines.isEmpty()) {
+      dest = new char[len];
+      destOff = 0;
+      buffereredLines.add(dest);
+    } else {
+      char[] lastBuffer = buffereredLines.get(buffereredLines.size() - 1);
+
+      destOff = lastBuffer.length;
+      dest = new char[destOff + len];
+
+      System.arraycopy(lastBuffer, 0, dest, 0, destOff);
+      buffereredLines.set(buffereredLines.size() - 1, dest);
+    }
+
+    System.arraycopy(cbuf, off, dest, destOff, len);
   }
 
   private void checkException() throws IOException {
@@ -64,7 +100,7 @@ public class LatchedWriter extends Writer {
     checkException();
     if (latch.getCount() == 0) {
       synchronized (this) {
-        writer.flush();
+        inner.flush();
       }
     }
   }
@@ -74,7 +110,7 @@ public class LatchedWriter extends Writer {
     checkException();
     await();
     flush();
-    writer.close();
+    inner.close();
   }
 
   public void await() {
@@ -84,5 +120,4 @@ public class LatchedWriter extends Writer {
       throw new MustacheException("Interrupted while waiting for completion", e);
     }
   }
-
 }

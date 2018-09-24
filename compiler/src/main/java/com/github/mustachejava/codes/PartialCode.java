@@ -1,6 +1,7 @@
 package com.github.mustachejava.codes;
 
 import com.github.mustachejava.*;
+import com.github.mustachejava.util.IndentWriter;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -30,7 +31,7 @@ public class PartialCode extends DefaultCode {
   }
 
   @Override
-  public void identity(Writer writer) {
+  public void identity(IndentWriter writer) {
     try {
       if (name != null) {
         super.tag(writer, type);
@@ -52,7 +53,7 @@ public class PartialCode extends DefaultCode {
   }
 
   @Override
-  public Writer execute(Writer writer, final List<Object> scopes) {
+  public IndentWriter execute(IndentWriter writer, final List<Object> scopes) {
     DepthLimitedWriter depthLimitedWriter = null;
     // If the mustache wasn't found to recurse at compilation time we
     // don't need to track the recursion depth and therefore don't need
@@ -68,7 +69,7 @@ public class PartialCode extends DefaultCode {
       }
       writer = depthLimitedWriter;
     }
-    Writer execute = executePartial(writer, scopes);
+    IndentWriter execute = executePartial(writer, scopes);
     if (isRecursive) {
       assert depthLimitedWriter != null;
       depthLimitedWriter.decr();
@@ -76,7 +77,7 @@ public class PartialCode extends DefaultCode {
     return appendText(execute);
   }
 
-  protected Writer executePartial(Writer writer, final List<Object> scopes) {
+  protected IndentWriter executePartial(IndentWriter writer, final List<Object> scopes) {
     return partial.execute(writer, scopes);
   }
 

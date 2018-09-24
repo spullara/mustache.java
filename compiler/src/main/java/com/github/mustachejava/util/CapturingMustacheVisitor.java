@@ -54,16 +54,16 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
     list.add(new IterableCode(tc, df, mustache, variable) {
 
       @Override
-      public Writer execute(Writer writer, List<Object> scopes) {
-        Writer execute = super.execute(writer, scopes);
+      public IndentWriter execute(IndentWriter writer, List<Object> scopes) {
+        IndentWriter execute = super.execute(writer, scopes);
         captured.arrayEnd();
         return execute;
       }
 
       @Override
-      public Writer next(Writer writer, Object next, List<Object> scopes) {
+      public IndentWriter next(IndentWriter writer, Object next, List<Object> scopes) {
         captured.objectStart();
-        Writer nextObject = super.next(writer, next, scopes);
+        IndentWriter nextObject = super.next(writer, next, scopes);
         captured.objectEnd();
         return nextObject;
       }
@@ -83,14 +83,14 @@ public class CapturingMustacheVisitor extends DefaultMustacheVisitor {
       boolean called;
 
       @Override
-      public Writer next(Writer writer, Object object, List<Object> scopes) {
+      public IndentWriter next(IndentWriter writer, Object object, List<Object> scopes) {
         called = true;
         return super.next(writer, object, scopes);
       }
 
       @Override
-      public Writer execute(Writer writer, List<Object> scopes) {
-        Writer execute = super.execute(writer, scopes);
+      public IndentWriter execute(IndentWriter writer, List<Object> scopes) {
+        IndentWriter execute = super.execute(writer, scopes);
         if (called) {
           captured.arrayStart(name);
           captured.arrayEnd();

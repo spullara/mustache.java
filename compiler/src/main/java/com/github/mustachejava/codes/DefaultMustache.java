@@ -4,6 +4,8 @@ import com.github.mustachejava.Code;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.util.BaseIndentWriter;
+import com.github.mustachejava.util.IndentWriter;
 import com.github.mustachejava.util.InternalArrayList;
 import com.github.mustachejava.util.Node;
 
@@ -28,7 +30,7 @@ public class DefaultMustache extends DefaultCode implements Mustache {
     return codes;
   }
 
-  public Writer run(Writer writer, List<Object> scopes) {
+  public IndentWriter run(IndentWriter writer, List<Object> scopes) {
     if (codes != null) {
       for (Code code : codes) {
         writer = code.execute(writer, scopes);
@@ -48,7 +50,7 @@ public class DefaultMustache extends DefaultCode implements Mustache {
   }
 
   @Override
-  public Writer execute(Writer writer, List<Object> scopes) {
+  public IndentWriter execute(IndentWriter writer, List<Object> scopes) {
     if (!(scopes instanceof InternalArrayList)) {
       // This is the only place where we explicitly allocate post initialization for a compiled mustache
       // in order to track the scopes as you descend the template. It ends up being ~200 bytes.
@@ -58,7 +60,7 @@ public class DefaultMustache extends DefaultCode implements Mustache {
   }
 
   @Override
-  public void identity(Writer writer) {
+  public void identity(IndentWriter writer) {
     // No self output at the top level
     runIdentity(writer);
   }

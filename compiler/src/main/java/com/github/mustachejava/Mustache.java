@@ -1,5 +1,7 @@
 package com.github.mustachejava;
 
+import com.github.mustachejava.util.BaseIndentWriter;
+import com.github.mustachejava.util.IndentWriter;
 import com.github.mustachejava.util.InternalArrayList;
 import com.github.mustachejava.util.Node;
 
@@ -53,7 +55,11 @@ public interface Mustache extends Code {
    * @param scopes an ordered list of scopes for variable resolution
    * @return the new writer
    */
-  Writer execute(Writer writer, List<Object> scopes);
+  default Writer execute(Writer writer, List<Object> scopes) {
+    return execute(new BaseIndentWriter(writer), scopes);
+  }
+
+  IndentWriter execute(IndentWriter writer, List<Object> scopes);
 
   /**
    * Get the underlying code objects.
@@ -67,7 +73,11 @@ public interface Mustache extends Code {
    *
    * @param writer write the output of the executed template here
    */
-  void identity(Writer writer);
+  void identity(IndentWriter writer);
+
+  default void identity(Writer writer) {
+    this.identity(new BaseIndentWriter(writer));
+  }
 
   /**
    * Initialize the mustache before executing. This is must be called at least once
@@ -89,7 +99,7 @@ public interface Mustache extends Code {
    * @param scopes the array of scopes to execute
    * @return the replacement writer
    */
-  Writer run(Writer writer, List<Object> scopes);
+  IndentWriter run(IndentWriter writer, List<Object> scopes);
 
   /**
    * Invert this mustache given output text.

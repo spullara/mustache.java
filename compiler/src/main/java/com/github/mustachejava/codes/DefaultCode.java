@@ -7,6 +7,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.util.IndentWriter;
 import com.github.mustachejava.util.Node;
 
 import java.io.IOException;
@@ -158,12 +159,12 @@ public class DefaultCode implements Code, Cloneable {
    * @param scopes The scopes to evaluate the embedded names against.
    */
   @Override
-  public Writer execute(Writer writer, List<Object> scopes) {
+  public IndentWriter execute(IndentWriter writer, List<Object> scopes) {
     return appendText(run(writer, scopes));
   }
 
   @Override
-  public void identity(Writer writer) {
+  public void identity(IndentWriter writer) {
     try {
       if (name != null) {
         tag(writer, type);
@@ -178,7 +179,7 @@ public class DefaultCode implements Code, Cloneable {
     }
   }
 
-  protected void runIdentity(Writer writer) {
+  protected void runIdentity(IndentWriter writer) {
     int length = getCodes().length;
     for (int i = 0; i < length; i++) {
       getCodes()[i].identity(writer);
@@ -192,16 +193,21 @@ public class DefaultCode implements Code, Cloneable {
     writer.write(tc.endChars());
   }
 
-  private char[] appendedChars;
+  private char[][] appendedLines;
   
-  protected Writer appendText(Writer writer) {
+  protected IndentWriter appendText(IndentWriter writer) {
     if (appended != null) {
       try {
         // Avoid allocations at runtime
-        if (appendedChars == null) {
-          appendedChars = appended.toCharArray();
+        if (appendedLines == null) {
+            String[] ls = appended.split("\n", -1);
+            appendedLines = new char[ls.length][];
+
+            for (int i = 0; i < ls.length; ++i) {
+                appendedLines[i] = ls[i].toCharArray();
+            }
         }
-        writer.write(appendedChars);
+        writer.writeLines(appendedLines);
       } catch (IOException e) {
         throw new MustacheException("Failed to write", e, tc);
       }
@@ -209,7 +215,7 @@ public class DefaultCode implements Code, Cloneable {
     return writer;
   }
 
-  protected Writer run(Writer writer, List<Object> scopes) {
+  protected IndentWriter run(IndentWriter writer, List<Object> scopes) {
     return mustache == null ? writer : mustache.run(writer, scopes);
   }
 

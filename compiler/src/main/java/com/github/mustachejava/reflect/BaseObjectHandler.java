@@ -5,6 +5,7 @@ import com.github.mustachejava.Code;
 import com.github.mustachejava.Iteration;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.util.IndentWriter;
 
 import java.io.Writer;
 import java.lang.reflect.AccessibleObject;
@@ -31,7 +32,7 @@ public abstract class BaseObjectHandler implements ObjectHandler {
   }
 
   @Override
-  public Writer falsey(Iteration iteration, Writer writer, Object object, List<Object> scopes) {
+  public IndentWriter falsey(Iteration iteration, IndentWriter writer, Object object, List<Object> scopes) {
     if (object != null) {
       if (object instanceof Boolean) {
         if ((Boolean) object) {
@@ -66,7 +67,7 @@ public abstract class BaseObjectHandler implements ObjectHandler {
   public abstract Binding createBinding(String name, TemplateContext tc, Code code);
 
   @SuppressWarnings("ForLoopReplaceableByForEach") // it allocates objects for foreach
-  public Writer iterate(Iteration iteration, Writer writer, Object object, List<Object> scopes) {
+  public IndentWriter iterate(Iteration iteration, IndentWriter writer, Object object, List<Object> scopes) {
     if (object == null) return writer;
     if (object instanceof Boolean) {
       if (!(Boolean) object) {

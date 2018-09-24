@@ -2,6 +2,7 @@ package com.github.mustachejava;
 
 import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.util.GuardException;
+import com.github.mustachejava.util.IndentWriter;
 import com.github.mustachejava.util.InternalArrayList;
 import com.github.mustachejava.util.Wrapper;
 
@@ -77,7 +78,7 @@ public class DeferringMustacheFactory extends DefaultMustacheFactory {
           Wrapper deferredWrapper;
 
           @Override
-          public Writer execute(Writer writer, final List<Object> scopes) {
+          public IndentWriter execute(IndentWriter writer, final List<Object> scopes) {
 
             final Object object = get(scopes);
             final DeferredCallable deferredCallable = getDeferred(scopes);
