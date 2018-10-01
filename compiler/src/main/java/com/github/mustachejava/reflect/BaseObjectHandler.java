@@ -144,6 +144,9 @@ public abstract class BaseObjectHandler implements ObjectHandler {
   }
 
   protected AccessibleObject findMember(Class sClass, String name) {
+    if (String.class == sClass && "value".equals(name)) { // under java11 it would return a wrapper we don't want
+      return null;
+    }
     AccessibleObject ao;
     try {
       ao = getMethod(sClass, name);
