@@ -23,6 +23,11 @@ import static junit.framework.Assert.assertFalse;
 public class SpecTest {
 
   @Test
+  public void comments() throws IOException {
+    run(getSpec("comments.yml"));
+  }
+
+  @Test
   public void interpolations() throws IOException {
     run(getSpec("interpolation.yml"));
   }

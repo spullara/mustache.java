@@ -260,8 +260,21 @@ public class MustacheParser {
                 case '!':
                   // Comment
                   mv.comment(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable);
-                  out = write(mv, out, file, currentLine.intValue(), startOfLine);
-                  startOfLine = false;
+
+                  if (specConformWhitespace) {
+                    boolean sol = trimNewline(startOfLine & onlywhitespace, br);
+
+                    if (!sol) {
+                      write(mv, out, file, currentLine.intValue(), startOfLine);
+                    }
+
+                    startOfLine = sol;
+                  } else {
+                    write(mv, out, file, currentLine.intValue(), startOfLine);
+                    startOfLine = false;
+                  }
+                  out = new StringBuilder();
+
                   break;
                 case '=':
                   // Change delimiters
