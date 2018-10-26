@@ -52,6 +52,7 @@ public class SpecMustacheVisitor extends DefaultMustacheVisitor {
         iw.flushIndent();
         writer = iw.inner;
         while (writer instanceof IndentWriter) {
+          ((IndentWriter) writer).flushIndent();
           writer = ((IndentWriter) writer).inner;
         }
       }
