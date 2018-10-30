@@ -1520,8 +1520,10 @@ public class InterpreterTest extends TestCase {
                   final Object object = get(scopes);
                   if (object == null) {
                     identity(writer);
+                    return writer;
+                  } else {
+                    return super.execute(writer, scopes);
                   }
-                  return super.execute(writer, scopes);
                 } catch (Exception e) {
                   throw new MustacheException("Failed to get value for " + name, e, tc);
                 }
@@ -1531,12 +1533,12 @@ public class InterpreterTest extends TestCase {
         };
       }
     };
-    Mustache test = dmf.compile(new StringReader("{{name}} - {{email}}"), "test");
+    Mustache test = dmf.compile(new StringReader("{{name}} - {{email}} 1"), "test");
     StringWriter sw = new StringWriter();
     Map<Object, Object> map = new HashMap<>();
     map.put("name", "Sam Pullara");
     test.execute(sw, map).close();
-    assertEquals("Sam Pullara - {{email}}", sw.toString());
+    assertEquals("Sam Pullara - {{email}} 1", sw.toString());
   }
 
   private DefaultMustacheFactory initParallel() {
