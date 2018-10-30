@@ -40,7 +40,7 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
-      <version>7.0.2.v20100331</version>
+      <version>9.3.24.v20180605</version>
     </dependency>
 
     <!-- Testing -->
