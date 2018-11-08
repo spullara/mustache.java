@@ -35,7 +35,7 @@ Request for contributions:
 
 Documentation:
 
-- [Javadocs](http://mustachejava.s3-website-us-west-1.amazonaws.com/apidocs/index.html)
+- [Javadocs](http://spullara.github.io/mustache/apidocs/)
 - [Mustache.js manual](http://mustache.github.com/mustache.5.html)
 - Passes all of the `mustache` [specification tests](https://github.com/mustache/spec) modulo whitespace differences
 - Biggest difference between mustache.js and mustache.java is optional concurrent evaluation
