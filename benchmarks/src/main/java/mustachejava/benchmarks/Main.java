@@ -7,10 +7,14 @@ import com.github.mustachejavabenchmarks.NullWriter;
 import org.openjdk.jmh.annotations.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 /*
@@ -84,31 +88,34 @@ public class Main {
     }
   }));
 
-  @Benchmark
-  @BenchmarkMode(Mode.Throughput)
-  @OutputTimeUnit(TimeUnit.SECONDS)
-  public void benchMustache() throws IOException {
-    normal.execute(nw, scope).close();
-  }
-
-  @Benchmark
-  @BenchmarkMode(Mode.Throughput)
-  @OutputTimeUnit(TimeUnit.SECONDS)
-  public void benchJustEscapeClean() {
-    HtmlEscaper.escape("variable", nw);
-  }
-
-  @Benchmark
-  @BenchmarkMode(Mode.Throughput)
-  @OutputTimeUnit(TimeUnit.SECONDS)
-  public void benchJustEscapeTwo() {
-    HtmlEscaper.escape("va&ri\"ble", nw);
-  }
-
-  public static void main(String[] args) throws IOException {
-    Main main = new Main();
-    while (true) {
-      main.benchMustache();
+  private static String readStringFromURL(InputStream source) {
+    try (Scanner scanner = new Scanner(source,
+            StandardCharsets.UTF_8.toString())) {
+      scanner.useDelimiter("\\A");
+      return scanner.hasNext() ? scanner.next() : "";
     }
+  }
+
+  private static String html = readStringFromURL(ClassLoader.getSystemResourceAsStream("Yahoo.html"));
+
+//  @Benchmark
+//  @BenchmarkMode(Mode.Throughput)
+//  @OutputTimeUnit(TimeUnit.SECONDS)
+//  public void benchMustache() throws IOException {
+//    normal.execute(nw, scope).close();
+//  }
+
+  @Benchmark
+  @BenchmarkMode(Mode.Throughput)
+  @OutputTimeUnit(TimeUnit.SECONDS)
+  public void benchEscapeHTML() {
+    HtmlEscaper.escape(html, nw);
+  }
+
+  @Benchmark
+  @BenchmarkMode(Mode.Throughput)
+  @OutputTimeUnit(TimeUnit.SECONDS)
+  public void benchEscapeHTMLwithSW() {
+    HtmlEscaper.escape(html, new StringWriter());
   }
 }

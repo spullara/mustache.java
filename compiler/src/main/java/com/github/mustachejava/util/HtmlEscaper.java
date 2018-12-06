@@ -10,7 +10,7 @@ import java.io.Writer;
  */
 public class HtmlEscaper {
 
-  private static char[][] LT_96 = new char[97][];
+  private static char[][] ESC = new char[97][];
 
   static {
     char[] AMP = "&amp;".toCharArray();
@@ -20,34 +20,34 @@ public class HtmlEscaper {
     char[] SQ = "&#39;".toCharArray();
     char[] BQ = "&#96;".toCharArray();
     char[] EQ = "&#61;".toCharArray();
-    for (int c = 0; c < LT_96.length; c++) {
+    for (int c = 0; c < ESC.length; c++) {
       if (c <= 13) {
-        LT_96[c] = ("&#" + c + ";").toCharArray();
+        ESC[c] = ("&#" + c + ";").toCharArray();
       } else {
         switch (c) {
           case '&':
-            LT_96[c] = AMP;
+            ESC[c] = AMP;
             break;
           case '<':
-            LT_96[c] = LT;
+            ESC[c] = LT;
             break;
           case '>':
-            LT_96[c] = GT;
+            ESC[c] = GT;
             break;
           case '"':
-            LT_96[c] = DQ;
+            ESC[c] = DQ;
             break;
           case '\'':
-            LT_96[c] = SQ;
+            ESC[c] = SQ;
             break;
           case '=':
-            LT_96[c] = EQ;
+            ESC[c] = EQ;
             break;
           case '`':
-            LT_96[c] = BQ;
+            ESC[c] = BQ;
             break;
           default:
-            LT_96[c] = new char[]{(char) c};
+            ESC[c] = null;
             break;
         }
       }
@@ -56,17 +56,26 @@ public class HtmlEscaper {
 
   public static void escape(String value, Writer writer) {
     try {
-      int length = value.length();
+      char[] chars = value.toCharArray();
+      int length = chars.length;
+      int start = 0;
       for (int i = 0; i < length; i++) {
-        char c = value.charAt(i);
-        if (c <= 96) {
-          writer.write(LT_96[c]);
-        } else {
-          writer.write(c);
+        char c = chars[i];
+        char[] escaped;
+        // We only possibly escape chars in the range 0-96
+        if (c <= 96 && (escaped = ESC[c]) != null) {
+          // Write from the last replacement to before this one
+          if (i > start) writer.write(chars, start, i - start);
+          // Write the replacement
+          writer.write(escaped);
+          // Move the pointer to the position after replacement
+          start = i + 1;
         }
       }
+      writer.write(chars, start, length - start);
     } catch (IOException e) {
       throw new MustacheException("Failed to encode value: " + value, e);
     }
   }
+
 }
