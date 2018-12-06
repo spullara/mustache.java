@@ -1,6 +1,7 @@
 package com.github.mustachejava;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -112,7 +113,7 @@ public class FallbackMustacheFactory extends DefaultMustacheFactory {
         if (is == null) {
           throw new MustacheNotFoundException(resourceName);
         } else {
-          return new BufferedReader(new InputStreamReader(is, "UTF-8"));
+          return new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
         }
 
       } catch (Exception e) {

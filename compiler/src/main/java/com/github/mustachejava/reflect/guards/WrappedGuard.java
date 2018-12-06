@@ -17,6 +17,8 @@ import static com.github.mustachejava.reflect.ReflectionObjectHandler.unwrap;
  * Time: 9:09 PM
  */
 public class WrappedGuard implements Guard {
+  private static final Wrapper[] EMPTY_WRAPPERS = new Wrapper[0];
+
   protected final ObjectHandler oh;
   protected final int index;
   protected final Wrapper[] wrappers;
@@ -25,7 +27,7 @@ public class WrappedGuard implements Guard {
   public WrappedGuard(ObjectHandler oh, int index, List<Wrapper> wrappers, List<Guard> wrapperGuard) {
     this.oh = oh;
     this.index = index;
-    this.wrappers = wrappers.toArray(new Wrapper[wrappers.size()]);
+    this.wrappers = wrappers.toArray(EMPTY_WRAPPERS);
     this.wrapperGuard = wrapperGuard;
   }
 

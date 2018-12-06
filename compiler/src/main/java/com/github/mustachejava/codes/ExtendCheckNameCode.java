@@ -4,9 +4,6 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.TemplateContext;
 
-import java.io.Writer;
-import java.util.List;
-
 /**
  * Name a section: {{$name}}...{{/name}}
  */

@@ -1,6 +1,7 @@
 package com.github.mustachejava.util;
 
 import java.util.List;
+import java.util.Objects;
 
 public class NodeValue {
   private final List<Node> list;
@@ -38,8 +39,8 @@ public class NodeValue {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     NodeValue nodeValue = (NodeValue) o;
-    return !(list != null ? !list.equals(nodeValue.list) : nodeValue.list != null) && 
-            !(value != null ? !value.equals(nodeValue.value) : nodeValue.value != null);
+    return Objects.equals(list, nodeValue.list) &&
+            Objects.equals(value, nodeValue.value);
   }
 
   @Override

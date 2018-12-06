@@ -3,6 +3,7 @@ package com.github.mustachejava.reflect.guards;
 import com.github.mustachejava.reflect.Guard;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Ensure that the class of the current scope is that same as when this wrapper was generated.
@@ -29,7 +30,7 @@ public class ClassGuard implements Guard {
   public boolean equals(Object o) {
     if (o instanceof ClassGuard) {
       ClassGuard other = (ClassGuard) o;
-      return classGuard == null ? other.classGuard == null : classGuard.equals(other.classGuard);
+      return Objects.equals(classGuard, other.classGuard);
     } else {
       return false;
     }

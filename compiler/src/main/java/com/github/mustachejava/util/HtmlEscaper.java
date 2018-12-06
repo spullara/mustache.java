@@ -22,7 +22,7 @@ public class HtmlEscaper {
     char[] EQ = "&#61;".toCharArray();
     for (int c = 0; c < LT_96.length; c++) {
       if (c <= 13) {
-        LT_96[c] = ("&#" + String.valueOf(c) + ";").toCharArray();
+        LT_96[c] = ("&#" + c + ";").toCharArray();
       } else {
         switch (c) {
           case '&':

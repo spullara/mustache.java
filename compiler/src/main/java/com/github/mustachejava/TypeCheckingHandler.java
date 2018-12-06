@@ -33,7 +33,7 @@ public class TypeCheckingHandler extends BaseObjectHandler {
     }
     for (int i = length - 1; i >= 0; i--) {
       Object scope = scopes.get(i);
-      if (scope == null || !(scope instanceof Class)) {
+      if (!(scope instanceof Class)) {
         throw new MustacheException("Invalid scope: " + scope);
       }
       Class scopeClass = (Class) scope;
@@ -50,7 +50,7 @@ public class TypeCheckingHandler extends BaseObjectHandler {
         };
       }
     }
-    throw new MustacheException("Failed to find matching field or method: " + name + " in " + Arrays.asList(scopes));
+    throw new MustacheException("Failed to find matching field or method: " + name + " in " + scopes);
   }
 
   @Override

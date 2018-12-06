@@ -1,5 +1,7 @@
 package com.github.mustachejava;
 
+import java.util.Objects;
+
 public final class TemplateContext {
   private final String sm;
   private final String em;
@@ -40,10 +42,10 @@ public final class TemplateContext {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     TemplateContext that = (TemplateContext) o;
-    return line == that.line && 
-            !(em != null ? !em.equals(that.em) : that.em != null) && 
-            !(file != null ? !file.equals(that.file) : that.file != null) && 
-            !(sm != null ? !sm.equals(that.sm) : that.sm != null);
+    return line == that.line &&
+            Objects.equals(em, that.em) &&
+            Objects.equals(file, that.file) &&
+            Objects.equals(sm, that.sm);
   }
 
   @Override

@@ -224,12 +224,7 @@ public class DefaultMustacheFactory implements MustacheFactory {
     return recursionLimit;
   }
 
-  private final ThreadLocal<Map<String, Mustache>> partialCache = new ThreadLocal<Map<String, Mustache>>() {
-    @Override
-    protected Map<String, Mustache> initialValue() {
-      return new HashMap<>();
-    }
-  };
+  private final ThreadLocal<Map<String, Mustache>> partialCache = ThreadLocal.withInitial(() -> new HashMap<>());
 
   /**
    * In order to handle recursion, we need a temporary thread local cache during compilation

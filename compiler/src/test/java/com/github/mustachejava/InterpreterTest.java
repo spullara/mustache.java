@@ -3,8 +3,6 @@ package com.github.mustachejava;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingJsonFactory;
-import com.github.mustachejava.codes.CommentCode;
-import com.github.mustachejava.codes.ExtendCode;
 import com.github.mustachejava.codes.IterableCode;
 import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.codes.ValueCode;

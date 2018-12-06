@@ -10,6 +10,7 @@ import com.github.mustachejava.util.GuardException;
 import com.github.mustachejava.util.Wrapper;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Logger;
@@ -24,6 +25,8 @@ import static java.util.Collections.singletonList;
  * Time: 6:05 PM
  */
 public class GuardedBinding implements Binding {
+  private static final Wrapper[] EMPTY_WRAPPERS = new Wrapper[0];
+
   // Debug callsites
   private static Logger logger = Logger.getLogger("mustache");
   private static boolean debug = Boolean.getBoolean("mustache.debug");
@@ -86,7 +89,7 @@ public class GuardedBinding implements Binding {
     Wrapper wrapper = getWrapper(name, scopes);
     previousSet.add(wrapper);
     if (prevWrappers == null || prevWrappers.length != previousSet.size()) {
-      prevWrappers = previousSet.toArray(new Wrapper[previousSet.size()]);
+      prevWrappers = previousSet.toArray(EMPTY_WRAPPERS);
     }
     // If this fails the guard, there is a bug
     try {
@@ -118,7 +121,7 @@ public class GuardedBinding implements Binding {
             .append(tc.line())
             .append(") ")
             .append("in");
-    scopes.stream().filter(scope -> scope != null).forEach(scope -> {
+    scopes.stream().filter(Objects::nonNull).forEach(scope -> {
       Class aClass = scope.getClass();
       try {
         sb.append(" ").append(aClass.getSimpleName());
