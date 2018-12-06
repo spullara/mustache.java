@@ -17,14 +17,6 @@ public class NotIterableCode extends IterableCode {
     super(templateContext, df, mustache, variable, "^");
   }
 
-  @Override
-  public Writer execute(Writer writer, final List<Object> scopes) {
-    Object resolved = get(scopes);
-    writer = handle(writer, resolved, scopes);
-    appendText(writer);
-    return writer;
-  }
-
   protected Writer handle(Writer writer, Object resolved, List<Object> scopes) {
     if (resolved instanceof Callable) {
       writer = handleCallable(writer, (Callable) resolved, scopes);

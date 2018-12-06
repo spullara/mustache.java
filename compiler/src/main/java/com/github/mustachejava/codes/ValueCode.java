@@ -77,8 +77,7 @@ public class ValueCode extends DefaultCode {
 
   protected Writer handleCallable(Writer writer, final Callable callable, final List<Object> scopes) throws Exception {
     if (les == null) {
-      Object call = callable.call();
-      execute(writer, call == null ? null : oh.stringify(call));
+      execute(writer, callable);
       return super.execute(writer, scopes);
     } else {
       // Flush the current writer
@@ -91,8 +90,7 @@ public class ValueCode extends DefaultCode {
       final Writer finalWriter = writer;
       les.execute(() -> {
         try {
-          Object call = callable.call();
-          execute(finalWriter, call == null ? null : oh.stringify(call));
+          execute(finalWriter, callable);
           latchedWriter.done();
         } catch (Throwable e) {
           latchedWriter.failed(e);
@@ -100,6 +98,11 @@ public class ValueCode extends DefaultCode {
       });
       return super.execute(latchedWriter, scopes);
     }
+  }
+
+  private void execute(Writer writer, Callable callable) throws Exception {
+    Object call = callable.call();
+    execute(writer, call == null ? null : oh.stringify(call));
   }
 
   @SuppressWarnings("unchecked")
