@@ -8,13 +8,10 @@ import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.codes.ValueCode;
 import com.github.mustachejava.codes.WriteCode;
 import com.github.mustachejava.functions.CommentFunction;
-import com.github.mustachejava.reflect.Guard;
-import com.github.mustachejava.reflect.GuardedBinding;
-import com.github.mustachejava.reflect.MissingWrapper;
-import com.github.mustachejava.reflect.ReflectionObjectHandler;
-import com.github.mustachejava.reflect.SimpleObjectHandler;
+import com.github.mustachejava.reflect.*;
 import com.github.mustachejava.resolver.DefaultResolver;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
+import com.github.mustachejava.util.Wrapper;
 import com.github.mustachejavabenchmarks.JsonCapturer;
 import com.github.mustachejavabenchmarks.JsonInterpreterTest;
 import com.google.common.collect.ImmutableMap;
@@ -249,6 +246,37 @@ public class InterpreterTest extends TestCase {
       };
     });
     assertEquals(getContents(root, "page.txt"), sw.toString());
+  }
+
+  public void testDefaultValue() throws IOException {
+    DefaultMustacheFactory mf = new DefaultMustacheFactory(root);
+    mf.setObjectHandler(new ReflectionObjectHandler() {
+      @Override
+      public Wrapper find(String name, List<Object> scopes) {
+        int i;
+        if ((i = name.indexOf("|")) != -1) {
+          String newName = name.substring(0, i);
+          String defaultValue = name.substring(i + 1);
+          Wrapper wrapper = super.find(newName, scopes);
+          if (wrapper instanceof MissingWrapper) {
+            return scopes1 -> {
+              // Test the guards returned in the missing wrapper
+              wrapper.call(scopes1);
+              return defaultValue;
+            };
+          }
+          return wrapper;
+        }
+        return super.find(name, scopes);
+      }
+    });
+    Mustache m = mf.compile(new StringReader("{{test}} {{test2|bar}} {{test3|baz}}"), "testDefaultValue");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      String test = "foo";
+      String test2 = "BAR";
+    });
+    assertEquals("foo BAR baz", sw.toString());
   }
 
   public void testSimplePragma() throws MustacheException, IOException, ExecutionException, InterruptedException {
