@@ -26,8 +26,8 @@ import static com.github.mustachejava.util.NodeValue.value;
  * Output a value
  */
 public class ValueCode extends DefaultCode {
-  private final boolean encoded;
-  private final ExecutorService les;
+  protected final boolean encoded;
+  protected final ExecutorService les;
 
   @Override
   public void identity(Writer writer) {
