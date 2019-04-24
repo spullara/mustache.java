@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -103,9 +104,10 @@ public class ReflectionWrapper extends GuardedWrapper {
   }
 
   private String getTargetDescription() {
+    final List<Object> argList = arguments == null ? Collections.emptyList() : Arrays.asList(arguments);
     return method == null
         ? "field " + field.getDeclaringClass() + "." + field.getName()
-        : "method " + method.getDeclaringClass().getCanonicalName() + "." + method.getName() + "(" + elementsToString(Arrays.asList(arguments), method.getParameterTypes().length - 1) + ")";
+        : "method " + method.getDeclaringClass().getCanonicalName() + "." + method.getName() + "(" + elementsToString(argList, method.getParameterTypes().length - 1) + ")";
   }
   
   private String elementsToString(List<Object> objects, int showUpTo) {
