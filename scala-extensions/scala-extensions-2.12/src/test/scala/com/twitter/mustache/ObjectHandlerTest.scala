@@ -1,7 +1,6 @@
 package com.twitter.mustache
 
 import com.github.mustachejava.DefaultMustacheFactory
-import com.twitter.util.{Future, FuturePool}
 import java.io.{StringReader, StringWriter}
 import java.util.concurrent.{Callable, Executors}
 
