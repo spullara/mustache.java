@@ -85,6 +85,14 @@
               </goals>
             </execution>
           </executions>
+          <configuration>
+              <instructions>
+                  <Export-Package>
+                      com.github.spullara.mustache.java.*;version=${version},
+                  </Export-Package>
+                  <Embed-Dependency>*;scope=compile;inline=true</Embed-Dependency>
+              </instructions>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
