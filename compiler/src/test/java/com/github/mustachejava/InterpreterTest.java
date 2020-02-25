@@ -1333,6 +1333,22 @@ public class InterpreterTest extends TestCase {
     }
   }
 
+  public void testLambdaExceptions() {
+    try {
+      String template = "hello {{#timesTwo}}a{{/timesTwo}}";
+      Mustache mustache = new DefaultMustacheFactory().compile(new StringReader(template), "test");
+      StringWriter sw = new StringWriter();
+      mustache.execute(sw, new Object() {
+        Function<String, String> timesTwo = (s) -> {
+          throw new RuntimeException();
+        };
+      });
+      fail("Should have throw MustacheException");
+    } catch (MustacheException me) {
+      // works
+    }
+  }
+
   public void testLimitedDepthRecursion() {
     try {
       StringWriter sw = execute("infiniteparent.html", new Context());

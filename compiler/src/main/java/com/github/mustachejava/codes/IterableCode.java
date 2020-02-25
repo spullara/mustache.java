@@ -100,7 +100,12 @@ public class IterableCode extends DefaultCode implements Iteration {
     StringWriter sw = new StringWriter();
     runIdentity(sw);
     if (function instanceof TemplateFunction) {
-      Object newtemplate = function.apply(sw.toString());
+      Object newtemplate;
+      try {
+        newtemplate = function.apply(sw.toString());
+      } catch (Exception e) {
+        throw new MustacheException("Function failure", e, tc);
+      }
       if (newtemplate != null) {
         String templateText = newtemplate.toString();
         writer = writeTemplate(writer, templateText, scopes);
@@ -109,7 +114,12 @@ public class IterableCode extends DefaultCode implements Iteration {
       try {
         StringWriter capture = new StringWriter();
         writeTemplate(capture, sw.toString(), scopes).close();
-        Object apply = function.apply(capture.toString());
+        Object apply;
+        try {
+          apply = function.apply(capture.toString());
+        } catch (Exception e) {
+          throw new MustacheException("Function failure", e, tc);
+        }
         if (apply != null) {
           writer.write(apply.toString());
         }
