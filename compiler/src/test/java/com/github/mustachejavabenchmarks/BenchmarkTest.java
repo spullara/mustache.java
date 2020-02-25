@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.Writer;
 import java.util.concurrent.Executors;
 
@@ -30,16 +31,36 @@ public class BenchmarkTest extends TestCase {
     return System.getenv().containsKey("CI") || System.getProperty("CI") != null;
   }
 
-  public void testCompiler() {
+  public void testCompiler() throws IOException {
     if (skip()) return;
+    String s = "<h1>{{header}}</h1>\n" +
+            "{{#list}}\n" +
+            "  <ul>\n" +
+            "  {{#item}}\n" +
+            "    {{#current}}\n" +
+            "      <li><strong>{{name}}</strong></li>\n" +
+            "    {{/current}}\n" +
+            "    {{#link}}\n" +
+            "      <li><a href=\"{{url}}\">{{name}}</a></li>\n" +
+            "    {{/link}}\n" +
+            "  {{/item}}\n" +
+            "  </ul>\n" +
+            "{{/list}}\n" +
+            "{{#empty}}\n" +
+            "  <p>The list is empty.</p>\n" +
+            "{{/empty}}\n" +
+            "{{^empty}}\n" +
+            "  <p>The list is not empty.</p>\n" +
+            "{{/empty}}";
     System.out.println("complex.html compilations per second:");
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 10; i++) {
       {
         long start = System.currentTimeMillis();
         int total = 0;
+        DefaultMustacheFactory cf = createMustacheFactory();
         while (true) {
-          DefaultMustacheFactory cf = createMustacheFactory();
-          Mustache m = cf.compile("complex.html");
+          StringReader sr = new StringReader(s);
+          Mustache m = cf.compile(sr, "complex.html");
           total++;
           if (System.currentTimeMillis() - start > TIME) break;
         }

@@ -1381,6 +1381,16 @@ public class InterpreterTest extends TestCase {
     assertEquals("blablabla banana, blablabla apple", sw.toString());
   }
 
+  public void testSpaces() {
+    String template = "{{#IF}} {{/IF}}]X";
+    Mustache mustache = new DefaultMustacheFactory().compile(new StringReader(template), "test");
+    StringWriter sw = new StringWriter();
+    mustache.execute(sw, new Object() {
+      boolean IF = true;
+    });
+    assertEquals(" ]X", sw.toString());
+  }
+
   public void testTemplateFunctionWithImplicitParams() {
     String template = "{{#parse}}\n" +
             "{{replaceMe}}\n" +
