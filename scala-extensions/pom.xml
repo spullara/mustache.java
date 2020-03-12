@@ -12,10 +12,10 @@
   <description>Scala extensions parent module</description>
 
   <modules>
-    <module>scala-extensions-2.10</module>
-    <module>scala-extensions-2.11</module>
-    <module>scala-extensions-2.12</module>
-    <module>scala-extensions-2.13</module>
+    <module>scala-extensions_2.10</module>
+    <module>scala-extensions_2.11</module>
+    <module>scala-extensions_2.12</module>
+    <module>scala-extensions_2.13</module>
   </modules>
   <packaging>pom</packaging>
 </project>
