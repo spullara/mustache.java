@@ -1,4 +1,4 @@
-lazy val `scala-extensions-2-13` = project
+lazy val `scala-extensions_2-13` = project
   .in(file("."))
   .settings(
     resolvers += Resolver.mavenLocal,
