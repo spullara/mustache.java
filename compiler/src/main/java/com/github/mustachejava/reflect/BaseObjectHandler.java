@@ -1,17 +1,9 @@
 package com.github.mustachejava.reflect;
 
-import com.github.mustachejava.Binding;
-import com.github.mustachejava.Code;
-import com.github.mustachejava.Iteration;
-import com.github.mustachejava.ObjectHandler;
-import com.github.mustachejava.TemplateContext;
+import com.github.mustachejava.*;
 
 import java.io.Writer;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -147,6 +139,22 @@ public abstract class BaseObjectHandler implements ObjectHandler {
     if (String.class == sClass && "value".equals(name)) { // under java11 it would return a wrapper we don't want
       return null;
     }
+    if (checkClass(sClass)) {
+      // We won't be able to get methods or members on the class directly, so we will look at superclasses and interfaces
+      for (Class anInterface : sClass.getInterfaces()) {
+        AccessibleObject member = findMember(anInterface, name);
+        if (member != null) return member;
+      }
+      Class superclass = sClass.getSuperclass();
+      if (superclass != null && superclass != Object.class) {
+        AccessibleObject ao = findMember(superclass, name);
+        if (ao != null) return ao;
+      }
+    }
+    return findMemberOnClass(sClass, name);
+  }
+
+  private AccessibleObject findMemberOnClass(Class sClass, String name) {
     AccessibleObject ao;
     try {
       ao = getMethod(sClass, name);
@@ -182,6 +190,11 @@ public abstract class BaseObjectHandler implements ObjectHandler {
     if ((member.getModifiers() & Modifier.PRIVATE) == Modifier.PRIVATE) {
       throw new NoSuchFieldException("Only public, protected and package members allowed");
     }
+  }
+
+  // We default to not allowing private classes
+  private boolean checkClass(Class sClass) {
+    return (sClass.getModifiers() & Modifier.PUBLIC) != Modifier.PUBLIC;
   }
 
   @Override

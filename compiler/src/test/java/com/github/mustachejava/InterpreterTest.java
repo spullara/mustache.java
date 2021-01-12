@@ -8,11 +8,7 @@ import com.github.mustachejava.codes.PartialCode;
 import com.github.mustachejava.codes.ValueCode;
 import com.github.mustachejava.codes.WriteCode;
 import com.github.mustachejava.functions.CommentFunction;
-import com.github.mustachejava.reflect.Guard;
-import com.github.mustachejava.reflect.GuardedBinding;
-import com.github.mustachejava.reflect.MissingWrapper;
-import com.github.mustachejava.reflect.ReflectionObjectHandler;
-import com.github.mustachejava.reflect.SimpleObjectHandler;
+import com.github.mustachejava.reflect.*;
 import com.github.mustachejava.resolver.DefaultResolver;
 import com.github.mustachejava.util.CapturingMustacheVisitor;
 import com.github.mustachejava.util.Wrapper;
@@ -23,31 +19,9 @@ import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
@@ -70,14 +44,14 @@ public class InterpreterTest extends TestCase {
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      String name = "Chris";
-      int value = 10000;
+      final String name = "Chris";
+      final int value = 10000;
 
       int taxed_value() {
         return (int) (this.value - (this.value * 0.4));
       }
 
-      boolean in_ca = true;
+      final boolean in_ca = true;
     });
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
@@ -120,14 +94,14 @@ public class InterpreterTest extends TestCase {
       Mustache m = c.compile("simple.html");
       StringWriter sw = new StringWriter();
       m.execute(sw, new Object() {
-        String name = "Chris";
-        int value = 10000;
+        final String name = "Chris";
+        final int value = 10000;
 
         int taxed_value() {
           return (int) (this.value - (this.value * 0.4));
         }
 
-        boolean in_ca = true;
+        final boolean in_ca = true;
       });
       assertEquals(getContents(root, "simple_ko.txt"), sw.toString());
     }
@@ -136,14 +110,14 @@ public class InterpreterTest extends TestCase {
       Mustache m = c.compile("simple.html");
       StringWriter sw = new StringWriter();
       m.execute(sw, new Object() {
-        String name = "Chris";
-        int value = 10000;
+        final String name = "Chris";
+        final int value = 10000;
 
         int taxed_value() {
           return (int) (this.value - (this.value * 0.4));
         }
 
-        boolean in_ca = true;
+        final boolean in_ca = true;
       });
       assertEquals(getContents(root, "simple.txt"), sw.toString());
     }
@@ -175,34 +149,34 @@ public class InterpreterTest extends TestCase {
     Mustache m = c.compile("simplefiltered.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      String name = "Chris";
-      int value = 10000;
+      final String name = "Chris";
+      final int value = 10000;
 
       int taxed_value() {
         return (int) (this.value - (this.value * 0.4));
       }
 
-      boolean in_ca = true;
+      final boolean in_ca = true;
     });
     assertEquals(getContents(root, "simplefiltered.txt"), sw.toString());
   }
 
   public void testTypedSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
     final Object scope = new Object() {
-      String name = "Chris";
-      int value = 10000;
+      final String name = "Chris";
+      final int value = 10000;
 
       class MyObject {
         int taxed_value() {
           return (int) (value - (value * 0.4));
         }
 
-        String fred = "";
+        final String fred = "";
       }
 
-      MyObject in_ca = new MyObject();
+      final MyObject in_ca = new MyObject();
 
-      boolean test = false;
+      final boolean test = false;
     };
     DefaultMustacheFactory c = new DefaultMustacheFactory(root);
     c.setObjectHandler(new TypeCheckingHandler());
@@ -218,8 +192,8 @@ public class InterpreterTest extends TestCase {
 
   public void testRecurision() throws IOException {
     StringWriter sw = execute("recursion.html", new Object() {
-      Object value = new Object() {
-        boolean value = false;
+      final Object value = new Object() {
+        final boolean value = false;
       };
     });
     assertEquals(getContents(root, "recursion.txt"), sw.toString());
@@ -227,8 +201,8 @@ public class InterpreterTest extends TestCase {
 
   public void testRecursionWithInheritance() throws IOException {
     StringWriter sw = execute("recursion_with_inheritance.html", new Object() {
-      Object value = new Object() {
-        boolean value = false;
+      final Object value = new Object() {
+        final boolean value = false;
       };
     });
     assertEquals(getContents(root, "recursion.txt"), sw.toString());
@@ -236,8 +210,8 @@ public class InterpreterTest extends TestCase {
 
   public void testPartialRecursionWithInheritance() throws IOException {
     StringWriter sw = execute("recursive_partial_inheritance.html", new Object() {
-      Object test = new Object() {
-        boolean test = false;
+      final Object test = new Object() {
+        final boolean test = false;
       };
     });
     assertEquals(getContents(root, "recursive_partial_inheritance.txt"), sw.toString());
@@ -245,8 +219,8 @@ public class InterpreterTest extends TestCase {
 
   public void testChainedInheritance() throws IOException {
     StringWriter sw = execute("page.html", new Object() {
-      Object test = new Object() {
-        boolean test = false;
+      final Object test = new Object() {
+        final boolean test = false;
       };
     });
     assertEquals(getContents(root, "page.txt"), sw.toString());
@@ -277,8 +251,8 @@ public class InterpreterTest extends TestCase {
     Mustache m = mf.compile(new StringReader("{{test}} {{test2|bar}} {{test3|baz}}"), "testDefaultValue");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      String test = "foo";
-      String test2 = "BAR";
+      final String test = "foo";
+      final String test2 = "BAR";
     });
     assertEquals("foo BAR baz", sw.toString());
   }
@@ -288,14 +262,14 @@ public class InterpreterTest extends TestCase {
     Mustache m = c.compile("simplepragma.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      String name = "Chris";
-      int value = 10000;
+      final String name = "Chris";
+      final int value = 10000;
 
       int taxed_value() {
         return (int) (this.value - (this.value * 0.4));
       }
 
-      boolean in_ca = true;
+      final boolean in_ca = true;
     });
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
@@ -346,20 +320,20 @@ public class InterpreterTest extends TestCase {
     Mustache m = c.compile("simple.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      String name = "Chris";
-      int value = 10000;
+      final String name = "Chris";
+      final int value = 10000;
 
-      Object o = new Object() {
+      final Object o = new Object() {
         int taxed_value() {
           return (int) (value - (value * 0.4));
         }
 
-        String fred = "test";
+        final String fred = "test";
       };
 
-      Object in_ca = Arrays.asList(
+      final Object in_ca = Arrays.asList(
               o, new Object() {
-                int taxed_value = (int) (value - (value * 0.2));
+                final int taxed_value = (int) (value - (value * 0.2));
               },
               o
       );
@@ -377,7 +351,7 @@ public class InterpreterTest extends TestCase {
     final CountDownLatch cdl2 = new CountDownLatch(1);
 
     m.execute(sw, new Object() {
-      Iterable list = Arrays.asList(
+      final Iterable list = Arrays.asList(
               () -> {
                 cdl1.await();
                 sb.append("How");
@@ -407,19 +381,19 @@ public class InterpreterTest extends TestCase {
     StringWriter sw = new StringWriter();
     long start = System.currentTimeMillis();
     Writer execute = m.execute(sw, new Object() {
-      Callable<Object> a = () -> {
+      final Callable<Object> a = () -> {
         Thread.sleep(300);
         return "How";
       };
-      Callable<Object> b = () -> {
+      final Callable<Object> b = () -> {
         Thread.sleep(200);
         return "are";
       };
-      Callable<Object> c = () -> {
+      final Callable<Object> c = () -> {
         Thread.sleep(100);
         return "you?";
       };
-      Callable<Function> caps = () -> (Function) o -> o.toString().toUpperCase();
+      final Callable<Function> caps = () -> (Function) o -> o.toString().toUpperCase();
     });
     execute.close();
     assertTrue("Time < 600ms", System.currentTimeMillis() - start < 600);
@@ -432,15 +406,15 @@ public class InterpreterTest extends TestCase {
     Mustache m = c.compile("latchedtest.html");
     StringWriter sw = new StringWriter();
     Writer execute = m.execute(sw, new Object() {
-      Callable<Object> nest = () -> {
+      final Callable<Object> nest = () -> {
         Thread.sleep(300);
         return "How";
       };
-      Callable<Object> nested = () -> {
+      final Callable<Object> nested = () -> {
         Thread.sleep(200);
         return "are";
       };
-      Callable<Object> nestest = () -> {
+      final Callable<Object> nestest = () -> {
         Thread.sleep(100);
         return "you?";
       };
@@ -456,14 +430,14 @@ public class InterpreterTest extends TestCase {
       Mustache m = c.compile("brokensimple.html");
       StringWriter sw = new StringWriter();
       m.execute(sw, new Object() {
-        String name = "Chris";
-        int value = 10000;
+        final String name = "Chris";
+        final int value = 10000;
 
         int taxed_value() {
           return (int) (this.value - (this.value * 0.4));
         }
 
-        boolean in_ca = true;
+        final boolean in_ca = true;
       });
       fail("Should have failed: " + sw.toString());
     } catch (Exception e) {
@@ -473,7 +447,7 @@ public class InterpreterTest extends TestCase {
 
   public void testIsNotEmpty() throws IOException {
     Object object = new Object() {
-      List<String> people = singletonList("Test");
+      final List<String> people = singletonList("Test");
     };
     StringWriter sw = execute("isempty.html", object);
     assertEquals(getContents(root, "isempty.txt"), sw.toString());
@@ -497,7 +471,7 @@ public class InterpreterTest extends TestCase {
 
   public void testImmutableList() throws IOException {
     Object object = new Object() {
-      List<String> people = singletonList("Test");
+      final List<String> people = singletonList("Test");
     };
     StringWriter sw = execute("isempty.html", singletonList(object));
     assertEquals(getContents(root, "isempty.txt"), sw.toString());
@@ -509,12 +483,12 @@ public class InterpreterTest extends TestCase {
     Mustache m = c.compile(template, "test");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      Optional<String> person = Optional.of("Test");
+      final Optional<String> person = Optional.of("Test");
     });
     assertEquals("Test is present", sw.toString());
     sw = new StringWriter();
     m.execute(sw, new Object() {
-      Optional<String> person = Optional.empty();
+      final Optional<String> person = Optional.empty();
     });
     assertEquals("Is not present", sw.toString());
   }
@@ -524,7 +498,7 @@ public class InterpreterTest extends TestCase {
     Mustache m = c.compile(new StringReader("{{#process}}{{!comment}}{{/process}}"), "");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      TemplateFunction process = s -> s.replace("{", "[");
+      final TemplateFunction process = s -> s.replace("{", "[");
     });
     assertEquals("[[!comment}}", sw.toString());
   }
@@ -555,8 +529,8 @@ public class InterpreterTest extends TestCase {
     StringWriter sw = new StringWriter();
     Mustache m = c.compile(new StringReader("{{#zero}}zero{{/zero}}{{#one}}one{{/one}}{{^zero}}zero{{/zero}}{{^one}}one{{/one}}"), "zeroone");
     m.execute(sw, new Object() {
-      int zero = 0;
-      int one = 1;
+      final int zero = 0;
+      final int one = 1;
     }).close();
     assertEquals("onezero", sw.toString());
   }
@@ -566,17 +540,17 @@ public class InterpreterTest extends TestCase {
     Mustache m = c.compile("security.html");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      String name = "Chris";
-      int value = 10000;
+      final String name = "Chris";
+      final int value = 10000;
 
       int taxed_value() {
         return (int) (this.value - (this.value * 0.4));
       }
 
-      boolean in_ca = true;
+      final boolean in_ca = true;
 
       // Should not be accessible
-      private String test = "Test";
+      private final String test = "Test";
     });
     assertEquals(getContents(root, "security.txt"), sw.toString());
   }
@@ -624,6 +598,18 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
+  public void testReflectiveAccessThroughInterface() {
+    MustacheFactory c = createMustacheFactory();
+    Mustache m = c.compile(new StringReader("{{#entries}}{{key}}{{/entries}}"), "");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      final Set entries = new HashMap() {{
+        put("key", "value");
+      }}.entrySet();
+    });
+    assertEquals("key", sw.toString());
+  }
+
   public void testPartialWithTF() throws MustacheException, IOException {
     MustacheFactory c = createMustacheFactory();
     Mustache m = c.compile("partialintemplatefunction.html");
@@ -642,27 +628,27 @@ public class InterpreterTest extends TestCase {
     {
       StringWriter sw = new StringWriter();
       m.execute(sw, new Object() {
-        Function f = new Function<String, String>() {
+        final Function f = new Function<String, String>() {
           @Override
           public String apply(String s) {
             return s.toUpperCase();
           }
         };
-        String foo = "bar";
+        final String foo = "bar";
       }).flush();
       assertEquals("BAR", sw.toString());
     }
     {
       StringWriter sw = new StringWriter();
       m.execute(sw, new Object() {
-        Function f = new TemplateFunction() {
+        final Function f = new TemplateFunction() {
           @Override
           public String apply(String s) {
             return s.toUpperCase();
           }
         };
-        String foo = "bar";
-        String FOO = "baz";
+        final String foo = "bar";
+        final String FOO = "baz";
       }).flush();
       assertEquals("baz", sw.toString());
     }
@@ -730,7 +716,7 @@ public class InterpreterTest extends TestCase {
                   }
                 }
 
-                ConcurrentMap<String, Mustache> dynamicaPartialCache = new ConcurrentHashMap<>();
+                final ConcurrentMap<String, Mustache> dynamicaPartialCache = new ConcurrentHashMap<>();
 
                 @Override
                 public Writer execute(Writer writer, List<Object> scopes) {
@@ -861,9 +847,9 @@ public class InterpreterTest extends TestCase {
     DefaultMustacheFactory mf = new DeferringMustacheFactory(root);
     mf.setExecutorService(Executors.newCachedThreadPool());
     Object context = new Object() {
-      String title = "Deferred";
-      Object deferred = new DeferringMustacheFactory.DeferredCallable();
-      Object deferredpartial = DeferringMustacheFactory.DEFERRED;
+      final String title = "Deferred";
+      final Object deferred = new DeferringMustacheFactory.DeferredCallable();
+      final Object deferredpartial = DeferringMustacheFactory.DEFERRED;
     };
     Mustache m = mf.compile("deferred.html");
     StringWriter sw = new StringWriter();
@@ -882,7 +868,7 @@ public class InterpreterTest extends TestCase {
     // scope object has a 'value' property, lookup shouldn't fail
     StringWriter sw = new StringWriter();
     mustache.execute(sw, new Object() {
-      String value = "something";
+      final String value = "something";
     });
 
     assertEquals("Value: something", sw.toString());
@@ -935,7 +921,7 @@ public class InterpreterTest extends TestCase {
     Mustache compile = mf.compile("relative/functionpaths.html");
     StringWriter sw = new StringWriter();
     compile.execute(sw, new Object() {
-      Function i = new TemplateFunction() {
+      final Function i = new TemplateFunction() {
         @Override
         public String apply(String s) {
           return s;
@@ -1009,7 +995,7 @@ public class InterpreterTest extends TestCase {
     Mustache m = mf.compile(new StringReader("{{#values}}{{.}}{{/values}}{{^values}}Test2{{/values}}"), "testObjectArray");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      Integer[] values = new Integer[]{1, 2, 3};
+      final Integer[] values = new Integer[]{1, 2, 3};
     }).close();
     assertEquals("123", sw.toString());
   }
@@ -1019,7 +1005,7 @@ public class InterpreterTest extends TestCase {
     Mustache m = mf.compile(new StringReader("{{#values}}{{.}}{{/values}}{{^values}}Test2{{/values}}"), "testBaseArray");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      int[] values = new int[]{1, 2, 3};
+      final int[] values = new int[]{1, 2, 3};
     }).close();
     assertEquals("123", sw.toString());
   }
@@ -1029,7 +1015,7 @@ public class InterpreterTest extends TestCase {
     Mustache m = mf.compile(new StringReader("{{#values}}Test1{{/values}}{{^values}}Test2{{/values}}"), "testEmptyString");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      String values = "";
+      final String values = "";
     }).close();
     assertEquals("Test2", sw.toString());
   }
@@ -1039,7 +1025,7 @@ public class InterpreterTest extends TestCase {
     Mustache m = mf.compile(new StringReader("{{#values}}Test1{{/values}}{{^values}}Test2{{/values}}"), "testPrivate");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      private String values = "value";
+      private final String values = "value";
 
       private String values() {
         return "value";
@@ -1107,7 +1093,7 @@ public class InterpreterTest extends TestCase {
     Mustache m = mf.compile(new StringReader("{{^value}}test{{/value}}"), "testNotIterableCallable");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      Callable value = () -> null;
+      final Callable value = () -> null;
     }).close();
     // Values ignored as if it didn't exist at all
     assertEquals("test", sw.toString());
@@ -1197,15 +1183,15 @@ public class InterpreterTest extends TestCase {
             "{{#comment}}comment{{/comment}}"), "testTemplateFunction");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      Function i = new TemplateFunction() {
+      final Function i = new TemplateFunction() {
         @Override
         public String apply(String s) {
           return s.replace("test", "test2");
         }
       };
-      String test2 = "test";
-      Function f = o -> null;
-      CommentFunction comment = new CommentFunction();
+      final String test2 = "test";
+      final Function f = o -> null;
+      final CommentFunction comment = new CommentFunction();
     }).close();
     // Values ignored as if it didn't exist at all
     assertEquals("test", sw.toString());
@@ -1302,7 +1288,7 @@ public class InterpreterTest extends TestCase {
     Mustache test = new DefaultMustacheFactory().compile(new StringReader("{{#test}}_{{.}}_{{/test}}"), "test");
     StringWriter sw = new StringWriter();
     test.execute(sw, new Object() {
-      List<String> test = Arrays.asList("a", "b", "c");
+      final List<String> test = Arrays.asList("a", "b", "c");
     }).close();
     assertEquals("_a__b__c_", sw.toString());
   }
@@ -1311,7 +1297,7 @@ public class InterpreterTest extends TestCase {
     Mustache m = new DefaultMustacheFactory().compile(new StringReader("{{test}}\r\n{{test}}\r\n"), "test");
     StringWriter sw = new StringWriter();
     m.execute(sw, new Object() {
-      String test = "fred";
+      final String test = "fred";
     });
     assertEquals("fred\r\nfred\r\n", sw.toString());
   }
@@ -1339,7 +1325,7 @@ public class InterpreterTest extends TestCase {
       Mustache mustache = new DefaultMustacheFactory().compile(new StringReader(template), "test");
       StringWriter sw = new StringWriter();
       mustache.execute(sw, new Object() {
-        Function<String, String> timesTwo = (s) -> {
+        final Function<String, String> timesTwo = (s) -> {
           throw new RuntimeException();
         };
       });
@@ -1391,8 +1377,8 @@ public class InterpreterTest extends TestCase {
         return s -> "blablabla {{anotherVar}}, blablabla {{yetAnotherVar}}";
       }
 
-      String anotherVar = "banana";
-      String yetAnotherVar = "apple";
+      final String anotherVar = "banana";
+      final String yetAnotherVar = "apple";
     });
     assertEquals("blablabla banana, blablabla apple", sw.toString());
   }
@@ -1406,7 +1392,7 @@ public class InterpreterTest extends TestCase {
         return new DefaultMustacheVisitor(this) {
           public void iterable(final TemplateContext templateContext, String variable, Mustache mustache) {
             list.add(new IterableCode(templateContext, df, mustache, variable) {
-              Binding binding = oh.createBinding("params", templateContext, this);
+              final Binding binding = oh.createBinding("params", templateContext, this);
 
               protected Writer handleFunction(Writer writer, Function function, List<Object> scopes) {
                 boolean added = addScope(scopes, binding.get(scopes));
@@ -1428,7 +1414,7 @@ public class InterpreterTest extends TestCase {
         return s -> "blablabla {{anotherVar}}, blablabla {{yetAnotherVar}}";
       }
 
-      Map<String, Object> params = new HashMap<>();
+      final Map<String, Object> params = new HashMap<>();
 
       {
         params.put("anotherVar", "banana");
@@ -1503,7 +1489,7 @@ public class InterpreterTest extends TestCase {
       Mustache m = mf.compile(sr, "value");
       try {
         m.execute(sw, new Object() {
-          String value = null;
+          final String value = null;
         }).close();
         ps.flush();
         assertTrue(new String(out.toByteArray()).contains("Variable is null"));
@@ -1517,7 +1503,7 @@ public class InterpreterTest extends TestCase {
       Mustache m = mf.compile(sr, "value");
       try {
         m.execute(sw, new Object() {
-          String value = "";
+          final String value = "";
         }).close();
         ps.flush();
         assertTrue(new String(out.toByteArray()).contains("Variable is empty string"));
@@ -1531,7 +1517,7 @@ public class InterpreterTest extends TestCase {
       Mustache m = mf.compile(sr, "value");
       try {
         m.execute(sw, new Object() {
-          String value = "value";
+          final String value = "value";
         }).close();
         ps.flush();
         assertEquals("", new String(out.toByteArray()));
