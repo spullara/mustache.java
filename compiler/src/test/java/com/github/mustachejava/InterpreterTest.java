@@ -714,7 +714,7 @@ public class InterpreterTest extends TestCase {
       public MustacheVisitor createMustacheVisitor() {
         return new DefaultMustacheVisitor(this) {
           @Override
-          public void partial(TemplateContext tc, String variable) {
+          public void partial(TemplateContext tc, String variable, String indent) {
             if (variable.startsWith("+")) {
               // This is a dynamic partial rather than a static one
               TemplateContext partialTC = new TemplateContext("{{", "}}", tc.file(), tc.line(), tc.startOfLine());
@@ -743,7 +743,7 @@ public class InterpreterTest extends TestCase {
                 }
               });
             } else {
-              super.partial(tc, variable);
+              super.partial(tc, variable, indent);
             }
           }
         };
@@ -1252,7 +1252,7 @@ public class InterpreterTest extends TestCase {
       public MustacheVisitor createMustacheVisitor() {
         return new DefaultMustacheVisitor(this) {
           @Override
-          public void partial(TemplateContext tc, String variable) {
+          public void partial(TemplateContext tc, String variable, String indent) {
             TemplateContext partialTC = new TemplateContext("{{", "}}", tc.file(), tc.line(), tc.startOfLine());
             list.add(new PartialCode(partialTC, df, variable) {
               @Override

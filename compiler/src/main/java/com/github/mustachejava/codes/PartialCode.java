@@ -15,6 +15,7 @@ public class PartialCode extends DefaultCode {
 
   protected PartialCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String type, String variable) {
     super(tc, df, mustache, variable, type);
+
     // Use the  name of the parent to get the name of the partial
     String file = tc.file();
     int dotindex = file.lastIndexOf(".");
@@ -67,12 +68,16 @@ public class PartialCode extends DefaultCode {
       }
       writer = depthLimitedWriter;
     }
-    Writer execute = partial.execute(writer, scopes);
+    Writer execute = executePartial(writer, scopes);
     if (isRecursive) {
       assert depthLimitedWriter != null;
       depthLimitedWriter.decr();
     }
     return appendText(execute);
+  }
+
+  protected Writer executePartial(Writer writer, final List<Object> scopes) {
+    return partial.execute(writer, scopes);
   }
 
   @Override
