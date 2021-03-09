@@ -9,7 +9,7 @@ import org.junit.{Assert, Test}
 class ObjectHandlerTest {
 
   @Test
-  def testMap() {
+  def testMap():Unit = {
     val mf = new DefaultMustacheFactory()
     mf.setObjectHandler(new ScalaObjectHandler)
     val m = mf.compile(
@@ -22,7 +22,7 @@ class ObjectHandlerTest {
   }
 
   @Test
-  def testScalaHandler() {
+  def testScalaHandler():Unit = {
     val pool = Executors.newCachedThreadPool()
     val mf = new DefaultMustacheFactory()
     mf.setObjectHandler(new ScalaObjectHandler)
@@ -58,7 +58,7 @@ class ObjectHandlerTest {
   }
 
   @Test
-  def testScalaStream() {
+  def testScalaStream():Unit = {
     val pool = Executors.newCachedThreadPool()
     val mf = new DefaultMustacheFactory()
     mf.setObjectHandler(new ScalaObjectHandler)
@@ -66,7 +66,7 @@ class ObjectHandlerTest {
     val m = mf.compile(new StringReader("{{#stream}}{{value}}{{/stream}}"), "helloworld")
     val sw = new StringWriter
     val writer = m.execute(sw, new {
-      val stream = Stream(
+      val stream = LazyList(
         new { val value = "hello" },
         new { val value = "world" })
     })
@@ -75,7 +75,7 @@ class ObjectHandlerTest {
   }
 
   @Test
-  def testUnit() {
+  def testUnit():Unit = {
     val mf = new DefaultMustacheFactory()
     mf.setObjectHandler(new ScalaObjectHandler)
     val m = mf.compile(new StringReader("{{test}}"), "unit")
@@ -87,7 +87,7 @@ class ObjectHandlerTest {
   }
 
   @Test
-  def testOptions() {
+  def testOptions():Unit = {
     val mf = new DefaultMustacheFactory()
     mf.setObjectHandler(new ScalaObjectHandler)
     val m = mf.compile(new StringReader("{{foo}}{{bar}}"), "unit")
@@ -100,7 +100,7 @@ class ObjectHandlerTest {
   }
 
   @Test
-  def testClass() {
+  def testClass():Unit = {
     val mf = new DefaultMustacheFactory()
     mf.setObjectHandler(new ScalaObjectHandler)
     val m = mf.compile(
@@ -116,7 +116,7 @@ class ObjectHandlerTest {
   }
 
   @Test
-  def testClassDot() {
+  def testClassDot():Unit = {
     val mf = new DefaultMustacheFactory()
     mf.setObjectHandler(new ScalaObjectHandler)
     val m = mf.compile(
