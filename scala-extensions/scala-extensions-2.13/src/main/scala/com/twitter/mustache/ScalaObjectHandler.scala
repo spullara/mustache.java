@@ -14,9 +14,9 @@ import scala.reflect.ClassTag
 class ScalaObjectHandler extends ReflectionObjectHandler {
 
   // Allow any method or field
-  override def checkMethod(member: Method) {}
+  override def checkMethod(member: Method):Unit = {}
 
-  override def checkField(member: Field) {}
+  override def checkField(member: Field):Unit = {}
 
   override def coerce(value: AnyRef) = {
     value match {
@@ -30,7 +30,7 @@ class ScalaObjectHandler extends ReflectionObjectHandler {
 
   override def iterate(iteration: Iteration, writer: Writer, value: AnyRef, scopes: java.util.List[AnyRef]) = {
     value match {
-      case TraversableAnyRef(t) => {
+      case IterableAnyRef(t) => {
         var newWriter = writer
         t foreach {
           next =>
@@ -45,7 +45,7 @@ class ScalaObjectHandler extends ReflectionObjectHandler {
 
   override def falsey(iteration: Iteration, writer: Writer, value: AnyRef, scopes: java.util.List[AnyRef]) = {
     value match {
-      case TraversableAnyRef(t) => {
+      case IterableAnyRef(t) => {
         if (t.isEmpty) {
           iteration.next(writer, value, scopes)
         } else {
@@ -57,7 +57,7 @@ class ScalaObjectHandler extends ReflectionObjectHandler {
     }
   }
 
-  val TraversableAnyRef = new Def[Traversable[AnyRef]]
+  val IterableAnyRef = new Def[Iterable[AnyRef]]
   class Def[C: ClassTag] {
     def unapply[X: ClassTag](x: X): Option[C] = {
       x match {
