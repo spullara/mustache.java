@@ -52,12 +52,12 @@ public class DynamicPartials {
           }
 
           @Override
-          public void partial(TemplateContext tc, String variable) {
+          public void partial(TemplateContext tc, String variable, String indent) {
             // Implements {{>.}} which dynamically gets the partial name from the partial field
             if (variable.equals(".")) {
               dynamicPartial(tc, variable);
             } else {
-              super.partial(tc, variable);
+              super.partial(tc, variable, indent);
             }
           }
 
