@@ -73,6 +73,109 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
+  public void testSafe() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    try {
+      MustacheFactory c = new SafeMustacheFactory(Collections.singleton("notsimple.html"), root);
+      // Not present in allowed list
+      Mustache m = c.compile("simple.html");
+      fail("Should not be allowed");
+    } catch (MustacheException me) {
+      // Success
+    }
+    MustacheFactory c = new SafeMustacheFactory(Collections.singleton("simple.html"), root);
+    Mustache m = c.compile("simple.html");
+    {
+      StringWriter sw = new StringWriter();
+      m.execute(sw, new Object() {
+        // It won't find this since it isn't public
+        String name = "Chris";
+        public int value = 10000;
+
+        public int taxed_value() {
+          return (int) (this.value - (this.value * 0.4));
+        }
+
+        public boolean in_ca = true;
+      });
+      assertNotSame(getContents(root, "simple.txt"), sw.toString());
+    }
+    {
+      StringWriter sw = new StringWriter();
+      m.execute(sw, new Object() {
+        public String name = "Chris";
+        public int value = 10000;
+
+        // It won't find this since it isn't public
+        int taxed_value() {
+          return (int) (this.value - (this.value * 0.4));
+        }
+
+        public boolean in_ca = true;
+      });
+      assertNotSame(getContents(root, "simple.txt"), sw.toString());
+    }
+    {
+      m = c.compile(new StringReader("{{toString}}"), "test");
+      StringWriter sw = new StringWriter();
+      try {
+        m.execute(sw, new Object() {
+          public String toString() {
+            return "";
+          }
+        });
+        fail("Got value for toString");
+      } catch (MustacheException me) {
+        // Success
+      }
+    }
+    {
+      try {
+        m = c.compile(new StringReader("{{>/etc/passwd}}"), "test");
+        StringWriter sw = new StringWriter();
+        m.execute(sw, new Object() {
+        });
+        fail("Can't access that partial");
+      } catch (MustacheException me) {
+        // Success
+      }
+    }
+    {
+      try {
+        m = c.compile(new StringReader("{{%pragma}}"), "test");
+        StringWriter sw = new StringWriter();
+        m.execute(sw, new Object() {
+        });
+        fail("Can't use pragmas");
+      } catch (MustacheException me) {
+        // Success
+      }
+    }
+    {
+      try {
+        m = c.compile(new StringReader("{{{rawtext}}}"), "test");
+        StringWriter sw = new StringWriter();
+        m.execute(sw, new Object() {
+          public String rawtext() {
+            return "";
+          }
+        });
+        fail("Can't use raw text");
+      } catch (MustacheException me) {
+        // Success
+      }
+    }
+    {
+      try {
+        m = c.compile(new StringReader("{{=[[]]=}}"), "test");
+        StringWriter sw = new StringWriter();
+        m.execute(sw, new Object() {
+        });
+        fail("Can't change delimiters");
+      } catch (MustacheException me) {
+        // Success
+      }
+    }
+  }
 
   private static class LocalizedMustacheResolver extends DefaultResolver {
     private final Locale locale;
