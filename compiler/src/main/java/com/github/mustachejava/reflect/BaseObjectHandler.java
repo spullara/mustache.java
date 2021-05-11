@@ -193,7 +193,7 @@ public abstract class BaseObjectHandler implements ObjectHandler {
   }
 
   // We default to not allowing private classes
-  private boolean checkClass(Class sClass) {
+  protected boolean checkClass(Class sClass) {
     return (sClass.getModifiers() & Modifier.PUBLIC) != Modifier.PUBLIC;
   }
 

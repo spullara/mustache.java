@@ -2,8 +2,8 @@ Mustache.java [![Build Status](https://travis-ci.org/spullara/mustache.java.svg?
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fspullara%2Fmustache.java.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fspullara%2Fmustache.java?ref=badge_shield)
 =============
 
-Mustache.java is not designed to allow untrusted parties to provide templates. It may be possible to lock it down to provide that safely,
-but by default it is UNSAFE.
+**Mustache.java is not designed to allow untrusted parties to provide templates. It may be possible to lock it down to provide that safely,
+but by default it is UNSAFE. Use the SafeMustacheFactory and whitelist all templates and partials.**
 
 As of release 0.9.0 mustache.java is now Java 8 only. For Java 6/7 support use 0.8.x.
 

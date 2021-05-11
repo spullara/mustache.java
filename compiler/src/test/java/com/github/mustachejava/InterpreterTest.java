@@ -56,6 +56,24 @@ public class InterpreterTest extends TestCase {
     assertEquals(getContents(root, "simple.txt"), sw.toString());
   }
 
+  public void testSafeSimple() throws MustacheException, IOException, ExecutionException, InterruptedException {
+    MustacheFactory c = new SafeMustacheFactory(Collections.singleton("simple.html"), root);
+    Mustache m = c.compile("simple.html");
+    StringWriter sw = new StringWriter();
+    m.execute(sw, new Object() {
+      public String name = "Chris";
+      public int value = 10000;
+
+      public int taxed_value() {
+        return (int) (this.value - (this.value * 0.4));
+      }
+
+      public boolean in_ca = true;
+    });
+    assertEquals(getContents(root, "simple.txt"), sw.toString());
+  }
+
+
   private static class LocalizedMustacheResolver extends DefaultResolver {
     private final Locale locale;
 

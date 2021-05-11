@@ -17,7 +17,8 @@ public class MustacheParser {
   public static final String DEFAULT_SM = "{{";
   public static final String DEFAULT_EM = "}}";
   private final boolean specConformWhitespace;
-  private MustacheFactory mf;
+  private final MustacheFactory mf;
+  private boolean allowChangingDelimeters = true;
 
   protected MustacheParser(MustacheFactory mf, boolean specConformWhitespace) {
     this.mf = mf;
@@ -246,6 +247,9 @@ public class MustacheParser {
                   out = write(mv, out, file, currentLine.intValue(), startOfLine);
                   break;
                 case '=':
+                  if (!allowChangingDelimeters) {
+                    throw new MustacheException("Disallowed: changing defaul delimiters");
+                  }
                   // Change delimiters
                   out = write(mv, out, file, currentLine.intValue(), startOfLine);
                   String trimmed = command.substring(1).trim();
@@ -314,4 +318,7 @@ public class MustacheParser {
     return new StringBuilder();
   }
 
+  public void setAllowChangingDelimeters(boolean allowChangingDelimeters) {
+    this.allowChangingDelimeters = allowChangingDelimeters;
+  }
 }
