@@ -1,0 +1,7 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Some title!</title>
+</head>
+<body>
+<h1>This is mustacheee</h1>

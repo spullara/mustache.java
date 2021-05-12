@@ -1,0 +1,108 @@
+{{{before_tweet_element}}}
+<{{ _tweet_element}}
+  {{ _root_attr}}
+  data-twt-id="{{id_str}}"
+  {{#_web_intents}}
+    data-twt-intents="{{ _enabled}}"
+    {{#_partner}} data-twt-partner="{{ _partner}}" {{/_partner}}
+    {{#_related}} data-twt-related="{{ _related}}" {{/_related}}
+  {{/_web_intents}}
+  class="twt-o twt-tweet
+  {{#_as_reply}} twt-inline twt-reply {{/_as_reply}}
+  {{#_always_show_actions}} twt-always-show-actions {{/_always_show_actions}}
+  {{#_was_retweeted}} tweet-retweeted twt-rt {{/_was_retweeted}}
+  {{#media}} has-photo {{/media}}
+  {{#_pin_media}} twt-pinned {{/_pin_media}}
+  {{#_tweet_not_found}} twt-error {{/_tweet_not_found}}
+  {{#_favorited}} twt-fav {{/_favorited}}
+  {{#_format}} {{ _format}} {{/_format}}
+  {{#_touch_device}} twt-touch {{/_touch_device}}
+  hentry">
+    <div class="vcard author">
+      {{{before_username}}}
+      {{#user}}
+        {{#screen_name}}
+        <a class="screen-name" href="{{ _screen_name_url}}" data-screen-name="{{screen_name}}">
+        {{/screen_name}}
+        <span class="avatar">{{#profile_image_url_https}}<img src="{{profile_image_url_https}}" class="photo" alt="">{{/profile_image_url_https}}</span>
+        {{#name}}<span class="fn">{{name}}</span>{{/name}}
+        {{#_has_badges}}
+        <ul class="badges note">
+          {{{before_badges}}}
+          {{#protected}}<li class="twt-protected"><abbr title="{{ _protected_text}}">&#x1f512;</abbr></li>{{/protected}}
+          {{#verified}}<li class="twt-verified"><abbr title="{{ _verified_text}}">&#x2714;</abbr></li>{{/verified}}
+          {{{after_badges}}}
+        </ul>
+        {{/_has_badges}}
+        {{#screen_name}}
+        <span class="nickname">@<b>{{screen_name}}</b></span>
+        </a>
+        {{/screen_name}}
+        {{#in_reply_to}}<em class="in-reply">&middot; {{{ _in_reply_to}}}</em>{{/in_reply_to}}
+        {{#_show_follow_button}}
+        <iframe class="twt-follow-button" allowtransparency="true" frameborder="0" scrolling="no" src="//platform.twitter.com/widgets/follow_button.html?align=right&button=grey&screen_name={{screen_name}}&show_count=false&show_screen_name=false&lang={{language_code}}"></iframe>
+        {{/_show_follow_button}}
+      {{/user}}
+
+      {{{after_username}}}
+
+      {{#_as_timeline}}
+      {{#rendered_time}}
+        <a class="permalink" rel="bookmark" href="{{ _permalink_url}}">
+          {{{rendered_time}}}
+        </a>
+      {{/rendered_time}}
+      {{/_as_timeline}}
+
+    </div>
+
+    {{#rendered_text}}
+    <div class="entry-content">
+      {{{before_tweet}}}
+      <p class="entry-title">{{{rendered_text}}}</p>
+      {{{after_tweet}}}
+    </div>
+    {{/rendered_text}}
+
+    {{{tweet_media}}}
+
+    {{^_as_reply}}
+    <div class="footer">
+      {{{before_footer}}}
+
+      {{#_retweeted}}<span class="retweet-credit" title="{{ _retweeted_at}}"><i></i> {{{ _retweeted}}}</span>{{/_retweeted}}
+
+      {{^_as_timeline}}
+        <a class="view-details" href="{{ _permalink_url}}">{{{ _view_permalink}}}</a>
+      {{/_as_timeline}}
+
+      {{^error}}
+      {{#_as_timeline}}
+          <a class="view-details" href="{{ _permalink_url}}">{{{ _view_permalink}}}</a>
+      {{/_as_timeline}}
+      {{/error}}
+
+      {{#_render_actions}}
+      {{^error}}
+        {{{ _actions}}}
+      {{/error}}
+      {{/_render_actions}}
+
+      {{#_show_errors}}
+      {{#error}}
+        <div class="twt-error">{{error}}</div>
+      {{/error}}
+      {{/_show_errors}}
+      {{{after_footer}}}
+    </div>
+    {{/_as_reply}}
+
+  {{{timeline_media}}}
+
+  {{#_as_reply}}
+  <div class="border-arrow"></div>
+  <div class="border"></div>
+  {{/_as_reply}}
+
+</{{ _tweet_element}}>
+{{{after_tweet_element}}}

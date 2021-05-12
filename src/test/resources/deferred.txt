@@ -1,0 +1,7 @@
+<html>
+<head><title>Deferred</title></head>
+<body>
+<div id="1"></div>
+<script>document.getElementById("1").innerHTML="I am calculated\n\"later\" and divs\nare written out &lt;\nnow";</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+Hello Chris
+You have just won $10000!
+Well, $6000, after taxes.
+<partial>
+With padding!
+</partial>
+This is a test
+Test space
+Test <partial>
+With padding!
+</partial> Test

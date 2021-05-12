@@ -1,0 +1,2 @@
+<b>I &lt;3 Ponies!</b>
+<button onclick="foo({&quot;foo&quot;:&quot;bar&quot;,&quot;\\&quot;baz\\&quot;&quot;:42})"></button>

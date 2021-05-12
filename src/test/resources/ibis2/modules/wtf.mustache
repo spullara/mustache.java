@@ -1,0 +1,26 @@
+<table class="suggestions"
+    style="background: #ecf2f5; -webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px; padding: 15px;"
+    width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    {{#wtf}}
+      {{#wtf_users}}
+    <td style="padding: 0 50px;">
+      <a href="{{account_link}}" style="text-decoration: none;">
+        <div
+            style="font-size: 13px; font-weight: bold; color: #333; text-decoration: none; margin-bottom: 5px;">
+          {{name}}
+        </div>
+        <div style="color: #5a7b93; font-size: 12px; margin-bottom: 5px;">
+          @{{screen_name}}
+        </div>
+        <img alt="" width="80" height="80"
+             src="{{profile_image}}"
+             style="display: block; border: none; margin-bottom: 5px;"/>
+
+        <div style="color: #5a7b93; font-size: 12px;">view profile &rarr;</div>
+      </a>
+    </td>
+      {{/wtf_users}}
+    {{/wtf}}
+  </tr>
+</table>

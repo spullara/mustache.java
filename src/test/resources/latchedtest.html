@@ -1,0 +1,15 @@
+<outer>
+{{#nest}}
+<inner>{{.}}</inner>
+  {{#nested}}
+<inner>{{.}}</inner>
+    {{#nestest}}
+    {{/nestest}}
+  {{/nested}}
+  {{#nested}}
+    {{#nestest}}
+<inner>{{.}}</inner>
+    {{/nestest}}
+  {{/nested}}
+{{/nest}}
+</outer>
