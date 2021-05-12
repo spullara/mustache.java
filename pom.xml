@@ -9,8 +9,6 @@
 
   <modules>
     <module>compiler</module>
-    <module>javascript</module>
-    <module>handlebar</module>
     <module>mustache-maven-plugin</module>
     <module>scala-extensions</module>
     <module>benchmarks</module>
