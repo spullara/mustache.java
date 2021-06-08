@@ -71,8 +71,10 @@ public class MustacheParser {
       currentLine.compareAndSet(0, 1);
       StringBuilder out = new StringBuilder();
       try {
+        int n = 0;
         int c;
         while ((c = br.read()) != -1) {
+          n++;
           // We remember that we saw a carriage return so we can put it back in later
           if (c == '\r') {
             sawCR = true;
@@ -90,6 +92,7 @@ public class MustacheParser {
             iterable = false;
             onlywhitespace = true;
             startOfLine = true;
+            n = 0;
             continue;
           }
           sawCR = false;
@@ -102,13 +105,16 @@ public class MustacheParser {
               StringBuilder sb = new StringBuilder();
               br.mark(1);
               c = br.read();
+              n++;
               boolean delimiter = c == '=';
               if (delimiter) {
                 sb.append((char) c);
               } else {
                 br.reset();
+                n--;
               }
               while ((c = br.read()) != -1) {
+                n++;
                 br.mark(1);
                 if (delimiter) {
                   if (c == '=') {
@@ -123,10 +129,12 @@ public class MustacheParser {
                   if (em.length() > 1) {
                     if (br.read() == em.charAt(1)) {
                       // Matched end
+                      n++;
                       break;
                     } else {
                       // Only one
                       br.reset();
+                      n--;
                     }
                   } else break;
                 }
@@ -197,10 +205,15 @@ public class MustacheParser {
                   if (specConformWhitespace && startOfLine) {
                     br.mark(2);
                     int ca = br.read();
+                    n++;
                     if (ca == '\r') {
                       ca = br.read();
+                      n++;
                     }
-                    if (ca != '\n') br.reset();
+                    if (ca != '\n') {
+                      n--;
+                      br.reset();
+                    }
                   }
                   break;
                 }
@@ -212,9 +225,10 @@ public class MustacheParser {
                     name = variable.substring(0, variable.length() - 1);
                   } else {
                     if (br.read() != '}') {
+                      n++;
                       TemplateContext tc = new TemplateContext(sm, em, file, currentLine.get(), startOfLine);
                       throw new MustacheException(
-                              "Improperly closed variable in " + file + ":" + currentLine, tc);
+                              "Improperly closed variable: " + variable + " in " + file + ":" + currentLine + "@" + n, tc);
                     }
                   }
                   mv.value(new TemplateContext(sm, em, file, currentLine.get(), false), name, false);

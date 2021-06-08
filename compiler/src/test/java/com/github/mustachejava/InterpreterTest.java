@@ -1436,7 +1436,7 @@ public class InterpreterTest extends TestCase {
       new DefaultMustacheFactory().compile(new StringReader("{{{#containers}} {{/containers}}"), "example");
       fail("Should have throw MustacheException");
     } catch (MustacheException actual) {
-      assertEquals("Improperly closed variable in example:1 @[example:1]", actual.getMessage());
+      assertEquals("Improperly closed variable: #containers in example:1@16 @[example:1]", actual.getMessage());
     }
   }
 
