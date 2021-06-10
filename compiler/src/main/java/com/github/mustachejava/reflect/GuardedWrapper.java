@@ -17,10 +17,6 @@ public class GuardedWrapper implements Wrapper {
   @SuppressWarnings("ThrowableInstanceNeverThrown")
   protected static final GuardException guardException = new GuardException();
 
-  static {
-    guardException.setStackTrace(new StackTraceElement[0]);
-  }
-
   // Array of guards that must be satisfied
   protected final Guard[] guards;
 

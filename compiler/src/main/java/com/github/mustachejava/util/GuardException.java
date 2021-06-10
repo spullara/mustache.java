@@ -6,9 +6,10 @@ package com.github.mustachejava.util;
  */
 public class GuardException extends RuntimeException {
   public GuardException() {
+    super(null, null, false, false);
   }
 
   public GuardException(String message) {
-    super(message);
+    super(message, null, false, false);
   }
 }
