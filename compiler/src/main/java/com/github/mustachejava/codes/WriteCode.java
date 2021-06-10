@@ -28,7 +28,7 @@ public class WriteCode extends DefaultCode {
   @Override
   public Node invert(Node node, String text, AtomicInteger position) {
     if (compiledAppended == null) {
-      compiledAppended = Pattern.compile(appended);
+      compiledAppended = Pattern.compile(Pattern.quote(appended));
     }
     Matcher matcher = compiledAppended.matcher(text);
     if (matcher.find(position.get())) {
