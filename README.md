@@ -9,7 +9,7 @@ As of release 0.9.0 mustache.java is now Java 8 only. For Java 6/7 support use 0
 
 There are no external dependencies and the compiler library is ~100k.
 
-**Mustache.java** is a derivative of [mustache.js](http://mustache.github.com/mustache.5.html).
+**Mustache.java** is a derivative of [mustache.js](http://mustache.github.io/mustache.5.html).
 
 There is a Google Group for support and questions: <http://groups.google.com/group/mustachejava>
 
