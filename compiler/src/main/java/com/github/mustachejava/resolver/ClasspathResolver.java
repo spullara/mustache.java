@@ -2,11 +2,9 @@ package com.github.mustachejava.resolver;
 
 import com.github.mustachejava.MustacheResolver;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -36,6 +34,22 @@ public class ClasspathResolver implements MustacheResolver {
         String fullResourceName = concatResourceRootAndResourceName(resourceName);
         String normalizeResourceName = URI.create(fullResourceName).normalize().getPath();
 
+        URL resource = ccl.getResource(normalizeResourceName);
+        if (resource != null)
+            if (resource.getProtocol().equals("jar")) {
+                if (normalizeResourceName.endsWith("/")) {
+                    // This is a directory
+                    return null;
+                } else if (ccl.getResource(normalizeResourceName + "/") != null) {
+                    // This is a directory
+                    return null;
+                }
+            } else if (resource.getProtocol().equals("file")) {
+                if (new File(resource.getPath()).isDirectory()) {
+                    // This is a directory
+                    return null;
+                }
+            }
         InputStream is = ccl.getResourceAsStream(normalizeResourceName);
         if (is == null) {
             ClassLoader classLoader = ClasspathResolver.class.getClassLoader();

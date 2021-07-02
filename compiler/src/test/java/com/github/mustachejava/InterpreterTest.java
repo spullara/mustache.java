@@ -1456,6 +1456,17 @@ public class InterpreterTest extends TestCase {
     }
   }
 
+  public void testDirectoryInsteadOfFile() {
+    try {
+      // there is a folder called "templates" in the resources dir (src/main/resources/templates)
+      MustacheFactory mustacheFactory = new DefaultMustacheFactory();
+      Mustache template = mustacheFactory.compile("templates");
+      fail("Should have throw MustacheNotFoundException");
+    } catch (MustacheNotFoundException mnfe) {
+      // works
+    }
+  }
+
   public void testLimitedDepthRecursion() {
     try {
       StringWriter sw = execute("infiniteparent.html", new Context());
