@@ -39,7 +39,7 @@ Request for contributions:
 Documentation:
 
 - [Javadocs](http://spullara.github.io/mustache/apidocs/)
-- [Mustache.js manual](http://mustache.github.com/mustache.5.html)
+- [Mustache.js manual](http://mustache.github.io/mustache.5.html)
 - Passes all of the `mustache` [specification tests](https://github.com/mustache/spec) modulo whitespace differences
 - Biggest difference between mustache.js and mustache.java is optional concurrent evaluation
 - Data is provided by objects in an array of scopes and are accessed via non-private fields, methods or maps
