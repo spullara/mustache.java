@@ -172,7 +172,7 @@ public class FileSystemResolverTest {
     @Test
     public void getReaderPathRootAndNonDefaultFileSystem() throws Exception {
         Path zipFile = Paths.get(resources + "/templates.jar");
-        try (FileSystem zipFileSystem = FileSystems.newFileSystem(zipFile, null)) {
+        try (FileSystem zipFileSystem = FileSystems.newFileSystem(zipFile, (ClassLoader) null)) {
             Path pathRoot = zipFileSystem.getPath("templates");
             FileSystemResolver underTest = new FileSystemResolver(pathRoot);
             try (Reader reader = underTest.getReader("absolute_partials_template.html")) {

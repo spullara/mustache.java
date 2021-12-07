@@ -101,6 +101,24 @@ tests:
     template: '"{{&power}} jiggawatts!"'
     expected: '"1.21 jiggawatts!"'
 
+  - name: Basic Null Interpolation
+    desc: Nulls should interpolate as the empty string.
+    data: { cannot: null }
+    template: "I ({{cannot}}) be seen!"
+    expected: "I () be seen!"
+
+  - name: Triple Mustache Null Interpolation
+    desc: Nulls should interpolate as the empty string.
+    data: { cannot: null }
+    template: "I ({{{cannot}}}) be seen!"
+    expected: "I () be seen!"
+
+  - name: Ampersand Null Interpolation
+    desc: Nulls should interpolate as the empty string.
+    data: { cannot: null }
+    template: "I ({{&cannot}}) be seen!"
+    expected: "I () be seen!"
+
   # Context Misses
 
   - name: Basic Context Miss Interpolation
@@ -178,6 +196,46 @@ tests:
       b: { c: 'ERROR' }
     template: '{{#a}}{{b.c}}{{/a}}'
     expected: ''
+
+  # Implicit Iterators
+
+  - name: Implicit Iterators - Basic Interpolation
+    desc: Unadorned tags should interpolate content into the template.
+    data: "world"
+    template: |
+      Hello, {{.}}!
+    expected: |
+      Hello, world!
+
+  - name: Implicit Iterators - HTML Escaping
+    desc: Basic interpolation should be HTML escaped.
+    data: '& " < >'
+    template: |
+      These characters should be HTML escaped: {{.}}
+    expected: |
+      These characters should be HTML escaped: &amp; &quot; &lt; &gt;
+
+  - name: Implicit Iterators - Triple Mustache
+    desc: Triple mustaches should interpolate without HTML escaping.
+    data: '& " < >'
+    template: |
+      These characters should not be HTML escaped: {{{.}}}
+    expected: |
+      These characters should not be HTML escaped: & " < >
+
+  - name: Implicit Iterators - Ampersand
+    desc: Ampersand should interpolate without HTML escaping.
+    data: '& " < >'
+    template: |
+      These characters should not be HTML escaped: {{&.}}
+    expected: |
+      These characters should not be HTML escaped: & " < >
+
+  - name: Implicit Iterators - Basic Integer Interpolation
+    desc: Integers should interpolate seamlessly.
+    data: 85
+    template: '"{{.}} miles an hour!"'
+    expected: '"85 miles an hour!"'
 
   # Whitespace Sensitivity
 

@@ -47,20 +47,54 @@ tests:
     template: '"{{#boolean}}This should not be rendered.{{/boolean}}"'
     expected: '""'
 
+  - name: Null is falsey
+    desc: Null is falsey.
+    data: { "null": null }
+    template: '"{{#null}}This should not be rendered.{{/null}}"'
+    expected: '""'
+
   - name: Context
     desc: Objects and hashes should be pushed onto the context stack.
     data: { context: { name: 'Joe' } }
     template: '"{{#context}}Hi {{name}}.{{/context}}"'
     expected: '"Hi Joe."'
 
+  - name: Parent contexts
+    desc: Names missing in the current context are looked up in the stack.
+    data: { a: "foo", b: "wrong", sec: { b: "bar" }, c : { d : "baz" } }
+    template: '"{{#sec}}{{a}}, {{b}}, {{c.d}}{{/sec}}"'
+    expected: '"foo, bar, baz"'
+
+  - name: Variable test
+    desc: |
+      Non-false sections have their value at the top of context,
+      accessible as {{.}} or through the parent context. This gives
+      a simple way to display content conditionally if a variable exists.
+    data: { foo: "bar" }
+    template: '"{{#foo}}{{.}} is {{foo}}{{/foo}}"'
+    expected: '"bar is bar"'
+
+  - name: List Contexts
+    desc: All elements on the context stack should be accessible within lists.
+    data:
+      tops:
+        - tname:
+            upper: "A"
+            lower: "a"
+          middles:
+            - mname: "1"
+              bottoms:
+                - bname: "x"
+                - bname: "y"
+    template: '{{#tops}}{{#middles}}{{tname.lower}}{{mname}}.{{#bottoms}}{{tname.upper}}{{mname}}{{bname}}.{{/bottoms}}{{/middles}}{{/tops}}'
+    expected: 'a1.A1x.A1y.'
+
   - name: Deeply Nested Contexts
     desc: All elements on the context stack should be accessible.
     data:
       a: { one: 1 }
       b: { two: 2 }
-      c: { three: 3 }
-      d: { four: 4 }
-      e: { five: 5 }
+      c: { three: 3, d : { four : 4, five : 5 } }
     template: |
       {{#a}}
       {{one}}
@@ -70,9 +104,11 @@ tests:
       {{one}}{{two}}{{three}}{{two}}{{one}}
       {{#d}}
       {{one}}{{two}}{{three}}{{four}}{{three}}{{two}}{{one}}
-      {{#e}}
+      {{#five}}
       {{one}}{{two}}{{three}}{{four}}{{five}}{{four}}{{three}}{{two}}{{one}}
-      {{/e}}
+      {{one}}{{two}}{{three}}{{four}}{{.}}6{{.}}{{four}}{{three}}{{two}}{{one}}
+      {{one}}{{two}}{{three}}{{four}}{{five}}{{four}}{{three}}{{two}}{{one}}
+      {{/five}}
       {{one}}{{two}}{{three}}{{four}}{{three}}{{two}}{{one}}
       {{/d}}
       {{one}}{{two}}{{three}}{{two}}{{one}}
@@ -86,6 +122,8 @@ tests:
       121
       12321
       1234321
+      123454321
+      12345654321
       123454321
       1234321
       12321
@@ -160,6 +198,13 @@ tests:
       list: [ 1.10, 2.20, 3.30, 4.40, 5.50 ]
     template: '"{{#list}}({{.}}){{/list}}"'
     expected: '"(1.1)(2.2)(3.3)(4.4)(5.5)"'
+
+  - name: Implicit Iterator - Array
+    desc: Implicit iterators should allow iterating over nested arrays.
+    data:
+      list: [ [1, 2, 3], ['a', 'b', 'c'] ]
+    template: '"{{#list}}({{#.}}{{.}}{{/.}}){{/list}}"'
+    expected: '"(123)(abc)"'
 
   # Dotted Names
 

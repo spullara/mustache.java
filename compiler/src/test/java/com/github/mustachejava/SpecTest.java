@@ -52,9 +52,9 @@ public class SpecTest {
     run(getSpec("~lambdas.yml"));
   }
 
-  // @Test — need this to appear in the spec repository to enable
+  @Test
   public void inheritance() throws IOException {
-    run(getSpec("inheritance.yml"));
+    run(getSpec("~inheritance.yml"));
   }
 
   private void run(JsonNode spec) {
@@ -145,7 +145,13 @@ public class SpecTest {
       try {
         Mustache compile = CF.compile(template, file);
         StringWriter writer = new StringWriter();
-        compile.execute(writer, new Object[]{new ObjectMapper().readValue(data.toString(), Map.class), functionMap.get(file)});
+        String json = data.toString();
+        if (json.startsWith("{")) {
+          compile.execute(writer, new Object[]{new ObjectMapper().readValue(json, Map.class), functionMap.get(file)});
+        } else {
+          String s = new ObjectMapper().readValue(json, String.class);
+          compile.execute(writer, new Object[]{functionMap.get(file), s});
+        }
         String expected = test.get("expected").asText();
         if (transformOutput(writer.toString()).equals(transformOutput(expected))) {
           System.out.print(": success");
