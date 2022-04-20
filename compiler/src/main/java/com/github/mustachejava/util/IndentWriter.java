@@ -9,6 +9,13 @@ public class IndentWriter extends Writer {
   private final String indent;
   private boolean prependIndent = false;
 
+  private void setPrependIndent() {
+    prependIndent = true;
+    if(inner instanceof IndentWriter) {
+      ((IndentWriter) inner).setPrependIndent();
+    }
+  }
+
   public IndentWriter(Writer inner, String indent) {
     this.inner = inner;
     this.indent = indent;
@@ -21,7 +28,7 @@ public class IndentWriter extends Writer {
       if (chars[i] == '\n') {
         // write character up to newline
         writeLine(chars, newOff, i + 1 - newOff);
-        this.prependIndent = true;
+        setPrependIndent();
 
         newOff = i + 1;
       }
@@ -32,7 +39,7 @@ public class IndentWriter extends Writer {
   public void flushIndent() throws IOException {
     if (this.prependIndent) {
       inner.append(indent);
-      this.prependIndent = false;
+      prependIndent = false;
     }
   }
 
