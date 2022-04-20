@@ -28,7 +28,10 @@ public class Issue278Test {
     private static File root;
 
     static Function<String, String> transformFunc = input ->
-        Arrays.stream(input.split("\n")).map(x -> "^^^\n***" + x).collect(Collectors.joining("\n"));
+        Arrays
+            .stream(input.split("\n"))
+            .map(x -> "^^^\n***" + x)
+            .collect(Collectors.joining("\n", "", "\n"));
 
 
     @Test
