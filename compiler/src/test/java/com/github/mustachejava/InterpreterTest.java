@@ -14,7 +14,6 @@ import com.github.mustachejava.util.CapturingMustacheVisitor;
 import com.github.mustachejava.util.Wrapper;
 import com.github.mustachejavabenchmarks.JsonCapturer;
 import com.github.mustachejavabenchmarks.JsonInterpreterTest;
-import com.google.common.collect.ImmutableMap;
 import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,6 +26,7 @@ import java.util.function.Function;
 
 import static com.github.mustachejava.TestUtil.getContents;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 
 /**
  * Tests for the compiler.
@@ -1482,7 +1482,7 @@ public class InterpreterTest extends TestCase {
     MustacheFactory mustacheFactory = createMustacheFactory();
     Mustache mustache = mustacheFactory.compile("templates/someTemplate.mustache");
     StringWriter stringWriter = new StringWriter();
-    mustache.execute(stringWriter, ImmutableMap.of("title", "Some title!"));
+    mustache.execute(stringWriter, singletonMap("title", "Some title!"));
     assertEquals(getContents(root, "templates/someTemplate.txt"), stringWriter.toString());
   }
 
