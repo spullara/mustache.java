@@ -1,8 +1,11 @@
 package com.github.mustachejavabenchmarks.simple;
 
 import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.reflect.SimpleObjectHandler;
 import com.github.mustachejavabenchmarks.BenchmarkTest;
+
+import java.io.IOException;
 
 /**
  * Compare compilation with interpreter.
