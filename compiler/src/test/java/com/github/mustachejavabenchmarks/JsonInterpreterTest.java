@@ -6,7 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +25,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.mustachejavabenchmarks.BenchmarkTest.skip;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for the compiler.
@@ -32,7 +34,7 @@ import static com.github.mustachejavabenchmarks.BenchmarkTest.skip;
  * Date: May 3, 2010
  * Time: 10:23:54 AM
  */
-public class JsonInterpreterTest extends TestCase {
+public class JsonInterpreterTest {
   private static final int TIME = 2;
 
   protected File root;
@@ -59,7 +61,8 @@ public class JsonInterpreterTest extends TestCase {
     }
   }
 
-  public void testSingleThreaded() throws MustacheException, IOException, InterruptedException {
+  @Test
+  public void testSingleThreaded() throws MustacheException, IOException {
     if (skip()) return;
     final Mustache parse = getMustache();
     final Object parent = getScope();
@@ -67,7 +70,8 @@ public class JsonInterpreterTest extends TestCase {
     singlethreaded(parse, parent);
   }
 
-  public void testSingleThreadedClass() throws MustacheException, IOException, InterruptedException {
+  @Test
+  public void testSingleThreadedClass() throws MustacheException {
     if (skip()) return;
     final Mustache parse = getMustache();
     final Object parent = new Object() {
@@ -83,6 +87,7 @@ public class JsonInterpreterTest extends TestCase {
     singlethreaded(parse, parent);
   }
 
+  @Test
   public void testContextPrecedence() throws IOException {
     Mustache m = new DefaultMustacheFactory().compile(new StringReader("{{#a}}{{b.c}}{{/a}}"), "test");
     Map map = new ObjectMapper().readValue("{\"a\": {\"b\": {}}, \"b\": {\"c\": \"ERROR\"}}", Map.class);
@@ -92,6 +97,7 @@ public class JsonInterpreterTest extends TestCase {
     assertEquals("", sw.toString());
   }
 
+  @Test
   public void testCompiler() throws MustacheException, IOException, InterruptedException {
     if (skip()) return;
     for (int i = 0; i < 3; i++) {
@@ -113,6 +119,7 @@ public class JsonInterpreterTest extends TestCase {
     return new DefaultMustacheFactory(root);
   }
 
+  @Test
   public void testMultithreaded() throws IOException, InterruptedException {
     if (skip()) return;
     final Mustache parse = getMustache();
@@ -166,7 +173,6 @@ public class JsonInterpreterTest extends TestCase {
   private void singlethreaded(Mustache parse, Object parent) {
     long start = System.currentTimeMillis();
     System.out.println(System.currentTimeMillis() - start);
-    start = System.currentTimeMillis();
     StringWriter writer = new StringWriter();
     parse.execute(writer, parent);
     writer.flush();
@@ -211,11 +217,10 @@ public class JsonInterpreterTest extends TestCase {
     System.out.println((System.currentTimeMillis() - start));
   }
 
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     File file = new File("src/test/resources");
     root = new File(file, "simple.html").exists() ? file : new File("../src/test/resources");
   }
-
 }
 

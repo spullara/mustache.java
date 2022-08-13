@@ -14,7 +14,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.mustachejavabenchmarks.BenchmarkTest.skip;
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Inspired by an unconfirmed bug report.

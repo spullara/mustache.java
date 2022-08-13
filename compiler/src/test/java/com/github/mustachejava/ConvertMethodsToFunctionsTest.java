@@ -18,7 +18,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Function;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 public class ConvertMethodsToFunctionsTest {
 

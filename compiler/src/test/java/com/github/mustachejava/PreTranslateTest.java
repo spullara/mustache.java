@@ -8,7 +8,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.function.Function;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * If you want to precompile translations, you will need to do two passes against

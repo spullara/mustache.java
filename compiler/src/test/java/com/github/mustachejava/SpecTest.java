@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import static junit.framework.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Specification tests

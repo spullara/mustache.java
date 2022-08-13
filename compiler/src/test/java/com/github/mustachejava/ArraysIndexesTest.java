@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 /**
  * Shows a simple way to add indexes for arrays.
@@ -66,8 +66,8 @@ public class ArraysIndexesTest {
   }
 
   @Test
-  public void testThrowMustacheExceptionInCaseOfNullHandler() throws Exception {
-    try {
+  public void testThrowMustacheExceptionInCaseOfNullHandler() {
+    MustacheException expected = assertThrows(MustacheException.class, () -> {
       String template = "<ol>\n" +
               "    <li>{{test.1}}</li>\n" +
               "    <li>{{test.0}}</li>\n" +
@@ -79,16 +79,14 @@ public class ArraysIndexesTest {
               "{{/test}}\n" +
               "</ol>";
       Object scope = new Object() {
-        String[] test = new String[]{ "a", "b", "c", "d" };
+        String[] test = new String[]{"a", "b", "c", "d"};
       };
       DefaultMustacheFactory mf = new DefaultMustacheFactory();
       mf.setObjectHandler(null);
       Mustache m = mf.compile(new StringReader(template), "template");
       m.execute(new StringWriter(), scope).flush();
-      fail("should have thrown MustacheException");
-    } catch (MustacheException expected) {
-      assertEquals("Failed to get value for test.1 @[template:2]", expected.getMessage());
-    }
+    });
+    assertEquals("Failed to get value for test.1 @[template:2]", expected.getMessage());
   }
 
   private static class ArrayMap extends AbstractMap<Object, Object> implements Iterable<Object> {
