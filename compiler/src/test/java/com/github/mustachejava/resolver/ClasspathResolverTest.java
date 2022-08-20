@@ -106,7 +106,7 @@ public class ClasspathResolverTest {
     public void getReaderNullRootAndResourceIsDirectory() throws Exception {
         ClasspathResolver underTest = new ClasspathResolver();
         try (Reader reader = underTest.getReader("templates/absolute")) {
-            assertThat(reader, is(notNullValue()));
+            assertThat(reader, is(nullValue()));
         }
     }
 
@@ -115,7 +115,7 @@ public class ClasspathResolverTest {
     public void getReaderWithRootAndResourceIsDirectory() throws Exception {
         ClasspathResolver underTest = new ClasspathResolver("templates");
         try (Reader reader = underTest.getReader("absolute")) {
-            assertThat(reader, is(notNullValue()));
+            assertThat(reader, is(nullValue()));
         }
     }
 
