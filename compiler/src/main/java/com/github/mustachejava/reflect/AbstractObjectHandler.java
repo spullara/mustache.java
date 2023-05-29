@@ -1,5 +1,8 @@
-package com.github.mustachejava;
+package com.github.mustachejava.reflect;
 
+import com.github.mustachejava.Iteration;
+import com.github.mustachejava.ObjectHandler;
+import com.github.mustachejava.util.Wrapper;
 import java.io.Writer;
 import java.lang.reflect.Array;
 import java.util.Iterator;
@@ -7,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-public abstract class AbstractObjectHandler implements ObjectHandler {
+abstract class AbstractObjectHandler implements ObjectHandler {
 
   @Override
   public Object coerce(Object object) {
