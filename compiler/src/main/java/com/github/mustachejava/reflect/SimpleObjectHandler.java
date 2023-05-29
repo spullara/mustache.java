@@ -13,8 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SimpleObjectHandler extends BaseObjectHandler {
 
-  private boolean allowReflection = true;
-
   @Override
   public Binding createBinding(final String name, TemplateContext tc, Code code) {
     return new Binding() {
@@ -44,10 +42,6 @@ public class SimpleObjectHandler extends BaseObjectHandler {
               } else if (!areMethodsAccessible(map)) {
                 continue; //don't check methods, move to next scope
               }
-            }
-
-            if (!allowReflection) {
-              continue;
             }
 
             // Check to see if there is a method or field that matches
@@ -80,10 +74,6 @@ public class SimpleObjectHandler extends BaseObjectHandler {
       }
       return null;
     };
-  }
-
-  public void disableReflection() {
-    allowReflection = false;
   }
 
   // Used for the member cache

@@ -8,10 +8,10 @@ import java.io.StringWriter;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
-public class ReflectionTest {
+public class SimpleObjectHandlerTest {
 
   @Test
-  public void testReflectionEnabledFieldsUsed() {
+  public void testFieldsUsed() {
     String template = "{{field}}";
     Object scope = new Object() {
       public final String field = "value";
@@ -28,7 +28,7 @@ public class ReflectionTest {
   }
 
   @Test
-  public void testReflectionEnabledMethodsUsed() {
+  public void testMethodsUsed() {
     String template = "{{method}}";
     Object scope = new Object() {
       public String method() {
@@ -45,43 +45,4 @@ public class ReflectionTest {
 
     assertEquals("value", stringWriter.toString());
   }
-
-  @Test
-  public void testReflectionDisabledFieldsIgnored() {
-    String template = "{{field}}";
-    Object scope = new Object() {
-      public final String field = "value";
-    };
-    SimpleObjectHandler simpleObjectHandler = new SimpleObjectHandler();
-    simpleObjectHandler.disableReflection();
-    DefaultMustacheFactory mf = new DefaultMustacheFactory();
-    mf.setObjectHandler(simpleObjectHandler);
-
-    Mustache m = mf.compile(new StringReader(template), "template");
-    StringWriter stringWriter = new StringWriter();
-    m.execute(stringWriter, scope);
-
-    assertEquals("", stringWriter.toString());
-  }
-
-  @Test
-  public void testReflectionDisabledMethodsIgnored() {
-    String template = "{{method}}";
-    Object scope = new Object() {
-      public String method() {
-        return "value";
-      }
-    };
-    SimpleObjectHandler simpleObjectHandler = new SimpleObjectHandler();
-    simpleObjectHandler.disableReflection();
-    DefaultMustacheFactory mf = new DefaultMustacheFactory();
-    mf.setObjectHandler(simpleObjectHandler);
-
-    Mustache m = mf.compile(new StringReader(template), "template");
-    StringWriter stringWriter = new StringWriter();
-    m.execute(stringWriter, scope);
-
-    assertEquals("", stringWriter.toString());
-  }
-
 }
