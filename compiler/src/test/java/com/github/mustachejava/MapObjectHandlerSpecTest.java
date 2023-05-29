@@ -10,8 +10,8 @@ public class MapObjectHandlerSpecTest extends SpecTest {
   @Override
   @Test
   public void lambdas() {
-    // MapObjectHandler does not support lambdas as that would require looking up the value in the
-    // map by its method name (in this case "apply").
+    // MapObjectHandler does not support lambdas as that would require looking up the value of
+    // object methods in the Map.
   }
 
   @Override
