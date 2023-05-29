@@ -43,7 +43,6 @@ public class SimpleObjectHandler extends BaseObjectHandler {
                 continue; //don't check methods, move to next scope
               }
             }
-
             // Check to see if there is a method or field that matches
             try {
               AccessibleObject ao = lookup(scope.getClass(), name);
