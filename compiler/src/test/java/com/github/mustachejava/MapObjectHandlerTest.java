@@ -3,7 +3,6 @@ package com.github.mustachejava;
 import static org.junit.Assert.assertEquals;
 
 import com.github.mustachejava.reflect.MapObjectHandler;
-import com.github.mustachejava.reflect.SimpleObjectHandler;
 import java.io.StringReader;
 import java.io.StringWriter;
 import org.junit.Test;
