@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -62,78 +63,32 @@ public class SpecTest {
     int success = 0;
     int whitespace = 0;
     Map<String, Object> functionMap = new HashMap<String, Object>() {{
-      put("Interpolation", new Object() {
-        Function lambda() {
-          return input -> "world";
-        }
-      });
-      put("Interpolation - Expansion", new Object() {
-        Function lambda() {
-          return input -> "{{planet}}";
-        }
-      });
-      put("Interpolation - Alternate Delimiters", new Object() {
-        Function lambda() {
-          return input -> "|planet| => {{planet}}";
-        }
-      });
-      put("Interpolation - Multiple Calls", new Object() {
+      put("Interpolation", mapWithConstantLambda("world"));
+      put("Interpolation - Expansion", mapWithConstantLambda("{{planet}}"));
+      put("Interpolation - Alternate Delimiters", mapWithConstantLambda("|planet| => {{planet}}"));
+      put("Interpolation - Multiple Calls",ImmutableMap.of("lambda", new Function<String, String>() {
+
         int calls = 0;
 
-        Function lambda() {
-          return input -> String.valueOf(++calls);
+        @Override
+        public String apply(String input) {
+          return String.valueOf(++calls);
         }
-      });
-      put("Escaping", new Object() {
-        Function lambda() {
-          return input -> ">";
-        }
-      });
-      put("Section", new Object() {
-        Function lambda() {
-          return new TemplateFunction() {
-            @Override
-            public String apply(String input) {
-              return input.equals("{{x}}") ? "yes" : "no";
-            }
-          };
-        }
-      });
-      put("Section - Expansion", new Object() {
-        Function lambda() {
-          return new TemplateFunction() {
-            @Override
-            public String apply(String input) {
-              return input + "{{planet}}" + input;
-            }
-          };
-        }
-      });
-      put("Section - Alternate Delimiters", new Object() {
-        Function lambda() {
-          return new TemplateFunction() {
-            @Override
-            public String apply(String input) {
-              return input + "{{planet}} => |planet|" + input;
-            }
-          };
-        }
-      });
-      put("Section - Multiple Calls", new Object() {
-        Function lambda() {
-          return new Function<String, String>() {
-            @Override
-            public String apply(String input) {
-              return "__" + input + "__";
-            }
-          };
-        }
-      });
-      put("Inverted Section", new Object() {
-        Function lambda() {
-          return input -> false;
-        }
-      });
+      }));
+      put("Escaping", mapWithConstantLambda(">"));
+      put("Section", ImmutableMap.of(
+          "lambda",
+          (TemplateFunction) (input) -> input.equals("{{x}}") ? "yes" : "no"));
+      put("Section - Expansion", ImmutableMap.of(
+          "lambda",
+          (TemplateFunction) (input) -> input + "{{planet}}" + input));
+      put("Section - Alternate Delimiters", ImmutableMap.of(
+          "lambda",
+          (TemplateFunction) (input) -> input + "{{planet}} => |planet|" + input));
+      put("Section - Multiple Calls", ImmutableMap.of(
+          "lambda",
+          (TemplateFunction) (input) -> "__" + input + "__"));
+      put("Inverted Section", mapWithConstantLambda(false));
     }};
     for (final JsonNode test : spec.get("tests")) {
       boolean failed = false;
@@ -200,4 +155,7 @@ public class SpecTest {
                     "/spec/specs/" + spec))).readValueAsTree();
   }
 
+  private static Map<String, Function<String, Object>> mapWithConstantLambda(Object value) {
+    return ImmutableMap.of("lambda", (input) -> value);
+  }
 }
