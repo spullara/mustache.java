@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -63,10 +62,10 @@ public class SpecTest {
     int success = 0;
     int whitespace = 0;
     Map<String, Object> functionMap = new HashMap<String, Object>() {{
-      put("Interpolation", mapWithConstantLambda("world"));
-      put("Interpolation - Expansion", mapWithConstantLambda("{{planet}}"));
-      put("Interpolation - Alternate Delimiters", mapWithConstantLambda("|planet| => {{planet}}"));
-      put("Interpolation - Multiple Calls",ImmutableMap.of("lambda", new Function<String, String>() {
+      put("Interpolation", singletonMapWithConstantLambda("world"));
+      put("Interpolation - Expansion", singletonMapWithConstantLambda("{{planet}}"));
+      put("Interpolation - Alternate Delimiters", singletonMapWithConstantLambda("|planet| => {{planet}}"));
+      put("Interpolation - Multiple Calls",singletonMap("lambda", new Function<String, String>() {
 
         int calls = 0;
 
@@ -75,20 +74,20 @@ public class SpecTest {
           return String.valueOf(++calls);
         }
       }));
-      put("Escaping", mapWithConstantLambda(">"));
-      put("Section", ImmutableMap.of(
+      put("Escaping", singletonMapWithConstantLambda(">"));
+      put("Section", singletonMap(
           "lambda",
           (TemplateFunction) (input) -> input.equals("{{x}}") ? "yes" : "no"));
-      put("Section - Expansion", ImmutableMap.of(
+      put("Section - Expansion", singletonMap(
           "lambda",
           (TemplateFunction) (input) -> input + "{{planet}}" + input));
-      put("Section - Alternate Delimiters", ImmutableMap.of(
+      put("Section - Alternate Delimiters", singletonMap(
           "lambda",
           (TemplateFunction) (input) -> input + "{{planet}} => |planet|" + input));
-      put("Section - Multiple Calls", ImmutableMap.of(
+      put("Section - Multiple Calls", singletonMap(
           "lambda",
           (TemplateFunction) (input) -> "__" + input + "__"));
-      put("Inverted Section", mapWithConstantLambda(false));
+      put("Inverted Section", singletonMapWithConstantLambda(false));
     }};
     for (final JsonNode test : spec.get("tests")) {
       boolean failed = false;
@@ -155,7 +154,15 @@ public class SpecTest {
                     "/spec/specs/" + spec))).readValueAsTree();
   }
 
-  private static Map<String, Function<String, Object>> mapWithConstantLambda(Object value) {
-    return ImmutableMap.of("lambda", (input) -> value);
+  private static Map<String, Function<String, Object>> singletonMapWithConstantLambda(Object value) {
+    return new HashMap<String, Function<String, Object>>() {{
+      put("lambda", (input) -> value);
+    }};
+  }
+
+  private static Map<String, Object> singletonMap(String key, Object value) {
+    return new HashMap<String, Object>() {{
+      put(key, value);
+    }};
   }
 }
