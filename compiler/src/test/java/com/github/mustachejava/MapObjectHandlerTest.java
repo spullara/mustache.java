@@ -10,7 +10,7 @@ import org.junit.Test;
 public class MapObjectHandlerTest {
 
   @Test
-  public void testReflectionDisabledFieldsIgnored() {
+  public void testFieldsIgnored() {
     String template = "{{field}}";
     Object scope = new Object() {
       public final String field = "value";
@@ -27,7 +27,7 @@ public class MapObjectHandlerTest {
   }
 
   @Test
-  public void testReflectionDisabledMethodsIgnored() {
+  public void testMethodsIgnored() {
     String template = "{{method}}";
     Object scope = new Object() {
       public String method() {
