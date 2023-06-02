@@ -163,7 +163,7 @@ public class SpecTest {
           }
         } else {
           System.out.println(": failed!");
-          System.out.println(expected + " != " + writer.toString());
+          System.out.println("'" + expected + "' != '" + writer + "'");
           System.out.println(test);
           failed = true;
         }
