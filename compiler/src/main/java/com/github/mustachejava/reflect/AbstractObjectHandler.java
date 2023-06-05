@@ -12,6 +12,8 @@ import java.util.Optional;
 
 abstract class AbstractObjectHandler implements ObjectHandler {
 
+  protected static final Object NOT_FOUND = new Object();
+
   @Override
   public Object coerce(Object object) {
     if (object instanceof Optional) {
