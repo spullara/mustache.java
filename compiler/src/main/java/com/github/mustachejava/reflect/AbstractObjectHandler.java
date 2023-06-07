@@ -2,7 +2,6 @@ package com.github.mustachejava.reflect;
 
 import com.github.mustachejava.Iteration;
 import com.github.mustachejava.ObjectHandler;
-import com.github.mustachejava.util.Wrapper;
 import java.io.Writer;
 import java.lang.reflect.Array;
 import java.util.Iterator;
