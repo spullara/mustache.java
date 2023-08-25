@@ -1298,6 +1298,16 @@ public class InterpreterTest extends TestCase {
     }
   }
 
+  public void testEmptyDot() {
+    MustacheFactory mf = createMustacheFactory();
+    StringWriter sw = new StringWriter();
+    Mustache mustache = mf.compile(new StringReader("{{No.}}"), "template");
+    Map<String, String> scope = new HashMap<>();
+    scope.put("No", "1");
+    mustache.execute(sw, scope);
+    System.out.println(sw);
+  }
+
   public void testTemplateFunction() throws IOException {
     MustacheFactory mf = createMustacheFactory();
     Mustache m = mf.compile(new StringReader("{{#i}}{{{test}}}{{f}}{{/i}}" +

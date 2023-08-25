@@ -66,6 +66,7 @@ public abstract class BaseObjectHandler extends AbstractObjectHandler {
   }
 
   private AccessibleObject findMemberOnClass(Class sClass, String name) {
+    if (name.isEmpty()) return null;
     AccessibleObject ao;
     try {
       ao = getMethod(sClass, name);

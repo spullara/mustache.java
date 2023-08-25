@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-abstract class AbstractObjectHandler implements ObjectHandler {
+public abstract class AbstractObjectHandler implements ObjectHandler {
 
   protected static final Object NOT_FOUND = new Object();
 
@@ -26,6 +26,7 @@ abstract class AbstractObjectHandler implements ObjectHandler {
     }
     return object;
   }
+
 
   @Override
   public Writer falsey(Iteration iteration, Writer writer, Object object, List<Object> scopes) {
