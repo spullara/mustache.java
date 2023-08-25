@@ -1308,6 +1308,27 @@ public class InterpreterTest extends TestCase {
     System.out.println(sw);
   }
 
+  @Test
+  public void testCase() {
+    String template = "Hello {{user.name}}";
+
+    DefaultMustacheFactory factory = new DefaultMustacheFactory();
+    Mustache m = factory.compile(new StringReader(template), "test");
+
+    Map<String, Object> scopes = new HashMap<>();
+    Map<String, String> value = new HashMap<>();
+    value.put("name", "Test");
+    scopes.put("user", value);
+
+    //Expected this to output 'Hello'
+    String result =  m.execute(new StringWriter(), (Map<String, Object>) null).toString();
+    System.out.println(result); //prints 'Hello'
+
+    //Expected this to output 'Hello Test' instead prints 'Hello'
+    result = m.execute(new StringWriter(), scopes).toString();
+    System.out.println(result); //prints 'Hello'
+  }
+
   public void testTemplateFunction() throws IOException {
     MustacheFactory mf = createMustacheFactory();
     Mustache m = mf.compile(new StringReader("{{#i}}{{{test}}}{{f}}{{/i}}" +
