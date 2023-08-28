@@ -254,6 +254,23 @@ public class InterpreterTest extends TestCase {
     }
   }
 
+  public void testIssue280() throws IOException {
+    MustacheFactory c = createMustacheFactory();
+    StringWriter sw = new StringWriter();
+    Mustache m = c.compile(new StringReader("{{{template}}}"), "test");
+    Object o = new Object() {
+      String template() throws IOException {
+        MustacheFactory c = createMustacheFactory();
+        StringWriter sw = new StringWriter();
+        Mustache m = c.compile("template.html");
+        m.execute(sw, new Object()).flush();
+        return sw.toString();
+      }
+    };
+    m.execute(sw, o).flush();
+    assertTrue(sw.toString().startsWith("<html>"));
+  }
+
   public void testSimpleFiltered() throws MustacheException, IOException, ExecutionException, InterruptedException {
     MustacheFactory c = new DefaultMustacheFactory(root) {
       @Override
