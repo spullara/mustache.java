@@ -1,13 +1,15 @@
 package com.github.mustachejava.util;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.StringWriter;
 
 import static com.github.mustachejava.util.HtmlEscaper.escape;
+import static org.junit.Assert.assertEquals;
 
-public class HtmlEscaperTest extends TestCase {
-  public void testEscape() throws Exception {
+public class HtmlEscaperTest {
+  @Test
+  public void testEscape() {
     {
       StringWriter sw = new StringWriter();
       escape("Hello, world!", sw);

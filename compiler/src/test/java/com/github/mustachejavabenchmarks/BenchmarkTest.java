@@ -1,7 +1,8 @@
 package com.github.mustachejavabenchmarks;
 
 import com.github.mustachejava.*;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,21 +16,21 @@ import java.util.concurrent.Executors;
  * Date: 5/14/11
  * Time: 9:28 PM
  */
-public class BenchmarkTest extends TestCase {
+public class BenchmarkTest {
   private static final int TIME = 2000;
   protected File root;
 
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     File file = new File("src/test/resources");
     root = new File(file, "simple.html").exists() ? file : new File("../src/test/resources");
-
   }
 
   public static boolean skip() {
     return System.getenv().containsKey("CI") || System.getProperty("CI") != null;
   }
 
+  @Test
   public void testCompiler() {
     if (skip()) return;
     System.out.println("complex.html compilations per second:");
@@ -48,6 +49,7 @@ public class BenchmarkTest extends TestCase {
     }
   }
 
+  @Test
   public void testComplex() throws MustacheException, IOException {
     if (skip()) return;
     System.out.println("complex.html evaluations per millisecond:");
@@ -73,6 +75,7 @@ public class BenchmarkTest extends TestCase {
     return new DefaultMustacheFactory();
   }
 
+  @Test
   public void testComplexFlapping() throws MustacheException, IOException {
     if (skip()) return;
     System.out.println("complex.html evaluations with 3 different objects per millisecond:");
@@ -96,6 +99,7 @@ public class BenchmarkTest extends TestCase {
     }
   }
 
+  @Test
   public void testParallelComplex() throws MustacheException, IOException {
     if (skip()) return;
     System.out.println("complex.html evaluations per millisecond:");
@@ -117,6 +121,7 @@ public class BenchmarkTest extends TestCase {
     }
   }
 
+  @Test
   public void testParallelComplexNoExecutor() throws MustacheException, IOException {
     if (skip()) return;
     System.out.println("complex.html evaluations per millisecond:");
@@ -142,14 +147,4 @@ public class BenchmarkTest extends TestCase {
     m.execute(sw, complexObject).close();
     return sw;
   }
-
-  public static void main(String[] args) throws Exception {
-    BenchmarkTest benchmarkTest = new BenchmarkTest();
-    benchmarkTest.setUp();
-    benchmarkTest.testComplex();
-    benchmarkTest.testParallelComplex();
-    benchmarkTest.testParallelComplexNoExecutor();
-    System.exit(0);
-  }
-
 }
