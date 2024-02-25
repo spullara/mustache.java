@@ -10,10 +10,8 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class FileSystemResolverTest {
 
@@ -23,7 +21,7 @@ public class FileSystemResolverTest {
     public void getReaderDefaultRootAndResourceHasRelativePath() throws Exception {
         FileSystemResolver underTest = new FileSystemResolver();
         try (Reader reader = underTest.getReader(resources + "/nested_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -32,7 +30,7 @@ public class FileSystemResolverTest {
         File fileRoot = new File(resources + "/templates_filepath");
         FileSystemResolver underTest = new FileSystemResolver(fileRoot);
         try (Reader reader = underTest.getReader("absolute_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -41,7 +39,7 @@ public class FileSystemResolverTest {
         Path pathRoot = Paths.get(resources + "/templates_filepath");
         FileSystemResolver underTest = new FileSystemResolver(pathRoot);
         try (Reader reader = underTest.getReader("absolute_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -49,7 +47,7 @@ public class FileSystemResolverTest {
     public void getReaderDefaultRootDoesNotFindFileWithAbsolutePath() throws Exception {
         FileSystemResolver underTest = new FileSystemResolver();
         try (Reader reader = underTest.getReader("/" + resources + "/nested_partials_template.html")) {
-            assertThat(reader, is(nullValue()));
+            assertNull(reader);
         }
     }
 
@@ -58,7 +56,7 @@ public class FileSystemResolverTest {
         File fileRoot = new File(resources + "/templates_filepath");
         FileSystemResolver underTest = new FileSystemResolver(fileRoot);
         try (Reader reader = underTest.getReader("/absolute_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -67,7 +65,7 @@ public class FileSystemResolverTest {
         Path pathRoot = Paths.get(resources + "/templates_filepath");
         FileSystemResolver underTest = new FileSystemResolver(pathRoot);
         try (Reader reader = underTest.getReader("/absolute_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -95,7 +93,7 @@ public class FileSystemResolverTest {
     public void getReaderDefaultRootAndResourceHasDoubleDotRelativePath() throws Exception {
         FileSystemResolver underTest = new FileSystemResolver();
         try (Reader reader = underTest.getReader(resources + "/templates_filepath/../nested_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -104,7 +102,7 @@ public class FileSystemResolverTest {
         File fileRoot = new File(resources + "/templates_filepath");
         FileSystemResolver underTest = new FileSystemResolver(fileRoot);
         try (Reader reader = underTest.getReader("absolute/../absolute_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -113,7 +111,7 @@ public class FileSystemResolverTest {
         Path pathRoot = Paths.get(resources + "/templates_filepath");
         FileSystemResolver underTest = new FileSystemResolver(pathRoot);
         try (Reader reader = underTest.getReader("absolute/../absolute_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -121,7 +119,7 @@ public class FileSystemResolverTest {
     public void getReaderDefaultRootAndResourceHasDotRelativePath() throws Exception {
         FileSystemResolver underTest = new FileSystemResolver();
         try (Reader reader = underTest.getReader(resources + "/templates_filepath/./absolute_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -130,7 +128,7 @@ public class FileSystemResolverTest {
         File fileRoot = new File(resources + "/templates_filepath");
         FileSystemResolver underTest = new FileSystemResolver(fileRoot);
         try (Reader reader = underTest.getReader("absolute/./nested_partials_sub.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -139,7 +137,7 @@ public class FileSystemResolverTest {
         Path pathRoot = Paths.get(resources + "/templates_filepath");
         FileSystemResolver underTest = new FileSystemResolver(pathRoot);
         try (Reader reader = underTest.getReader("absolute/./nested_partials_sub.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -147,7 +145,7 @@ public class FileSystemResolverTest {
     public void getReaderDefaultRootAndResourceHasInvalidPath() throws Exception {
         FileSystemResolver underTest = new FileSystemResolver();
         try (Reader reader = underTest.getReader("\0")) {
-            assertThat(reader, is(nullValue()));
+            assertNull(reader);
         }
     }
 
@@ -156,7 +154,7 @@ public class FileSystemResolverTest {
         File fileRoot = new File(resources + "/templates_filepath");
         FileSystemResolver underTest = new FileSystemResolver(fileRoot);
         try (Reader reader = underTest.getReader("\0")) {
-            assertThat(reader, is(nullValue()));
+            assertNull(reader);
         }
     }
 
@@ -165,7 +163,7 @@ public class FileSystemResolverTest {
         Path pathRoot = Paths.get(resources + "/templates_filepath");
         FileSystemResolver underTest = new FileSystemResolver(pathRoot);
         try (Reader reader = underTest.getReader("\0")) {
-            assertThat(reader, is(nullValue()));
+            assertNull(reader);
         }
     }
 
@@ -176,7 +174,7 @@ public class FileSystemResolverTest {
             Path pathRoot = zipFileSystem.getPath("templates");
             FileSystemResolver underTest = new FileSystemResolver(pathRoot);
             try (Reader reader = underTest.getReader("absolute_partials_template.html")) {
-                assertThat(reader, is(notNullValue()));
+                assertNotNull(reader);
             }
         }
     }
@@ -185,7 +183,7 @@ public class FileSystemResolverTest {
     public void getReaderDefaultRootAndResourceIsDirectory() throws Exception {
         FileSystemResolver underTest = new FileSystemResolver();
         try (Reader reader = underTest.getReader(resources + "/templates_filepath")) {
-            assertThat(reader, is(nullValue()));
+            assertNull(reader);
         }
     }
 
@@ -194,7 +192,7 @@ public class FileSystemResolverTest {
         File fileRoot = new File(resources);
         FileSystemResolver underTest = new FileSystemResolver(fileRoot);
         try (Reader reader = underTest.getReader("templates_filepath")) {
-            assertThat(reader, is(nullValue()));
+            assertNull(reader);
         }
     }
 
@@ -203,7 +201,7 @@ public class FileSystemResolverTest {
         Path pathRoot = Paths.get(resources);
         FileSystemResolver underTest = new FileSystemResolver(pathRoot);
         try (Reader reader = underTest.getReader("templates_filepath")) {
-            assertThat(reader, is(nullValue()));
+            assertNull(reader);
         }
     }
 
@@ -214,7 +212,7 @@ public class FileSystemResolverTest {
     public void getReaderDefaultRootAndResourceAboveRootNotFound() throws Exception {
         FileSystemResolver underTest = new FileSystemResolver();
         try (Reader reader = underTest.getReader("../this_file_does_not_exist.html")) {
-            assertThat(reader, is(nullValue()));
+            assertNull(reader);
         }
     }
 
@@ -230,7 +228,7 @@ public class FileSystemResolverTest {
         File fileRoot = new File(resources + "/templates_filepath");
         FileSystemResolver underTest = new FileSystemResolver(fileRoot);
         try (Reader reader = underTest.getReader("../this_file_does_not_exist.html")) {
-            assertThat(reader, is(nullValue()));
+            assertNull(reader);
         }
     }
 
@@ -246,7 +244,7 @@ public class FileSystemResolverTest {
         Path pathRoot = Paths.get(resources + "/templates_filepath");
         FileSystemResolver underTest = new FileSystemResolver(pathRoot);
         try (Reader reader = underTest.getReader("../this_file_does_not_exist.html")) {
-            assertThat(reader, is(nullValue()));
+            assertNull(reader);
         }
     }
 }

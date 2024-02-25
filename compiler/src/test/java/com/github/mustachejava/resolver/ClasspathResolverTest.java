@@ -4,10 +4,8 @@ import org.junit.Test;
 
 import java.io.Reader;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class ClasspathResolverTest {
 
@@ -15,7 +13,7 @@ public class ClasspathResolverTest {
     public void getReaderNullRootAndResourceHasRelativePath() throws Exception {
         ClasspathResolver underTest = new ClasspathResolver();
         try (Reader reader = underTest.getReader("nested_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -23,7 +21,7 @@ public class ClasspathResolverTest {
     public void getReaderWithRootAndResourceHasRelativePath() throws Exception {
         ClasspathResolver underTest = new ClasspathResolver("templates");
         try (Reader reader = underTest.getReader("absolute_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -31,7 +29,7 @@ public class ClasspathResolverTest {
     public void getReaderWithRootThatHasTrailingForwardSlashAndResourceHasRelativePath() throws Exception {
         ClasspathResolver underTest = new ClasspathResolver("templates/");
         try (Reader reader = underTest.getReader("absolute_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -39,7 +37,7 @@ public class ClasspathResolverTest {
     public void getReaderWithRootAndResourceHasAbsolutePath() throws Exception {
         ClasspathResolver underTest = new ClasspathResolver("templates");
         try (Reader reader = underTest.getReader("/absolute_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -47,7 +45,7 @@ public class ClasspathResolverTest {
     public void getReaderWithRootThatHasTrailingForwardSlashAndResourceHasAbsolutePath() throws Exception {
         ClasspathResolver underTest = new ClasspathResolver("templates/");
         try (Reader reader = underTest.getReader("/absolute_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -55,7 +53,7 @@ public class ClasspathResolverTest {
     public void getReaderNullRootDoesNotFindFileWithAbsolutePath() throws Exception {
         ClasspathResolver underTest = new ClasspathResolver();
         try (Reader reader = underTest.getReader("/nested_partials_template.html")) {
-            assertThat(reader, is(nullValue()));
+            assertNull(reader);
         }
     }
 
@@ -75,7 +73,7 @@ public class ClasspathResolverTest {
     public void getReaderWithRootAndResourceHasDoubleDotRelativePath() throws Exception {
         ClasspathResolver underTest = new ClasspathResolver("templates");
         try (Reader reader = underTest.getReader("absolute/../absolute_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -83,7 +81,7 @@ public class ClasspathResolverTest {
     public void getReaderWithRootAndResourceHasDotRelativePath() throws Exception {
         ClasspathResolver underTest = new ClasspathResolver("templates");
         try (Reader reader = underTest.getReader("absolute/./nested_partials_sub.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 
@@ -106,7 +104,7 @@ public class ClasspathResolverTest {
     public void getReaderNullRootAndResourceIsDirectory() throws Exception {
         ClasspathResolver underTest = new ClasspathResolver();
         try (Reader reader = underTest.getReader("templates/absolute")) {
-            assertThat(reader, is(nullValue()));
+            assertNull(reader);
         }
     }
 
@@ -115,7 +113,7 @@ public class ClasspathResolverTest {
     public void getReaderWithRootAndResourceIsDirectory() throws Exception {
         ClasspathResolver underTest = new ClasspathResolver("templates");
         try (Reader reader = underTest.getReader("absolute")) {
-            assertThat(reader, is(nullValue()));
+            assertNull(reader);
         }
     }
 
@@ -124,7 +122,7 @@ public class ClasspathResolverTest {
     public void getReaderWithRootAndResourceAboveRoot() throws Exception {
         ClasspathResolver underTest = new ClasspathResolver("templates/absolute");
         try (Reader reader = underTest.getReader("../absolute_partials_template.html")) {
-            assertThat(reader, is(notNullValue()));
+            assertNotNull(reader);
         }
     }
 }
