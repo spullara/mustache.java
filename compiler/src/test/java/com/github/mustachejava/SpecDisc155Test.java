@@ -25,7 +25,7 @@ public class SpecDisc155Test {
             return "";
         };
         String defaultText;
-        TemplateFunction t = content -> {
+        Function<String, String> t = content -> {
             defaultText = content;
             return "";
         };
