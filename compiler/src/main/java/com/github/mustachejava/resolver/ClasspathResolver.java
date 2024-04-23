@@ -2,11 +2,7 @@ package com.github.mustachejava.resolver;
 
 import com.github.mustachejava.MustacheResolver;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -54,14 +50,15 @@ public class ClasspathResolver implements MustacheResolver {
                     return null;
                 }
             }
-        InputStream is = ccl.getResourceAsStream(normalizeResourceName);
-        if (is == null) {
-            ClassLoader classLoader = ClasspathResolver.class.getClassLoader();
-            is = classLoader.getResourceAsStream(normalizeResourceName);
-        }
+        else
+            resource = ClasspathResolver.class.getClassLoader().getResource(normalizeResourceName);
 
-        if (is != null) {
-            return new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+        if (resource != null) {
+            try {
+                return new BufferedReader(new InputStreamReader(resource.openStream(), StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                return null;
+            }
         } else {
             return null;
         }
