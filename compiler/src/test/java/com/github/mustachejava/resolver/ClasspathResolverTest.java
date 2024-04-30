@@ -3,6 +3,8 @@ package com.github.mustachejava.resolver;
 import org.junit.Test;
 
 import java.io.Reader;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -123,6 +125,21 @@ public class ClasspathResolverTest {
         ClasspathResolver underTest = new ClasspathResolver("templates/absolute");
         try (Reader reader = underTest.getReader("../absolute_partials_template.html")) {
             assertNotNull(reader);
+        }
+    }
+
+    @Test
+    public void getReaderWithoutContextClassLoader() throws Exception {
+        ClassLoader savedContextClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(new URLClassLoader(new URL[]{}, null));
+
+            ClasspathResolver underTest = new ClasspathResolver();
+            try (Reader reader = underTest.getReader("template.mustache")) {
+                assertNotNull(reader);
+            }
+        } finally {
+            Thread.currentThread().setContextClassLoader(savedContextClassLoader);
         }
     }
 }
