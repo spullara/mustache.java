@@ -35,7 +35,7 @@ public class ClasspathResolver implements MustacheResolver {
         String normalizeResourceName = URI.create(fullResourceName).normalize().getPath();
 
         URL resource = ccl.getResource(normalizeResourceName);
-        if (resource != null)
+        if (resource != null) {
             if (resource.getProtocol().equals("jar")) {
                 if (normalizeResourceName.endsWith("/")) {
                     // This is a directory
@@ -50,8 +50,10 @@ public class ClasspathResolver implements MustacheResolver {
                     return null;
                 }
             }
-        else
+        } else {
             resource = ClasspathResolver.class.getClassLoader().getResource(normalizeResourceName);
+        }
+
 
         if (resource != null) {
             try {
