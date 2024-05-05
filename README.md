@@ -1,5 +1,4 @@
-Mustache.java [![Build Status](https://travis-ci.org/spullara/mustache.java.svg?branch=master)](https://travis-ci.org/spullara/mustache.java)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fspullara%2Fmustache.java.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fspullara%2Fmustache.java?ref=badge_shield)
+Mustache.java [Build Status](https://github.com/spullara/mustache.java/actions/workflows/maven.yml)
 =============
 
 **Mustache.java is not designed to allow untrusted parties to provide templates. It may be possible to lock it down to provide that safely,
