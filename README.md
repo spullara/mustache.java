@@ -12,7 +12,7 @@ There are no external dependencies and the compiler library is ~100k.
 
 There is a Google Group for support and questions: <http://groups.google.com/group/mustachejava>
 
-Travis CI: https://travis-ci.org/spullara/mustache.java
+Github CI: https://github.com/spullara/mustache.java/actions/workflows/maven.yml
 
 API documentation: http://spullara.github.io/mustache/apidocs/
 
