@@ -102,7 +102,7 @@ public class SpecTest {
         StringWriter writer = new StringWriter();
         String json = data.toString();
         if (json.startsWith("{")) {
-          compile.execute(writer, new Object[]{functionMap.get(file), new ObjectMapper().readValue(json, Map.class)});
+          compile.execute(writer, new Object[]{new ObjectMapper().readValue(json, Map.class), functionMap.get(file)});
         } else if (json.startsWith("[")) {
           compile.execute(writer, new Object[]{functionMap.get(file), new ObjectMapper().readValue(json, List.class)});
         } else {
