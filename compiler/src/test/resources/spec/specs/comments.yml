@@ -101,3 +101,9 @@ tests:
     data: { }
     template: '12345 {{! Comment Block! }} 67890'
     expected: '12345  67890'
+
+  - name: Variable Name Collision
+    desc: Comments must never render, even if variable with same name exists.
+    data: { '! comment': 1, '! comment ': 2, '!comment': 3, 'comment': 4}
+    template: 'comments never show: >{{! comment }}<'
+    expected: 'comments never show: ><'

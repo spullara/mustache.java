@@ -245,6 +245,62 @@
         "parent": "{{#nested}}{{$block}}You say {{fruit}}.{{/block}}{{/nested}}"
       },
       "expected": "I say bananas."
+    },
+    {
+      "name": "Standalone parent",
+      "desc": "A parent's opening and closing tags need not be on separate lines in order to be standalone",
+      "data": {
+      },
+      "template": "Hi,\n  {{<parent}}{{/parent}}\n",
+      "partials": {
+        "parent": "one\ntwo\n"
+      },
+      "expected": "Hi,\n  one\n  two\n"
+    },
+    {
+      "name": "Standalone block",
+      "desc": "A block's opening and closing tags need not be on separate lines in order to be standalone",
+      "data": {
+      },
+      "template": "{{<parent}}{{$block}}\none\ntwo{{/block}}\n{{/parent}}\n",
+      "partials": {
+        "parent": "Hi,\n  {{$block}}{{/block}}\n"
+      },
+      "expected": "Hi,\n  one\n  two\n"
+    },
+    {
+      "name": "Block reindentation",
+      "desc": "Block indentation is removed at the site of definition and added at the site of expansion",
+      "data": {
+      },
+      "template": "{{<parent}}{{$block}}\n    one\n    two\n{{/block}}{{/parent}}\n",
+      "partials": {
+        "parent": "Hi,\n  {{$block}}\n  {{/block}}\n"
+      },
+      "expected": "Hi,\n  one\n  two\n"
+    },
+    {
+      "name": "Intrinsic indentation",
+      "desc": "When the block opening tag is standalone, indentation is determined by default content",
+      "data": {
+      },
+      "template": "{{<parent}}{{$block}}\none\ntwo\n{{/block}}{{/parent}}\n",
+      "partials": {
+        "parent": "Hi,\n{{$block}}\n  default\n{{/block}}\n"
+      },
+      "expected": "Hi,\n  one\n  two\n"
+    },
+    {
+      "name": "Nested block reindentation",
+      "desc": "Nested blocks are reindented relative to the surrounding block",
+      "data": {
+      },
+      "template": "{{<parent}}{{$nested}}\nthree\n{{/nested}}{{/parent}}\n",
+      "partials": {
+        "parent": "{{<grandparent}}{{$block}}\n  one\n  {{$nested}}\n    two\n  {{/nested}}\n{{/block}}{{/grandparent}}\n",
+        "grandparent": "{{$block}}default{{/block}}"
+      },
+      "expected": "one\n  three\n"
     }
   ]
 }

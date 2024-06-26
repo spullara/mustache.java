@@ -56,6 +56,20 @@
       "expected": "X<Y<>>"
     },
     {
+      "name": "Nested",
+      "desc": "The greater-than operator should work from within partials.",
+      "data": {
+        "a": "hello",
+        "b": "world"
+      },
+      "template": "{{>outer}}",
+      "partials": {
+        "outer": "*{{a}} {{>inner}}*",
+        "inner": "{{b}}!"
+      },
+      "expected": "*hello world!*"
+    },
+    {
       "name": "Surrounding Whitespace",
       "desc": "The greater-than operator should not alter surrounding whitespace.",
       "data": {

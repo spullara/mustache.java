@@ -12,6 +12,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -101,7 +102,9 @@ public class SpecTest {
         StringWriter writer = new StringWriter();
         String json = data.toString();
         if (json.startsWith("{")) {
-          compile.execute(writer, new Object[]{new ObjectMapper().readValue(json, Map.class), functionMap.get(file)});
+          compile.execute(writer, new Object[]{functionMap.get(file), new ObjectMapper().readValue(json, Map.class)});
+        } else if (json.startsWith("[")) {
+          compile.execute(writer, new Object[]{functionMap.get(file), new ObjectMapper().readValue(json, List.class)});
         } else {
           String s = new ObjectMapper().readValue(json, String.class);
           compile.execute(writer, new Object[]{functionMap.get(file), s});
