@@ -58,6 +58,11 @@ public class SpecTest {
     run(getSpec("~inheritance.yml"));
   }
 
+  @Test
+  public void dynamicnames() throws IOException {
+    run(getSpec("~dynamic-names.yml"));
+  }
+
   private void run(JsonNode spec) {
     int fail = 0;
     int success = 0;
