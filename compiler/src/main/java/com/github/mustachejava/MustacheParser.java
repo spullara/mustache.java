@@ -199,8 +199,12 @@ public class MustacheParser {
                   String indent = (onlywhitespace && startOfLine) ? out.toString() : "";
                   out = write(mv, out, file, currentLine.intValue(), startOfLine);
                   startOfLine = startOfLine & onlywhitespace;
-                  mv.partial(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable, indent);
 
+                  if (variable.trim().startsWith("*")) {
+                    mv.dynamicPartial(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable.replaceAll(" ", ""), indent);
+                  } else {
+                    mv.partial(new TemplateContext(sm, em, file, currentLine.get(), startOfLine), variable, indent);
+                  }
                   // a new line following a partial is dropped
                   if (specConformWhitespace && startOfLine) {
                     br.mark(2);

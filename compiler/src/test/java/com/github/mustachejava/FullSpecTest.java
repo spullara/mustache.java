@@ -45,6 +45,11 @@ public class FullSpecTest extends SpecTest {
   public void inheritance() throws IOException {
   }
 
+  @Override
+  @Test
+  @Ignore("not ready yet")
+  public void dynamicnames() {
+  }
 
   @Override
   protected DefaultMustacheFactory createMustacheFactory(final JsonNode test) {

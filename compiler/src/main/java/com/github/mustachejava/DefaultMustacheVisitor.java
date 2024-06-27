@@ -71,6 +71,12 @@ public class DefaultMustacheVisitor implements MustacheVisitor {
   }
 
   @Override
+  public void dynamicPartial(TemplateContext tc, final String variable, String indent) {
+    TemplateContext partialTC = new TemplateContext("{{", "}}", tc.file(), tc.line(), tc.startOfLine());
+    list.add(new DynamicPartialCode(partialTC, df, variable));
+  }
+
+  @Override
   public void value(TemplateContext tc, final String variable, boolean encoded) {
     list.add(new ValueCode(tc, df, variable, encoded));
   }

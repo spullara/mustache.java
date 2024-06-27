@@ -14,6 +14,8 @@ public interface MustacheVisitor {
 
   void partial(TemplateContext templateContext, String variable, String indent);
 
+  void dynamicPartial(TemplateContext templateContext, String variable, String indent);
+
   void value(TemplateContext templateContext, String variable, boolean encoded);
 
   void write(TemplateContext templateContext, String text);

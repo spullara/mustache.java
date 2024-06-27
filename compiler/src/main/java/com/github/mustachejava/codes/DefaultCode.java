@@ -31,6 +31,7 @@ public class DefaultCode implements Code, Cloneable {
   protected final boolean returnThis;
   protected final Binding binding;
   protected final DefaultMustacheFactory df;
+  protected final boolean dynamic;
 
   @SuppressWarnings({"CloneDoesntCallSuperClone", "CloneDoesntDeclareCloneNotSupportedException"})
   public Object clone() {
@@ -79,7 +80,13 @@ public class DefaultCode implements Code, Cloneable {
     this.type = type;
     this.name = name;
     this.tc = tc;
-    this.binding = oh == null ? null : oh.createBinding(name, tc, this);
+    if (name != null && name.startsWith("*")) {
+      this.binding = oh == null ? null : oh.createBinding(name.substring(1), tc, this);
+      this.dynamic = true;
+    } else {
+      this.binding = oh == null ? null : oh.createBinding(name, tc, this);
+      this.dynamic = false;
+    }
     this.returnThis = ".".equals(name);
   }
 
@@ -142,6 +149,12 @@ public class DefaultCode implements Code, Cloneable {
       return length == 0 ? null : scopes.get(length - 1);
     }
     try {
+      if (dynamic) {
+        // We need to create a new binding each time, as the name is dynamic
+        String dynamicName = (String) binding.get(scopes);
+        // TODO: cache these bindings
+        return oh.createBinding(dynamicName, tc, this).get(scopes);
+      }
       return binding.get(scopes);
     } catch (MustacheException e) {
       e.setContext(tc);
