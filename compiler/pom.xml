@@ -59,6 +59,36 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.moditect</groupId>
+        <artifactId>moditect-maven-plugin</artifactId>
+        <version>1.0.0.Beta2</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>add-module-info</goal>
+            </goals>
+            <configuration>
+              <module>
+                <name>com.github.mustachejava</name>
+                <exports>
+                  <package>com.github.mustachejava</package>
+                  <package>com.github.mustachejava.codes</package>
+                  <package>com.github.mustachejava.functions</package>
+                  <package>com.github.mustachejava.reflect</package>
+                  <package>com.github.mustachejava.reflect.guards</package>
+                  <package>com.github.mustachejava.resolver</package>
+                  <package>com.github.mustachejava.util</package>
+                </exports>
+                <requires>
+                  <module>java.base</module>
+                </requires>
+              </module>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <executions>
           <execution>
