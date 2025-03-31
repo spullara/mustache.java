@@ -266,7 +266,7 @@ public class MustacheParser {
                   break;
                 case '=':
                   if (!allowChangingDelimeters) {
-                    throw new MustacheException("Disallowed: changing defaul delimiters");
+                    throw new MustacheException("Disallowed: changing default delimiters");
                   }
                   // Change delimiters
                   out = write(mv, out, file, currentLine.intValue(), startOfLine);
