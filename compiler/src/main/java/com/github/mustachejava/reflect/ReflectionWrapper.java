@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * Used for evaluating values at a callsite
@@ -54,6 +55,26 @@ public class ReflectionWrapper extends GuardedWrapper {
   public Object call(List<Object> scopes) throws GuardException {
     guardCall(scopes);
     Object scope = oh.coerce(unwrap(scopes));
+    return call(scope, scopes);
+  }
+
+  /**
+   * Resolve a freshly found dotted wrapper while collecting the intermediate scopes.
+   */
+  public Object callDotted(List<Object> scopes, List<Object> intermediateScopes) throws GuardException {
+    Object scope = oh.coerce(scopes.get(scopeIndex));
+    if (wrappers != null) {
+      for (Wrapper wrapper : wrappers) {
+        scope = oh.coerce(wrapper.call(ObjectHandler.makeList(scope)));
+        if (!(scope instanceof Callable)) {
+          intermediateScopes.add(scope);
+        }
+      }
+    }
+    return call(scope, scopes);
+  }
+
+  private Object call(Object scope, List<Object> scopes) {
     try {
       if (scope == null) return null;
       if (method == null) {
