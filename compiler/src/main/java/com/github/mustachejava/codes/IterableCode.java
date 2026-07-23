@@ -8,9 +8,11 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.TemplateFunction;
+import com.github.mustachejava.reflect.ReflectionWrapper;
 import com.github.mustachejava.util.InternalArrayList;
 import com.github.mustachejava.util.LatchedWriter;
 import com.github.mustachejava.util.Node;
+import com.github.mustachejava.util.Wrapper;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -181,6 +183,14 @@ public class IterableCode extends DefaultCode implements Iteration {
   }
 
   private void addIntermediateScopes(List<Object> scopes) {
+    Wrapper resolvedWrapper = oh.find(name, scopes);
+    if (!(resolvedWrapper instanceof ReflectionWrapper)) {
+      return;
+    }
+    Wrapper[] dottedWrappers = ((ReflectionWrapper) resolvedWrapper).getWrappers();
+    if (dottedWrappers == null || dottedWrappers.length == 0) {
+      return;
+    }
     Object[] intermediateScopes = new Object[intermediateBindings.length];
     for (int i = 0; i < intermediateBindings.length; i++) {
       Object scope = intermediateBindings[i].get(scopes);
