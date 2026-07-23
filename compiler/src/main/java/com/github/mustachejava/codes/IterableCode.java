@@ -1,5 +1,6 @@
 package com.github.mustachejava.codes;
 
+import com.github.mustachejava.Binding;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.FragmentKey;
 import com.github.mustachejava.Iteration;
@@ -25,11 +26,27 @@ import static com.github.mustachejava.util.NodeValue.list;
 
 public class IterableCode extends DefaultCode implements Iteration {
 
+  private static final Binding[] EMPTY_BINDINGS = new Binding[0];
+
   private final ExecutorService les;
+  private final Binding[] intermediateBindings;
 
   public IterableCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String variable, String type) {
     super(tc, df, mustache, variable, type);
     les = df.getExecutorService();
+    if ("#".equals(type) && !dynamic && !returnThis && variable != null) {
+      List<Binding> bindings = new ArrayList<>();
+      int dotIndex = variable.indexOf('.');
+      while (dotIndex != -1) {
+        if (dotIndex > 0) {
+          bindings.add(oh.createBinding(variable.substring(0, dotIndex), tc, this));
+        }
+        dotIndex = variable.indexOf('.', dotIndex + 1);
+      }
+      intermediateBindings = bindings.toArray(EMPTY_BINDINGS);
+    } else {
+      intermediateBindings = EMPTY_BINDINGS;
+    }
   }
 
   public IterableCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String variable) {
@@ -95,8 +112,18 @@ public class IterableCode extends DefaultCode implements Iteration {
     return writer;
   }
 
-  @SuppressWarnings("unchecked")
   protected Writer handleFunction(Writer writer, Function function, List<Object> scopes) {
+    int scopeSize = scopes.size();
+    try {
+      addIntermediateScopes(scopes);
+      return executeFunction(writer, function, scopes);
+    } finally {
+      removeScopes(scopes, scopeSize);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private Writer executeFunction(Writer writer, Function function, List<Object> scopes) {
     StringWriter sw = new StringWriter();
     runIdentity(sw);
     if (function instanceof TemplateFunction) {
@@ -135,7 +162,48 @@ public class IterableCode extends DefaultCode implements Iteration {
   }
 
   protected Writer execute(Writer writer, Object resolve, List<Object> scopes) {
-    return oh.iterate(this, writer, resolve, scopes);
+    if (intermediateBindings.length == 0) {
+      return oh.iterate(this, writer, resolve, scopes);
+    }
+    int scopeSize = scopes.size();
+    boolean[] added = {false};
+    try {
+      return oh.iterate((currentWriter, next, currentScopes) -> {
+        if (!added[0]) {
+          addIntermediateScopes(currentScopes);
+          added[0] = true;
+        }
+        return IterableCode.this.next(currentWriter, next, currentScopes);
+      }, writer, resolve, scopes);
+    } finally {
+      removeScopes(scopes, scopeSize);
+    }
+  }
+
+  private void addIntermediateScopes(List<Object> scopes) {
+    Object[] intermediateScopes = new Object[intermediateBindings.length];
+    for (int i = 0; i < intermediateBindings.length; i++) {
+      Object scope = intermediateBindings[i].get(scopes);
+      while (scope instanceof Callable) {
+        try {
+          scope = oh.coerce(((Callable) scope).call());
+        } catch (Exception e) {
+          throw new MustacheException("Failed to invoke intermediate callable", e, tc);
+        }
+      }
+      intermediateScopes[i] = scope;
+    }
+    for (Object scope : intermediateScopes) {
+      if (scope != null) {
+        addScope(scopes, scope);
+      }
+    }
+  }
+
+  private void removeScopes(List<Object> scopes, int scopeSize) {
+    while (scopes.size() > scopeSize) {
+      scopes.remove(scopes.size() - 1);
+    }
   }
 
   public Writer next(Writer writer, Object next, List<Object> scopes) {
