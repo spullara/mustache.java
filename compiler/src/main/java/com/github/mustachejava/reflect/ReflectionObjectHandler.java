@@ -2,6 +2,7 @@ package com.github.mustachejava.reflect;
 
 import com.github.mustachejava.Binding;
 import com.github.mustachejava.Code;
+import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.ObjectHandler;
 import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.reflect.guards.ClassGuard;
@@ -18,6 +19,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import static java.util.Collections.singletonList;
 
@@ -31,6 +33,17 @@ import static java.util.Collections.singletonList;
 public class ReflectionObjectHandler extends BaseObjectHandler {
   private static final Wrapper[] EMPTY_WRAPPERS = new Wrapper[0];
   private static final Guard[] EMPTY_GUARDS = new Guard[0];
+  private static final Wrapper CALLABLE_WRAPPER = scopes -> {
+    Object scope = scopes.get(0);
+    if (!(scope instanceof Callable)) {
+      throw new GuardException();
+    }
+    try {
+      return ((Callable<?>) scope).call();
+    } catch (Exception e) {
+      throw new MustacheException("Failed to invoke callable while resolving dotted name", e);
+    }
+  };
 
   protected static final Method MAP_METHOD;
 
@@ -92,6 +105,10 @@ public class ReflectionObjectHandler extends BaseObjectHandler {
           try {
             // Pull out the next level from the coerced scope
             scope = coerce(wrapper.call(ObjectHandler.makeList(coerce(scope))));
+            while (scope instanceof Callable) {
+              wrappers.add(CALLABLE_WRAPPER);
+              scope = coerce(CALLABLE_WRAPPER.call(ObjectHandler.makeList(scope)));
+            }
           } catch (GuardException e) {
             throw new AssertionError(e);
           }
