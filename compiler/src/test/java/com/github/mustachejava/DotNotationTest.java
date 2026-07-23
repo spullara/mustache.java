@@ -9,7 +9,6 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
@@ -64,16 +63,11 @@ public class DotNotationTest {
   }
 
   @Test
-  public void testDottedSectionPushesIntermediateScope() throws Exception {
-    Map<String, Object> bar = map();
-    Map<String, Object> foo = map("bar", bar, "baz", "from foo");
-    Map<String, Object> model = map("foo", foo);
+  public void testDottedSectionDoesNotPushIntermediateScope() throws Exception {
+    Map<String, Object> a = map("x", "A", "b", map());
+    Map<String, Object> model = map("a", a, "x", "ROOT");
 
-    String dotted = render(compile("{{#foo.bar}}{{baz}}{{/foo.bar}}"), model);
-    String nested = render(compile("{{#foo}}{{#bar}}{{baz}}{{/bar}}{{/foo}}"), model);
-
-    assertEquals("from foo", dotted);
-    assertEquals(nested, dotted);
+    assertEquals("ROOT", render(compile("{{#a.b}}{{x}}{{/a.b}}"), model));
   }
 
   @Test
@@ -82,16 +76,6 @@ public class DotNotationTest {
     Map<String, Object> foo = map("bar", bar, "baz", "from foo");
 
     assertEquals("from bar", render(compile("{{#foo.bar}}{{baz}}{{/foo.bar}}"), map("foo", foo)));
-  }
-
-  @Test
-  public void testThreePartDottedSectionPushesAllScopes() throws Exception {
-    Map<String, Object> c = map("fromC", "c");
-    Map<String, Object> b = map("c", c, "fromB", "b");
-    Map<String, Object> a = map("b", b, "fromA", "a");
-
-    assertEquals("a/b/c", render(compile(
-            "{{#a.b.c}}{{fromA}}/{{fromB}}/{{fromC}}{{/a.b.c}}"), map("a", a)));
   }
 
   @Test
@@ -143,25 +127,6 @@ public class DotNotationTest {
   }
 
   @Test
-  public void testCallableIntermediateInvocationCount() throws Exception {
-    AtomicInteger dottedInvocations = new AtomicInteger();
-    Callable<Object> dottedFoo = () -> {
-      dottedInvocations.incrementAndGet();
-      return map("bar", true);
-    };
-    AtomicInteger nestedInvocations = new AtomicInteger();
-    Callable<Object> nestedFoo = () -> {
-      nestedInvocations.incrementAndGet();
-      return map("bar", true);
-    };
-
-    assertEquals("dotted", render(compile("{{#foo.bar}}dotted{{/foo.bar}}"), map("foo", dottedFoo)));
-    assertEquals("nested", render(compile("{{#foo}}{{#bar}}nested{{/bar}}{{/foo}}"), map("foo", nestedFoo)));
-    assertEquals("Dotted lookup and resolution each invoke the intermediate once", 2, dottedInvocations.get());
-    assertEquals(1, nestedInvocations.get());
-  }
-
-  @Test
   public void testNullCallableBreaksDottedSectionChain() throws Exception {
     Callable<Object> foo = () -> null;
 
@@ -173,28 +138,8 @@ public class DotNotationTest {
     Callable<Object> b = () -> map("c", map("fromC", "c"), "fromB", "b");
     Map<String, Object> a = map("b", b, "fromA", "a");
 
-    assertEquals("a/b/c", render(compile(
-            "{{#a.b.c}}{{fromA}}/{{fromB}}/{{fromC}}{{/a.b.c}}"), map("a", a)));
-  }
-
-  @Test
-  public void testAlternatingDottedSectionShapesReuseCachedWrappers() throws Exception {
-    Mustache mustache = compile("{{#foo.bar}}{{baz}}{{/foo.bar}}");
-    Map<String, Object> literal = map(
-            "foo.bar", map("value", true),
-            "foo", map("baz", "wrong intermediate"),
-            "baz", "literal");
-    Map<String, Object> nested = map(
-            "foo", map("bar", map(), "baz", "nested"),
-            "baz", "wrong root");
-    Callable<Object> foo = () -> map("bar", map(), "baz", "callable");
-    Map<String, Object> callable = map("foo", foo, "baz", "wrong root");
-
-    for (int i = 0; i < 2; i++) {
-      assertEquals("literal", render(mustache, literal));
-      assertEquals("nested", render(mustache, nested));
-      assertEquals("callable", render(mustache, callable));
-    }
+    assertEquals("c", render(compile(
+            "{{#a.b.c}}{{fromC}}{{/a.b.c}}"), map("a", a)));
   }
   
   private void testMiss(Object model, String template) {

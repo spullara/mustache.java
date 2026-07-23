@@ -7,12 +7,9 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheException;
 import com.github.mustachejava.TemplateContext;
 import com.github.mustachejava.TemplateFunction;
-import com.github.mustachejava.reflect.ReflectionObjectHandler;
-import com.github.mustachejava.reflect.ReflectionWrapper;
 import com.github.mustachejava.util.InternalArrayList;
 import com.github.mustachejava.util.LatchedWriter;
 import com.github.mustachejava.util.Node;
-import com.github.mustachejava.util.Wrapper;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -28,16 +25,11 @@ import static com.github.mustachejava.util.NodeValue.list;
 
 public class IterableCode extends DefaultCode implements Iteration {
 
-  private static final Object[] EMPTY_INTERMEDIATE_SCOPES = new Object[0];
-
   private final ExecutorService les;
-  private final boolean dottedSection;
-  private final ThreadLocal<Object[]> intermediateScopes = new ThreadLocal<>();
 
   public IterableCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String variable, String type) {
     super(tc, df, mustache, variable, type);
     les = df.getExecutorService();
-    dottedSection = "#".equals(type) && !dynamic && !returnThis && hasIntermediateName(variable);
   }
 
   public IterableCode(TemplateContext tc, DefaultMustacheFactory df, Mustache mustache, String variable) {
@@ -47,36 +39,9 @@ public class IterableCode extends DefaultCode implements Iteration {
   @Override
   public Writer execute(Writer writer, final List<Object> scopes) {
     Object resolved = get(scopes);
-    try {
-      writer = handle(writer, resolved, scopes);
-    } finally {
-      intermediateScopes.remove();
-    }
+    writer = handle(writer, resolved, scopes);
     appendText(writer);
     return writer;
-  }
-
-  @Override
-  public Object get(List<Object> scopes) {
-    if (!dottedSection || !(oh instanceof ReflectionObjectHandler)) {
-      return super.get(scopes);
-    }
-    try {
-      Wrapper wrapper = oh.find(name, scopes);
-      if (wrapper instanceof ReflectionWrapper) {
-        List<Object> resolvedScopes = new ArrayList<>();
-        Object resolved = ((ReflectionWrapper) wrapper).callDotted(scopes, resolvedScopes);
-        intermediateScopes.set(resolvedScopes.toArray(EMPTY_INTERMEDIATE_SCOPES));
-        return oh.coerce(resolved);
-      }
-      intermediateScopes.remove();
-      return oh.coerce(wrapper.call(scopes));
-    } catch (MustacheException e) {
-      e.setContext(tc);
-      throw e;
-    } catch (Throwable e) {
-      throw new MustacheException(e.getMessage(), e, tc);
-    }
   }
 
   protected Writer handle(Writer writer, Object resolved, List<Object> scopes) {
@@ -108,13 +73,11 @@ public class IterableCode extends DefaultCode implements Iteration {
       }
       final Writer originalWriter = writer;
       final LatchedWriter latchedWriter = new LatchedWriter(writer);
-      final Object[] resolvedScopes = intermediateScopes.get();
       writer = latchedWriter;
       // Scopes must not cross thread boundaries as they
       // are thread locally reused
       final List<Object> newScopes = new InternalArrayList<>(scopes);
       les.execute(() -> {
-        intermediateScopes.set(resolvedScopes);
         try {
           Object call = callable.call();
           Writer subWriter = handle(originalWriter, call, newScopes);
@@ -126,26 +89,14 @@ public class IterableCode extends DefaultCode implements Iteration {
           latchedWriter.done();
         } catch (Throwable e) {
           latchedWriter.failed(e);
-        } finally {
-          intermediateScopes.remove();
         }
       });
     }
     return writer;
   }
 
-  protected Writer handleFunction(Writer writer, Function function, List<Object> scopes) {
-    int scopeSize = scopes.size();
-    try {
-      addIntermediateScopes(scopes, intermediateScopes.get());
-      return executeFunction(writer, function, scopes);
-    } finally {
-      removeScopes(scopes, scopeSize);
-    }
-  }
-
   @SuppressWarnings("unchecked")
-  private Writer executeFunction(Writer writer, Function function, List<Object> scopes) {
+  protected Writer handleFunction(Writer writer, Function function, List<Object> scopes) {
     StringWriter sw = new StringWriter();
     runIdentity(sw);
     if (function instanceof TemplateFunction) {
@@ -184,54 +135,7 @@ public class IterableCode extends DefaultCode implements Iteration {
   }
 
   protected Writer execute(Writer writer, Object resolve, List<Object> scopes) {
-    Object[] resolvedScopes = intermediateScopes.get();
-    if (resolvedScopes == null || resolvedScopes.length == 0) {
-      return oh.iterate(this, writer, resolve, scopes);
-    }
-    int scopeSize = scopes.size();
-    boolean[] added = {false};
-    try {
-      return oh.iterate((currentWriter, next, currentScopes) -> {
-        if (!added[0]) {
-          addIntermediateScopes(currentScopes, resolvedScopes);
-          added[0] = true;
-        }
-        return IterableCode.this.next(currentWriter, next, currentScopes);
-      }, writer, resolve, scopes);
-    } finally {
-      removeScopes(scopes, scopeSize);
-    }
-  }
-
-  private void addIntermediateScopes(List<Object> scopes, Object[] resolvedScopes) {
-    if (resolvedScopes == null) {
-      return;
-    }
-    for (Object scope : resolvedScopes) {
-      if (scope != null) {
-        addScope(scopes, scope);
-      }
-    }
-  }
-
-  private static boolean hasIntermediateName(String variable) {
-    if (variable == null) {
-      return false;
-    }
-    int dotIndex = variable.indexOf('.');
-    while (dotIndex != -1) {
-      if (dotIndex > 0) {
-        return true;
-      }
-      dotIndex = variable.indexOf('.', dotIndex + 1);
-    }
-    return false;
-  }
-
-  private void removeScopes(List<Object> scopes, int scopeSize) {
-    while (scopes.size() > scopeSize) {
-      scopes.remove(scopes.size() - 1);
-    }
+    return oh.iterate(this, writer, resolve, scopes);
   }
 
   public Writer next(Writer writer, Object next, List<Object> scopes) {
