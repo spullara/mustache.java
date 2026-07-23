@@ -9,6 +9,7 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
@@ -139,6 +140,25 @@ public class DotNotationTest {
 
     assertEquals("baz", dotted);
     assertEquals(nested, dotted);
+  }
+
+  @Test
+  public void testCallableIntermediateInvocationCount() throws Exception {
+    AtomicInteger dottedInvocations = new AtomicInteger();
+    Callable<Object> dottedFoo = () -> {
+      dottedInvocations.incrementAndGet();
+      return map("bar", true);
+    };
+    AtomicInteger nestedInvocations = new AtomicInteger();
+    Callable<Object> nestedFoo = () -> {
+      nestedInvocations.incrementAndGet();
+      return map("bar", true);
+    };
+
+    assertEquals("dotted", render(compile("{{#foo.bar}}dotted{{/foo.bar}}"), map("foo", dottedFoo)));
+    assertEquals("nested", render(compile("{{#foo}}{{#bar}}nested{{/bar}}{{/foo}}"), map("foo", nestedFoo)));
+    assertEquals("Dotted lookup and resolution each invoke the intermediate once", 2, dottedInvocations.get());
+    assertEquals(1, nestedInvocations.get());
   }
 
   @Test
