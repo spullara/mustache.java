@@ -58,13 +58,11 @@ public class HtmlEscaper {
     try {
       int length = value.length();
       int start = 0;
-      boolean clean = true;
       for (int i = 0; i < length; i++) {
         char c = value.charAt(i);
         char[] escaped;
         // We only possibly escape chars in the range 0-96
         if (c <= 96 && (escaped = ESC[c]) != null) {
-          clean = false;
           // Write from the last replacement to before this one
           if (i > start) writer.write(value, start, i - start);
           // Write the replacement
@@ -73,9 +71,7 @@ public class HtmlEscaper {
           start = i + 1;
         }
       }
-      if (clean) {
-        writer.write(value);
-      } else if (start < length) {
+      if (start < length) {
         writer.write(value, start, length - start);
       }
     } catch (IOException e) {
