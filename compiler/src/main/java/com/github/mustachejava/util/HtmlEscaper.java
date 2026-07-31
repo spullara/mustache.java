@@ -56,23 +56,28 @@ public class HtmlEscaper {
 
   public static void escape(String value, Writer writer) {
     try {
-      char[] chars = value.toCharArray();
-      int length = chars.length;
+      int length = value.length();
       int start = 0;
+      boolean clean = true;
       for (int i = 0; i < length; i++) {
-        char c = chars[i];
+        char c = value.charAt(i);
         char[] escaped;
         // We only possibly escape chars in the range 0-96
         if (c <= 96 && (escaped = ESC[c]) != null) {
+          clean = false;
           // Write from the last replacement to before this one
-          if (i > start) writer.write(chars, start, i - start);
+          if (i > start) writer.write(value, start, i - start);
           // Write the replacement
           writer.write(escaped);
           // Move the pointer to the position after replacement
           start = i + 1;
         }
       }
-      writer.write(chars, start, length - start);
+      if (clean) {
+        writer.write(value);
+      } else if (start < length) {
+        writer.write(value, start, length - start);
+      }
     } catch (IOException e) {
       throw new MustacheException("Failed to encode value: " + value, e);
     }
