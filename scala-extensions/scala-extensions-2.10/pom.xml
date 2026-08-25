@@ -32,7 +32,7 @@
   <repositories>
     <repository>
       <id>Twitter</id>
-      <url>http://maven.twttr.com/</url>
+      <url>https://maven.twttr.com/</url>
     </repository>
   </repositories>
 
