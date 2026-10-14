@@ -4,6 +4,7 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Locale;
 
 public abstract class BaseObjectHandler extends AbstractObjectHandler {
 
@@ -71,7 +72,7 @@ public abstract class BaseObjectHandler extends AbstractObjectHandler {
     try {
       ao = getMethod(sClass, name);
     } catch (NoSuchMethodException e) {
-      String propertyname = name.substring(0, 1).toUpperCase() +
+      String propertyname = name.substring(0, 1).toUpperCase(Locale.ROOT) +
               (name.length() > 1 ? name.substring(1) : "");
       try {
         ao = getMethod(sClass, "get" + propertyname);
