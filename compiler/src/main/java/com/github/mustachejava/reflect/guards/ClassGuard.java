@@ -12,9 +12,9 @@ import java.util.Objects;
  * Time: 9:23 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ClassGuard implements Guard {
-  protected final Class classGuard;
-  protected final int scopeIndex;
+public value class ClassGuard implements Guard {
+  private final Class classGuard;
+  private final int scopeIndex;
 
   public ClassGuard(int scopeIndex, Object scope) {
     this.scopeIndex = scopeIndex;
@@ -23,14 +23,14 @@ public class ClassGuard implements Guard {
 
   @Override
   public int hashCode() {
-    return classGuard == null ? 0 : classGuard.hashCode();
+    return (classGuard == null ? 0 : classGuard.hashCode()) * 43 + scopeIndex;
   }
 
   @Override
   public boolean equals(Object o) {
     if (o instanceof ClassGuard) {
       ClassGuard other = (ClassGuard) o;
-      return Objects.equals(classGuard, other.classGuard);
+      return scopeIndex == other.scopeIndex && Objects.equals(classGuard, other.classGuard);
     } else {
       return false;
     }

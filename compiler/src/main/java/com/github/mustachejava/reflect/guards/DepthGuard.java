@@ -7,8 +7,8 @@ import java.util.List;
 /**
  * Check that there are the same number of scope levels.
  */
-public class DepthGuard implements Guard {
-  protected final int length;
+public value class DepthGuard implements Guard {
+  private final int length;
 
   public DepthGuard(int length) {
     this.length = length;

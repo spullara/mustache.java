@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Guard dot notation references.
  */
-public class DotGuard implements Guard {
+public value class DotGuard implements Guard {
 
   private final String lookup;
   private final int scopeIndex;

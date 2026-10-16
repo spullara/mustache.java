@@ -3,7 +3,7 @@ package com.github.mustachejava.util;
 import java.util.List;
 import java.util.Objects;
 
-public class NodeValue {
+public value class NodeValue {
   private final List<Node> list;
   private final String value;
   private final boolean isList;

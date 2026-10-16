@@ -3,7 +3,7 @@ package com.github.mustachejava;
 /**
  * Used for indexing runtime compiled template text from lambdas.
  */
-public class FragmentKey {
+public value class FragmentKey {
   public final TemplateContext tc;
   public final String templateText;
 

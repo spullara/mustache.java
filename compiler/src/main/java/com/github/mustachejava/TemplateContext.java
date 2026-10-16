@@ -2,7 +2,7 @@ package com.github.mustachejava;
 
 import java.util.Objects;
 
-public final class TemplateContext {
+public value class TemplateContext {
   private final String sm;
   private final String em;
   private final String file;

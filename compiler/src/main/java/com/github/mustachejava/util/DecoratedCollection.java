@@ -46,7 +46,7 @@ public class DecoratedCollection<T> extends AbstractCollection<Element<T>> {
   }
 }
 
-class Element<T> {
+value class Element<T> {
   public final int index;
   public final boolean first;
   public final boolean last;

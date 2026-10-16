@@ -20,7 +20,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <javac.target>1.8</javac.target>
+    <javac.target>28</javac.target>
     <jackson.version>2.15.2</jackson.version>
   </properties>
 
@@ -87,11 +87,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.5.1</version>
+          <version>3.14.0</version>
           <configuration>
-            <compilerVersion>${javac.target}</compilerVersion>
-            <source>${javac.target}</source>
-            <target>${javac.target}</target>
+            <release>${javac.target}</release>
+            <compilerArgs>
+              <arg>--enable-preview</arg>
+            </compilerArgs>
           </configuration>
         </plugin>
         <plugin>
