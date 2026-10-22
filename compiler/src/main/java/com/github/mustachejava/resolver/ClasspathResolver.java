@@ -3,9 +3,12 @@ package com.github.mustachejava.resolver;
 import com.github.mustachejava.MustacheResolver;
 
 import java.io.*;
+import java.net.JarURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.jar.JarEntry;
 
 /**
  * MustacheResolver implementation that resolves mustache files from the classpath.
@@ -35,29 +38,27 @@ public class ClasspathResolver implements MustacheResolver {
         String normalizeResourceName = URI.create(fullResourceName).normalize().getPath();
 
         URL resource = ccl.getResource(normalizeResourceName);
-        if (resource != null) {
-            if (resource.getProtocol().equals("jar")) {
-                if (normalizeResourceName.endsWith("/")) {
-                    // This is a directory
-                    return null;
-                } else if (ccl.getResource(normalizeResourceName + "/") != null) {
-                    // This is a directory
-                    return null;
-                }
-            } else if (resource.getProtocol().equals("file")) {
-                if (new File(resource.getPath()).isDirectory()) {
-                    // This is a directory
-                    return null;
-                }
-            }
-        } else {
+        if (resource == null) {
             resource = ClasspathResolver.class.getClassLoader().getResource(normalizeResourceName);
         }
 
 
         if (resource != null) {
             try {
-                return new BufferedReader(new InputStreamReader(resource.openStream(), StandardCharsets.UTF_8));
+                if (resource.getProtocol().equals("jar") && normalizeResourceName.endsWith("/")) {
+                    return null;
+                }
+                if (resource.getProtocol().equals("file") && new File(resource.getPath()).isDirectory()) {
+                    return null;
+                }
+                URLConnection connection = resource.openConnection();
+                if (connection instanceof JarURLConnection) {
+                    JarEntry entry = ((JarURLConnection) connection).getJarEntry();
+                    if (entry == null || entry.isDirectory()) {
+                        return null;
+                    }
+                }
+                return new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
             } catch (IOException e) {
                 return null;
             }
