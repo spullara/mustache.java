@@ -12,6 +12,45 @@ import static org.junit.Assert.assertNull;
 public class ClasspathResolverTest {
 
     @Test
+    public void getReaderWithNullContextClassLoaderFindsTemplate() throws Exception {
+        ClassLoader savedContextClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(null);
+            try (Reader reader = new ClasspathResolver().getReader("template.mustache")) {
+                assertNotNull(reader);
+            }
+        } finally {
+            Thread.currentThread().setContextClassLoader(savedContextClassLoader);
+        }
+    }
+
+    @Test
+    public void getReaderWithNullContextClassLoaderReturnsNullForMissingTemplate() throws Exception {
+        ClassLoader savedContextClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(null);
+            try (Reader reader = new ClasspathResolver().getReader("missing-template.mustache")) {
+                assertNull(reader);
+            }
+        } finally {
+            Thread.currentThread().setContextClassLoader(savedContextClassLoader);
+        }
+    }
+
+    @Test
+    public void getReaderWithNullContextClassLoaderRejectsDirectory() throws Exception {
+        ClassLoader savedContextClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(null);
+            try (Reader reader = new ClasspathResolver().getReader("templates")) {
+                assertNull(reader);
+            }
+        } finally {
+            Thread.currentThread().setContextClassLoader(savedContextClassLoader);
+        }
+    }
+
+    @Test
     public void getReaderNullRootAndResourceHasRelativePath() throws Exception {
         ClasspathResolver underTest = new ClasspathResolver();
         try (Reader reader = underTest.getReader("nested_partials_template.html")) {

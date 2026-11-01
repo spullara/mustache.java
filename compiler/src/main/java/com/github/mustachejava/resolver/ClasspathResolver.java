@@ -30,6 +30,9 @@ public class ClasspathResolver implements MustacheResolver {
     @Override
     public Reader getReader(String resourceName) {
         ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+        if (ccl == null) {
+            ccl = ClasspathResolver.class.getClassLoader();
+        }
 
         String fullResourceName = concatResourceRootAndResourceName(resourceName);
         String normalizeResourceName = URI.create(fullResourceName).normalize().getPath();
